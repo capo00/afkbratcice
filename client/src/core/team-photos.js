@@ -4,21 +4,29 @@ import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
 import Cfg from "./config.js";
 
-import "./article-item.less";
+import "./team-photos.less";
 
-const ArticleItem = createReactClass({
+const NAME = "TeamPhotos";
+const CSS_NAME = NAME.toLowerCase();
+const CODE = NAME.replace(/^([A-Z])/, (firstChar) => (firstChar.toLowerCase()));
+
+export default createReactClass({
+
+  displayName: NAME,
 
   //@@viewOn:mixins
   mixins: [
-    UU5.Common.BaseMixin
+    UU5.Common.BaseMixin,
+    UU5.Common.CcrReaderMixin,
+    UU5.Common.RouteMixin
   ],
   //@@viewOff:mixins
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.app("ArticleItem"),
+    tagName: Cfg.app(NAME),
     classNames: {
-      main: Cfg.css("articleitem")
+      main: Cfg.css(CSS_NAME)
     }
   },
   //@@viewOff:statics
@@ -36,6 +44,9 @@ const ArticleItem = createReactClass({
   //@@viewOff:interface
 
   //@@viewOn:overridingMethods
+  onRouteChanged_(prevProps, prevState) {
+    this.getCcrComponentByKey(Cfg.CCR_MENU).setActive(CODE);
+  },
   //@@viewOff:overridingMethods
 
   //@@viewOn:componentSpecificHelpers
@@ -44,12 +55,10 @@ const ArticleItem = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()} header={this.props.header}>
-        <UU5.Bricks.Todo props={this.props.data} />
+      <UU5.Bricks.Section {...this.getMainPropsToPass()} header="">
+
       </UU5.Bricks.Section>
     );
   }
   //@@viewOff:render
 });
-
-export default ArticleItem;

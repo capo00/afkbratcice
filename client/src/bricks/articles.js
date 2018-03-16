@@ -2,7 +2,7 @@ import React from "react";
 import createReactClass from "create-react-class";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
-import Cfg from "./_config.js";
+import Cfg from "./config.js";
 import Calls from '../calls.js';
 import ArticleItem from './article-item.js';
 
@@ -19,9 +19,9 @@ const Articles = createReactClass({
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.APP + ".Articles",
+    tagName: Cfg.app("Articles"),
     classNames: {
-      main: Cfg.CSS + "-articles"
+      main: Cfg.css("articles")
     },
     defaults: {
       pageSize: 5

@@ -2,7 +2,7 @@ import React from "react";
 import createReactClass from "create-react-class";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
-import Cfg from "./_config.js";
+import Cfg from "./config.js";
 
 import "./top.less";
 
@@ -47,13 +47,13 @@ const Menu = createReactClass({
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.APP + ".Menu",
+    tagName: Cfg.app("Menu"),
     classNames: {
-      main: Cfg.CSS + "-menu",
+      main: Cfg.css("menu"),
       active: "active"
     },
     opt: {
-      ccrKey: "Menu"
+      ccrKey: Cfg.CCR_MENU
     }
   },
   //@@viewOff:statics
@@ -69,6 +69,10 @@ const Menu = createReactClass({
     return {
       active: "home"
     };
+  },
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.active !== nextState.active;
   },
   //@@viewOff:standardComponentLifeCycle
 

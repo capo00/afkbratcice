@@ -2,7 +2,7 @@ import React from "react";
 import createReactClass from "create-react-class";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
-import Cfg from "./_config.js";
+import Cfg from "./config.js";
 import Calls from '../calls.js';
 
 import "./articles.less";
@@ -18,9 +18,9 @@ const ClosestMatches = createReactClass({
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.APP + ".ClosestMatches",
+    tagName: Cfg.app("ClosestMatches"),
     classNames: {
-      main: Cfg.CSS + "-closestmatches"
+      main: Cfg.css("closestmatches")
     },
     defaults: {
 

@@ -3,7 +3,7 @@ import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
-import Cfg from "./_config.js";
+import Cfg from "./config.js";
 import Calls from '../calls.js';
 
 import "./table.less";
@@ -19,9 +19,9 @@ const Table = createReactClass({
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.APP + ".Table",
+    tagName: Cfg.app("Table"),
     classNames: {
-      main: Cfg.CSS + "-table"
+      main: Cfg.css("table")
     },
     calls: {
       onLoad: 'getTable'

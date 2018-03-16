@@ -2,12 +2,18 @@ import React from "react";
 import createReactClass from "create-react-class";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
-import Cfg from "./_config.js";
+import Cfg from "./config.js";
 import Articles from '../bricks/articles.js';
 
 import "./home.less";
 
-const Home = createReactClass({
+const NAME = "Home";
+const CSS_NAME = NAME.toLowerCase();
+const CODE = NAME.replace(/^([A-Z])/, (firstChar) => (firstChar.toLowerCase()));
+
+export default createReactClass({
+
+  displayName: NAME,
 
   //@@viewOn:mixins
   mixins: [
@@ -19,9 +25,9 @@ const Home = createReactClass({
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.APP + ".Home",
+    tagName: Cfg.app(NAME),
     classNames: {
-      main: Cfg.CSS + "-home"
+      main: Cfg.css(CSS_NAME)
     }
   },
   //@@viewOff:statics
@@ -40,7 +46,7 @@ const Home = createReactClass({
 
   //@@viewOn:overridingMethods
   onRouteChanged_(prevProps, prevState) {
-    this.getCcrComponentByKey("Menu").setActive("home");
+    this.getCcrComponentByKey(Cfg.CCR_MENU).setActive(CODE);
   },
   //@@viewOff:overridingMethods
 
@@ -57,5 +63,3 @@ const Home = createReactClass({
   }
   //@@viewOff:render
 });
-
-export default Home;

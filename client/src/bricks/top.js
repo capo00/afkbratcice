@@ -2,7 +2,7 @@ import React from "react";
 import createReactClass from "create-react-class";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
-import Cfg from "./_config.js";
+import Cfg from "./config.js";
 import Menu from "./menu.js";
 
 import "./top.less";
@@ -17,9 +17,9 @@ const Top = createReactClass({
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.APP + ".Top",
+    tagName: Cfg.app("Top"),
     classNames: {
-      main: Cfg.CSS + "-top",
+      main: Cfg.css("top"),
       title: "title",
       menu: "menu"
     }
@@ -61,7 +61,7 @@ const Top = createReactClass({
               <span>AFK BRATČICE</span>
             </UU5.Bricks.NavBar.Header>
 
-            <UU5.Bricks.NavBar.Nav allowTags={["AFK.Web.Menu"]}>
+            <UU5.Bricks.NavBar.Nav allowTags={["AFK.Bricks.Menu"]}>
               <Menu />
             </UU5.Bricks.NavBar.Nav>
           </UU5.Bricks.NavBar>
