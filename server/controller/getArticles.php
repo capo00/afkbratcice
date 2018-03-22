@@ -1,7 +1,7 @@
 <?php
-  require_once "model/response.php";
-  require_once "model/database.php";
-  require_once "model/logger.php";
+  require_once "../model/response.php";
+  require_once "../model/database.php";
+  require_once "../model/logger.php";
 
   Response::create(function($dtoIn) {
     $sql = "SELECT *
@@ -20,7 +20,7 @@
         "date" => $item["datum"],
         "matchId" => $item["zapas"],
         "priority" => $item["priorita"],
-        "content" => file_get_contents("../reporty/" . $item["soubor"] . ".php")
+        "content" => file_get_contents("../../reporty/" . $item["soubor"] . ".php")
       );
     }, $data);
   });

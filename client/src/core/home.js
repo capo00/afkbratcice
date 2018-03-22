@@ -6,6 +6,8 @@ import Cfg from "./config.js";
 import Articles from "../bricks/articles.js";
 import Table from "../bricks/table.js";
 import ClosestMatches from "../bricks/closest-matches.js";
+import Box from "../bricks/box.js";
+import News from "../bricks/news.js";
 
 import "./home.less";
 
@@ -61,15 +63,21 @@ export default createReactClass({
       <UU5.Bricks.Div {...this.getMainPropsToPass()}>
         <Articles />
 
-        <UU5.Bricks.Row>
+        <UU5.Bricks.Row display="flex">
           <UU5.Bricks.Column colWidth="xs-12 s-6 m-4">
-            <Table team="M" size="s" />
+            <Box header="TABULKA">
+              <Table team={Cfg.MEN} size="s" />
+            </Box>
           </UU5.Bricks.Column>
           <UU5.Bricks.Column colWidth="xs-12 s-6 m-4">
-            <ClosestMatches teamId={1} />
+            <Box header="ZÁPASY">
+              <ClosestMatches team={Cfg.MEN} />
+            </Box>
           </UU5.Bricks.Column>
           <UU5.Bricks.Column colWidth="xs-12 s-6 m-4">
-
+            <Box header="NOVINKY">
+              <News />
+            </Box>
           </UU5.Bricks.Column>
         </UU5.Bricks.Row>
       </UU5.Bricks.Div>

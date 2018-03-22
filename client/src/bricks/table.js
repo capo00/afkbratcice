@@ -91,7 +91,7 @@ const Table = createReactClass({
       let row;
       if (this.props.size === "l") {
         row = [
-          i + 1,
+          i + 1 + ".",
           team.name,
           team.played,
           team.wins,
@@ -102,7 +102,7 @@ const Table = createReactClass({
           team.points
         ];
       } else {
-        row = [i + 1, team.name, team.points];
+        row = [i + 1 + ".", team.name, team.points];
       }
       return row;
     });
@@ -119,9 +119,9 @@ const Table = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()}>
+      <UU5.Bricks.Div {...this.getMainPropsToPass()}>
         {this.getLoadFeedbackChildren(this._renderTable)}
-      </UU5.Bricks.Section>
+      </UU5.Bricks.Div>
     );
   }
   //@@viewOff:render

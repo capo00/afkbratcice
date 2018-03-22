@@ -1,7 +1,7 @@
 <?php
-  require_once "model/response.php";
-  require_once "model/database.php";
-  require_once "model/logger.php";
+  require_once "../model/response.php";
+  require_once "../model/database.php";
+  require_once "../model/logger.php";
 
   Response::create(function($dtoIn) {
     $sql = "SELECT *

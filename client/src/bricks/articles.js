@@ -89,10 +89,10 @@ const Articles = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()}>
+      <UU5.Bricks.Div {...this.getMainPropsToPass()}>
         {this.getLoadFeedbackChildren(this._renderArticles)}
-        <UU5.Bricks.Link content={this.getLsiComponent("allArticles")} onClick={this._navigate} />
-      </UU5.Bricks.Section>
+        <UU5.Bricks.Button bgStyle="transparent" colorSchema="red-rich" content={this.getLsiComponent("allArticles")} onClick={this._navigate} />
+      </UU5.Bricks.Div>
     );
   }
   //@@viewOff:render

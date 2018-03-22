@@ -104,5 +104,5 @@ RewriteRule    ^upravit-vydaj    vydaj.php
 RewriteRule    ^novy-vydaj    vydaj.php
 RewriteRule    ^rss/    rss.php
 RewriteRule    ^rss    rss.php
-RewriteRule    ^cmd/(\w+)    cmd/$1.php
+RewriteRule    ^api/(\w+)    cmd/controller/$1.php
 RewriteRule    ^2.0.0/[^.]+$     2.0.0/index.html

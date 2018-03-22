@@ -9,7 +9,7 @@ let Calls = {
   call(method, useCase, dtoIn, headers) {
     let request = new XMLHttpRequest();
 
-    let url = 'http://afkbratcice.cz/cmd/' + useCase;
+    let url = 'http://afkbratcice.cz/api/' + useCase;
 
     let params;
 
@@ -63,9 +63,8 @@ let Calls = {
     Calls.call('get', 'getClosestMatches', dtoIn);
   },
 
-  loadPrototyp(dtoIn) {
-    dtoIn.data = { pageSize: 1 };
-    Calls.call('get', 'getArticles', dtoIn);
+  getNews(dtoIn) {
+    Calls.call('get', 'getNews', dtoIn);
   },
 };
 

@@ -3,22 +3,27 @@ import createReactClass from "create-react-class";
 import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
 import Cfg from "./config.js";
+import Calls from "../calls.js";
 
-import "./article-item.less";
+import "./news.less";
 
-const ArticleItem = createReactClass({
+const News = createReactClass({
 
   //@@viewOn:mixins
   mixins: [
-    UU5.Common.BaseMixin
+    UU5.Common.BaseMixin,
+    UU5.Common.LoadMixin
   ],
   //@@viewOff:mixins
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.app("ArticleItem"),
+    tagName: Cfg.app("News"),
     classNames: {
-      main: Cfg.css("articleitem")
+      main: Cfg.css("news")
+    },
+    calls: {
+      onLoad: 'getNews'
     }
   },
   //@@viewOff:statics
@@ -30,6 +35,9 @@ const ArticleItem = createReactClass({
   //@@viewOff:getDefaultProps
 
   //@@viewOn:standardComponentLifeCycle
+  componentWillMount() {
+    this.setCalls(Calls);
+  },
   //@@viewOff:standardComponentLifeCycle
 
   //@@viewOn:interface
@@ -39,20 +47,30 @@ const ArticleItem = createReactClass({
   //@@viewOff:overridingMethods
 
   //@@viewOn:componentSpecificHelpers
+  _renderChildren(dtoOut) {
+    console.log("news", dtoOut);
+
+    return (
+      <UU5.Bricks.Ul>
+        {dtoOut.data.map((news, i) => {
+          return (
+            <UU5.Bricks.Li key={i} content={`<uu5string/>${news.content}`} />
+          )
+        })}
+      </UU5.Bricks.Ul>
+    );
+  },
   //@@viewOff:componentSpecificHelpers
 
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section
-        {...this.getMainPropsToPass()}
-        header={this.props.name}
-        level={3}
-        content={`<uu5string/>${this.props.description}...`}
-      />
+      <UU5.Bricks.Div {...this.getMainPropsToPass()}>
+        {this.getLoadFeedbackChildren(this._renderChildren)}
+      </UU5.Bricks.Div>
     );
   }
   //@@viewOff:render
 });
 
-export default ArticleItem;
+export default News;

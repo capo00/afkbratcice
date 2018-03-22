@@ -1,7 +1,7 @@
 <?php
-  require_once "model/response.php";
-  require_once "model/database.php";
-  require_once "model/logger.php";
+  require_once "../model/response.php";
+  require_once "../model/database.php";
+  require_once "../model/logger.php";
 
   Response::create(function($dtoIn) {
     $data = Database::process(function($dtb) use($dtoIn) {
@@ -17,10 +17,10 @@
                     $dtoIn["season"],
                     $dtoIn["season"] + 1
                    );
-    
+
       $rounds = $dtb->selectMany($sqlRounds);
-      $matches = array();  
-      
+      $matches = array();
+
       foreach ($rounds as &$round) {
         $sqlMatches = sprintf(
                         'SELECT zapas.id AS "id", kolo, datum, dom.nazev AS "domaci", hos.nazev AS "hoste", golyD, golyH, golyDP, golyHP, penalty
@@ -34,12 +34,12 @@
                         $dtoIn["season"],
                         $dtoIn["season"] + 1
                       );
-                      
-        $matches[$round["kolo"]] = $dtb->selectMany($sqlMatches);                        
-      } 
-      
+
+        $matches[$round["kolo"]] = $dtb->selectMany($sqlMatches);
+      }
+
       return $matches;
-    });           
+    });
 
     return $data;
   });

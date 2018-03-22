@@ -67,7 +67,7 @@ const App = createReactClass({
       >
         <UU5.Bricks.Container>
           <UU5.Common.Router
-            basePath="/2.0.0"
+            basePath={UU5.Environment.isDevelopment() ? "" : "/2.0.0"}
             route="/"
             routes={{
               "/": { component: <Home /> },

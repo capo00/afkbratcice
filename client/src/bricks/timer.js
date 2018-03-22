@@ -22,7 +22,9 @@ const Timer = createReactClass({
       main: Cfg.css("timer")
     },
     defaults: {
-      matchDuration: 120 * 60 // in seconds
+      matchDuration: 120 * 60, // in seconds
+      waitingDuration: 1, // in seconds
+      nowDuration: 60 // in seconds
     }
   },
   //@@viewOff:statics
@@ -43,7 +45,7 @@ const Timer = createReactClass({
 
   //@@viewOn:standardComponentLifeCycle
   componentDidMount() {
-    this._timerSecondsInterval = setInterval(this._update, 1000);
+    this._timerSecondsInterval = setInterval(this._update, this.getDefault("waitingDuration") * 1000);
   },
 
   componentWillUnmount() {
@@ -68,7 +70,7 @@ const Timer = createReactClass({
     } else if (diff < 0) {
       this._timerSecondsInterval && clearInterval(this._timerSecondsInterval);
       // per minute
-      this._timerMinutesInterval = setInterval(this._update, 60 * 1000);
+      this._timerMinutesInterval = setInterval(this._update, this.getDefault("nowDuration") * 1000);
     } else {
       this.forceUpdate();
     }

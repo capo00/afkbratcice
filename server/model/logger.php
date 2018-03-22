@@ -1,6 +1,6 @@
 <?php
   class Logger {
-    const FILE_NAME = "logger.log";
+    const FILE_NAME = "../logger.log";
 
     private static function write($text, $severity = null) {
       $result = array(

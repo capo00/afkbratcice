@@ -8,7 +8,7 @@ import Tools from "../tools.js";
 import Calls from '../calls.js';
 import Timer from "./timer.js";
 
-import "./articles.less";
+import "./closest-matches.less";
 
 const ClosestMatches = createReactClass({
 
@@ -109,11 +109,34 @@ const ClosestMatches = createReactClass({
     return result;
   },
 
+  _getActiveName(lastMatch, nextMatch) {
+    let name = null;
+
+    if (lastMatch && nextMatch) {
+      let now = new Date();
+
+      let lastDate = lastMatch && new Date(lastMatch.date);
+      let nextDate = nextMatch && new Date(nextMatch.date);
+
+      name = now - lastDate < nextDate - now ? "last" : "next";
+    } else if (lastMatch) {
+      name = "last";
+    } else if (nextMatch) {
+      name = "next";
+    }
+
+    return name;
+  },
+
   _renderClosestMatches(dtoOut) {
     console.log("closestMatches", dtoOut);
 
     return (
-      <UU5.Bricks.Tabs colorSchema="red-rich" type="pills" justified fade>
+      <UU5.Bricks.Tabs
+        type="pills" justified fade
+        activeName={this._getActiveName(dtoOut.data.last, dtoOut.data.next)}
+        colorSchema="red-rich"
+      >
         {this._renderLastMatch(dtoOut.data.last)}
         {this._renderNextMatch(dtoOut.data.next)}
       </UU5.Bricks.Tabs>
@@ -124,9 +147,9 @@ const ClosestMatches = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()}>
+      <UU5.Bricks.Div {...this.getMainPropsToPass()}>
         {this.getLoadFeedbackChildren(this._renderClosestMatches)}
-      </UU5.Bricks.Section>
+      </UU5.Bricks.Div>
     );
   }
   //@@viewOff:render

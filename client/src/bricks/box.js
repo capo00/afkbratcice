@@ -4,21 +4,22 @@ import * as UU5 from "uu5g04";
 import "uu5g04-bricks";
 import Cfg from "./config.js";
 
-import "./article-item.less";
+import "./box.less";
 
-const ArticleItem = createReactClass({
+const Box = createReactClass({
 
   //@@viewOn:mixins
   mixins: [
-    UU5.Common.BaseMixin
+    UU5.Common.BaseMixin,
+    UU5.Common.SectionMixin
   ],
   //@@viewOff:mixins
 
   //@@viewOn:statics
   statics: {
-    tagName: Cfg.app("ArticleItem"),
+    tagName: Cfg.app("Box"),
     classNames: {
-      main: Cfg.css("articleitem")
+      main: Cfg.css("box")
     }
   },
   //@@viewOff:statics
@@ -44,15 +45,16 @@ const ArticleItem = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section
+      <UU5.Bricks.Card
         {...this.getMainPropsToPass()}
-        header={this.props.name}
-        level={3}
-        content={`<uu5string/>${this.props.description}...`}
+        elevation={3}
+        elevationHover={3}
+        level={5}
+        content={this.props.content || this.props.children}
       />
     );
   }
   //@@viewOff:render
 });
 
-export default ArticleItem;
+export default Box;
