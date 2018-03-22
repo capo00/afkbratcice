@@ -1,22 +1,32 @@
 <?php
+  require_once "config.php";
   require_once "model/response.php";
   require_once "model/database.php";
   require_once "model/logger.php";
 
-  Response::create(function($dtoIn) {     
+  Response::create(function($dtoIn) {
     $season = $dtoIn["season"];
 
+    if (!$season) {
+      $season = date("Y");
+      if (date("n") < 8) {
+        $season -= 1;
+      }
+    }
+
+    $team = isset($dtoIn["team"]) ? $dtoIn["team"] : Config::MEN;
+
     $sql = sprintf(
-             "SELECT idTymu, nazev,
-                SUM(V) + SUM(VP) + SUM(PP) + SUM(P) AS 'zapasy',
-                SUM(V) AS 'vyhry',
-                SUM(VP) AS 'vyhrane_penalty',
-                SUM(PP) AS 'prohrane_penalty',
-                SUM(P) AS 'prohry',
-                SUM(GV) AS 'golyVst',
-                SUM(GO) AS 'golyObd',
-                SUM(GV) - SUM(GO) AS 'rozdil',
-                SUM(V) * 3  + SUM(VP) * 2 + SUM(PP) * 1 AS 'body'
+             "SELECT idTymu AS 'id', nazev AS 'name',
+                SUM(V) + SUM(VP) + SUM(PP) + SUM(P) AS 'played',
+                SUM(V) AS 'wins',
+                SUM(VP) AS 'penaltyWins',
+                SUM(PP) AS 'penaltyLosses',
+                SUM(P) AS 'losses',
+                SUM(GV) AS 'goalsFor',
+                SUM(GO) AS 'goalsAgainst',
+                SUM(GV) - SUM(GO) AS 'goalDifference',
+                SUM(V) * 3  + SUM(VP) * 2 + SUM(PP) * 1 AS 'points'
               FROM(
                 SELECT idD AS 'idTymu',
                   SUM(IF(golyD > golyH AND penalty IS NULL, 1, 0)) AS 'V',
@@ -44,11 +54,12 @@
                   AND datum > '%s-07-01 00:00:00'
                 GROUP BY idH
               ) tmp RIGHT JOIN tym ON id = idTymu
-              WHERE vek = 'M' AND rok%s = 1
-              GROUP BY nazev
-              ORDER BY body DESC, rozdil DESC, golyVst DESC, zapasy DESC, nazev ASC",
+              WHERE vek = '%s' AND rok%s = 1
+              GROUP BY name
+              ORDER BY points DESC, goalDifference DESC, goalsFor DESC, played DESC, name ASC",
              $season,
              $season,
+             Config::getTeamShortcut($team),
              $season
            );
 

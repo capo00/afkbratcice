@@ -44,9 +44,11 @@ const ArticleItem = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()} header={this.props.header}>
-        <UU5.Bricks.Todo props={this.props.data} />
-      </UU5.Bricks.Section>
+      <UU5.Bricks.Section
+        {...this.getMainPropsToPass()}
+        header={this.props.name}
+        content={`<uu5string/>${this.props.description}...`}
+      />
     );
   }
   //@@viewOff:render

@@ -30,8 +30,8 @@ const Articles = createReactClass({
       onLoad: 'getArticles'
     },
     lsi: {
-      header: {
-        cs: 'Novinky'
+      allArticles: {
+        cs: "Více"
       }
     }
   },
@@ -61,6 +61,10 @@ const Articles = createReactClass({
   //@@viewOff:overridingMethods
 
   //@@viewOn:componentSpecificHelpers
+  _navigate() {
+    Cfg.route("clanky");
+  },
+
   _renderArticles(dtoOut) {
     let articles;
 
@@ -68,20 +72,16 @@ const Articles = createReactClass({
       articles = dtoOut.data.map(article => {
         return (
           <UU5.Bricks.Carousel.Item key={article.id}>
-            <ArticleItem data={article} />
+            <ArticleItem {...article} />
           </UU5.Bricks.Carousel.Item>
         );
       })
     }
 
     return (
-      <UU5.Bricks.Div>
-        <UU5.Bricks.Carousel>
-          {articles}
-        </UU5.Bricks.Carousel>
-
-        Všechny články
-      </UU5.Bricks.Div>
+      <UU5.Bricks.Carousel type="circular" interval={10000} colorSchema="red-rich">
+        {articles}
+      </UU5.Bricks.Carousel>
     );
   },
   //@@viewOff:componentSpecificHelpers
@@ -89,8 +89,9 @@ const Articles = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()} header={this.getLsiComponent('header')}>
+      <UU5.Bricks.Section {...this.getMainPropsToPass()}>
         {this.getLoadFeedbackChildren(this._renderArticles)}
+        <UU5.Bricks.Link content={this.getLsiComponent("allArticles")} onClick={this._navigate} />
       </UU5.Bricks.Section>
     );
   }

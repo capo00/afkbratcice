@@ -32,6 +32,7 @@ const Table = createReactClass({
   //@@viewOn:propTypes
   propTypes: {
     season: PropTypes.number,
+    team: PropTypes.string,
     size: PropTypes.oneOf(["s", "l"])
   },
   //@@viewOff:propTypes
@@ -40,6 +41,7 @@ const Table = createReactClass({
   getDefaultProps() {
     return {
       season: null,
+      team: "M",
       size: "l"
     };
   },
@@ -57,25 +59,59 @@ const Table = createReactClass({
   //@@viewOn:overridingMethods
   getOnLoadData_(props) {
     return {
-      season: props.season || new Date().getFullYear()
+      season: props.season,
+      team: props.team
     };
   },
   //@@viewOff:overridingMethods
 
   //@@viewOn:componentSpecificHelpers
-  _renderTable(dtoOut) {
-    console.log(dtoOut);
-    // let teams;
-    // if (dtoOut.data && dtoOut.data.teams) {
-    //   teams = dtoOut.data.teams.map(team => {
-    //     return <TableItem {...team} key={team.id} />;
-    //   })
-    // }
+  _getHeader() {
+    let header = null;
 
+    if (this.props.size === "l") {
+      header = [
+        "",
+        "Tým",
+        <UU5.Bricks.Span tooltip="Odehrané zápasy">Z</UU5.Bricks.Span>,
+        <UU5.Bricks.Span tooltip="Výhry">V</UU5.Bricks.Span>,
+        <UU5.Bricks.Span tooltip="Vyharné penalty">VP</UU5.Bricks.Span>,
+        <UU5.Bricks.Span tooltip="Prohrané penalty">PP</UU5.Bricks.Span>,
+        <UU5.Bricks.Span tooltip="Prohry">P</UU5.Bricks.Span>,
+        "Skóre",
+        <UU5.Bricks.Span tooltip="Body">B</UU5.Bricks.Span>
+      ];
+    }
+
+    return header;
+  },
+
+  _getRows(data) {
+    return data.map((team, i) => {
+      let row;
+      if (this.props.size === "l") {
+        row = [
+          i + 1,
+          team.name,
+          team.played,
+          team.wins,
+          team.penaltyWins,
+          team.penaltyLosses,
+          team.losses,
+          `${team.goalsFor}:${team.goalsAgainst}`,
+          team.points
+        ];
+      } else {
+        row = [i + 1, team.name, team.points];
+      }
+      return row;
+    });
+  },
+
+  _renderTable(dtoOut) {
+    console.log("table", dtoOut);
     return (
-      <UU5.Bricks.Div>
-        <UU5.Bricks.Todo props={dtoOut.data} />
-      </UU5.Bricks.Div>
+      <UU5.Bricks.DataTable condensed hover rows={this._getRows(dtoOut.data)} headerRow={this._getHeader()} />
     );
   },
   //@@viewOff:componentSpecificHelpers
@@ -83,7 +119,7 @@ const Table = createReactClass({
   //@@viewOn:render
   render() {
     return (
-      <UU5.Bricks.Section {...this.getMainPropsToPass()} header="Table">
+      <UU5.Bricks.Section {...this.getMainPropsToPass()}>
         {this.getLoadFeedbackChildren(this._renderTable)}
       </UU5.Bricks.Section>
     );

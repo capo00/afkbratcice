@@ -1,18 +1,41 @@
 <?php
   class Logger {
-    private static function write($text, $severity) {
-      $file = 'logger.log';
+    const FILE_NAME = "logger.log";
 
+    private static function write($text, $severity = null) {
       $result = array(
-        date("Y-m-d H:i:s.u"),
-        "[" . ($severity ? $severity : "DEBUG") . "]",
-        json_encode($text) . "\n"
+        "date" => date("c"),
+        "sev" => $severity ? $severity : "DEBUG",
+        "msg" => is_array($text) ? json_encode($text) : $text
       );
 
       // Write the contents to the file,
       // using the FILE_APPEND flag to append the content to the end of the file
       // and the LOCK_EX flag to prevent anyone else writing to the file at the same time
-      file_put_contents($file, join(" ", $result), FILE_APPEND | LOCK_EX);
+      file_put_contents(self::FILE_NAME, json_encode($result) . ",", FILE_APPEND | LOCK_EX);
+    }
+
+    public static function read($severity = null) {
+      $text = file_get_contents(self::FILE_NAME);
+      $json = "[" . rtrim($text, ",") . "]";
+      $array = json_decode($json);
+
+      if ($severity) {
+        $newArray = array_filter($array, function($v, $k) use($severity) {
+          return $v->sev === $severity;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        $array = $newArray;
+      }
+
+      usort($array, function($a, $b) {
+        if ($a->date == $b->date) {
+          return 0;
+        }
+        return ($a->date < $b->date) ? 1 : -1;
+      });
+
+      return $array;
     }
 
     public static function log($text) {

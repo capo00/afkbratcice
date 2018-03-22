@@ -91,7 +91,7 @@ const Menu = createReactClass({
     if (code === "login") {
 
     } else {
-      UU5.Environment.getRouter().setRoute("/" + item.route, null);
+      Cfg.route("/" + item.route);
     }
   },
 

@@ -67,7 +67,7 @@ const App = createReactClass({
       >
         <UU5.Bricks.Container>
           <UU5.Common.Router
-            basePath=""
+            basePath="/2.0.0"
             route="/"
             routes={{
               "/": { component: <Home /> },
@@ -83,7 +83,8 @@ const App = createReactClass({
               "/soupiska-stara-garda": { component: <PlayerList id="25" /> },
               "/fotogalerie": { component: <Photogallery /> },
               "/diskuze": { component: <Discussion /> },
-              "/kontakt": { component: <Contact /> }
+              "/kontakt": { component: <Contact /> },
+              "/clanky": { component: <Home /> }
             }}
           />
         </UU5.Bricks.Container>
