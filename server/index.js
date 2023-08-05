@@ -9,7 +9,7 @@ const app = express();
 app.use(express.static(path.resolve(__dirname, "../public")));
 
 app.get("/api", async (req, res) => {
-  const c = await playerDao.get("64cd6ca820a0cf5b33ad4fba")
+  const c = await playerDao.get("64cd6ca820a0cf5b33ad4fb8");
 
   res.json(c);
 });

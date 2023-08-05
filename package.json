@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "nodemon server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "myBuild": "cd client/oc_afkbratcice_maing01-hi && npm run build && cd.. && cd.. && node tools/build.js",
     "deploy": "npm run myBuild && gcloud app deploy"
@@ -14,6 +14,11 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
-    "mongodb": "^5.7.0"
+    "mongodb": "^5.7.0",
+    "nodemon": "^3.0.1"
+  },
+  "nodemonConfig": {
+    "ignore": ["client/**", "node_modules/**"],
+    "ext": "js"
   }
 }
