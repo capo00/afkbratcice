@@ -10,39 +10,39 @@ require 'json'
 require "nokogiri"
 
 TEAMS = {
-  "Bratčice" => 1,
-  "Vrdy B" => 48,
-  "Záboří n.L." => 21,
-  "Žleby" => 35,
-  "Okřesaneč" => 44,
-  "Tupadly C" => 54,
-  "Hostovlice" => 28,
-  "Potěhy" => 4,
-  "Štrampouch" => 43,
-  "Horní Bučice" => 2,
-  "Chotusice B" => 47
+  "TJ AFK Bratčice" => 1,
+  "FC Bílé Podolí B" => 5,
+  "FK Chotusice 1932 B" => 47,
+  "TJ Dynamo Horní Bučice" => 2,
+  "Sokol Močovice" => 50,
+  "SK Nepoměřice" => 56,
+  "TJ Rataje nad Sázavou" => 11,
+  "FK KAVALIER SÁZAVA B" => 13,
+  "TJ Sokol Družba Suchdol B" => 14,
+  "TJ Star Tupadly B" => 12,
+  "FK Uhlířské Janovice B" => 62,
+  "TJ Sokol Vlkaneč" => 46,
+  "TJ Slavoj Vrdy B" => 48,
+  "SK Zbraslavice" => 60,
+  "TJ Sokol Žlebské Chvalovice." => 33,
 }
 
-doc = Nokogiri::XML(File.open("schedule.html"))
-matches = doc.xpath("//div[@class='match']/div[@class='match-meta']/div[@class='row']|//h2[contains(@class,'h3')]")
+doc = Nokogiri::HTML5(File.open("schedule.html"))
+rounds = doc.xpath("//section[contains(@class, 'js-matchRoundSection')]")
 
 round = 1
-# update dates of matches
-#arr = []
-matches.each do |match|
-  if match.name == "h2"
-    round = match.text[/\d+/]
-    next
-  end
 
-  result = match.xpath(".//div[2]//strong")
-  if result.empty?
+rounds.each do |round_el|
+  round = round_el.xpath("./div/h2")[0].text[/\d+/]
 
-    day = match.xpath(".//div[1]/span").text
+  round_matches = round_el.xpath("./ul/li[contains(@class, 'js-matchRound')]")
+
+  round_matches.each do |round_match|
+    day = round_match.xpath(".//ul[contains(@class, 'MatchRound-meta')]/li[1]/p")[0].text
     date_match = day.match(/(\d+)\.\s*(\d+)\.\s*(\d+)\s+(\d+):(\d+)/)
     date = "#{date_match[3]}-#{date_match[2].rjust(2, "0")}-#{date_match[1].rjust(2, "0")} #{date_match[4]}:#{date_match[5]}:00"
 
-    teams = match.xpath(".//div[2]//span")
+    teams = round_match.xpath(".//a[contains(@class, 'MatchRound-match')]//span[contains(@class, 'H7')]")
     team_home = teams[0].text
     team_guest = teams[1].text
 
@@ -60,11 +60,5 @@ matches.each do |match|
     end
 
     puts "INSERT INTO `d27814_afk`.`zapas` (`kolo`, `datum`, `idD`, `idH`) VALUES ('#{round}', '#{date}', #{id_home}, #{id_guest});"
-    # arr << {
-    #   idD: id_home,
-    #   idH: id_guest,
-    #   date: date
-    # }
   end
 end
-# puts JSON.pretty_generate(arr)
