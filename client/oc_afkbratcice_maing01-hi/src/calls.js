@@ -1,5 +1,13 @@
 import { Environment } from "uu5g05";
-import Plus4U5 from "uu_plus4u5g02";
+
+function serializeDtoIn(dtoIn) {
+  const newDtoIn = {};
+  for (let k in dtoIn) {
+    if (dtoIn[k] != null && typeof dtoIn[k] === "object") newDtoIn[k] = JSON.stringify(dtoIn[k]);
+    else newDtoIn[k] = dtoIn[k];
+  }
+  return newDtoIn;
+}
 
 // the base URI of calls for development / staging environments can be configured in *-hi/env/development.json
 // (or <stagingEnv>.json), e.g.:
@@ -9,10 +17,34 @@ import Plus4U5 from "uu_plus4u5g02";
 const CALLS_BASE_URI =
   (process.env.NODE_ENV !== "production" ? Environment.get("callsBaseUri") : null) || Environment.appBaseUri;
 
+console.log("CALLS_BASE_URI", CALLS_BASE_URI);
+
 const Calls = {
   async call(method, url, dtoIn, clientOptions) {
-    const response = await Plus4U5.Utils.AppClient[method](url, dtoIn, clientOptions);
-    return response.data;
+    let data;
+    if (method === "get") {
+      if (dtoIn) {
+        url = new URL(url);
+        url.search = new URLSearchParams(serializeDtoIn(dtoIn));
+      }
+      const response = await fetch(url, clientOptions);
+      data = await response.json();
+    } else if (method === "post") {
+      const response = await fetch(url, {
+        ...clientOptions,
+        method: method.toUpperCase(),
+        body: method === "post" && dtoIn ? JSON.stringify(dtoIn) : undefined,
+      });
+      data = await response.json();
+    } else {
+      throw new Error(`Invalid method "${method}".`);
+    }
+    return data;
+  },
+
+  loadTeams(dtoIn) {
+    const commandUri = Calls.getCommandUri("team/list");
+    return Calls.call("get", commandUri, dtoIn);
   },
 
   // // example for mock calls

@@ -96,9 +96,15 @@ class Dao {
   }
 
   async _exec(callback) {
+    // Connect the client to the server	(optional starting in v4.7)
     try {
-      // Connect the client to the server	(optional starting in v4.7)
       await this.client.connect();
+    } catch (e) {
+      console.error("Cannot connect to mongo. Check https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters if dtb is running.", e);
+      throw e;
+    }
+
+    try {
       // Send a ping to confirm a successful connection
       return await callback();
     } finally {

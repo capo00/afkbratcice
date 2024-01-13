@@ -1,6 +1,7 @@
 //@@viewOn:imports
 import { Utils, createVisualComponent, useSession, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
+import TeamManager from "../core/team-manager";
 
 import Config from "./config/config.js";
 //@@viewOff:imports
@@ -9,13 +10,6 @@ import Config from "./config/config.js";
 //@@viewOff:constants
 
 //@@viewOn:css
-const Css = {
-  icon: () =>
-    Config.Css.css({
-      fontSize: 48,
-      lineHeight: "1em",
-    }),
-};
 //@@viewOff:css
 
 //@@viewOn:helpers
@@ -45,7 +39,7 @@ let Home = createVisualComponent({
     const attrs = Utils.VisualComponent.getAttrs(props);
     return (
       <div {...attrs}>
-        Hello AFK
+        <TeamManager />
       </div>
     );
     //@@viewOff:render
