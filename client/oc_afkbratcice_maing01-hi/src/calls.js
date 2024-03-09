@@ -17,8 +17,6 @@ function serializeDtoIn(dtoIn) {
 const CALLS_BASE_URI =
   (process.env.NODE_ENV !== "production" ? Environment.get("callsBaseUri") : null) || Environment.appBaseUri;
 
-console.log("CALLS_BASE_URI", CALLS_BASE_URI);
-
 const Calls = {
   async call(method, url, dtoIn, clientOptions) {
     let data;
