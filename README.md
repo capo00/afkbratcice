@@ -8,7 +8,7 @@ Local development
 1. do not use pnpm, because gcloud cannot work with pnpm
 2. in client/*-hi -> `npm start` -> run app-hi
 3. in root -> `npm start` -> run server
-4. start on http://localhost:8080
+4. start on http://localhost:1234
 5. if dtb connection fail, necessary to resume dtb on https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters
 
 Deploy to Google Cloud

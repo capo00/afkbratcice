@@ -1,11 +1,32 @@
 const path = require("path");
 const express = require("express");
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const playerDao = require("./dao/player-dao");
 const teamDao = require("./dao/team-dao");
 
 const PORT = process.env.PORT || 8080;
 
 const app = express();
+app.use(bodyParser.json()) // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+
+if (process.env.NODE_ENV !== "production") {
+  const allowedOrigins = ["http://localhost:1234", "http://192.168.88.91:1234", "http://192.168.88.12:1234"]
+  app.use(cors({
+    origin(origin, callback) {
+      // allow requests with no origin
+      // (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not ' +
+          'allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    }
+  }));
+}
 
 function deserializeDtoIn(dtoIn) {
   const newDtoIn = {};
@@ -30,7 +51,7 @@ app.get("/team/list", async (req, res) => {
 
   const itemList = await teamDao.list();
 
-  if (!process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production") {
     // because of cors on localhost
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
