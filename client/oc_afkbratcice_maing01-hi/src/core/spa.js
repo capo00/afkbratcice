@@ -11,6 +11,7 @@ import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import Home from "../routes/home.js";
 import Router from "./router";
+import TheChase from "../routes/the-chase";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -19,9 +20,9 @@ import Router from "./router";
 // const ControlPanel = Utils.Component.lazy(() => import("../routes/control-panel.js"));
 
 const ROUTE_MAP = {
-  "": { redirect: "home" },
+  "": { redirect: "theChase" },
   home: (props) => <Home {...props} />,
-  // about: (props) => <About {...props} />,
+  theChase: (props) => <TheChase {...props} />,
   // controlPanel: (props) => <ControlPanel {...props} />,
   "*": () => (
     <Uu5Elements.Text category="story" segment="heading" type="h1">

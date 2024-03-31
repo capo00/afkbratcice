@@ -4,6 +4,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const playerDao = require("./dao/player-dao");
 const teamDao = require("./dao/team-dao");
+const theChaseApi = require("./the-chase/api");
+const Tools = require("./the-chase/tools")
 
 const PORT = process.env.PORT || 8080;
 
@@ -60,6 +62,32 @@ app.get("/team/list", async (req, res) => {
 
   res.json({ itemList });
 });
+
+let theChaseMap = {};
+
+const API = {
+  ...theChaseApi,
+}
+
+for (let uc in API) {
+  const { method, fn } = API[uc];
+  // const reqId = Tools.generateId();
+
+  app[method]("/" + uc, async (req, res) => {
+    try {
+      const dtoIn = method === "get" ? deserializeDtoIn(req.query) : req.body;
+
+      // console.info(`{${reqId}}[${new Date().toISOString()}](${method}) /${uc} start`, dtoIn);
+      const dtoOut = fn(dtoIn);
+      // console.info(`{${reqId}}[${new Date().toISOString()}](${method}) /${uc} end`, dtoOut);
+
+      res.json(dtoOut);
+    } catch (e) {
+      console.error("[" + new Date().toISOString() + "] Unexpected exception", e);
+      res.status(500).send({ message: "Unexpected exception" });
+    }
+  });
+}
 
 // All other GET requests not handled before will return our React app
 app.get('*', (req, res) => {
