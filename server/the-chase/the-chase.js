@@ -20,7 +20,7 @@ function generateQuestion2List() {
 class TheChase {
 
   constructor() {
-    this._id = "aaa" || Tools.generateId();
+    this._id = Tools.generateId();
     this._playerList = [];
     this._hunterId = null;
     this._round2Map = {};

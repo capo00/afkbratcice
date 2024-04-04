@@ -2,8 +2,12 @@ import { useEffect, useState, useUveVisibility } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { useRound2 } from "../../contexts/round2-context";
 import { usePlayer } from "../../contexts/player-context";
-import WaitingForQuestion from "../waiting-for-question";
-import AnswerList from "../answer-list";
+import WaitingForQuestion from "./waiting-for-question";
+import AnswerList from "./answer-list";
+import Button from "../button";
+import Amount from "../amount";
+import Config from "../../config/config";
+import Table from "../table";
 
 function WaitingForOffer() {
   const visible = useUveVisibility();
@@ -16,9 +20,9 @@ function WaitingForOffer() {
   }, [visible]);
 
   return (
-    <div>
-      <h2>Vyčkejte lovče, až budete na řadě!</h2>
-    </div>
+    <Uu5Elements.Text category="interface" segment="title" type="major">
+      Vyčkejte lovče, až budete na řadě!
+    </Uu5Elements.Text>
   );
 }
 
@@ -31,41 +35,55 @@ function Offer() {
   const min = Math.ceil(round2.amount / 3000) * 1000;
   const max = 2 * round2.amount;
 
+  const length = (max - min) / 1000;
+
   return (
-    <div>
-      <h3>
-        Nabídněte vyšší a nižší částku než je <Uu5Elements.Number value={round2.amount} currency="CZK" />!
-      </h3>
-      <Uu5Elements.MenuList
-        itemList={Array((max - min) / 1000)
+    <>
+      <Uu5Elements.Text category="interface" segment="title" type="major">
+        Nabídněte vyšší a nižší částku než je <Amount value={round2.amount} />!
+      </Uu5Elements.Text>
+      <Table
+        itemList={Array(length)
           .fill()
           .map((_, i) => {
             const value = min + i * 1000;
-            console.log(value, valueMin, valueMax);
+
             return {
-              ...(value === valueMin || value === valueMax
-                ? { colorScheme: "primary", significance: "highlighted" }
-                : null),
+              style: { justifyContent: value === round2.amount ? "space-between" : "center" },
+              children:
+                value === round2.amount ? (
+                  <>
+                    <Uu5Elements.Icon icon="uugds-chevron-right" className={Config.Css.css({ fontSize: "1.5em" })} />
+                    <b>
+                      <Amount value={round2.amount} />
+                    </b>
+                    <Uu5Elements.Icon icon="uugds-chevron-left" className={Config.Css.css({ fontSize: "1.5em" })} />
+                  </>
+                ) : (
+                  <Amount value={value} />
+                ),
+
+              colorScheme: value === valueMin || value === valueMax || value === round2.amount ? "dark-blue" : "blue",
+              significance: "highlighted",
+
+              disabled: value === round2.amount,
               onClick: () => {
                 if (value < round2.amount) setValueMin(value);
                 else setValueMax(value);
               },
-              disabled: value === round2.amount,
-              children: <Uu5Elements.Number value={value} currency="CZK" />,
             };
           })}
       />
+
       {valueMin && valueMax && (
-        <Uu5Elements.Button
-          colorScheme="primary"
-          significance="highlighted"
+        <Button
           onClick={() => handlerMap.setOffer([valueMin, valueMax])}
           disabled={pendingData?.operation === "setOffer"}
         >
           Potvrdit
-        </Uu5Elements.Button>
+        </Button>
       )}
-    </div>
+    </>
   );
 }
 
@@ -77,8 +95,6 @@ function Round2Hunter({ onConfirm }) {
       handlerMap.setData({});
     }
   }, [round2?.playerStep, round2?.hunterStep]);
-
-  console.log("Round2Hunter render round2", round2);
 
   let result;
   if (round2?.question && round2?.question.hunterAnswer == null) {

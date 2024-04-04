@@ -74,17 +74,17 @@ for (let uc in API) {
   // const reqId = Tools.generateId();
 
   app[method]("/" + uc, async (req, res) => {
-    try {
-      const dtoIn = method === "get" ? deserializeDtoIn(req.query) : req.body;
+    const dtoIn = method === "get" ? deserializeDtoIn(req.query) : req.body;
 
+    try {
       // console.info(`{${reqId}}[${new Date().toISOString()}](${method}) /${uc} start`, dtoIn);
       const dtoOut = fn(dtoIn);
       // console.info(`{${reqId}}[${new Date().toISOString()}](${method}) /${uc} end`, dtoOut);
 
       res.json(dtoOut);
     } catch (e) {
-      console.error("[" + new Date().toISOString() + "] Unexpected exception", e);
-      res.status(500).send({ message: "Unexpected exception" });
+      console.error(`[${new Date().toISOString()}](${method}) /${uc} Unexpected exception. dtoIn = `, dtoIn, e);
+      res.status(500).send({ message: "Unexpected exception", error: e });
     }
   });
 }

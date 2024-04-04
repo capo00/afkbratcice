@@ -1,4 +1,5 @@
 import { useEffect, useUveVisibility } from "uu5g05";
+import Uu5Elements from "uu5g05-elements";
 import { usePlayer } from "../../contexts/player-context";
 
 function Welcome({ onConfirm }) {
@@ -16,10 +17,17 @@ function Welcome({ onConfirm }) {
   }, [visible]);
 
   return (
-    <div>
-      <h1>{player.name}, vítejte ve hře Na lovu</h1>
-      <h2>Vyčkejte, až budete na řadě!</h2>
-    </div>
+    <>
+      <Uu5Elements.Text category="interface" segment="title" type="major">
+        {player?.name}, vítejte ve hře
+      </Uu5Elements.Text>
+      <Uu5Elements.Text category="interface" segment="title" type="main">
+        Na lovu
+      </Uu5Elements.Text>
+      <Uu5Elements.Text category="interface" segment="title" type="major">
+        Vyčkejte, až budete na řadě!
+      </Uu5Elements.Text>
+    </>
   );
 }
 

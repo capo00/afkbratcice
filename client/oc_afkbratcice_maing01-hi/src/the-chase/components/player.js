@@ -3,25 +3,16 @@ import { createVisualComponent, useState } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config";
 import PlayerProvider from "../providers/player-provider";
-import AddPlayer from "./player/add-player";
+import Init from "./player/init";
 import Welcome from "./player/welcome";
 import Round2 from "./player/round2";
 import { usePlayer } from "../contexts/player-context";
+import Cover from "./cover";
 //@@viewOff:imports
 
 function Bg({ children }) {
   const { data: player } = usePlayer();
-
-  return (
-    <Uu5Elements.Box
-      shape="background"
-      colorScheme={player?.hunter ? "red" : "blue"}
-      significance="highlighted"
-      className={Config.Css.css({ padding: 16, minHeight: "100vh" })}
-    >
-      {children}
-    </Uu5Elements.Box>
-  );
+  return <Cover colorScheme={player?.hunter ? "red" : undefined}>{children}</Cover>;
 }
 
 const Player = createVisualComponent({
@@ -39,15 +30,15 @@ const Player = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { gameId } = props;
+    const { gameId, id } = props;
 
-    const [type, setType] = useState("addPlayer");
+    const [type, setType] = useState(id ? "welcome" : "init");
     //@@viewOff:private
 
     let result;
     switch (type) {
-      case "addPlayer":
-        result = <AddPlayer onConfirm={() => setType("welcome")} />;
+      case "init":
+        result = <Init onConfirm={() => setType("welcome")} />;
         break;
       case "welcome":
         result = <Welcome onConfirm={() => setType("round2")} />;
@@ -57,7 +48,11 @@ const Player = createVisualComponent({
         break;
       case "final":
         // result = <Final />;
-        result = <h1>Final</h1>;
+        result = (
+          <Uu5Elements.Text category="interface" segment="title" type="major">
+            Pokračujte na hlavní obrazovce
+          </Uu5Elements.Text>
+        );
         break;
       default:
         result = <h2>Neznámý typ: {type}</h2>;
@@ -65,7 +60,7 @@ const Player = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <PlayerProvider gameId={gameId}>
+      <PlayerProvider gameId={gameId} id={id}>
         <Bg>{result}</Bg>
       </PlayerProvider>
     );

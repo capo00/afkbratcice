@@ -2,6 +2,9 @@
 import { createVisualComponent, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config";
+import Cover from "../cover";
+import Amount from "../amount";
+import QuitButton from "./quit-button";
 //@@viewOff:imports
 
 const Final = createVisualComponent({
@@ -21,18 +24,23 @@ const Final = createVisualComponent({
     const { winner, sum } = props;
 
     //@@viewOn:render
-    const attrs = Utils.VisualComponent.getAttrs(props);
-
     return (
-      <div {...attrs}>
-        <h1>Final</h1>
-        <h2>Vítězem {winner === "hunter" ? "je lovec" : "jsou hráči"}</h2>
-        {winner === "player" && (
-          <h3>
-            Výhra: <Uu5Elements.Number value={sum} currency="CZK" />
-          </h3>
+      <Cover colorScheme={winner === "hunter" ? "red" : undefined}>
+        <Uu5Elements.Text category="interface" segment="title" type="main">
+          Konec
+        </Uu5Elements.Text>
+        <Uu5Elements.Text category="interface" segment="title" type="major">
+          Vítězem {winner === "hunter" ? "je lovec" : "jsou hráči"}
+        </Uu5Elements.Text>
+        {winner !== "hunter" && (
+          <Uu5Elements.Text category="interface" segment="title" type="common">
+            Výhra: <Amount value={sum} />
+          </Uu5Elements.Text>
         )}
-      </div>
+        <QuitButton size="xl" significance="highlighted">
+          Ukončit hru
+        </QuitButton>
+      </Cover>
     );
     //@@viewOff:render
   },

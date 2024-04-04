@@ -35,7 +35,7 @@ const TheChase = createVisualComponent({
     //@@viewOn:render
     return (
       <main className={Config.Css.css({ height: "100vh" })}>
-        {params?.gameId ? <Player gameId={params.gameId} /> : <Game />}
+        {params?.gameId ? <Player gameId={params.gameId} id={params?.playerId} /> : <Game id={params?.id} />}
       </main>
     );
     //@@viewOff:render

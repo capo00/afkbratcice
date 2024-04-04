@@ -1,75 +1,83 @@
 //@@viewOn:imports
-import { createVisualComponent, useDataObject, useEffect, useState, useUpdateEffect } from "uu5g05";
+import {
+  createVisualComponent,
+  Environment,
+  useDataObject,
+  useEffect,
+  useRoute,
+  useState,
+  useUpdateEffect,
+} from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
+import Uu5Extras from "uu5extrasg01";
 import Config from "../../config/config";
 import Round1Calls from "../../calls/round1-calls";
 import { useGame } from "../../contexts/game-context";
 import { usePlayerList } from "../../contexts/player-list-context";
-import speech from "../../utils/speech";
-import Progress from "../progress";
+import Cover from "../cover";
+import Button from "../button";
+import FastQuestions from "./fast-questions";
 //@@viewOff:imports
 
 //@@viewOn:helpers
-function PlayersBar({ playerList }) {
+function PlayersBar({ playerList, gameId }) {
+  const [info, setInfo] = useState();
+  const [route] = useRoute();
+
   return (
-    <div className={Config.Css.css({ display: "flex", justifyItems: "start", gap: 16 })}>
-      {playerList.map(({ id, name, amount }) => (
-        <Uu5Elements.Box
-          key={id}
-          shape="background"
-          colorScheme="blue"
-          borderRadius="moderate"
-          className={Config.Css.css({ padding: 16, display: "inline-block" })}
-          disabled={amount === 0}
-        >
-          {name}
-          <br />
-          {amount != null && <Uu5Elements.Number value={amount} />}
-        </Uu5Elements.Box>
-      ))}
-    </div>
+    <>
+      <div
+        className={Config.Css.css({
+          display: "grid",
+          gridTemplateColumns: `repeat(${playerList.length}, 1fr)`,
+          gap: 16,
+        })}
+      >
+        {playerList.map(({ id, name, amount, active }, i) => (
+          <Uu5Elements.Text key={id} category="interface" segment="title" type="common">
+            {({ style }) => (
+              <Uu5Elements.Box
+                shape="background"
+                significance="highlighted"
+                colorScheme={!active && amount === 0 ? "building" : "light-blue"}
+                borderRadius="moderate"
+                className={Config.Css.css({
+                  padding: 16,
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  alignItems: "center",
+                  minWidth: 96,
+                  ...style,
+                })}
+                disabled={!active}
+                onClick={() => {
+                  const url = new URL(route.uu5Route, Environment.appBaseUri);
+                  url.searchParams.set("gameId", gameId);
+                  url.searchParams.set("id", id);
+                  setInfo({ ...playerList[i], url: url.toString() });
+                }}
+              >
+                {active ? <b>{name}</b> : <span>{name}</span>}
+                <Uu5Elements.Number value={amount ?? 0} />
+              </Uu5Elements.Box>
+            )}
+          </Uu5Elements.Text>
+        ))}
+      </div>
+      <Uu5Elements.Modal open={!!info} onClose={() => setInfo(null)} header={info?.name}>
+        <div className={Config.Css.css({ textAlign: "center" })}>
+          {info?.url && (
+            <Uu5Extras.QRCode
+              value={info.url}
+              size="l"
+              elementAttrs={{ onClick: () => window.open(info.url, "_blank") }}
+            />
+          )}
+        </div>
+      </Uu5Elements.Modal>
+    </>
   );
-}
-
-function Questions({ itemList, onSuccess, onFinish }) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (itemList) {
-      const msg = itemList[index];
-      speech.speak(msg.question, { rate: 2 });
-    }
-  }, [itemList, index]);
-
-  // TODO 2min
-  return itemList ? (
-    <div>
-      <Progress timeMs={0.25 * Config.minMs} onFinish={onFinish} />
-      <h3>{itemList[index].answer}</h3>
-
-      <Uu5Elements.Button
-        colorScheme="positive"
-        significance="highlighted"
-        onClick={() => {
-          speech.stop();
-          setIndex(index + 1);
-          onSuccess(1000);
-        }}
-      >
-        Ano
-      </Uu5Elements.Button>
-      <Uu5Elements.Button
-        colorScheme="negative"
-        significance="highlighted"
-        onClick={() => {
-          speech.stop();
-          setIndex(index + 1);
-        }}
-      >
-        Ne
-      </Uu5Elements.Button>
-    </div>
-  ) : null;
 }
 
 //@@viewOff:helpers
@@ -113,13 +121,15 @@ const Round1 = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <div>
-        <PlayersBar playerList={playerList.map(({ data }, i) => (i === playerIndex ? { ...data, amount } : data))} />
-        <h1>1. kolo</h1>
-        <h2>
-          {playerData.name} {playerData.amount}
-        </h2>
-        <Questions
+      <Cover>
+        <Uu5Elements.Text category="interface" segment="title" type="main">
+          1. kolo
+        </Uu5Elements.Text>
+        <PlayersBar
+          gameId={game.id}
+          playerList={playerList.map(({ data }, i) => (i === playerIndex ? { ...data, amount, active: true } : data))}
+        />
+        <FastQuestions
           itemList={amount != null ? data.itemList : undefined}
           onSuccess={(value) => setAmount(amount + value)}
           onFinish={() => {
@@ -132,18 +142,16 @@ const Round1 = createVisualComponent({
               setPlayerIndex(playerIndex + 1);
             }
           }}
+          // TODO
+          //timeMs={2 * Config.minMs}
+          timeMs={0.1 * Config.minMs}
         />
         {amount == null && (
-          <Uu5Elements.Button
-            disabled={state !== "ready"}
-            onClick={() => setAmount(0)}
-            colorScheme="primary"
-            significance="highlighted"
-          >
+          <Button disabled={state !== "ready"} onClick={() => setAmount(0)}>
             Start
-          </Uu5Elements.Button>
+          </Button>
         )}
-      </div>
+      </Cover>
     );
     //@@viewOff:render
   },

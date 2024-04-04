@@ -1,6 +1,7 @@
 import { useEffect, useUveVisibility } from "uu5g05";
-import { useRound2 } from "../contexts/round2-context";
-import { usePlayer } from "../contexts/player-context";
+import Uu5Elements from "uu5g05-elements";
+import { useRound2 } from "../../contexts/round2-context";
+import { usePlayer } from "../../contexts/player-context";
 
 function WaitingForQuestion() {
   const { data: player } = usePlayer();
@@ -10,15 +11,14 @@ function WaitingForQuestion() {
   useEffect(() => {
     const interval = setInterval(() => {
       visible && (round2 ? handlerMap.get() : handlerMap.load({ playerId: player.id }));
-      console.log("WaitingForQuestion interval");
     }, 1000);
     return () => clearInterval(interval);
   }, [visible]);
 
   return (
-    <div>
-      <h3>Připravte se na otázku!</h3>
-    </div>
+    <Uu5Elements.Text category="interface" segment="title" type="major">
+      Připravte se na otázku!
+    </Uu5Elements.Text>
   );
 }
 

@@ -4,38 +4,50 @@ import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config.js";
 import { usePlayerList } from "../../contexts/player-list-context";
 import { useRound2 } from "../../contexts/round2-context";
-import Progress from "../progress";
+import Progress from "./progress";
 import speech from "../../utils/speech";
+import Cover from "../cover";
+import Table from "../table";
+import Amount from "../amount";
+import Button from "../button";
 
 //@@viewOff:imports
 
-function WaitingForOffer({ onConfirm }) {
+function WaitingForOffer() {
   const visible = useUveVisibility();
-  const { state, data: round2, handlerMap } = useRound2();
+  const { handlerMap } = useRound2();
 
   useEffect(() => {
-    console.log("WaitingForOffer useEffect", state, round2);
-    if (!round2?.offer && state !== "readyNoData") {
-      const interval = setInterval(() => visible && handlerMap.get(), 1000);
-      return () => clearInterval(interval);
-    } else if (round2?.offer) {
-      onConfirm();
-    }
-  }, [round2?.offer, state, visible]);
+    const interval = setInterval(() => visible && handlerMap.get(), 1000);
+    return () => clearInterval(interval);
+  }, [visible]);
 
-  return <p>Čekejte na nabídku lovce</p>;
+  return (
+    <Uu5Elements.Text category="interface" segment="title" type="common">
+      Čekejte na nabídku lovce!
+    </Uu5Elements.Text>
+  );
 }
 
 function QuestionVoice({ question, answerList, onEnd }) {
   useEffect(() => {
     speech.speak(question, {
       onEnd: () => {
-        speech.speak(answerList.map(({ answer }, i) => `Za ${Config.answerList[i]}) ${answer}.`).join("\n"), { onEnd });
+        speech.speak(
+          answerList.map(({ answer }, i) => `Za ${i === 0 ? "á" : Config.answerList[i] + "é"}) ${answer}`).join("\n"),
+          { onEnd, rate: 2 }, // TODO delete rate
+        );
       },
+      rate: 2, // TODO delete rate
     });
+    return () => speech.stop();
   }, []);
 
-  return <Uu5Elements.Text>{question}</Uu5Elements.Text>;
+  return (
+    <Uu5Elements.Text category="interface" segment="title" type="common">
+      {question}
+    </Uu5Elements.Text>
+  );
 }
 
 function ProgressLoader(props) {
@@ -52,7 +64,7 @@ function ProgressLoader(props) {
     }
   }, [round2.question.hunterAnswer, round2.question.playerAnswer]);
 
-  return <Progress {...props} />;
+  return <Progress type="horizontal" size="xl" colorScheme="building" width="100%" text={null} {...props} />;
 }
 
 function Question({ onConfirm }) {
@@ -73,49 +85,39 @@ function Question({ onConfirm }) {
     }
   }, [type, handlerMap]);
 
-  console.log("Question", JSON.parse(JSON.stringify({ type, round2, playerAnswer, correctAnswer, hunterAnswer })));
-
   let result;
   if (round2.question) {
     let answerBar;
     if (type === "answer") {
       if (hunterAnswer != null) {
-        answerBar = <Uu5Elements.Button onClick={() => onConfirm()}>Zobraz stav</Uu5Elements.Button>;
+        answerBar = <Button onClick={() => onConfirm()}>Zobraz stav</Button>;
       } else if (correctAnswer != null) {
-        answerBar = (
-          <Uu5Elements.Button onClick={() => setHunterAnswer(round2.question.hunterAnswer)}>
-            Zobraz odpověď lovce
-          </Uu5Elements.Button>
-        );
+        answerBar = <Button onClick={() => setHunterAnswer(round2.question.hunterAnswer)}>Zobraz odpověď lovce</Button>;
       } else if (playerAnswer != null) {
         answerBar = (
-          <Uu5Elements.Button onClick={() => setCorrectAnswer(round2.question.correctAnswer)}>
-            Zobraz správnou odpověď
-          </Uu5Elements.Button>
+          <Button onClick={() => setCorrectAnswer(round2.question.correctAnswer)}>Zobraz správnou odpověď</Button>
         );
       } else if (round2.question.playerAnswer != null) {
-        answerBar = (
-          <Uu5Elements.Button onClick={() => setPlayerAnswer(round2.question.playerAnswer)}>
-            Zobraz odpověď hráče
-          </Uu5Elements.Button>
-        );
+        answerBar = <Button onClick={() => setPlayerAnswer(round2.question.playerAnswer)}>Zobraz odpověď hráče</Button>;
       }
     }
 
     result = (
-      <div>
+      <div className={Config.Css.css({ textAlign: "center", width: 640, maxWidth: "100%", marginTop: 64 })}>
         <QuestionVoice
+          key={round2.question.id}
           question={round2.question.question}
           answerList={round2.question.answerList}
           onEnd={() => setType("question")}
         />
-        <Uu5Elements.Grid templateColumns="1fr 1fr 1fr">
+
+        <Uu5Elements.Grid templateColumns="1fr 1fr 1fr" className={Config.Css.css({ marginTop: 16, marginBottom: 16 })}>
           {round2.question.answerList.map(({ answer }, i) => {
-            let colorScheme,
-              significance = "distinct";
+            let colorScheme, significance;
+
             if (playerAnswer === i) {
               if (correctAnswer == null) {
-                colorScheme = "cyan";
+                colorScheme = "blue";
               } else if (correctAnswer !== i) {
                 colorScheme = "red";
               }
@@ -123,32 +125,31 @@ function Question({ onConfirm }) {
 
             if (correctAnswer === i) {
               colorScheme = "green";
-              significance = "distinct";
             }
 
             if (hunterAnswer === i) {
-              if (correctAnswer === i) {
-                significance = "highlighted";
-              } else {
+              significance = "highlighted";
+              if (correctAnswer !== i) {
                 colorScheme = "red";
-                significance = "distinct";
               }
             }
 
             return (
-              <Uu5Elements.MenuItem
+              <Uu5Elements.Button
                 key={i}
                 colorScheme={colorScheme}
                 significance={significance}
                 borderRadius="moderate"
+                size="xl"
+                className={Config.Css.css({ justifyContent: "left" })}
               >
                 {Config.answerList[i]}) {answer}
-              </Uu5Elements.MenuItem>
+              </Uu5Elements.Button>
             );
           })}
         </Uu5Elements.Grid>
         {answerBar}
-        {type === "question" && <ProgressLoader timeMs={Config.minMs} onFinish={() => setType("answer")} />}
+        {type === "question" && <ProgressLoader timeMs={0.12 * Config.minMs} onFinish={() => setType("answer")} />}
       </div>
     );
   } else {
@@ -184,7 +185,7 @@ const Round2 = createVisualComponent({
 
     const { data: round2, handlerMap } = useRound2();
 
-    const [type, setType] = useState("waitForOffer");
+    const [type, setType] = useState("offer");
 
     useEffect(() => {
       if (round2?.playerId !== playerData.id || round2?.hunterId !== hunter.data.id) {
@@ -195,59 +196,94 @@ const Round2 = createVisualComponent({
     let result;
 
     switch (type) {
-      case "waitForOffer":
-        result = <WaitingForOffer onConfirm={() => setType("confirmOffer")} />;
-        break;
-      case "confirmOffer":
+      case "offer":
         result = (
-          <Uu5Elements.MenuList
-            itemList={[round2.offer[0], playerData.amount, round2.offer[1]].map((value) => ({
-              children: value,
-              onClick: () => {
-                handlerMap.confirmOffer(value);
-                setType("canPlay");
-              },
-            }))}
-          />
+          <>
+            <Table
+              itemList={[null, round2?.offer?.[1], playerData.amount, round2?.offer?.[0], null, null, null].map(
+                (value, i) => ({
+                  style: { justifyContent: value === playerData.amount ? "space-between" : "center" },
+                  children: value ? (
+                    <>
+                      {value === playerData.amount && (
+                        <Uu5Elements.Icon
+                          icon="uugds-chevron-right"
+                          className={Config.Css.css({ fontSize: "1.5em" })}
+                        />
+                      )}
+                      <b>
+                        <Amount value={value} />
+                      </b>
+                      {value === playerData.amount && (
+                        <Uu5Elements.Icon icon="uugds-chevron-left" className={Config.Css.css({ fontSize: "1.5em" })} />
+                      )}
+                    </>
+                  ) : (
+                    ""
+                  ),
+                  disabled: !value,
+                  onClick:
+                    value && round2?.offer
+                      ? () => {
+                          handlerMap.confirmOffer(value);
+                          setType("canPlay");
+                        }
+                      : undefined,
+                }),
+              )}
+            />
+
+            {!round2?.offer && <WaitingForOffer />}
+          </>
         );
         break;
       case "canPlay":
-        const length = 7;
+        const length = 6;
         const playerStepI = length - round2.playerStep;
         const hunterStepI = length - round2.hunterStep;
 
         result = (
-          <div>
-            <Uu5Elements.MenuList
+          <>
+            <Table
               itemList={Array(length)
                 .fill()
                 .map((_, i) => ({
+                  style: { justifyContent: i === playerStepI ? "space-between" : "center" },
                   children:
                     i === playerStepI ? (
-                      <Uu5Elements.Number value={round2.amount} currency="CZK" />
+                      <>
+                        <Uu5Elements.Icon
+                          icon="uugds-chevron-right"
+                          className={Config.Css.css({ fontSize: "1.5em" })}
+                        />
+                        <b>
+                          <Amount value={round2.amount} />
+                        </b>
+                        <Uu5Elements.Icon icon="uugds-chevron-left" className={Config.Css.css({ fontSize: "1.5em" })} />
+                      </>
                     ) : i === hunterStepI ? (
-                      "Lovec"
+                      <b>Lovec</b>
                     ) : (
                       ""
                     ),
-                  colorScheme: i <= hunterStepI ? "negative" : "primary",
-                  significance: i <= hunterStepI || i === playerStepI ? "highlighted" : "distinct",
+                  colorScheme: i <= hunterStepI ? "negative" : i >= playerStepI ? "dark-blue" : "blue",
+                  significance: "highlighted",
                 }))}
             />
             {round2.playerStep === 0 || round2.playerStep === round2.hunterStep ? (
-              <Uu5Elements.Button
+              <Button
                 onClick={() => {
                   player.handlerMap.set({ amount: round2.playerStep === 0 ? round2.amount : 0 });
                   if (playerIndex === playerList.length - 1) onConfirm();
                   else setPlayerIndex(playerIndex + 1);
                 }}
               >
-                Další hráč
-              </Uu5Elements.Button>
+                Další
+              </Button>
             ) : (
-              <Uu5Elements.Button onClick={() => setType("question")}>Otázka</Uu5Elements.Button>
+              <Button onClick={() => setType("question")}>Otázka</Button>
             )}
-          </div>
+          </>
         );
         break;
       case "question":
@@ -259,10 +295,22 @@ const Round2 = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <div>
-        <h2>{playerData.name}</h2>
+      <Cover colorScheme={type === "offer" && !round2?.offer ? "red" : undefined}>
+        <Uu5Elements.Text category="interface" segment="title" type="main">
+          2. kolo
+        </Uu5Elements.Text>
+        <Uu5Elements.Text category="interface" segment="title" type="major">
+          {playerData.name}
+          {type === "canPlay" && (round2.playerStep === 0 || round2.playerStep === round2.hunterStep) ? (
+            <>
+              :&nbsp;
+              <Amount value={round2.amount} />
+            </>
+          ) : null}
+        </Uu5Elements.Text>
+
         {result}
-      </div>
+      </Cover>
     );
     //@@viewOff:render
   },

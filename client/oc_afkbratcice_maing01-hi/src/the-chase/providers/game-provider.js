@@ -7,7 +7,7 @@ function GameProvider({ children }) {
     skipInitialLoad: true,
     handlerMap: {
       init: GameCalls.init,
-      get: () => GameCalls.get({ id: gameDto.data.id }),
+      get: (data) => GameCalls.get({ id: gameDto.data?.id, ...data }),
       set: (data) => GameCalls.set({ id: gameDto.data.id, ...data }),
       setHunter: (hunterId) => {
         // console.log("setHunter", { ...gameDto.data, hunterId });
@@ -23,7 +23,11 @@ function GameProvider({ children }) {
     return () => gameDto.handlerMap.destroy();
   }, []);
 
-  return <GameContext.Provider value={gameDto}>{children}</GameContext.Provider>;
+  return (
+    <GameContext.Provider value={gameDto}>
+      {children}
+    </GameContext.Provider>
+  );
 }
 
 export default GameProvider;
