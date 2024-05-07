@@ -1,20 +1,25 @@
 const Tools = require("../the-chase/tools");
 
 function generateQuestion2List() {
-  return Array(100).fill().map(() => {
-    const x = Math.round(Math.random() * 1000);
-    const y = Math.round(Math.random() * 1000);
-    return {
-      id: Tools.generateId(),
-      question: `Kolik je ${x} + ${y}?`,
-      answerList: [
-        { answer: (x - Math.round(Math.random() * 1000)) + "" },
-        { answer: (x + y) + "" },
-        { answer: (x + Math.round(Math.random() * 1000)) + "", hunterDisabled: true },
-      ],
-      correctAnswer: 1,
-    };
-  });
+  // return Array(100).fill().map(() => {
+  //   const x = Math.round(Math.random() * 1000);
+  //   const y = Math.round(Math.random() * 1000);
+  //   return {
+  //     id: Tools.generateId(),
+  //     question: `Kolik je ${x} + ${y}?`,
+  //     answerList: [
+  //       { answer: (x - Math.round(Math.random() * 1000)) + "" },
+  //       { answer: (x + y) + "" },
+  //       { answer: (x + Math.round(Math.random() * 1000)) + "", hunterDisabled: true },
+  //     ],
+  //     correctAnswer: 1,
+  //   };
+  // });
+
+  const questionList = require("./questions2.json");
+  const shuffledList = questionList.sort(() => Math.random() - 0.5);
+
+  return shuffledList.slice(0, 100);
 }
 
 class TheChase {

@@ -142,9 +142,7 @@ const Round1 = createVisualComponent({
               setPlayerIndex(playerIndex + 1);
             }
           }}
-          // TODO
-          //timeMs={2 * Config.minMs}
-          timeMs={0.1 * Config.minMs}
+          timeMs={Config.round1DurationMs}
         />
         {amount == null && (
           <Button disabled={state !== "ready"} onClick={() => setAmount(0)}>

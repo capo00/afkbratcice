@@ -14,7 +14,6 @@ import FastQuestions from "./fast-questions";
 //@@viewOn:helpers
 
 function HuntBar({ playerCount, hunterCount }) {
-  console.log(playerCount, hunterCount);
   return (
     <Uu5Elements.Grid templateColumns={`repeat(${playerCount}, minmax(40px, 1fr))`} columnGap={4}>
       {({ style }) => (
@@ -24,7 +23,6 @@ function HuntBar({ playerCount, hunterCount }) {
           borderRadius="moderate"
           className={Config.Css.css({ ...style, padding: 8 })}
         >
-
           {Array(playerCount)
             .fill()
             .map((_, i) => (
@@ -52,6 +50,7 @@ function HuntBar({ playerCount, hunterCount }) {
     </Uu5Elements.Grid>
   );
 }
+
 //@@viewOff:helpers
 
 const Round3 = createVisualComponent({
@@ -81,7 +80,6 @@ const Round3 = createVisualComponent({
     const [type, setType] = useState();
     const [playerCount, setPlayerCount] = useState();
     const [hunterCount, setHunterCount] = useState(0);
-    const [pause, setPause] = useState(false);
 
     const { state, data, handlerMap } = useDataObject({
       handlerMap: {
@@ -112,8 +110,11 @@ const Round3 = createVisualComponent({
         </Uu5Elements.Text>
         <FastQuestions
           itemList={type != null ? data.itemList : undefined}
-          onSuccess={() => (type === "hunter" ? setHunterCount(hunterCount + 1) : setPlayerCount(playerCount + 1))}
-          onFailure={() => type === "hunter" && setPause(true)}
+          onSuccess={(value) =>
+            type === "hunter"
+              ? setHunterCount(value < 0 ? hunterCount - 1 : hunterCount + 1)
+              : setPlayerCount(playerCount + 1)
+          }
           onFinish={() => {
             if (type === "hunter") {
               onConfirm({ winner: "player", sum });
@@ -121,7 +122,8 @@ const Round3 = createVisualComponent({
               setType(null);
             }
           }}
-          timeMs={4 * Config.minMs}
+          timeMs={Config.round3DurationMs}
+          stopByFailure={type === "hunter"}
         />
         {type == null && (
           <Button
@@ -139,7 +141,7 @@ const Round3 = createVisualComponent({
             Start
           </Button>
         )}
-        {playerCount != null && <HuntBar playerCount={playerCount} hunterCount={hunterCount} pause={pause} />}
+        {playerCount != null && <HuntBar playerCount={playerCount} hunterCount={hunterCount} />}
       </Cover>
     );
     //@@viewOff:render

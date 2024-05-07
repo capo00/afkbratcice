@@ -1,6 +1,5 @@
 //@@viewOn:imports
 import { createVisualComponent, useState } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config";
 import TheChaseProvider from "../providers/the-chase-provider";
 import Welcome from "./game/welcome";
@@ -9,7 +8,6 @@ import Round1 from "./game/round1";
 import Round2 from "./game/round2";
 import Round3 from "./game/round3";
 import Final from "./game/final";
-import { useGame } from "../contexts/game-context";
 import QuitButton from "./game/quit-button";
 //@@viewOff:imports
 

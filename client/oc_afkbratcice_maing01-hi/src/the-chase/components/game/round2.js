@@ -35,13 +35,13 @@ function QuestionVoice({ question, answerList, onEnd }) {
       onEnd: () => {
         speech.speak(
           answerList.map(({ answer }, i) => `Za ${i === 0 ? "á" : Config.answerList[i] + "é"}) ${answer}`).join("\n"),
-          { onEnd, rate: 2 }, // TODO delete rate
+          { onEnd, rate: Config.round2Rate },
         );
       },
-      rate: 2, // TODO delete rate
+      rate: Config.round2Rate,
     });
     return () => speech.stop();
-  }, []);
+  }, [question]);
 
   return (
     <Uu5Elements.Text category="interface" segment="title" type="common">
@@ -149,7 +149,7 @@ function Question({ onConfirm }) {
           })}
         </Uu5Elements.Grid>
         {answerBar}
-        {type === "question" && <ProgressLoader timeMs={0.12 * Config.minMs} onFinish={() => setType("answer")} />}
+        {type === "question" && <ProgressLoader timeMs={0.167 * Config.minMs} onFinish={() => setType("answer")} />}
       </div>
     );
   } else {

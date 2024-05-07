@@ -21,7 +21,7 @@ const FastQuestions = createVisualComponent({
   //@@viewOff:defaultProps
 
   render(props) {
-    const { itemList, onSuccess, onFailure, onFinish, timeMs } = props;
+    const { itemList, onSuccess, onFailure, onFinish, timeMs, stopByFailure } = props;
 
     const [index, setIndex] = useState(0);
     const question = itemList?.[index]?.question;
@@ -33,6 +33,8 @@ const FastQuestions = createVisualComponent({
       }
     }, [question]);
 
+    const [pause, setPause] = useState(false);
+
     //@@viewOn:render
     return itemList ? (
       <div className={Config.Css.css({ display: "flex", flexDirection: "column", gap: 32, alignItems: "center" })}>
@@ -43,6 +45,7 @@ const FastQuestions = createVisualComponent({
           width="100%"
           timeMs={timeMs}
           onFinish={onFinish}
+          pause={pause}
           className={Config.Css.css({ flexDirection: "column" })}
         />
 
@@ -51,13 +54,24 @@ const FastQuestions = createVisualComponent({
         </Uu5Elements.Text>
 
         <div className={Config.Css.css({ display: "flex", gap: 16 })}>
+          {pause && (
+            <Button
+              onClick={() => {
+                speech.speak(question);
+              }}
+            >
+              Zopakovat otázku
+            </Button>
+          )}
+
           <Button
             colorScheme="positive"
             width={80}
             onClick={() => {
               speech.stop();
               setIndex(index + 1);
-              onSuccess(1000);
+              onSuccess(pause ? -1000 : 1000);
+              if (pause) setPause(false);
             }}
           >
             Ano
@@ -68,8 +82,13 @@ const FastQuestions = createVisualComponent({
             width={80}
             onClick={() => {
               speech.stop();
-              setIndex(index + 1);
-              onFailure?.(1000);
+              if (stopByFailure) {
+                if (pause) setIndex(index + 1);
+                setPause(!pause);
+              } else {
+                setIndex(index + 1);
+                onFailure?.();
+              }
             }}
           >
             Ne

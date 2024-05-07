@@ -3,6 +3,8 @@ import Config from "../../config/config.js";
 
 const TAG = Config.TAG + "TheChase.";
 
+const MIN = 60 * 1000;
+
 export default {
   ...Config,
 
@@ -15,6 +17,9 @@ export default {
     process.env.NAME + "/" + process.env.OUTPUT_NAME + "@" + process.env.VERSION, // this helps preserve proper order of styles among loaded libraries
   ),
 
-  minMs: 60 * 1000,
-  answerList: ["a", "b", "c", "d"],
+  minMs: MIN,
+  answerList: ["a", "b", "c"],
+  round1DurationMs: MIN, // MIN
+  round3DurationMs: 2 * MIN, // 2 * MIN
+  round2Rate: process.env.NODE_ENV === "development" ? 2 : undefined,
 };

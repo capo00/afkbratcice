@@ -11,8 +11,20 @@ Local development
 4. start on http://localhost:1234
 5. if dtb connection fail, necessary to resume dtb on https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters
 
+## Deployed
 Deploy to Google Cloud
 - in root -> `npm run deploy` -> deploy to google cloud
 
-TODO:
+Deployed service [default] to [https://afkbratcice.oa.r.appspot.com]
+
+You can stream logs from the command line by running:
+`$ gcloud app logs tail -s default`
+
+To view your application in the web browser run:
+`$ gcloud app browse`
+
+To take a quick anonymous survey, run:
+`$ gcloud survey`
+
+## TODO:
 1. google/fb login

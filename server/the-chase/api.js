@@ -1,4 +1,5 @@
 const TheChase = require("./the-chase");
+const questionList = require("./questions1.json");
 
 let theChaseMap = {};
 
@@ -172,16 +173,19 @@ const API = {
   "theChase/round1/loadQuestions": {
     method: "get",
     fn: () => {
-      const questionList = Array(100).fill().map(() => {
-        const x = Math.round(Math.random() * 10);
-        const y = Math.round(Math.random() * 10);
-        return {
-          question: `Kolik je ${x} + ${y}?`,
-          answer: x + y
-        };
-      });
+      // const questionList = Array(100).fill().map(() => {
+      //   const x = Math.round(Math.random() * 10);
+      //   const y = Math.round(Math.random() * 10);
+      //   return {
+      //     question: `Kolik je ${x} + ${y}?`,
+      //     answer: x + y
+      //   };
+      // });
 
-      const dtoOut = { itemList: questionList };
+      const questionList = require("./questions1.json");
+      const shuffledList = questionList.sort(() => Math.random() - 0.5);
+
+      const dtoOut = { itemList: shuffledList.slice(0, 100) };
       return dtoOut;
     }
   },
@@ -189,16 +193,19 @@ const API = {
   "theChase/round3/loadQuestions": {
     method: "get",
     fn: () => {
-      const questionList = Array(100).fill().map(() => {
-        const x = Math.round(Math.random() * 10);
-        const y = Math.round(Math.random() * 10);
-        return {
-          question: `Kolik je ${x} * ${y}?`,
-          answer: x * y
-        };
-      });
+      // const questionList = Array(100).fill().map(() => {
+      //   const x = Math.round(Math.random() * 10);
+      //   const y = Math.round(Math.random() * 10);
+      //   return {
+      //     question: `Kolik je ${x} * ${y}?`,
+      //     answer: x * y
+      //   };
+      // });
 
-      const dtoOut = { itemList: questionList };
+      const questionList = require("./questions3.json");
+      const shuffledList = questionList.sort(() => Math.random() - 0.5);
+
+      const dtoOut = { itemList: shuffledList.slice(0, 100) };
       return dtoOut;
     }
   },

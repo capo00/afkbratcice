@@ -28,6 +28,14 @@ class Speech {
     this._synth.cancel();
   }
 
+  pause() {
+    this._synth.pause();
+  }
+
+  resume() {
+    this._synth.resume();
+  }
+
   _loadVoices() {
     this._voices = this._synth.getVoices();
 
