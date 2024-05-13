@@ -94,7 +94,7 @@ const Round3 = createVisualComponent({
     }, [type]);
 
     useEffect(() => {
-      if (playerCount === hunterCount) {
+      if (playerCount <= hunterCount) {
         onConfirm({ winner: "hunter" });
       }
     }, [playerCount, hunterCount]);
@@ -112,7 +112,7 @@ const Round3 = createVisualComponent({
           itemList={type != null ? data.itemList : undefined}
           onSuccess={(value) =>
             type === "hunter"
-              ? setHunterCount(value < 0 ? hunterCount - 1 : hunterCount + 1)
+              ? setHunterCount(value < 0 ? hunterCount - 1 : hunterCount + 2)
               : setPlayerCount(playerCount + 1)
           }
           onFinish={() => {
