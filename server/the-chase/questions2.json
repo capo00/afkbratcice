@@ -1,0 +1,4082 @@
+[
+  {
+    "id": "74b029a5add224d7cb5471f3795f726b",
+    "question": "Mazlíčkem kterého módního návrháře byla kočka jménem Choupette?",
+    "answerList": [
+      {
+        "answer": "Gianniho Versaceho"
+      },
+      {
+        "answer": "Galvina Kleina",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Karla Lagerfelda"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "58b008a8005b441838edddce32a5a1f9",
+    "question": "Jaká je délka zaoceánské lodi Queen Mary 2?",
+    "answerList": [
+      {
+        "answer": "345 metrů"
+      },
+      {
+        "answer": "420 metrů"
+      },
+      {
+        "answer": "457 metrů",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "d25571f15cb6b4237953c6aff15a2edf",
+    "question": "Jaké státní zřízení najdeme na souostroví Tonga?",
+    "answerList": [
+      {
+        "answer": "parlamentní republika"
+      },
+      {
+        "answer": "konstituční monarchie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "prezidentská republika"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "6c44d6e9a1ae143df9bb60046585ffdb",
+    "question": "Kolik ze dvaceti nejdelších světových řek najdeme na africkém kontinentu?",
+    "answerList": [
+      {
+        "answer": "2"
+      },
+      {
+        "answer": "3"
+      },
+      {
+        "answer": "5",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "5cf8267e056bb4a0cb81b81b30cdee0d",
+    "question": "Jak se jmenoval zakladatel první tajné sovětské policie Čeka?",
+    "answerList": [
+      {
+        "answer": "Felix Dzeržinskij"
+      },
+      {
+        "answer": "Lev Trockij",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Lavrentij Berija"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "5b6bf232d91c14db9ad8639189fb4b59",
+    "question": "Která slavná modelka byla v 90. letech životní partnerkou kouzelníka Davida Copperfielda?",
+    "answerList": [
+      {
+        "answer": "Heidi Klum"
+      },
+      {
+        "answer": "Kate Moss",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Claudia Schiffer"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "646e7835c40ca4777a6a018fd81de2a7",
+    "question": "Populární americká herečka Kate Hudson má i neméně slavnou matku. Jmenuje se:",
+    "answerList": [
+      {
+        "answer": "Diane Keaton"
+      },
+      {
+        "answer": "Goldie Hawn"
+      },
+      {
+        "answer": "Meryl Streep",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "58cffa0e781034da38dba4e2a62359a6",
+    "question": "Ze které země pocházel spisovatel Gabriel Garcia Márquez?",
+    "answerList": [
+      {
+        "answer": "Spanělsko",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Mexiko"
+      },
+      {
+        "answer": "Kolumbie"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "967e6e415b91e4b298ad5e81de887a55",
+    "question": "Ze kterého města pochází tým NFL s přízviskem Giants?",
+    "answerList": [
+      {
+        "answer": "New York"
+      },
+      {
+        "answer": "Los Angeles",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Miami"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "6dd09f86d5cc34d9280afeaf0fd87a50",
+    "question": "Který z následujících kontinentů patří do ságy Piseń ledu a ohně George R. R. Martina?",
+    "answerList": [
+      {
+        "answer": "Středozem"
+      },
+      {
+        "answer": "Valinor",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Západozemí"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "2f7996dc750c841218126f5e8b2f4385",
+    "question": "Jak se nazývá modlitební kniha s modlitbami různých druhů pro celý církevní rok?",
+    "answerList": [
+      {
+        "answer": "graduál"
+      },
+      {
+        "answer": "brevial"
+      },
+      {
+        "answer": "evangelistál",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "3e5d9dd83ba9d4438b139fae5ca332d6",
+    "question": "Která CHKO v ČR je nejstarší?",
+    "answerList": [
+      {
+        "answer": "Šumava"
+      },
+      {
+        "answer": "Moravský kras",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Český ráj"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "b4b39b05e4d2648c49b426e156da0042",
+    "question": "Které příjmení je druhé nejčetnější v České republice?",
+    "answerList": [
+      {
+        "answer": "Novotný",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Svoboda"
+      },
+      {
+        "answer": "Černý"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "9ec2c666694704395932377a7b995e56",
+    "question": "Jaké bylo původní povolání Jurije Gagarina?",
+    "answerList": [
+      {
+        "answer": "slévač"
+      },
+      {
+        "answer": "truhlář",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "elektrikář"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "d6b198cc08bb74504bddfc5bc32704be",
+    "question": "Jak se jmenuje herec, který ve filmu Zápisník jedné lásky ztvárnil hlavni postavu Noaha?",
+    "answerList": [
+      {
+        "answer": "Ryan Gosling"
+      },
+      {
+        "answer": "George Clooney"
+      },
+      {
+        "answer": "Daniel Radcliffe",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "df397e1f33a8c4832a4dab926fa3a2ac",
+    "question": "Z kterého filmu pochází hláška: \"On teda cihlu do ruky nevezme, ale odborník je to na slovo vzatý\"?",
+    "answerList": [
+      {
+        "answer": "Slavnosti sněženek"
+      },
+      {
+        "answer": "Vesničko má středisková",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Na samotě u lesa"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "9f24a54f800bf4684885098c916b10c4",
+    "question": "Ve kterém městě stojí proslulý most Ponte Vecchio?",
+    "answerList": [
+      {
+        "answer": "Neapol",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Florencie"
+      },
+      {
+        "answer": "Milán"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "99e7248af13f5499f84ea78bd6e878c4",
+    "question": "Jaká dynastie vládla v Číně mezi lety 1368-16447",
+    "answerList": [
+      {
+        "answer": "Ming"
+      },
+      {
+        "answer": "Dan",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Ching"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "6f421a57dde884627a38d0593bbf92af",
+    "question": "Jak se jmenuje první vydaná kniha z cyklu Zeměplocha?",
+    "answerList": [
+      {
+        "answer": "Lehké fantastično",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Čarodějky na cestách"
+      },
+      {
+        "answer": "Barva kouzel"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "402db4237d32a4fe1b57ebd6a61909f6",
+    "question": "Která z uvedených rakouských spolkových zemí sousedí s ČR?",
+    "answerList": [
+      {
+        "answer": "Korutany"
+      },
+      {
+        "answer": "Dolní Rakousy"
+      },
+      {
+        "answer": "Burgenland",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "f50650bc7db1e4c51a810840fe818b85",
+    "question": "Která herečka nejčastěji dabuje do češtiny Meryl Streepovou?",
+    "answerList": [
+      {
+        "answer": "Zuzana Slavíková",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Ljuba Krbová"
+      },
+      {
+        "answer": "Zlata Adamovská"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "44aa6debfc0d24e26ab1b463db919742",
+    "question": "Na území kterého dnešního státu leží starověká Trója?",
+    "answerList": [
+      {
+        "answer": "Bulharska"
+      },
+      {
+        "answer": "Řecka",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Turecka"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "b914aaa02bc1d4d1bb434538c2dd206f",
+    "question": "Most krále Fahda spojuje Saúdskou Arábii s...",
+    "answerList": [
+      {
+        "answer": "Bahrajnem"
+      },
+      {
+        "answer": "Katarem",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Jemenem"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8932b8e05b77d4463b816843e90a88ea",
+    "question": "Kterou zemi reprezentovala Céline Dion na soutěži Eurovision Song Contest v roce 1988?",
+    "answerList": [
+      {
+        "answer": "Francii"
+      },
+      {
+        "answer": "Švýcarsko"
+      },
+      {
+        "answer": "Belgii",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "979827a254dad45809284dd3a5065486",
+    "question": "Lakedaimón je starověký název pro který antický městský stát?",
+    "answerList": [
+      {
+        "answer": "Spartu"
+      },
+      {
+        "answer": "Mykény",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Théby"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "c25b74d7cb61c4f59beb619c39a460a4",
+    "question": "Kdo je autorem obrazu, podle nějž vzniklo pojmenování uměleckého směru impresionismus?",
+    "answerList": [
+      {
+        "answer": "Claude Monet"
+      },
+      {
+        "answer": "Edgar Degas",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Edouard Manet"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8740fa0e645e1430ab35c3107218e52a",
+    "question": "Pod který suverénní stát spadá závislé území Aruba?",
+    "answerList": [
+      {
+        "answer": "Francie"
+      },
+      {
+        "answer": "Nizozemsko"
+      },
+      {
+        "answer": "Velká Británie",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "d8e82395b10844d1b8b85e0c68ac17b5",
+    "question": "5 jakým číslem dresu je spojena kariéra Maria Lemieux?",
+    "answerList": [
+      {
+        "answer": "99"
+      },
+      {
+        "answer": "66"
+      },
+      {
+        "answer": "88",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "b2f0b3a53f2174292919076f06d29ea3",
+    "question": "Která z uvedených zemí měla v roce 2020 nejvyšší HDP na 1 obyvatele ve standardech kupní sily?",
+    "answerList": [
+      {
+        "answer": "Portugalsko"
+      },
+      {
+        "answer": "Slovinsko",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Česká republika"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "449596bb45e2c4ca0a92c510d593d2a4",
+    "question": "Která z uvedených pokojových rostlin je jedovatá?",
+    "answerList": [
+      {
+        "answer": "difenbachie"
+      },
+      {
+        "answer": "voskovka",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pepřinec"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "5d90ed875b9854331875927531f0a770",
+    "question": "Na území kterého z uvedených států žijí tradičně Masajové?",
+    "answerList": [
+      {
+        "answer": "Tanzánie"
+      },
+      {
+        "answer": "Namibie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Indie"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "a5260475dda87441d905b96a71c8f0f7",
+    "question": "Který prvek je nejtěžším přirozené se vyskytujícím chemickým prvkem ve skupině vzácných plynů?",
+    "answerList": [
+      {
+        "answer": "xenon",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "radon"
+      },
+      {
+        "answer": "helium"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "a1f31a976b5ee4b1ab615cf3b190eb11",
+    "question": "Ve kterém hlavním městě se nachází známý Andělský hrad?",
+    "answerList": [
+      {
+        "answer": "Lisabon"
+      },
+      {
+        "answer": "Bukurešť",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Řím"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "c67d0f287fa5640a99b02cc728e9b5f5",
+    "question": "Ve které zemi se údajně vyskytuje mytický tvor zvaný olgoj chorchoj?",
+    "answerList": [
+      {
+        "answer": "Mongolsko"
+      },
+      {
+        "answer": "Vietnam"
+      },
+      {
+        "answer": "Indonésie",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "b2f9f9a94df294471a9fa8dfa3c6f3fa",
+    "question": "Ve které zemi působila většinu života Matka Tereza?",
+    "answerList": [
+      {
+        "answer": "Albánie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Indie"
+      },
+      {
+        "answer": "Brazílie"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "412a517b1446947cdb978d2351805b88",
+    "question": "Ve kterém roce v České republice skončila platnost padesátikorunové bankovky?",
+    "answerList": [
+      {
+        "answer": "v roce 2011"
+      },
+      {
+        "answer": "v roce 2014",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "v roce 2016"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8d99d46d2756e41e1a856ff75438ab0b",
+    "question": "Která z těchto našich současných armádních hodnosti je nejvyšší?",
+    "answerList": [
+      {
+        "answer": "četař"
+      },
+      {
+        "answer": "rotmistr",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "praporčík"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "5577944f6588247838e552334b482714",
+    "question": "Které písmeno následuje v řecké abecedě po písmenu delta?",
+    "answerList": [
+      {
+        "answer": "éta"
+      },
+      {
+        "answer": "epsilon"
+      },
+      {
+        "answer": "omega",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "d445566957dde4e2996b62d2ad989c63",
+    "question": "Která lingvistická disciplína zkoumá slovní zásobu?",
+    "answerList": [
+      {
+        "answer": "syntax"
+      },
+      {
+        "answer": "morfologie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "lexikologie"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "38632e32f26fd40d8abd8f5c5c2eb8a8",
+    "question": "Která z pobaltských republik má nejvíce obyvatel?",
+    "answerList": [
+      {
+        "answer": "Estonsko"
+      },
+      {
+        "answer": "Litva"
+      },
+      {
+        "answer": "Lotyšsko",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "ddc5e88abecc5439190ffdaba059d4f1",
+    "question": "Kandela je jednotkou soustavy SI pro co?",
+    "answerList": [
+      {
+        "answer": "svítivost"
+      },
+      {
+        "answer": "elektrický náboj",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "indukčnost"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "4ee21d1d29e4a4732a4ab1418f210efe",
+    "question": "Kdo se stal americkým prezidentem po smrti Johna Kennedyho v roce 1963?",
+    "answerList": [
+      {
+        "answer": "Richard Nixon",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Lyndon B. Johnson"
+      },
+      {
+        "answer": "Gerald Ford"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "58513e9ecb016426da9f7a391b8e8efe",
+    "question": "Jak se jmenoval první český veřejný ochránce práv?",
+    "answerList": [
+      {
+        "answer": "Pavel Rychetský",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Otakar Motejl"
+      },
+      {
+        "answer": "Josef Baxa"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "f09268acb9d904b02b2699e36ee013ed",
+    "question": "Ve kterém paláci sídlila hlavní úřadovna gestapa v Protektorátu Čechy a Morava?",
+    "answerList": [
+      {
+        "answer": "Palác Kinských",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Petschkův palác"
+      },
+      {
+        "answer": "Pöttingovský palác"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "c1c76f4002e4e48ac9709fa41220942d",
+    "question": "Odrůda jakého ovoce dala jméno slavnému akčnímu hrdinovi Rambovi?",
+    "answerList": [
+      {
+        "answer": "hruška"
+      },
+      {
+        "answer": "meruňka",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "jablko"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "64fcb9e06c22e4d9291a4004b3060406",
+    "question": "Kterému státu USA se přezdívá \"Empire State\"?",
+    "answerList": [
+      {
+        "answer": "Havaj"
+      },
+      {
+        "answer": "New York"
+      },
+      {
+        "answer": "Arkansas",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "1b7e01b4240ad4a5bb6ef71b8643855f",
+    "question": "Který český scenárista a spisovatel publikuje také pod jménem Božena Svárovská?",
+    "answerList": [
+      {
+        "answer": "Petr Kolečko"
+      },
+      {
+        "answer": "Vladimír Körner",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "René Decastelo"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "97f5f631e35e4440b8d7514d6084f584",
+    "question": "Kolik kilometrů za hodinu je jeden metr za sekundu?",
+    "answerList": [
+      {
+        "answer": "3,2 km/h",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "3,4 km/h"
+      },
+      {
+        "answer": "3,6 km/h"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "a215748eef3a94254b032341c48deac3",
+    "question": "O deltoidu platí, že je:",
+    "answerList": [
+      {
+        "answer": "středově souměrný"
+      },
+      {
+        "answer": "osově souměrný"
+      },
+      {
+        "answer": "asymetrický",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "64a2e9b51ace84696b013d6c3669fd91",
+    "question": "Jak zní geologický termín pro stromový porost, který má zakřivené kmeny do různých směrů?",
+    "answerList": [
+      {
+        "answer": "divoký les"
+      },
+      {
+        "answer": "pasivní les",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "opilý les"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "459b0a2b391d848d992d919fd106ed29",
+    "question": "Které z uvedených jmen patří bývalému úspěšnému českému skikrosaři?",
+    "answerList": [
+      {
+        "answer": "Tomáš Kraus"
+      },
+      {
+        "answer": "Pavel Černý"
+      },
+      {
+        "answer": "Jan Zeman",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "5e66ae4f1ab4f4b9d8ea2843147a2f32",
+    "question": "Který z filmů nebyl natočen animačním studiem DreamWorks?",
+    "answerList": [
+      {
+        "answer": "Croodsovi"
+      },
+      {
+        "answer": "Legendární parta",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Vzhůru do oblak"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "74193d5442dab4b46932fd70f5422457",
+    "question": "Jaký akademický titul měl Franz Kafka?",
+    "answerList": [
+      {
+        "answer": "JUDr."
+      },
+      {
+        "answer": "Ing."
+      },
+      {
+        "answer": "PhDr.",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "3ce8a1ed9723d4978b1c8ce7b50d30d1",
+    "question": "Který z následujících roků nebude přestupný?",
+    "answerList": [
+      {
+        "answer": "2058"
+      },
+      {
+        "answer": "2076"
+      },
+      {
+        "answer": "2092",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "f4c8bb4e452a54d6fa7decf2132338e5",
+    "question": "Děj které hry Williama Shakespeara se odehrává na hradě Elsinor?",
+    "answerList": [
+      {
+        "answer": "Othello"
+      },
+      {
+        "answer": "Macbeth",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Hamlet"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4d7ed3243161b465888e77b1b46baa0a",
+    "question": "Která z trpasličích planet je nejblíže Slunci?",
+    "answerList": [
+      {
+        "answer": "Pluto"
+      },
+      {
+        "answer": "Eris",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Ceres"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "7e5c4d4409903449cbc5f36de9ec35a8",
+    "question": "Jak se jmenoval německý válečný zločinec, kterého Izrael vypátral v Argentině, unesl, odsoudil a popravil v roce 1962?",
+    "answerList": [
+      {
+        "answer": "Adolf Eichmann"
+      },
+      {
+        "answer": "Martin Bormann"
+      },
+      {
+        "answer": "Reinhard Gehlen",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8f728e2c94b8748848cafb445ea2c9d4",
+    "question": "Do které země patří Samarkand, jehož historické centrum je na seznamu UNESCO?",
+    "answerList": [
+      {
+        "answer": "Tádžikistán",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Uzbekistán"
+      },
+      {
+        "answer": "Kyrgyzstán"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "8f314990393614753b9a97a7a3989e98",
+    "question": "Jak se nazývají solné pláně nacházející se v Tunisku, Alžírsku a Maroku?",
+    "answerList": [
+      {
+        "answer": "šot"
+      },
+      {
+        "answer": "takyr",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "meseta"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8374bbd19df72470b85198e1c85f13bd",
+    "question": "Ve kterém městě se odehrává děj románu Odysseus od Jamese Joyce?",
+    "answerList": [
+      {
+        "answer": "v Dublinu"
+      },
+      {
+        "answer": "v Athénách"
+      },
+      {
+        "answer": "v Kodani",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "f35cf71c5bb694b808716344a7c495f2",
+    "question": "O kterém opeřenci není řeč v první sloce Máchova Máje?",
+    "answerList": [
+      {
+        "answer": "o slavíkovi",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "o pěnkavě"
+      },
+      {
+        "answer": "o hrdličce"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "78064dbb0965c4353b705f3db05281fe",
+    "question": "Jaký je souhrnný název pro trojici fyzikálních zákonů popisujících pohyb planet kolem Slunce?",
+    "answerList": [
+      {
+        "answer": "Koperníkovy zákony",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Keplerovy zákony"
+      },
+      {
+        "answer": "Brahovy zákony"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "6d732b0f801f045e4bd0e8f45e3c0a44",
+    "question": "Ve které části těla se nachází insulární kortex?",
+    "answerList": [
+      {
+        "answer": "ve střevech",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "v plicích"
+      },
+      {
+        "answer": "v mozku"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "bdc763cad92b541f58f0eafd1c545b42",
+    "question": "Který z uvedených států má dle ústavy zakázanou armádu?",
+    "answerList": [
+      {
+        "answer": "Kostarika"
+      },
+      {
+        "answer": "Ghana",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Nový Zéland"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "b5ad8d8928ca646f78ae12947468c436",
+    "question": "Z uvedených nebyl pražským arcibiskupem...",
+    "answerList": [
+      {
+        "answer": "Jan z Jenštejna",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Řehoř Zajíc z Valdeka"
+      },
+      {
+        "answer": "Jan Vilém Libštejnský z Kolovrat"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "6a40cb7957b6c4f3a9a9043d5bd09fc6",
+    "question": "Kterou z těchto knih nenapsal český spisovatel a novinář Karel Poláček?",
+    "answerList": [
+      {
+        "answer": "Bylo nás pět"
+      },
+      {
+        "answer": "Okresní město",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Lidé z maringotek"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4c0c249ca50134ea9ae0155ed31d62b0",
+    "question": "Jaká pozice na hřišti je primární u Jaromíra Jágra?",
+    "answerList": [
+      {
+        "answer": "levé křídlo"
+      },
+      {
+        "answer": "centr",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pravé křídlo"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "3a2d184cb2b4842ad83150c17de66cac",
+    "question": "Jakým kmenem byli Bójové?",
+    "answerList": [
+      {
+        "answer": "keltským"
+      },
+      {
+        "answer": "germánským",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "slovanským"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "1aadc27ffe233472eac4c81e8aacaf21",
+    "question": "Kigélie africká je strom, který pro své plody dostal lidový název:",
+    "answerList": [
+      {
+        "answer": "chlebovník",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "lahvovník"
+      },
+      {
+        "answer": "salámovník"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "9d836dd8d7a7647d2acd4dbe4c4e91ab",
+    "question": "Kumkvat je exotická rostlina, která rodí plody připomínající malé:",
+    "answerList": [
+      {
+        "answer": "broskve"
+      },
+      {
+        "answer": "hrušky",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pomeranče"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "e34b1d717e98249898725da644d3a995",
+    "question": "Jaké etnikum převažuje ve státě Rwanda?",
+    "answerList": [
+      {
+        "answer": "Hutuové"
+      },
+      {
+        "answer": "Tutsiové",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Zuluové"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "109b524776c0b435194442e6355d5414",
+    "question": "Ve kterém českém městě se nachází Tizianův obraz Apollo a Marsyas?",
+    "answerList": [
+      {
+        "answer": "Kroměříž"
+      },
+      {
+        "answer": "Hluboká nad Vltavou"
+      },
+      {
+        "answer": "Brno",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "3a4465798e7044bf793801424c681e7b",
+    "question": "Který japonský režisér natočil snímky Můj soused Totoro, Cesta do fantazie či Zámek v oblacích?",
+    "answerList": [
+      {
+        "answer": "Akira Kurosawa",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Hajao Mijazaki"
+      },
+      {
+        "answer": "Isao Takahata"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "fa4b43bad696e4160a2e208f11bfacdb",
+    "question": "Kdo z uvedených není příslušníkem tzv. Klubu 27?",
+    "answerList": [
+      {
+        "answer": "Jimi Hendrix"
+      },
+      {
+        "answer": "Brian Jones",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Avicii"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "f0c8227f3059641d8bafd295cb5f1af4",
+    "question": "Rodné příjmení bývalé manželky Donalda Trumpa Ivany je:",
+    "answerList": [
+      {
+        "answer": "Zelňáková"
+      },
+      {
+        "answer": "Zelníčková"
+      },
+      {
+        "answer": "Zaňáková",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "c2bc64c9e2f81404b8f49cc0f2c86266",
+    "question": "Který americký prezident získal v roce 2002 Nobelovu cenu míru?",
+    "answerList": [
+      {
+        "answer": "George W. Bush",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Jimmy Carter"
+      },
+      {
+        "answer": "Ronald Reagan"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "3e273efbc5ec34c15a621a3d5c85a080",
+    "question": "Jak se jmenuje první manželka herce Petra Štěpánka?",
+    "answerList": [
+      {
+        "answer": "Jana Štěpánková"
+      },
+      {
+        "answer": "Zlata Adamovská",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Regina Rázlová"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "ff10ab1c3efc041ffb02ea1ae3d717ae",
+    "question": "Jak se jmenuje tým NHL, který do soutěže vstoupil v ročníku 1991/92?",
+    "answerList": [
+      {
+        "answer": "Tampa Bay Lightning"
+      },
+      {
+        "answer": "Ottawa Senators",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "San Jose Sharks"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "abdb99ffad023483ead431272d1caf55",
+    "question": "Kterou částí oděvu je fedora?",
+    "answerList": [
+      {
+        "answer": "vázankou"
+      },
+      {
+        "answer": "sukní",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "kloboukem"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "10a3190fa093f4dcc8d60759c2229dfa",
+    "question": "Jak zní přezdívka legendárního závodníka na silničních motocyklech Valentina Rossiho?",
+    "answerList": [
+      {
+        "answer": "Doktor"
+      },
+      {
+        "answer": "Profesor",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Gorila z Monzy"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "2cdd254aba0454080a41521b0b6592ac",
+    "question": "Kdo zvítězil v prvním ročníku soutěže Česko Slovenská SuperStar?",
+    "answerList": [
+      {
+        "answer": "Martin Chodúr"
+      },
+      {
+        "answer": "Lukáš Adamec"
+      },
+      {
+        "answer": "Gabriela Gunčíková",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "38bd0b775c7014e339b213e342cd6472",
+    "question": "Ve které zemi zemřel Charlie Chaplin?",
+    "answerList": [
+      {
+        "answer": "Velká Británie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Švýcarsko"
+      },
+      {
+        "answer": "Francie"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "257cebafab23a41d4af341e522d81160",
+    "question": "Jak se dříve jmenovala Burkina Faso?",
+    "answerList": [
+      {
+        "answer": "Horní Volta"
+      },
+      {
+        "answer": "Dolní Volta"
+      },
+      {
+        "answer": "Dahome",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "5fab3d331f37e41e0ad16db5ccf115b3",
+    "question": "Který z amerických prezidentů není znázorněn na památníku Mount Rushmore?",
+    "answerList": [
+      {
+        "answer": "Theodore Roosevelt",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Thomas Jefferson"
+      },
+      {
+        "answer": "John Kennedy"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "cf3c09e59ea2645aab1783c2715e3b09",
+    "question": "Na kterou z těchto pamětihodností nenarazíte při kompletním vodáckém sjezdu řeky Vltavy?",
+    "answerList": [
+      {
+        "answer": "na zříceninu Karlův Hrádek"
+      },
+      {
+        "answer": "na hrad Zvíkov",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "na hrad Český Šternberk"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "efdb11b26d7114ca482dfd2eca2da4e3",
+    "question": "Jaká je česká varianta italského jména Luigi?",
+    "answerList": [
+      {
+        "answer": "Lukáš"
+      },
+      {
+        "answer": "Ludvík"
+      },
+      {
+        "answer": "Alois",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "ca77af93742d44fd3b9c8ac1e666e32c",
+    "question": "Která z uvedených univerzit je nejstarší?",
+    "answerList": [
+      {
+        "answer": "Università di Bologna"
+      },
+      {
+        "answer": "University of Cambridge",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Universidade de Coimbra"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "af67e4386711145db857b10c8a35d46f",
+    "question": "Která z následujících odrůd nepatří mezi červená vína?",
+    "answerList": [
+      {
+        "answer": "Dornfelder"
+      },
+      {
+        "answer": "André",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Rinot"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "318d84e760e454f609fcd548ec2f130c",
+    "question": "Ve kterém desetiletí 20. století začala Škoda vyrábět osobní vůz Škoda 100?",
+    "answerList": [
+      {
+        "answer": "50. léta",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "60. léta"
+      },
+      {
+        "answer": "70. léta"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "f73aa8fb9ae144041ba0b89aac9c758e",
+    "question": "Odkud pocházel nejdéle žijící muž historie?",
+    "answerList": [
+      {
+        "answer": "Francie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "USA"
+      },
+      {
+        "answer": "Japonsko"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "008cd2142bde0497fa65ade980943a4d",
+    "question": "Která z uvedených zemí Varšavské smlouvy se neúčastnila invaze do Československa?",
+    "answerList": [
+      {
+        "answer": "Rumunsko"
+      },
+      {
+        "answer": "Bulharsko",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Maďarsko"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "790e3acd2fd1244feadb53c9987864ac",
+    "question": "Jaké náboženství je nejrozšířenější na Madagaskaru?",
+    "answerList": [
+      {
+        "answer": "křesťanství"
+      },
+      {
+        "answer": "islám",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "domorodé náboženství"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "c2099cd0a69fc4036b72491049f7f76a",
+    "question": "Ze které země pochází syrovátková limonáda Rivella?",
+    "answerList": [
+      {
+        "answer": "ze Slovenska"
+      },
+      {
+        "answer": "ze Švýcarska"
+      },
+      {
+        "answer": "z Dánska",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "57cffc56e828c4efdbbee980f2084202",
+    "question": "Která rostlina je hlavní složkou při výrobě cikorky?",
+    "answerList": [
+      {
+        "answer": "vojtěška",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "řepka"
+      },
+      {
+        "answer": "čekanka"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "3b3d60192a91344d3a2de1d6852cd693",
+    "question": "Ze které země pocházel vynálezce suchého zipu?",
+    "answerList": [
+      {
+        "answer": "Francie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Čína"
+      },
+      {
+        "answer": "Švýcarsko"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "8ca5be10d3d454f5caf17dcc2e059f31",
+    "question": "Na území kterého současného státu se nachází město Kostnice?",
+    "answerList": [
+      {
+        "answer": "Švýcarsko"
+      },
+      {
+        "answer": "Německo"
+      },
+      {
+        "answer": "Rakousko",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "1503ed08d90fe467b914ffcbc00c65f8",
+    "question": "Kterého šachového velmistra porazil počítač Deep Blue?",
+    "answerList": [
+      {
+        "answer": "Anatolije Karpova"
+      },
+      {
+        "answer": "Garriho Kasparova"
+      },
+      {
+        "answer": "Bobbyho Fischera",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "a8312309a3d8a459d84d7baa96f12746",
+    "question": "Jak se jmenuje český astronom, který objevil kometu 1973 XII?",
+    "answerList": [
+      {
+        "answer": "Luboš Kohoutek"
+      },
+      {
+        "answer": "Miloš Tichý",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Antonín Mrkos"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "9d1733b6d19394c3e8d173740b054157",
+    "question": "Která je nejčastější krevní skupina v ČR?",
+    "answerList": [
+      {
+        "answer": "skupina B",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "skupina A"
+      },
+      {
+        "answer": "skupina 0"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "acb39a272d404435caad9e495bb362a7",
+    "question": "Kdo je vyobrazen na Palladiu země české, které je uloženo v bazilice ve Staré Boleslavi?",
+    "answerList": [
+      {
+        "answer": "Panna Marie s dítětem"
+      },
+      {
+        "answer": "svatý Václav",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Karel IV."
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "48d24651a3f7944fd9973e8a334eb503",
+    "question": "Co je palisandr?",
+    "answerList": [
+      {
+        "answer": "polský plot"
+      },
+      {
+        "answer": "slova, které se dá číst v libovolném směru",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "druh dřeva"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "1b666ca5cd3304bd08026b9a79660f2b",
+    "question": "Ve kterém městě se koná mezinárodní zahradnická výstava Flora?",
+    "answerList": [
+      {
+        "answer": "České Budějovice"
+      },
+      {
+        "answer": "Plzeň",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Olomouc"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4b0bc1e25b5084402a8013f4e8b3dee3",
+    "question": "Ve kterém měsíci u nás začíná letní čas?",
+    "answerList": [
+      {
+        "answer": "únor"
+      },
+      {
+        "answer": "březen"
+      },
+      {
+        "answer": "duben",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "e96787892065e4eb8b8207e9c7bf9978",
+    "question": "Ve kterém městě se konala první Světová výstava v roce 1851?",
+    "answerList": [
+      {
+        "answer": "Paříž"
+      },
+      {
+        "answer": "Vídeň",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Londýn"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4f051638378b643408de5609b7e139b8",
+    "question": "Církevní představitelé při obřadech nosí takzvaný pektorál. Jedná se o:",
+    "answerList": [
+      {
+        "answer": "prsten",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pokrývku hlavy"
+      },
+      {
+        "answer": "náprsní šperk"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "cbfd3e532014c485ab4c00ab312cf62f",
+    "question": "Ve kterém americkém státě byl zavražděn Martin Luther King?",
+    "answerList": [
+      {
+        "answer": "Mississippi",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Texas"
+      },
+      {
+        "answer": "Tennessee"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "961f6a88ca15a4bb8aa4820412d0869a",
+    "question": "Jak se jmenoval český barokní umělec, který je autorem díla Dobrá kočka, která nemlsá?",
+    "answerList": [
+      {
+        "answer": "Karel Škréta"
+      },
+      {
+        "answer": "Petr Brandl",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Václav Hollar"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "500d79b0d614a4a96872d015c2a4b293",
+    "question": "Kolik přesně hvězd najdeme na vlajce Austrálie?",
+    "answerList": [
+      {
+        "answer": "tři"
+      },
+      {
+        "answer": "šest"
+      },
+      {
+        "answer": "dvanáct",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "2eb6f694d62b64957b7bf4511f607086",
+    "question": "Rasnatka je...",
+    "answerList": [
+      {
+        "answer": "ryba"
+      },
+      {
+        "answer": "hmyz",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "houba"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "1839a0d26157f47b7bde705e80ae2913",
+    "question": "Jed ricin se získává ze semen které rostliny?",
+    "answerList": [
+      {
+        "answer": "skočec obecný"
+      },
+      {
+        "answer": "kulčiba dávivá",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "rulík zlomocný"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8886e3b8a3d254529bfa639a8e912269",
+    "question": "Marie Rottrová nazpívala baladu Lásko voníš deštěm. Která kapela ji pod názvem She's Gone původně nahrála?",
+    "answerList": [
+      {
+        "answer": "Scorpions",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Nazareth"
+      },
+      {
+        "answer": "Black Sabbath"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "2064d794916914f288ea86ae295949bc",
+    "question": "Autorem známé kantáty Carmina Burana je německý skladatel jménem:",
+    "answerList": [
+      {
+        "answer": "Richard Wagner"
+      },
+      {
+        "answer": "Franz Schubert",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Carl Orff"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "92d0f68d77c6d416086d001143c7b152",
+    "question": "Jak se nazývá stupnice sloužící k odhadu síly větru?",
+    "answerList": [
+      {
+        "answer": "Mercalliho"
+      },
+      {
+        "answer": "Schmidtova",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Beaufortova"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "1f0dd04796763469e84545f95d6e695d",
+    "question": "Kterému z hinduistických bohů je přidělena úloha ničitele vesmíru?",
+    "answerList": [
+      {
+        "answer": "Brahmá",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Šiva"
+      },
+      {
+        "answer": "Višnu"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "f4955710f9a604fdfaf12a2900b02be9",
+    "question": "Který lékař objevil původce tuberkulózy a potvrdil původce anthraxu a cholery?",
+    "answerList": [
+      {
+        "answer": "Filippo Pacini",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Robert Koch"
+      },
+      {
+        "answer": "Niels Ryberg Finsen"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "e96883456878f4ea0bcf779da16796a6",
+    "question": "Jakému stromu se lidově říká \"křemelák\"?",
+    "answerList": [
+      {
+        "answer": "dub letní"
+      },
+      {
+        "answer": "buk lesní",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "jírovec maďal"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "b3531a0b19a1b4098a7ea39d06a2cdb7",
+    "question": "Ve které skupině působil bubeník Pavel Grohman, přezdívaný Hroch?",
+    "answerList": [
+      {
+        "answer": "Ready Kirken",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Chinaski"
+      },
+      {
+        "answer": "Pražský výběr"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "8a5e516b895f84fc6ae4947e3b49408c",
+    "question": "Se kterou zpěvačkou nahrála kapela Maroon 5 singl Moves like Jagger?",
+    "answerList": [
+      {
+        "answer": "s Christinou Aguilerou"
+      },
+      {
+        "answer": "s Rihannou",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "s Madonnou"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "c24fbef95487445519a3d53e87af56b7",
+    "question": "Jak se jmenuje hlavní město Kazachstánu?",
+    "answerList": [
+      {
+        "answer": "Almaty"
+      },
+      {
+        "answer": "Karaganda",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Nur-Sultan"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "65caad47b2e8d4fca9025ff8a1cc5f1b",
+    "question": "Který z uvedených raketoplánů NASA byl vyroben jako poslední?",
+    "answerList": [
+      {
+        "answer": "Columbia"
+      },
+      {
+        "answer": "Challenger"
+      },
+      {
+        "answer": "Enterprise",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "79bb39c12a6dd45c290ed8cf0514d328",
+    "question": "Co v hudební terminologii znamená andante?",
+    "answerList": [
+      {
+        "answer": "zdlouhavě, volným pohybem",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pozvolně, zvolna"
+      },
+      {
+        "answer": "zrychlené"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "788ac02becc87462f9f541ef400f2341",
+    "question": "Který hinduistický bůh má podobu opice?",
+    "answerList": [
+      {
+        "answer": "Ganeša",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Višnu"
+      },
+      {
+        "answer": "Hanuman"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "06755b27aa14f44118e8fe1f9209634a",
+    "question": "Se kterou písní vyhrála kapela ABBA roku 1974 soutěž Eurovize?",
+    "answerList": [
+      {
+        "answer": "Mamma Mia"
+      },
+      {
+        "answer": "Super Trouper",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Waterloo"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "c0c1842c71c8246a0aa77af73127826c",
+    "question": "Ve kterém státě Jižní Ameriky leží nejvyšší hora kontinentu Aconcagua?",
+    "answerList": [
+      {
+        "answer": "v Argentině"
+      },
+      {
+        "answer": "v Peru",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "v Ekvádoru"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "2836c73e66ba448a1bd5e4609685ea6f",
+    "question": "Jaké je vlastní jméno českého hudebníka Felixe Slováčka?",
+    "answerList": [
+      {
+        "answer": "Jiří",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Antonín"
+      },
+      {
+        "answer": "František"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "24a4a292b199840d3b38d145437d80cc",
+    "question": "Jaká byla maximální kapacita pasažérů Titanicu?",
+    "answerList": [
+      {
+        "answer": "2220 lidí",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "3320 lidí"
+      },
+      {
+        "answer": "4420 lidí"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "d4799d0792852448aa2e4e63b5c68881",
+    "question": "Kterým termínem se označuje nauka o vlajkách a praporech?",
+    "answerList": [
+      {
+        "answer": "vexilologie"
+      },
+      {
+        "answer": "sfragistika",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "kampanologie"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "5c668057f0dc1419a9d5ce35962457aa",
+    "question": "Co znamená internetová zkratka \"ASAP\"?",
+    "answerList": [
+      {
+        "answer": "podle mého skromného názoru"
+      },
+      {
+        "answer": "pokud si vzpomínám"
+      },
+      {
+        "answer": "co možná nejdříve",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "f7f706fadb24b4fa592c621c50f0ac58",
+    "question": "Proti komu byla namířena Křišťálová noc?",
+    "answerList": [
+      {
+        "answer": "proti hugenotům"
+      },
+      {
+        "answer": "proti Židům"
+      },
+      {
+        "answer": "proti velení SA",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "5b8941c719729426586f7a9af5aef3cf",
+    "question": "Který filosof vyřkl větu \"Myslím, tedy jsem\"?",
+    "answerList": [
+      {
+        "answer": "Voltaire",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Immanuel Kant"
+      },
+      {
+        "answer": "René Descartes"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "74e8ced2ce85b4ff6b417af6506cca73",
+    "question": "Ve kterém městě se pravidelně odehrává Spenglerův pohár?",
+    "answerList": [
+      {
+        "answer": "Davos"
+      },
+      {
+        "answer": "Berlín"
+      },
+      {
+        "answer": "Innsbruck",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "23de22d772ded43de8a50e6711a970cb",
+    "question": "Český vědec Bedřich Hrozný rozluštil jazyk starověkých:",
+    "answerList": [
+      {
+        "answer": "Egypťanů",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Féničanů"
+      },
+      {
+        "answer": "Chetitů"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "3cba35b482dd84bee83bd2ad572532ea",
+    "question": "Jidiš patří mezi jazyky:",
+    "answerList": [
+      {
+        "answer": "semitské",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "germánské"
+      },
+      {
+        "answer": "ugrofinské"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "554759e7c6d844e7ea1a02defb06f66b",
+    "question": "Který český hokejista se stal jedničkou draftu NHL roku 1999?",
+    "answerList": [
+      {
+        "answer": "Patrik Stefan"
+      },
+      {
+        "answer": "Pavel Brendl",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Aleš Hemský"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "74cabf1c6e66c474eacb86162dfe6c07",
+    "question": "Který muzikálový skladatel má na svědomí dílo Jesus Christ Superstar?",
+    "answerList": [
+      {
+        "answer": "Leonard Bernstein"
+      },
+      {
+        "answer": "Andrew Lloyd Webber"
+      },
+      {
+        "answer": "George Gershwin",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "1a77f382d76b74709951dcf83f8a3465",
+    "question": "Který francouzský prezident zemřel v roce 1974 na leukémii?",
+    "answerList": [
+      {
+        "answer": "Charles de Gaulle",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Francois Mitterand"
+      },
+      {
+        "answer": "Georges Pompidou"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "d4bd4e3a89e6242b7ace30464d37db6f",
+    "question": "Jak se jmenoval norský politik za 2. světové války, jehož jméno je symbolem kolaborace?",
+    "answerList": [
+      {
+        "answer": "Vidkun Quisling"
+      },
+      {
+        "answer": "Johan Bernhard Hjortpo",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Fridtjof Nansen"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "0fb10919f0dcb42928b71f5f1f86a9af",
+    "question": "Jaká je látka, když se o ní řekne, že je impermeabilní?",
+    "answerList": [
+      {
+        "answer": "korozivzdorná"
+      },
+      {
+        "answer": "nezničitelná",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "nepropustná"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "b5b97d40e2872465c95cde234969ceaa",
+    "question": "Který z následujících tvarů je v češtině správný?",
+    "answerList": [
+      {
+        "answer": "pouze terciární"
+      },
+      {
+        "answer": "pouze terciální",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "správné jsou oba tvary"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "a6869161e711745e3a93a8b57bbfe924",
+    "question": "Co označuje pojem \"řvoucí čtyřicítky\"?",
+    "answerList": [
+      {
+        "answer": "bouře"
+      },
+      {
+        "answer": "větry"
+      },
+      {
+        "answer": "krupobití",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "c8dd00580ea544793a31e33764b5f536",
+    "question": "Jak se říkalo chorvatským fašistům za druhé světové války?",
+    "answerList": [
+      {
+        "answer": "ustašovci"
+      },
+      {
+        "answer": "spremnovci",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "banderovci"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "ac97be17a154a4bcc857dfa008e9f829",
+    "question": "Uveďte následující číslo ve známé Fibonacciho posloupnosti: 0-1-1-2-3-",
+    "answerList": [
+      {
+        "answer": "5"
+      },
+      {
+        "answer": "6"
+      },
+      {
+        "answer": "8",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "15531a723b1a640778fd5280afb89a5c",
+    "question": "Jak se nazývá samurajský morální kodex?",
+    "answerList": [
+      {
+        "answer": "bušidó"
+      },
+      {
+        "answer": "gokudó",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "hódzó"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "ec01962fea6184284a534645242057c5",
+    "question": "Kde byste hledali \"bílého kuřáka\" - jedná se o geologický termín.",
+    "answerList": [
+      {
+        "answer": "v moři"
+      },
+      {
+        "answer": "v sopce",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "v údolí"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "e9f0dce2c5d8f42f2a02823e79b8a597",
+    "question": "Kolik afrických států získalo nezávislost v tzv. Roce Afriky, tedy v roce 1960?",
+    "answerList": [
+      {
+        "answer": "12"
+      },
+      {
+        "answer": "15",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "18"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "b1feb643fecc3441b8f2c1bf672b7970",
+    "question": "Na kterém z těchto hradů se v roce 2022 nekonal festival Hrady CZ?",
+    "answerList": [
+      {
+        "answer": "Křivoklát"
+      },
+      {
+        "answer": "Hradec nad Moravicí"
+      },
+      {
+        "answer": "Bezděz",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "9837e6ec69b4a4c8e99b4e46daee2781",
+    "question": "Dodekagon má kolik stran?",
+    "answerList": [
+      {
+        "answer": "dvanáct"
+      },
+      {
+        "answer": "patnáct",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "osmnáct"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8e91d4a12eda148b0b40c9ebdc357798",
+    "question": "Jak se jmenuje autorka knižní tetralogie nazývané Neapolská sága nebo též Geniální přítelkyně?",
+    "answerList": [
+      {
+        "answer": "Kateřina Tučková"
+      },
+      {
+        "answer": "Jojo Moyesová",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Elena Ferrante"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "cf76254ecfc194988926312cab90a5e2",
+    "question": "Které z uvedených onemocnění se týká kolene?",
+    "answerList": [
+      {
+        "answer": "spondylartróza"
+      },
+      {
+        "answer": "koxartróza",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "gonartróza"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "ecde11b160fb8450d815494ff4d868b4",
+    "question": "Která planeta sluneční soustavy je největší?",
+    "answerList": [
+      {
+        "answer": "Jupiter"
+      },
+      {
+        "answer": "Saturn",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Mars"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "44c7adf8ab01841bead9707a3fed8c27",
+    "question": "Slinné žlázy produkují enzym, který se podílí na trávení škrobů. Jak se nazývá?",
+    "answerList": [
+      {
+        "answer": "ptyalin"
+      },
+      {
+        "answer": "sacharin"
+      },
+      {
+        "answer": "glucin",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "28ae876c4a6bf486a96fd09cba796817",
+    "question": "Kdo je autorem knihy Markéta Lazarová?",
+    "answerList": [
+      {
+        "answer": "Jan Grčenášek",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Vladislav Vančura"
+      },
+      {
+        "answer": "Alois Jirásek"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "5071f626356324881a4cb29966443039",
+    "question": "Ve které zemi sídlí automobilka Tata Motors?",
+    "answerList": [
+      {
+        "answer": "Indie"
+      },
+      {
+        "answer": "Jižní Korea"
+      },
+      {
+        "answer": "Japonsko",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "f6e1794b8351c4bb6b145fde924b0d09",
+    "question": "Ve které zemi má původ holandský řízek?",
+    "answerList": [
+      {
+        "answer": "v Rakousku"
+      },
+      {
+        "answer": "v Nizozemsku",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "v Československu"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "33234e4025ecf48b080bc7f39f3166ec",
+    "question": "Jaké přízvisko měl český král Václav I.?",
+    "answerList": [
+      {
+        "answer": "Pobočný",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Chrabrý"
+      },
+      {
+        "answer": "Jednooký"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "878bedebdc092478882557bc90c80ecc",
+    "question": "Která z uvedených smluv byla po skončení 1. světové války podepsána s Rakousko-Uherskem?",
+    "answerList": [
+      {
+        "answer": "Versailleská",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Saint-Germainská"
+      },
+      {
+        "answer": "Trianonská"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "22089f9c826524dcbafcfd69ca430ea3",
+    "question": "Ke generaci označené jakým písmenem patří lidé narození v roce 1988?",
+    "answerList": [
+      {
+        "answer": "generace X",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "generace Y"
+      },
+      {
+        "answer": "generace Z"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "d8929842ea07c4e618c3f374e5bb406b",
+    "question": "Jaké náboženství převládá na Filipínách?",
+    "answerList": [
+      {
+        "answer": "islám"
+      },
+      {
+        "answer": "buddhismus",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "křesťanství"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "a582080d8806d4b7294eb6fa69546c5f",
+    "question": "Co to je pastrami?",
+    "answerList": [
+      {
+        "answer": "uzené maso"
+      },
+      {
+        "answer": "těstoviny"
+      },
+      {
+        "answer": "salát",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "e8046616face64d38b12500fd89bbaf7",
+    "question": "Proč je při výrobě džemů důležitý obsah polysacharidu pektinu?",
+    "answerList": [
+      {
+        "answer": "zvyšuje sladkost"
+      },
+      {
+        "answer": "prodlužuje trvanlivost",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "zahušťuje a želíruje"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "7ac95f3dc49004acbb1df3b299368001",
+    "question": "Kdo byl prvním předsedou československé vlády po listopadu 1989?",
+    "answerList": [
+      {
+        "answer": "Václav Klaus"
+      },
+      {
+        "answer": "Marián Calfa"
+      },
+      {
+        "answer": "Jan Stránský",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "2d4956764e19c472c82ebbcf80fda68a",
+    "question": "Na kolikátém místě v žebříčku ATP se nejvýše nacházel Tomáš Berdych?",
+    "answerList": [
+      {
+        "answer": "2. místo"
+      },
+      {
+        "answer": "4. místo"
+      },
+      {
+        "answer": "6. místo",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "de8c0d8871ba34cffbd1a2bcd7b66250",
+    "question": "Jak se nazývá nejvyšší státní francouzské vyznamenání?",
+    "answerList": [
+      {
+        "answer": "Řád galského kohouta",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Rád železné koruny"
+      },
+      {
+        "answer": "Řád čestné legie"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "51bfd2bd1a99a466a8ddf5342575810f",
+    "question": "Jak se jmenuje sci-fi seriál, kde vede posádku kapitán Dylan Hunt?",
+    "answerList": [
+      {
+        "answer": "Battlestar Galactica",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Andromeda"
+      },
+      {
+        "answer": "Firefly"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "340369165eb1a42f09fc67b1a4be7954",
+    "question": "Jaký tvar mají těstoviny pappardelle?",
+    "answerList": [
+      {
+        "answer": "širokých nudlí"
+      },
+      {
+        "answer": "mušliček"
+      },
+      {
+        "answer": "kolínek",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "e81c5c318f94f4de7bc11f38b8088289",
+    "question": "Libanonské národní jídlo tabbouleh je:",
+    "answerList": [
+      {
+        "answer": "salát"
+      },
+      {
+        "answer": "polévka",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "dezert"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "fd362fb6af8dd4d48b0fd783039d5df7",
+    "question": "Jak se jmenoval švédský premiér, jenž se stal v roce 1986 obětí atentátu?",
+    "answerList": [
+      {
+        "answer": "Tage Erlander",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Olof Palme"
+      },
+      {
+        "answer": "Ingvar Carlsson"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "e77d2cf4c78914d1194498279a168a04",
+    "question": "Jakou hodnost měli výsadkáři Jan Kubiš a Jozef Gabčík v době atentátu na Reinharda Heydricha?",
+    "answerList": [
+      {
+        "answer": "rotmistr"
+      },
+      {
+        "answer": "nadporučík",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "kapitán"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "772027685f69140a2bb518b6f3c76c6d",
+    "question": "Jak se jmenovala levicová organizace, jejímž vůdcem byl Andreas Baader?",
+    "answerList": [
+      {
+        "answer": "Frakce Rudé armády"
+      },
+      {
+        "answer": "Organizace tajné armády",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Rudé brigády"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "758939afb34494237b61151f0530389f",
+    "question": "Která z těchto zemí leží nejseverněji?",
+    "answerList": [
+      {
+        "answer": "Malajsie"
+      },
+      {
+        "answer": "Vietnam",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Bhútán"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "46434a80a6689416c9f06ab29cf58ee0",
+    "question": "Z čeho se vyrábí potravina zvaná bulgur?",
+    "answerList": [
+      {
+        "answer": "z rýže",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "z prosa"
+      },
+      {
+        "answer": "z pšenice"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "1a5ad42ab3b10447d984ab36a3ddea50",
+    "question": "Pořídíte-li si boty z nubuku, ze kterého materiálu budou?",
+    "answerList": [
+      {
+        "answer": "z plastu"
+      },
+      {
+        "answer": "z gumy",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "z kůže"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "188131c57d5184328ace5260b59da03c",
+    "question": "V jakém sportu exceloval Paavo Nurmi?",
+    "answerList": [
+      {
+        "answer": "atletika"
+      },
+      {
+        "answer": "box",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "skoky na lyžích"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "e97ab8963f17548b7b23e3e24ca58fc0",
+    "question": "Kde se měly konat letní olympijské hry v roce 1916, které byly zrušeny kvůli válce?",
+    "answerList": [
+      {
+        "answer": "Tokio",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Londýn"
+      },
+      {
+        "answer": "Berlín"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4dc777ee7c9714c58a00803cd0f44f34",
+    "question": "Která je nejmenší kost v lidském těle?",
+    "answerList": [
+      {
+        "answer": "hrášková kost",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "třmínek"
+      },
+      {
+        "answer": "jazylka"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "7b59e2062deaf4006801fa142e03b80d",
+    "question": "Jak se označuje porucha spánku, kdy jedinec nemůže usnout nebo se ze spánku často budí?",
+    "answerList": [
+      {
+        "answer": "kataplexie"
+      },
+      {
+        "answer": "narkolepsie",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "insomnie"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "cc2afdd7273f84ed6be19c973e2aba95",
+    "question": "Ve kterém měsíci slaví svátek tzv. ledoví muži?",
+    "answerList": [
+      {
+        "answer": "květen"
+      },
+      {
+        "answer": "duben"
+      },
+      {
+        "answer": "březen",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "8ab7e84611c6f4f039dce0bf942d4f7c",
+    "question": "Ve které zemi byste našli město s českým názvem Ostřihom?",
+    "answerList": [
+      {
+        "answer": "Srbsko"
+      },
+      {
+        "answer": "Polsko",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Maďarsko"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4682e95f7d9354b649dcf790de6d0323",
+    "question": "Jakého původu je jméno Soña?",
+    "answerList": [
+      {
+        "answer": "ruského"
+      },
+      {
+        "answer": "latinského",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "českého"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "c7c7b6f71eed74087b9d7954a199e398",
+    "question": "Které buňky lidského oka jsou zodpovědné za barevné vidění?",
+    "answerList": [
+      {
+        "answer": "tyčinky"
+      },
+      {
+        "answer": "gliové buňky",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "čípky"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "6ecbcde576c3649f9bef4c92498d7de9",
+    "question": "Ztráta kterého smyslu se odborně nazývá anosmie?",
+    "answerList": [
+      {
+        "answer": "čichu"
+      },
+      {
+        "answer": "chuti",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "sluchu"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "6121d01702f26460eb17733319988771",
+    "question": "Které polské město neslo v letech 1953-1956 název Stalinogród?",
+    "answerList": [
+      {
+        "answer": "Gdynė",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Vratislav"
+      },
+      {
+        "answer": "Katovice"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "c6b34f57b90924f54b7ec016f140d173",
+    "question": "Který dřívější titul se skrývá pod zkratkou RCDr.?",
+    "answerList": [
+      {
+        "answer": "doktor technických věd",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "doktor obchodních věd"
+      },
+      {
+        "answer": "doktor kanonického práva"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "6f17e18faee1b4053bc58378fa31d519",
+    "question": "Kde se v roce 1942 konala konference, jejímž jediným bodem bylo konečné řešení židovské otázky?",
+    "answerList": [
+      {
+        "answer": "Norimberk",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Wannsee"
+      },
+      {
+        "answer": "Postupim"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "b2ddb93b4d92042afbfc469003baf3ac",
+    "question": "Kdo je autorem slavného obrazu Hvězdná noc?",
+    "answerList": [
+      {
+        "answer": "Vincent van Gogh"
+      },
+      {
+        "answer": "Francisco Goya",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Edgar Degas"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "bab2e180b7d084e6e8454b8d6ade6795",
+    "question": "Humerus je latinský název pro kterou kost?",
+    "answerList": [
+      {
+        "answer": "loketní"
+      },
+      {
+        "answer": "vřetenní",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pažní"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "5089dfb1da6084a098c504f7e3a06766",
+    "question": "Který válečný zločinec byl zadržen americkými vojsky v Rokycanech?",
+    "answerList": [
+      {
+        "answer": "Konrad Henlein",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Karl Hermann Frank"
+      },
+      {
+        "answer": "Kurt Daluege"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "9d34331fa51fb4c2e8d09467bff34d18",
+    "question": "Na kterém fotbalovém mistrovství světa byly poprvé udělovány žluté karty?",
+    "answerList": [
+      {
+        "answer": "1950 v Brazílii"
+      },
+      {
+        "answer": "1962 v Chile",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "1970 v Mexiku"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "f56c61b06ad424062a1bce54c60a3f59",
+    "question": "Označte prvního českého krále z rodu Přemyslovců.",
+    "answerList": [
+      {
+        "answer": "Boleslav III."
+      },
+      {
+        "answer": "Vratislav II."
+      },
+      {
+        "answer": "Přemysl Otakar I.",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "030692417a27d476db2e5c370c4bfb46",
+    "question": "Kdo složil hudbu ke komedii Což takhle dát si špenát?",
+    "answerList": [
+      {
+        "answer": "Michal David",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Karel Svoboda"
+      },
+      {
+        "answer": "Ondřej Soukup"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "bb45b6bd4d9e14169ab4bff6e758d275",
+    "question": "V roce 1970 došlo na hoře Huascarán k tragédii výpravy československých horolezců. Ve které zemi horu najdeme?",
+    "answerList": [
+      {
+        "answer": "Peru"
+      },
+      {
+        "answer": "Chile",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Bolívie"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "9f16d58c7e5114be3a47c5fe8049d7da",
+    "question": "Batynomus obrovský je...",
+    "answerList": [
+      {
+        "answer": "korýš"
+      },
+      {
+        "answer": "ryba",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "hmyz"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "4b25083a08aa34aaa8d13b3e54b40f5f",
+    "question": "Jak se označuje severní až severovýchodní vítr na Jadranu, v Řecku, Rusku a Turecku?",
+    "answerList": [
+      {
+        "answer": "bóra"
+      },
+      {
+        "answer": "bríza",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "harmatán"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "4958c6b09d35e42208ae71575e7cd1fd",
+    "question": "Do které rostlinné čeledi patří rýže?",
+    "answerList": [
+      {
+        "answer": "lipnicovité"
+      },
+      {
+        "answer": "sitinovité"
+      },
+      {
+        "answer": "tvrzeňovité",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "9572fc6366488423fa3ddf9b226bf39d",
+    "question": "Hanlivá slova můžeme také označit výrazem:",
+    "answerList": [
+      {
+        "answer": "eufemismy",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "pejorativa"
+      },
+      {
+        "answer": "homonyma"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "4caaa11542ca449608e6dcc4df9b681c",
+    "question": "Ve kterém pohoří najdeme horu Nanga Parbat?",
+    "answerList": [
+      {
+        "answer": "Himálaj"
+      },
+      {
+        "answer": "Hindúkuš"
+      },
+      {
+        "answer": "Karákóram",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "64ce2f5ee2a0c4555b022d8a12639f52",
+    "question": "Ze kterého roku pochází první rentgenový snímek?",
+    "answerList": [
+      {
+        "answer": "1885"
+      },
+      {
+        "answer": "1895"
+      },
+      {
+        "answer": "1905",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "4b93d1a79866145e7a5c46b37a7895d7",
+    "question": "Které dívčí jméno nese tvrz v Orlických horách, která byla tajně přebudována na protiatomový kryt?",
+    "answerList": [
+      {
+        "answer": "Hanička"
+      },
+      {
+        "answer": "Terezka",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Barunka"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "ec151f855befe47b8b580bdf70711cb7",
+    "question": "Období, během něhož není obsazen církevní úřad, např. úřad papeže, se nazývá:",
+    "answerList": [
+      {
+        "answer": "camerlengo",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "sedisvakance"
+      },
+      {
+        "answer": "pontifikálie"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "a78cdaff4663243e3976af48de822586",
+    "question": "Pro léto kterého roku se vžilo označení léto lásky?",
+    "answerList": [
+      {
+        "answer": "1965"
+      },
+      {
+        "answer": "1967"
+      },
+      {
+        "answer": "1969",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "a94e95f3772f44cfeb281706c9f68de0",
+    "question": "Za kterého panovníka se Hradec Králové stal královským městem?",
+    "answerList": [
+      {
+        "answer": "Václav I."
+      },
+      {
+        "answer": "Přemysl Otakar I."
+      },
+      {
+        "answer": "Přemysl Otakar II.",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "33cb6ddc2050c479fb4939cbd9a9e51e",
+    "question": "Jak se dnes jmenuje město, které bylo dříve známo jako Frývaldov?",
+    "answerList": [
+      {
+        "answer": "Plzeň",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Jeseník"
+      },
+      {
+        "answer": "Chomutov"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "adde8e96ea73443a29e2eef48cfb1e0c",
+    "question": "Jaké bylo kódové označení pro Hitlerův hlavní stan?",
+    "answerList": [
+      {
+        "answer": "Wolfsschanze"
+      },
+      {
+        "answer": "Wunderland",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Zitadelle"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "56aab3c376f034e6e99c1e3035467dfe",
+    "question": "Které ingredience jsou základem indického nápoje lasí?",
+    "answerList": [
+      {
+        "answer": "mléko a alkohol",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "jogurt a voda"
+      },
+      {
+        "answer": "ovocná šťáva a kari"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "962da3724cd654d878651b3ea4917674",
+    "question": "Kterou přísadou je dochuceno řecké víno retsina?",
+    "answerList": [
+      {
+        "answer": "třešňovou šťávou"
+      },
+      {
+        "answer": "borovicovou pryskyřicí"
+      },
+      {
+        "answer": "olivovým olejem",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "5c4b345b953474e14915a6e160a1265b",
+    "question": "V rámci které války se odehrál Srebrenický masakr?",
+    "answerList": [
+      {
+        "answer": "válka v Kosovu"
+      },
+      {
+        "answer": "chorvatská válka za nezávislost",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "válka v Bosně a Hercegovinė"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4f49bd5df03944791882c39b74060005",
+    "question": "Jak zní německé pojmenování města Liberec?",
+    "answerList": [
+      {
+        "answer": "Taus"
+      },
+      {
+        "answer": "Reichenberg"
+      },
+      {
+        "answer": "Taussig",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "9068933ab505245fa953dcae58c577f4",
+    "question": "Jaké bylo neformální pojmenování skupiny politiků KSČ ve 20. letech 20. století v čele s K. Gottwaldem?",
+    "answerList": [
+      {
+        "answer": "Žižkovští hoši"
+      },
+      {
+        "answer": "Vysočanští páni",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Karlínští kluci"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "1b97b95a640914ae496bef1b03bfdcdb",
+    "question": "Čeho se obává člověk trpící triskaidekafobii?",
+    "answerList": [
+      {
+        "answer": "čísla 13"
+      },
+      {
+        "answer": "vlasů a chlupů",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "možnosti být pohřben zaživa"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "3a4bd950d23b443c2bc2c0cb521ab015",
+    "question": "Který alkohol je nezbytnou součástí koktejlu margarita?",
+    "answerList": [
+      {
+        "answer": "vodka",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "tequila"
+      },
+      {
+        "answer": "rum"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "288e1e70fc9104fd7b402addb4d64859",
+    "question": "Kvůli které ženě se anglický král Jindřich VIII. rozvedl, aby jí nakonec dal setnout hlavu?",
+    "answerList": [
+      {
+        "answer": "kvůli Kateřině Aragonské",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "kvůli Anně Boleynové"
+      },
+      {
+        "answer": "kvůli Janě Seymourové"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "3fa63c705e53f4667ad1157ef16d495a",
+    "question": "Ve které z těchto zemí můžete zaplatit wony?",
+    "answerList": [
+      {
+        "answer": "Laos",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Jižní Korea"
+      },
+      {
+        "answer": "Myanmar"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "8cc12199027a94e04aad0d4a2585e325",
+    "question": "Která z uvedených stanic metra je přestupní na jinou linku?",
+    "answerList": [
+      {
+        "answer": "Náměstí Míru"
+      },
+      {
+        "answer": "Invalidovna",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Florenc"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "45379c426c7784020bf387f7088e027c",
+    "question": "Karbid křemíku je sloučeninou křemíku a čeho?",
+    "answerList": [
+      {
+        "answer": "uhlíku"
+      },
+      {
+        "answer": "hliníku",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "kobaltu"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "5c1d7c5cdbdc24c738b87192d69c11f4",
+    "question": "Která z uvedených zemí má na vlajce modrou barvu?",
+    "answerList": [
+      {
+        "answer": "Belgie"
+      },
+      {
+        "answer": "Bosna a Hercegovina"
+      },
+      {
+        "answer": "Bulharsko",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "52dfb6e12eb5048c094401a8dbe86b6b",
+    "question": "Během druhé světové války se rozhořela operace Pochodeň, což byla invaze spojeneckých vojsk do:",
+    "answerList": [
+      {
+        "answer": "Normandie"
+      },
+      {
+        "answer": "severní Afriky"
+      },
+      {
+        "answer": "Japonska",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "875d4d131f52b4160acba18e3562d935",
+    "question": "Ve které válce se angažoval Albrecht z Valdštejna?",
+    "answerList": [
+      {
+        "answer": "ve stoleté válce"
+      },
+      {
+        "answer": "ve třicetileté válce"
+      },
+      {
+        "answer": "ve válce o rakouské dědictví",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "a59871de256ce4c6ba6e31dcb214b188",
+    "question": "Ve kterém městě se nachází da Vinciho Poslední večeře?",
+    "answerList": [
+      {
+        "answer": "Milán"
+      },
+      {
+        "answer": "Paříž",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Madrid"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "83588b59982504ed8afaec066c628a79",
+    "question": "Která z uvedených osobností Velké francouzské revoluce byla zavražděna při koupeli ve vaně?",
+    "answerList": [
+      {
+        "answer": "Maximilien Robespierre",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Georges Danton"
+      },
+      {
+        "answer": "Jean Paul Marat"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "81d555fdd6b364a21bc159efe7a8deab",
+    "question": "Která pražská nemocnice je nejstarší?",
+    "answerList": [
+      {
+        "answer": "Thomayerova nemocnice"
+      },
+      {
+        "answer": "nemocnice Na Františku"
+      },
+      {
+        "answer": "nemocnice Milosrdných sester sv. Karla Boromejského",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "ca16664eece874f52b7974a63402ae3b",
+    "question": "Jakou teplotu má Vřídlo - nejteplejší termální pramen Česka?",
+    "answerList": [
+      {
+        "answer": "73°C"
+      },
+      {
+        "answer": "85°C",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "94°C"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "b8485fc77e9954c8eb80dc045ef9915e",
+    "question": "Vyberte z nabídky hrad, na kterém nějakou dobu pobýval Jan Hus.",
+    "answerList": [
+      {
+        "answer": "Krakovec"
+      },
+      {
+        "answer": "Hukvaldy"
+      },
+      {
+        "answer": "Sumburk",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "da40a2ff22f9047748dd19f2520b5a64",
+    "question": "Která herečka byla posedlá postavou v podání Michaela Douglase ve filmu Osudová přitažlivost?",
+    "answerList": [
+      {
+        "answer": "Demi Moore"
+      },
+      {
+        "answer": "Glenn Close"
+      },
+      {
+        "answer": "Sharon Stone",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "8a8121dda5a0f42eab7b7eb1f98d5e92",
+    "question": "Jaké z uvedených jmen v minulosti nepatřilo městu Volgograd?",
+    "answerList": [
+      {
+        "answer": "Caricyn"
+      },
+      {
+        "answer": "Leningrad"
+      },
+      {
+        "answer": "Stalingrad",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "4f830061647aa4a04af3b1ec0c0e2d0f",
+    "question": "Ke kterému rodu stromů patří osika?",
+    "answerList": [
+      {
+        "answer": "vrba"
+      },
+      {
+        "answer": "topol"
+      },
+      {
+        "answer": "onkoba",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "52e753248ba1548bb8ca80c309397869",
+    "question": "Jak se jmenuje nejvyšší vrchol Německa?",
+    "answerList": [
+      {
+        "answer": "Zugspitze"
+      },
+      {
+        "answer": "Feldberg",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Brocken"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "2a3160a807de94762a1bb361156b4136",
+    "question": "Které z následujících jmen nenajdeme mezi pěticí nejpočetnějších jmen v ČR?",
+    "answerList": [
+      {
+        "answer": "Jiří",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Václav"
+      },
+      {
+        "answer": "Petr"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "64c3d2d6781be44438a4889d18d7ca35",
+    "question": "Kam zavítal agent Jejího Veličenstva v bondovce Dech života s Timothym Daltonem v hlavní roli?",
+    "answerList": [
+      {
+        "answer": "na jižní pól"
+      },
+      {
+        "answer": "na Mount Everest",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "do Bratislavy"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "d67976e5b184a41a482377daf5388227",
+    "question": "Která z uvedených hodností jednotek SS byla nejvyšší?",
+    "answerList": [
+      {
+        "answer": "Obersturmbannführer"
+      },
+      {
+        "answer": "Hauptsturmführer",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Obergruppenführer"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "47f216f6d0a364a269b88234f4a341b5",
+    "question": "Který z uvedených českých herních časopisů vznikl nejdříve?",
+    "answerList": [
+      {
+        "answer": "Excalibur"
+      },
+      {
+        "answer": "Level",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Score"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "67c8e33f31ead45d6ba1a4ff4148ecb3",
+    "question": "Ve které instituci Evropské unie se scházejí hlavy států a předsedové vlád?",
+    "answerList": [
+      {
+        "answer": "Evropská komise"
+      },
+      {
+        "answer": "Evropská rada"
+      },
+      {
+        "answer": "Evropský parlament",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "561740ea0396a45c1b5f3210c40b1211",
+    "question": "Kterým výrazem označují židé Den smíření?",
+    "answerList": [
+      {
+        "answer": "Sukot",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Jom kipur"
+      },
+      {
+        "answer": "Pesach"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "876fd71759ae84c329ce115bcb71b685",
+    "question": "Pro které z uvedených měst se nepoužívá označení \"brána Šumavy\"?",
+    "answerList": [
+      {
+        "answer": "Domažlice"
+      },
+      {
+        "answer": "Klatovy",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Český Krumlov"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "135863ef07e754d5bad0d68636aa776d",
+    "question": "V manze Death Note je schopen majitel deníku zabít kohokoliv, musí znát jen dvě věci - jméno a...",
+    "answerList": [
+      {
+        "answer": "příjmení"
+      },
+      {
+        "answer": "tvář"
+      },
+      {
+        "answer": "datum narození",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "f214c97cf30694bc2b5b58d968743a7c",
+    "question": "Ve kterém americkém městě se konají výrazné slavnosti Mardi Gras?",
+    "answerList": [
+      {
+        "answer": "New Orleans"
+      },
+      {
+        "answer": "San Francisco",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Boston"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "1d4c7f5680dbe41208832d6728487975",
+    "question": "Kterému pražskému náměstí se lidově přezdívá \"Kulaťák\"?",
+    "answerList": [
+      {
+        "answer": "Karlovo náměstí"
+      },
+      {
+        "answer": "Vítězné náměstí"
+      },
+      {
+        "answer": "Obchodní náměstí",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "bf8f34689751f4f359646a8153386c65",
+    "question": "Jak se nazývá křesťanský svátek slavený 50 dnů po Velikonocích?",
+    "answerList": [
+      {
+        "answer": "pašije",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "letnike"
+      },
+      {
+        "answer": "šibřinky"
+      }
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": "762f7d3e17a23461b84d2f788fa46d4a",
+    "question": "Jak se podle řecké mytologie jmenuje bohyně lovu?",
+    "answerList": [
+      {
+        "answer": "Artemis"
+      },
+      {
+        "answer": "Diana",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Gaia"
+      }
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": "767e2bc5a7c27431f8a744f7b58f938d",
+    "question": "Jak se jmenovala druhá manželka českého krále Jana Lucemburského?",
+    "answerList": [
+      {
+        "answer": "Eliška Přemyslovna",
+        "hunterDisabled": true
+      },
+      {
+        "answer": "Markéta Pyskatá"
+      },
+      {
+        "answer": "Beatrix Bourbonská"
+      }
+    ],
+    "correctAnswer": 2
+  },
+  {
+    "id": "4f4a80a32f2c34844b29d5dd2002b1a3",
+    "question": "Které zemi patřila Demokratická republika Kongo v letech 1908-1960?",
+    "answerList": [
+      {
+        "answer": "Portugalsku"
+      },
+      {
+        "answer": "Belgii"
+      },
+      {
+        "answer": "Francii",
+        "hunterDisabled": true
+      }
+    ],
+    "correctAnswer": 1
+  }
+]
