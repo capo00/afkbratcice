@@ -1,13 +1,6 @@
 //@@viewOn:imports
 import { GoogleOAuthProvider, useGoogleLogin, googleLogout, useGoogleOneTapLogin } from "@react-oauth/google";
-import {
-  Utils,
-  createVisualComponent,
-  useRef,
-  useMemo,
-  useState,
-  useCallback,
-} from "uu5g05";
+import { Utils, createVisualComponent, useRef, useMemo, useState, useCallback } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import TeamManager from "../core/team-manager";
 
@@ -16,6 +9,7 @@ import Calls from "../calls";
 //@@viewOff:imports
 
 //@@viewOn:constants
+const CLIENT_ID = "320438662814-hgjqtc69jbs4d7ec9mgo9efnkp2oioj0.apps.googleusercontent.com"; // Replace with your actual Client ID
 //@@viewOff:constants
 
 //@@viewOn:css
@@ -38,18 +32,41 @@ function _GoogleProvider({ children }) {
             Authorization: `Bearer ${user.access_token}`,
             Accept: "application/json",
           },
-        }
+        },
       );
       setIdentity({ ...data, firstName: given_name, surname: family_name, language: locale, photo: picture });
     },
-    [setIdentity]
+    [setIdentity],
   );
 
   const onError = useCallback((error) => console.error("Login Failed:", error), []);
 
   const login = useGoogleLogin({ onSuccess, onError });
 
-  //useGoogleOneTapLogin({ onSuccess, onError });
+  const onSuccess2 = useCallback(
+    async (response) => {
+      const id_token = response.credential;
+
+      try {
+        const res = await Calls.call("post", Calls.getCommandUri("verify"), {
+          token: id_token,
+        });
+        console.log(res);
+
+        if (res.data.success) {
+          console.log('User authenticated:', res.data.userInfo);
+        } else {
+          console.error('Authentication failed:', res.data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      //setIdentity({ ...data, firstName: given_name, surname: family_name, language: locale, photo: picture });
+    },
+    [setIdentity],
+  );
+
+  useGoogleOneTapLogin({ onSuccess: onSuccess2, onError, auto_select: true });
 
   const value = useMemo(
     () => ({
@@ -63,7 +80,7 @@ function _GoogleProvider({ children }) {
       onSuccess,
       onError,
     }),
-    [identity, onSuccess, onError, login]
+    [identity, onSuccess, onError, login],
   );
 
   return (
@@ -80,7 +97,6 @@ function GoogleProvider({ clientId, children }) {
     </GoogleOAuthProvider>
   );
 }
-
 //@@viewOff:helpers
 
 let Home = createVisualComponent({
@@ -118,6 +134,7 @@ let Home = createVisualComponent({
                   icon="uugdsstencil-uiaction-log-out"
                   onClick={() => logout()}
                 />
+                <pre>{JSON.stringify(identity, null, 2)}</pre>
               </>
             ) : (
               <>

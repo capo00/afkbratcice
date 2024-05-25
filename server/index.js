@@ -6,8 +6,12 @@ const playerDao = require("./dao/player-dao");
 const teamDao = require("./dao/team-dao");
 const theChaseApi = require("./the-chase/api");
 const Tools = require("./the-chase/tools")
+const { OAuth2Client } = require('google-auth-library');
 
 const PORT = process.env.PORT || 8080;
+
+const CLIENT_ID = "320438662814-hgjqtc69jbs4d7ec9mgo9efnkp2oioj0.apps.googleusercontent.com"; // Replace with your actual Client ID
+const oAuth2Client = new OAuth2Client(CLIENT_ID);
 
 const app = express();
 app.use(bodyParser.json()) // for parsing application/json
@@ -88,6 +92,33 @@ for (let uc in API) {
     }
   });
 }
+
+app.post('/verify', async (req, res) => {
+  const token = req.body.token;
+
+  try {
+    // TODO not work :-( throw error "The verifyIdToken method requires an ID Token"
+    const ticket = await oAuth2Client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const userId = payload['sub'];
+    console.log(payload);
+
+    res.json({
+      success: true,
+      userId,
+      userInfo: payload,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 
 // All other GET requests not handled before will return our React app
 app.get('*', (req, res) => {

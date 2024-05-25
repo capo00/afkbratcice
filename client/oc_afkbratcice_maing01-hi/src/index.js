@@ -24,7 +24,7 @@ function render(targetElementId) {
     <AppContainer>
       <Spa />
     </AppContainer>,
-    document.getElementById(targetElementId)
+    document.getElementById(targetElementId),
   );
 }
 

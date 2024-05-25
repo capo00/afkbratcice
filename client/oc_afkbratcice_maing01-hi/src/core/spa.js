@@ -20,7 +20,7 @@ import TheChase from "../routes/the-chase";
 // const ControlPanel = Utils.Component.lazy(() => import("../routes/control-panel.js"));
 
 const ROUTE_MAP = {
-  "": { redirect: "theChase" },
+  "": { redirect: "home" },
   home: (props) => <Home {...props} />,
   theChase: (props) => <TheChase {...props} />,
   // controlPanel: (props) => <ControlPanel {...props} />,
