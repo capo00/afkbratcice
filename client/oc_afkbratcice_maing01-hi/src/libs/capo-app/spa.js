@@ -1,9 +1,8 @@
 //@@viewOn:imports
-import { Utils, createVisualComponent, useRef, useMemo, useState, useCallback } from "uu5g05";
+import { createVisualComponent, ErrorBoundary } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import TeamManager from "../core/team-manager";
 import Config from "./config/config.js";
-import Calls from "../calls";
+import SpaError from "./spa-error";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -15,9 +14,9 @@ import Calls from "../calls";
 //@@viewOn:helpers
 //@@viewOff:helpers
 
-let Home = createVisualComponent({
+const Spa = createVisualComponent({
   //@@viewOn:statics
-  uu5Tag: Config.TAG + "Home",
+  uu5Tag: Config.TAG + "Spa",
   //@@viewOff:statics
 
   //@@viewOn:propTypes
@@ -28,7 +27,7 @@ let Home = createVisualComponent({
   defaultProps: {},
   //@@viewOff:defaultProps
 
-  render(props) {
+  render({ children }) {
     //@@viewOn:private
     //@@viewOff:private
 
@@ -36,22 +35,18 @@ let Home = createVisualComponent({
     //@@viewOff:interface
 
     //@@viewOn:render
-    const attrs = Utils.VisualComponent.getAttrs(props);
     return (
-      <div {...attrs}>
-        <TeamManager />
-        {Array(40)
-          .fill(null)
-          .map((_, i) => (
-            <h1 key={i}>AAA</h1>
-          ))}
-      </div>
+      <ErrorBoundary fallback={SpaError}>
+        <Uu5Elements.ModalBus>
+          <Uu5Elements.AlertBus>{children}</Uu5Elements.AlertBus>
+        </Uu5Elements.ModalBus>
+      </ErrorBoundary>
     );
     //@@viewOff:render
   },
 });
 
 //@@viewOn:exports
-export { Home };
-export default Home;
+export { Spa };
+export default Spa;
 //@@viewOff:exports

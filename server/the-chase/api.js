@@ -17,7 +17,8 @@ const API = {
   },
   "theChase/game/get": {
     method: "get",
-    fn: ({ id }) => {
+    fn: ({dtoIn}) => {
+      const { id } = dtoIn;
       const theChase = theChaseMap[id];
 
       const dtoOut = theChase.toObject();
@@ -26,7 +27,8 @@ const API = {
   },
   "theChase/game/setHunter": {
     method: "post",
-    fn: ({ id, hunterId }) => {
+    fn: (dtoIn) => {
+      const { id, hunterId } = dtoIn;
       const theChase = theChaseMap[id];
       theChase.selectHunter(hunterId);
 
@@ -36,7 +38,8 @@ const API = {
   },
   "theChase/game/destroy": {
     method: "post",
-    fn: ({ id }) => {
+    fn: ({ dtoIn }) => {
+      const { id } = dtoIn;
       delete theChaseMap[id];
 
       const dtoOut = { id, destroyed: true };
@@ -46,7 +49,8 @@ const API = {
 
   "theChase/player/list": {
     method: "get",
-    fn: ({ gameId }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId } = dtoIn;
       const theChase = theChaseMap[gameId];
 
       const dtoOut = { gameId: theChase.id, itemList: theChase.playerList };
@@ -55,7 +59,8 @@ const API = {
   },
   "theChase/player/create": {
     method: "post",
-    fn: ({ gameId, name }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, name } = dtoIn;
       const theChase = theChaseMap[gameId];
       const player = theChase.addPlayer(name);
 
@@ -65,7 +70,8 @@ const API = {
   },
   "theChase/player/get": {
     method: "get",
-    fn: ({ gameId, id }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, id } = dtoIn;
       const theChase = theChaseMap[gameId];
       const player = theChase.getPlayer(id);
 
@@ -75,7 +81,8 @@ const API = {
   },
   "theChase/player/set": {
     method: "post",
-    fn: ({ gameId, id, ...playerData }) => {
+    fn: (dtoIn) => {
+      const { gameId, id, ...playerData } = dtoIn;
       const theChase = theChaseMap[gameId];
       const player = theChase.setPlayer(id, playerData);
 
@@ -86,7 +93,8 @@ const API = {
 
   "theChase/round2/init": {
     method: "post",
-    fn: ({ gameId, ...data }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, ...data } = dtoIn;
       const theChase = theChaseMap[gameId];
       const round2 = theChase.createRound2(data);
 
@@ -96,7 +104,8 @@ const API = {
   },
   "theChase/round2/load": {
     method: "get",
-    fn: ({ gameId, ...data }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, ...data } = dtoIn;
       const theChase = theChaseMap[gameId];
       const round2 = theChase.loadRound2(data);
 
@@ -106,7 +115,8 @@ const API = {
   },
   "theChase/round2/get": {
     method: "get",
-    fn: ({ gameId, id, hunterId }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, id, hunterId } = dtoIn;
       const theChase = theChaseMap[gameId];
       const round2 = theChase.getRound2(id);
 
@@ -125,7 +135,8 @@ const API = {
   },
   "theChase/round2/setOffer": {
     method: "post",
-    fn: ({ gameId, id, offer }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, id, offer } = dtoIn;
       const theChase = theChaseMap[gameId];
       const round2 = theChase.setRound2(id, { offer });
 
@@ -135,7 +146,8 @@ const API = {
   },
   "theChase/round2/confirmOffer": {
     method: "post",
-    fn: ({ gameId, id, amount }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, id, amount } = dtoIn;
       const theChase = theChaseMap[gameId];
       const { playerId } = theChase.getRound2(id);
       const player = theChase.getPlayer(playerId);
@@ -151,7 +163,8 @@ const API = {
   },
   "theChase/round2/loadQuestion": {
     method: "post",
-    fn: ({ gameId, id }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, id } = dtoIn;
       const theChase = theChaseMap[gameId];
       const round2 = theChase.createRound2Question(id);
 
@@ -161,7 +174,8 @@ const API = {
   },
   "theChase/round2/setAnswer": {
     method: "post",
-    fn: ({ gameId, id, hunterId, playerId, questionId, answer }) => {
+    fn: ({ dtoIn }) => {
+      const { gameId, id, hunterId, playerId, questionId, answer } = dtoIn;
       const theChase = theChaseMap[gameId];
       const round2 = theChase.setRound2Answer(id, { [hunterId ? "hunterAnswer" : "playerAnswer"]: answer });
 

@@ -25,15 +25,25 @@ const Calls = {
         url = new URL(url);
         url.search = new URLSearchParams(serializeDtoIn(dtoIn));
       }
-      const response = await fetch(url, clientOptions);
-      data = await response.json();
+      try {
+        const response = await fetch(url, clientOptions);
+        data = await response.json();
+      } catch (e) {
+        console.error("Error in fetch", e);
+        throw e;
+      }
     } else if (method === "post") {
-      const response = await fetch(url, {
-        ...clientOptions,
-        method: method.toUpperCase(),
-        body: method === "post" && dtoIn ? JSON.stringify(dtoIn) : undefined,
-      });
-      data = await response.json();
+      try {
+        const response = await fetch(url, {
+          ...clientOptions,
+          method: method.toUpperCase(),
+          body: method === "post" && dtoIn ? JSON.stringify(dtoIn) : undefined,
+        });
+        data = await response.json();
+      } catch (e) {
+        console.error("Error in fetch", e);
+        throw e;
+      }
     } else {
       throw new Error(`Invalid method "${method}".`);
     }

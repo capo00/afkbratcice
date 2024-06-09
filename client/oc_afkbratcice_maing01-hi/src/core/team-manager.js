@@ -7,9 +7,10 @@ import {
   useRouter,
   useSession,
   Suspense,
-  useDataList
+  useDataList,
 } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
+import Uu5CodeKit from "uu5codekitg01";
 import Config from "./config/config.js";
 import Calls from "../calls";
 //@@viewOff:imports
@@ -52,10 +53,10 @@ const TeamManager = createComponent({
         break;
       case "ready":
         // TODO use tiles for CRUD
-        result = <pre>{JSON.stringify(data, null, 2)}</pre>;
+        result = <Uu5CodeKit.Json.Input value={data} onChange={() => {}} format="pretty" minRows={7} maxRows={50} />;
         break;
       default:
-        console.log(dataList);
+        console.log("Unexpected state: " + state, dataList);
         result = state;
     }
 

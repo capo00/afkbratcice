@@ -4,7 +4,7 @@
   "description": "",
   "main": "server/index.js",
   "scripts": {
-    "start": "nodemon server/index.js",
+    "start": "node tools/start.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "myBuild": "cd client/oc_afkbratcice_maing01-hi && npm run build && cd.. && cd.. && node tools/build.js",
     "deploy": "npm run myBuild && gcloud app deploy"
@@ -15,7 +15,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "express-session": "^1.17.3",
+    "express-session": "^1.18.0",
+    "cookie-parser": "^1.4.6",
     "googleapis": "^123.0.0",
     "mongodb": "^5.7.0",
     "nodemon": "^3.0.1",

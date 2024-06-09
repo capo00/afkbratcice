@@ -8,7 +8,7 @@
   justify-content: center;
   align-items: center;
   pointer-events: none;
-  color: #2196f3;
+  color: #8b0000; /* NOTE: AFK */
   line-height: 1.15;
 }
 .uu-app-loading.uu-app-loading {
@@ -30,6 +30,7 @@
   font-size: 24px;
   text-align: center;
   height: 0; /* so that it doesn't affect vertical positioning */
+  font-weight: bold; /* NOTE: AFK */
 }
 .uu-app-loading-name:before {
   content: "";
