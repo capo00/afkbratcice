@@ -9,7 +9,10 @@
   "devkit": {
     "development": {
       "appBoxLocationUri": "----- VALUE REQUIRED -----",
-      "appDeploymentUri": null
+      "appDeploymentUri": null,
+      "uuCloudUniverseBaseUri": "----- VALUE REQUIRED -----",
+      "uuCloudLogStoreBaseUri": "----- VALUE REQUIRED -----",
+      "uuAppBoxRegistryBaseUri": "----- VALUE REQUIRED -----"
     }
   },
   "oc_afkbratcice_maing01-hi": {},

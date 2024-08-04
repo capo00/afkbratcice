@@ -6,11 +6,12 @@ import {
   LanguageListProvider,
   LanguageProvider,
 } from "uu5g05";
-
+import { GoogleSessionProvider } from "../capo-google-auth";
 import Config from "./config/config.js";
 //@@viewOff:imports
 
 //@@viewOn:constants
+const CLIENT_ID = "320438662814-hgjqtc69jbs4d7ec9mgo9efnkp2oioj0.apps.googleusercontent.com"; // Replace with your actual Client ID
 //@@viewOff:constants
 
 //@@viewOn:css
@@ -36,15 +37,14 @@ const SpaProvider = createVisualComponent({
     //@@viewOn:private
     //@@viewOff:private
 
-    //@@viewOn:interface
-    //@@viewOff:interface
-
     //@@viewOn:render
     return (
       <AppBackgroundProvider>
         <LanguageListProvider languageList={["cs"]}>
           <LanguageProvider>
-            <RouteProvider>{children}</RouteProvider>
+            <GoogleSessionProvider clientId={CLIENT_ID}>
+              <RouteProvider>{children}</RouteProvider>
+            </GoogleSessionProvider>
           </LanguageProvider>
         </LanguageListProvider>
       </AppBackgroundProvider>

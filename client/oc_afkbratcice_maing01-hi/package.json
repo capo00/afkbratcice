@@ -5,27 +5,29 @@
   "description": "",
   "license": "License Commercial",
   "namespace": "OcAfkBratcice",
-  "spec": "uu5-app; uu_appg01_devkit@5.4.1",
+  "spec": "uu5-app; uu_appg01_devkit@6.0.1; uu5devkitg01-plugin@1.1.0",
   "dependencies": {
+    "@react-oauth/google": "^0.12.1",
+    "uu5codekitg01": "^2.0.0",
+    "uu5extrasg01": "^1.0.0",
     "uu5g05": "^1.0.0",
     "uu5g05-browser-compatibility": "^1.0.0",
     "uu5g05-elements": "^1.0.0",
     "uu5g05-forms": "^1.0.0",
-    "uu5loaderg01": "^1.0.0",
-    "uu5extrasg01": "^1.0.0",
-    "uu5codekitg01": "^2.0.0",
-    "uu5stringg01": "^1.0.0",
     "uu5imagingg01": "^2.0.0",
+    "uu5loaderg01": "^1.0.0",
     "uu5richtextg01": "^2.0.0",
-    "uu5tilesg02": "^2.0.0",
-    "@react-oauth/google": "^0.12.1"
+    "uu5stringg01": "^1.0.0",
+    "uu5tilesg02": "^2.0.0"
   },
   "uuBuildSettings": {
     "externals": {}
   },
   "devDependencies": {
-    "uu_appg01_devkit": "^5.4.1",
-    "uu5g05-test": "^1.0.0"
+    "uu_appg01_devkit": "^6.1.1",
+    "uu5g05-test": "^1.0.0",
+    "uu5devkitg01-plugin": "^1.0.0",
+    "uu_cloudg02-devkit": "^0.12.2"
   },
   "engines": {
     "node": ">=12.0.0"
@@ -38,10 +40,22 @@
     "start": "uu_appg01_devkit start",
     "prettify": "uu_appg01_devkit prettify",
     "vulnerabilityScan": "uu_appg01_devkit vulnerabilityScan",
-    "generate": "uu_appg01_devkit generate",
-    "lsiExport": "uu_appg01_devkit lsiExport",
-    "lsiImport": "uu_appg01_devkit lsiImport",
-    "uuAppDevKitUpgrade": "uu_appg01_devkit uuAppDevKitUpgrade"
+    "uuAppDevKitUpgrade": "uu_appg01_devkit uuAppDevKitUpgrade",
+    "uuCloudg02AppBoxCopy": "uu_cloudg02-devkit appBoxCopy",
+    "uuCloudg02AppBoxExport": "uu_cloudg02-devkit appBoxExport",
+    "uuCloudg02AppBoxImport": "uu_cloudg02-devkit appBoxImport",
+    "uuCloudg02AppBox": "uu_cloudg02-devkit appBox",
+    "uuCloudg02CleanResources": "uu_cloudg02-devkit cleanResources",
+    "uuCloudg02DeployList": "uu_cloudg02-devkit deployList",
+    "uuCloudg02Deploy": "uu_cloudg02-devkit deploy",
+    "uuCloudg02LogExport": "uu_cloudg02-devkit logExport",
+    "uuCloudg02Swap": "uu_cloudg02-devkit swap",
+    "uuCloudg02Undeploy": "uu_cloudg02-devkit undeploy",
+    "uuCloudg02VulnerabilityScan": "uu_cloudg02-devkit vulnerabilityScan",
+    "uu5Generate": "uu5devkitg01-plugin generate",
+    "uu5LsiExport": "uu5devkitg01-plugin lsiExport",
+    "uu5LsiImport": "uu5devkitg01-plugin lsiImport",
+    "uu5DocUpdateExamples": "uu5devkitg01-plugin docUpdateExamples"
   },
   "prettier": {
     "printWidth": 120

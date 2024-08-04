@@ -56,7 +56,7 @@ function _GoogleProvider({ children }) {
 
   return (
     <GoogleSessionContext.Provider value={value}>
-      {typeof children === "function" ? children(value) : value}
+      {typeof children === "function" ? children(value) : children}
     </GoogleSessionContext.Provider>
   );
 }

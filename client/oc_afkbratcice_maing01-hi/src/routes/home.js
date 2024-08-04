@@ -1,9 +1,9 @@
 //@@viewOn:imports
-import { Utils, createVisualComponent, useRef, useMemo, useState, useCallback } from "uu5g05";
+import { Utils, createVisualComponent } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import TeamManager from "../core/team-manager";
 import Config from "./config/config.js";
-import Calls from "../calls";
+import News from "../core/news";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -39,7 +39,8 @@ let Home = createVisualComponent({
     const attrs = Utils.VisualComponent.getAttrs(props);
     return (
       <div {...attrs}>
-        <TeamManager />
+        <News />
+        {/*<TeamManager />*/}
         {Array(40)
           .fill(null)
           .map((_, i) => (

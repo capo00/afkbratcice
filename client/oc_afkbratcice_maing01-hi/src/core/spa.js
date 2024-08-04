@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, useRoute } from "uu5g05";
+import { createVisualComponent } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import Router from "./router";
