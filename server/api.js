@@ -1,9 +1,6 @@
-const authenticationApi = require('./api/authentication-api');
 const teamDao = require("./dao/team-dao");
 
 const API = {
-  ...authenticationApi,
-
   "team/list": {
     method: "get",
     fn: async ({ dtoIn }) => {

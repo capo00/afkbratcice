@@ -12,6 +12,6 @@ export default {
       .toLowerCase()
       .replace(/\./g, "-")
       .replace(/[^a-z-]/g, ""),
-    process.env.NAME + "/" + process.env.OUTPUT_NAME + "@" + process.env.VERSION // this helps preserve proper order of styles among loaded libraries
+    process.env.NAME + "/" + process.env.OUTPUT_NAME + "@" + process.env.VERSION, // this helps preserve proper order of styles among loaded libraries
   ),
 };

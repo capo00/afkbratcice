@@ -1,8 +1,8 @@
 //@@viewOn:imports
 import { createVisualComponent, Utils, useStickyTop, useRoute } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
+import OcAuth from "../oc_cli-auth";
 import Config from "./config/config.js";
-import { useGoogleSession } from "../capo-google-auth";
 
 //@@viewOff:imports
 
@@ -96,7 +96,7 @@ const Top = createVisualComponent({
     }
 
     // adding loginButton, because ButtonGroup does not support { component: LoginButton }
-    const session = useGoogleSession();
+    const session = OcAuth.useSession();
     const updatedMenuList = [...menuList, getLoginButton(session)];
 
     //@@viewOn:render

@@ -40,7 +40,7 @@ let Home = createVisualComponent({
     return (
       <div {...attrs}>
         <News />
-        {/*<TeamManager />*/}
+        <TeamManager />
         {Array(40)
           .fill(null)
           .map((_, i) => (

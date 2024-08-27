@@ -75,16 +75,16 @@ const API = {
     method: "get",
     fn: ({ session, request, response }) => {
       // TODO how to work with session or cookies to keep sign in after reload the page???
-      console.log("request.session", request.session);
+      // console.log("request.session", request.session);
+      //
+      // if (request.cookies?.aaa) {
+      //   console.log("request.cookies.aaa exists", request.cookies);
+      // } else {
+      //   console.log("request.cookies.aaa none " + Date(), request.cookies);
+      //   response.cookie('aaa', "1");
+      // }
 
-      if (request.cookies?.aaa) {
-        console.log("request.cookies.aaa exists", request.cookies);
-      } else {
-        console.log("request.cookies.aaa none " + Date(), request.cookies);
-        response.cookie('aaa', "1");
-      }
-
-      if (request.session.identity) return request.session.identity
+      //if (request.session?.identity) return request.session.identity
     },
   },
   "logout": {

@@ -4,10 +4,9 @@ import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import Router from "./router";
 import Home from "../routes/home.js";
-import Test from "../routes/test.js";
 import TheChase from "../routes/the-chase";
-import { SpaProvider, Spa as SpaView } from "../libs/capo-app/index";
-import Page from "../libs/capo-app/page";
+import { SpaProvider, Spa as SpaView } from "../libs/oc_cli-app/index";
+import Page from "../libs/oc_cli-app/page";
 import logoUri from "../assets/AFK_erb_light_160x160.png";
 //@@viewOff:imports
 
@@ -42,7 +41,6 @@ const MENU = [
 const ROUTE_MAP = {
   "": { redirect: "home" },
   home: (props) => <Home {...props} />,
-  test: (props) => <Test {...props} />,
   theChase: (props) => <TheChase {...props} />,
   // controlPanel: (props) => <ControlPanel {...props} />,
   "*": () => (
