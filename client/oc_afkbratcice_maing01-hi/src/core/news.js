@@ -6,6 +6,7 @@ import Uu5Forms from "uu5g05-forms";
 import Uu5Extras from "uu5extrasg01";
 import Config from "./config/config.js";
 import GoogleDisk from "../libs/capo-google-disk";
+import Calls from "../calls";
 
 //@@viewOff:imports
 
@@ -63,18 +64,18 @@ const News = createVisualComponent({
         children: wrapContent(
           "Commuting problems",
           "Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
-            " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this.",
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this." +
+          " Getting to your office every day from home can be stressful and time consuming. Getting stuck in traffic jams is not a very pleasant way to spend your free time. There are better ways to handle this.",
         ),
       },
       {
-        src: "https://drive.usercontent.google.com/download?id=1IuBJ3_jO-SIIiVjLqoDwHu4bbJTVgcj8&export=view&authuser=0",
+        src: "https://drive.google.com/thumbnail?id=1U5s1O2raTV4LWJqyVqpU-hX2USx0tISZ",
         children: wrapContent(
           "Stress in the city",
           "Living directly in the city where you work is a great way to solve every day long distance travels. Life in the city is stressful in a different way and using the overcrowded public transport can be unpleasant experience as well.",
@@ -92,13 +93,6 @@ const News = createVisualComponent({
     //@@viewOn:render
     return (
       <div>
-        <Uu5Forms.Form
-          onSave={async (e) => {
-            console.log(e.data.value);
-          }}
-        >
-          <Uu5Forms.FormFile name="file" />
-        </Uu5Forms.Form>
         <Carousel itemList={itemList} type="infinite" intervalMs={5000} />
       </div>
     );

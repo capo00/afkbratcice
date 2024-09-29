@@ -1,20 +1,22 @@
 //@@viewOn:imports
-import { createVisualComponent } from "uu5g05";
+import { createVisualComponent, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import Router from "./router";
-import Home from "../routes/home.js";
-import TheChase from "../routes/the-chase";
-import { SpaProvider, Spa as SpaView } from "../libs/oc_cli-app/index";
+import { SpaProvider, Spa as SpaView } from "../libs/oc_cli-app";
 import Page from "../libs/oc_cli-app/page";
 import logoUri from "../assets/AFK_erb_light_160x160.png";
+
+const Home = Utils.Component.lazy(() => import("../routes/home.js"));
+const Teams = Utils.Component.lazy(() => import("../routes/profile/teams.js"));
+const Binaries = Utils.Component.lazy(() => import("../routes/profile/binaries.js"));
+const TheChase = Utils.Component.lazy(() => import("../routes/the-chase.js"));
 //@@viewOff:imports
 
-//@@viewOn:constants
-// const About = Utils.Component.lazy(() => import("../routes/about.js"));
-// const InitAppWorkspace = Utils.Component.lazy(() => import("../routes/init-app-workspace.js"));
-// const ControlPanel = Utils.Component.lazy(() => import("../routes/control-panel.js"));
+// TODO change color to dark red (after release of UuGds)
+Uu5Elements.UuGds.setMeaningColor("primary", "red");
 
+//@@viewOn:constants
 const MENU = [
   {
     children: "Historie",
@@ -36,11 +38,20 @@ const MENU = [
   { children: "Fotogalerie", href: "photogallery" },
   { children: "Diskuze", href: "discussion", itemList: [{ children: "Ke stažení", href: "download" }] },
   { children: "Kontakt", href: "contact", itemList: [{ children: "Výbor", href: "board" }] },
+  {
+    key: "identity",
+    itemList: [
+      { children: "Týmy", href: "profile/teams", profile: "operatives" },
+      { children: "Soubory", href: "profile/binaries", profile: "operatives" },
+    ],
+  },
 ];
 
 const ROUTE_MAP = {
   "": { redirect: "home" },
   home: (props) => <Home {...props} />,
+  "profile/teams": (props) => <Teams {...props} />,
+  "profile/binaries": (props) => <Binaries {...props} />,
   theChase: (props) => <TheChase {...props} />,
   // controlPanel: (props) => <ControlPanel {...props} />,
   "*": () => (

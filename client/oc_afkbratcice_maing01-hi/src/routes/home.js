@@ -38,15 +38,10 @@ let Home = createVisualComponent({
     //@@viewOn:render
     const attrs = Utils.VisualComponent.getAttrs(props);
     return (
-      <div {...attrs}>
+      <main {...attrs}>
         <News />
         <TeamManager />
-        {Array(40)
-          .fill(null)
-          .map((_, i) => (
-            <h1 key={i}>AAA</h1>
-          ))}
-      </div>
+      </main>
     );
     //@@viewOff:render
   },

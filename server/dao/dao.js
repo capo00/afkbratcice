@@ -1,4 +1,4 @@
-const OcMongo = require("oc_mongo");
+const OcMongo = require("../libs/oc_mongo");
 const Config = require("../config/config")
 
 const MONGO_URI = Config.mongodbUri + "?retryWrites=true&w=majority";

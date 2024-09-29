@@ -1,14 +1,5 @@
 //@@viewOn:imports
-import {
-  createComponent,
-  ErrorBoundary,
-  PropTypes,
-  useRoute,
-  useRouter,
-  useSession,
-  Suspense,
-  useDataList,
-} from "uu5g05";
+import { createComponent, useDataList } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5CodeKit from "uu5codekitg01";
 import Config from "./config/config.js";

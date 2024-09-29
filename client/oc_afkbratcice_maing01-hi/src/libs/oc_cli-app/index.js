@@ -1,2 +1,3 @@
-export * from "./spa-provider";
-export * from "./spa";
+import * as Exports from "./exports.js";
+export * from "./exports.js";
+export default Exports;

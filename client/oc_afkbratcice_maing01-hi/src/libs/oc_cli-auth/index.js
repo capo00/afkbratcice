@@ -1,4 +1,3 @@
-import * as OcAuth from "./session";
-export * from "./session";
-
-export default OcAuth;
+import * as Exports from "./exports.js";
+export * from "./exports.js";
+export default Exports;

@@ -1,8 +1,9 @@
 //@@viewOn:imports
-import { createVisualComponent, Utils, useStickyTop, useRoute } from "uu5g05";
+import { createVisualComponent, Utils, useStickyTop, useRoute, useLsi, useState } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import OcAuth from "../oc_cli-auth";
 import Config from "./config/config.js";
+import anonymousUri from "./assets/anonymous.png";
 
 //@@viewOff:imports
 
@@ -15,24 +16,41 @@ function updateHref({ href, itemList, ...item }, setRoute) {
   return item;
 }
 
-function getLoginButton(session) {
+function Photo() {
+  const session = OcAuth.useSession();
+  const title = useLsi({ cs: "Přihlášený uživatel" });
+
+  const [uri, setUri] = useState(session.identity.photo);
+
+  return (
+    <img
+      alt="User"
+      src={uri}
+      height="90%"
+      className={Config.Css.css({ marginLeft: -8, marginRight: -4, borderRadius: "50%" })}
+      title={title}
+      onError={() => setUri(anonymousUri)}
+      referrerPolicy="no-referrer"
+    />
+  );
+}
+
+function getLoginButton(session, item) {
   let onClick,
     itemList,
     children,
     icon = "uugds-account";
+
   if (session.state === "notAuthenticated") onClick = () => session.login();
   else if (session.state === "authenticated") {
     icon = null;
-    children = (
-      <img
-        alt="User photo"
-        src={session.identity.photo}
-        height="90%"
-        className={Config.Css.css({ marginLeft: -8, marginRight: -4, borderRadius: "50%" })}
-        title="Přihlášený uživatel"
-      />
-    );
-    itemList = [{ icon: "uugds-log-out", children: "Odhlásit", onClick: () => session.logout() }];
+    children = <Photo />;
+    itemList = item?.itemList
+      ? item.itemList
+          .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
+          .filter(Boolean)
+      : [];
+    itemList.push({ icon: "uugds-log-out", children: "Odhlásit", onClick: () => session.logout() });
   }
 
   return { icon, onClick, itemList, children };
@@ -97,7 +115,15 @@ const Top = createVisualComponent({
 
     // adding loginButton, because ButtonGroup does not support { component: LoginButton }
     const session = OcAuth.useSession();
-    const updatedMenuList = [...menuList, getLoginButton(session)];
+
+    const identityItemIndex = menuList.findIndex((item) => item.key === "identity");
+    const updatedMenuList = [...menuList];
+
+    if (identityItemIndex > -1) {
+      updatedMenuList[identityItemIndex] = getLoginButton(session, menuList[identityItemIndex]);
+    } else {
+      updatedMenuList.push(getLoginButton(session));
+    }
 
     //@@viewOn:render
     const attrs = Utils.VisualComponent.getAttrs(
