@@ -1,10 +1,11 @@
 {
   "name": "server",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "server/index.js",
   "scripts": {
-    "start": "node tools/start.js",
+    "start": "nodemon server/index.js",
+    "startDev": "node tools/start.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "myBuild": "cd client/oc_afkbratcice_maing01-hi && npm run build && cd.. && cd.. && node tools/build.js",
     "deploy": "npm run myBuild && gcloud app deploy"
@@ -13,9 +14,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "oc_app-server": "C:\\Users\\User\\Documents\\work\\github\\oc_app-server\\target\\oc_app-server-0.1.0.tgz",
-    "oc_mongo": "^0.1.2",
+    "express": "^4.21.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "nodemon": "^3.0.1",
+    "mongodb": "^6.8.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "googleapis": "^144.0.0",
     "multer": "^1.4.5-lts.1",
     "uu_datatypesg01": "^0.1.0"

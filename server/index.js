@@ -9,9 +9,10 @@ const API = {
   ...afkApi,
 };
 
+const publicPath = process.env.NODE_ENV === "production" ? path.resolve(__dirname, "../public") : path.resolve(__dirname, "../client/oc_afkbratcice_maing01-hi/public");
+
 const app = AppServer.App.init({
-  // publicPath: path.resolve(__dirname, "../public"),
-  publicPath: path.resolve(__dirname, "../client/oc_afkbratcice_maing01-hi/public"),
+  publicPath,
   api: API,
 });
 

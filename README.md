@@ -19,11 +19,13 @@ Deployed service [https://afkbratcice.oa.r.appspot.com](https://afkbratcice.oa.r
 You can stream logs from the command line by running:
 `$ gcloud app logs tail -s default`
 
+See all [logs](https://console.cloud.google.com/logs/query?project=afkbratcice)
+
 To view your application in the web browser run:
 `$ gcloud app browse`
 
 To take a quick anonymous survey, run:
 `$ gcloud survey`
 
-## TODO:
-1. google/fb login
+## TODO: 
+2. fb login

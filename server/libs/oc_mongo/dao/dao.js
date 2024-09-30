@@ -135,7 +135,7 @@ class Dao {
     try {
       this._connectionsMap[this.uri] ??= await this.client.connect();
     } catch (e) {
-      console.error("Cannot connect to mongo. Check https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters if dtb is running.", e);
+      console.error("Cannot connect to mongo. Check https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters if database is running.", e);
       throw e;
     }
 
