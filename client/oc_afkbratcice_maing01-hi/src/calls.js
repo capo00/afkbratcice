@@ -1,5 +1,5 @@
 import { Environment } from "uu5g05";
-import { Call } from "./libs/oc_cli-app"
+import { Call } from "./libs/oc_cli-elements";
 
 // the base URI of calls for development / staging environments can be configured in *-hi/env/development.json
 // (or <stagingEnv>.json), e.g.:

@@ -1,22 +1,21 @@
 const UuDataTypes = require("uu_datatypesg01");
-const Abl = require("../abl/team-abl");
+const Abl = require("../abl/season-abl");
 
 module.exports = {
-  "team/list": {
+  "season/list": {
     method: "get",
     validator: UuDataTypes.exact({
-      age: UuDataTypes.string,
       pageInfo: UuDataTypes.exact({
         pageSize: UuDataTypes.number,
         pageIndex: UuDataTypes.number
       }),
     }),
     fn: async ({ dtoIn }) => {
-      const itemList = await Abl.list(dtoIn?.pageInfo, { age: dtoIn?.age });
+      const itemList = await Abl.list(dtoIn?.pageInfo);
       return { itemList };
     },
   },
-  "team/get": {
+  "season/get": {
     method: "get",
     validator: UuDataTypes.exact({
       id: UuDataTypes.string,
@@ -25,35 +24,39 @@ module.exports = {
       return await Abl.get(dtoIn.id);
     },
   },
-  "team/create": {
+  "season/create": {
     method: "post",
     auth: ["operatives"],
     // TODO add file or shape/object to UuDataTypes
     // validator: UuDataTypes.exact({
-    //   name: UuDataTypes.string,
-    //   logo: UuDataTypes.file,
     //   age: UuDataTypes.oneOf(["men"]),
+    //   competition: UuDataTypes.oneOf(["III. třída"]),
+    //   yearFrom: UuDataTypes.number,
+    //   desc: UuDataTypes.string,
+    //   teamList: UuDataTypes.array,
     // }),
     fn: async ({ dtoIn }) => {
       return await Abl.create(dtoIn);
     },
   },
-  "team/update": {
+  "season/update": {
     method: "post",
     auth: ["operatives"],
     // TODO add file or shape/object to UuDataTypes
     // validator: UuDataTypes.exact({
     //   id: UuDataTypes.string,
-    //   name: UuDataTypes.string,
-    //   logo: UuDataTypes.file,
     //   age: UuDataTypes.oneOf(["men"]),
+    //   competition: UuDataTypes.oneOf(["III. třída"]),
+    //   yearFrom: UuDataTypes.number,
+    //   desc: UuDataTypes.string,
+    //   teamList: UuDataTypes.array,
     // }),
     fn: async ({ dtoIn }) => {
       delete dtoIn.sys;
       return await Abl.update(dtoIn);
     },
   },
-  "team/delete": {
+  "season/delete": {
     method: "post",
     auth: ["operatives"],
     validator: UuDataTypes.exact({

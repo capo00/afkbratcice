@@ -1,81 +1,52 @@
-const OcAppServer = require("../libs/oc_app-server");
-const teamDao = require("../dao/team-dao");
+const OcAppCore = require("../libs/oc_app-core");
+const dao = require("../dao/team-dao");
 const OcBinaryStore = require("../libs/oc_binarystore");
 
-const ERROR_CODE_PREFIX = "afkbratcice/team/";
-const TeamError = {
-  DoesNotExists: class extends OcAppServer.AppError.DoesNotExists {
-    constructor(e, opts) {
-      super("Team does not exist", { cause: e, codePrefix: ERROR_CODE_PREFIX, ...opts });
-    }
-  },
+const CREATE_TAG_LIST = ["sys", "team"];
 
-  CreateFailed: class extends OcAppServer.AppError.Failed {
-    static CODE = ERROR_CODE_PREFIX + "createFailed";
+class TeamAbl extends OcAppCore.Crud {
 
-    constructor(e, opts) {
-      super("Creating of team was failed", { cause: e, code: TeamError.CreateFailed.CODE, ...opts });
-    }
-  },
-
-  UpdateFailed: class extends OcAppServer.AppError.Failed {
-    static CODE = ERROR_CODE_PREFIX + "updateFailed";
-
-    constructor(e, opts) {
-      super("Updating of team was failed", { cause: e, code: TeamError.UpdateFailed.CODE, ...opts });
-    }
-  },
-
-  DeleteFailed: class extends OcAppServer.AppError.Failed {
-    static CODE = ERROR_CODE_PREFIX + "deleteFailed";
-
-    constructor(e, opts) {
-      super("Deleting of team was failed", { cause: e, code: TeamError.DeleteFailed.CODE, ...opts });
-    }
-  },
-}
-
-class TeamAbl {
-  static async list(pageInfo) {
-    return await teamDao.list(pageInfo);
+  constructor() {
+    super("team", dao);
   }
 
-  static async get(id) {
-    const { logoId, ...data } = await TeamAbl.#get(id);
-    return data;
+  async list(pageInfo, { age }) {
+    return (age ? (await dao.listByAge(age)).map(this._getData) : await super.list(pageInfo));
   }
 
-  static async create(item) {
-    const { logoUri, ...restParams } = item;
-    const logo = await OcBinaryStore.Abl.Binary.create(logoUri);
+  async create(item) {
+    const { logo: logoFile, ...restParams } = item;
+    const logo = await OcBinaryStore.Abl.Binary.create({ file: logoFile, tagList: CREATE_TAG_LIST });
     try {
-      return await teamDao.create({ ...restParams, logoId: logo.id, logoUri: logo.uri });
+      return await super.create({ ...restParams, logoId: logo.id, logoUri: logo.uri });
     } catch (e) {
       try {
         await OcBinaryStore.Abl.Binary.delete(logo.id);
       } catch (e) {
         console.error("Binary cannot be deleted", logo.id);
       }
-      throw new TeamError.CreateFailed(e);
+      throw e;
     }
   }
 
-  static async update(data) {
-    const { logoUri, ...restParams } = data;
+  async update(data) {
+    const { logo: logoFile, ...restParams } = data;
+    let teamObject;
 
-    if (logoUri !== undefined) {
-      const { logoId } = await TeamAbl.#get(data.id);
+    if (logoFile !== undefined) {
+      teamObject = await this._get(data.id);
+      const { logoId } = teamObject;
 
-      if (logoUri) {
+      if (logoFile) {
         let logo;
         if (logoId) {
-          await OcBinaryStore.Abl.Binary.update(logoId, logoUri);
+          await OcBinaryStore.Abl.Binary.update({ id: logoId, file: logoFile });
         } else {
-          logo = await OcBinaryStore.Abl.Binary.create(logoUri);
+          logo = await OcBinaryStore.Abl.Binary.create({ file: logoFile, tagList: CREATE_TAG_LIST });
           restParams.logoId = logo.id;
           restParams.logoUri = logo.uri;
         }
-      } else if (logoUri === null) {
+      } else if (logoFile === null) {
         await OcBinaryStore.Abl.Binary.delete(logoId);
         restParams.logoId = null;
         restParams.logoUri = null;
@@ -83,7 +54,7 @@ class TeamAbl {
     }
 
     try {
-      return await teamDao.update(restParams);
+      return await super.update({ ...teamObject, ...restParams }, { merge: !teamObject });
     } catch (e) {
       if (restParams.logoId) {
         try {
@@ -92,28 +63,20 @@ class TeamAbl {
           console.error("Binary cannot be deleted", restParams.logoId);
         }
       }
-      throw new TeamError.UpdateFailed(e);
+      throw e;
     }
   }
 
-  static async delete(id) {
-    const { logoId } = await TeamAbl.#get(id);
+  async delete(id) {
+    const { logoId } = await this._get(id);
     if (logoId) await OcBinaryStore.Abl.Binary.delete(logoId);
-
-    try {
-      return await teamDao.delete(id);
-    } catch (e) {
-      throw new TeamError.DeleteFailed(e);
-    }
+    return await super.delete(id);
   }
 
-  static async #get(id) {
-    try {
-      return await teamDao.get(id);
-    } catch (e) {
-      throw new TeamError.DoesNotExists(e);
-    }
+  _getData(object) {
+    const { logoId, ...data } = object;
+    return data;
   }
 }
 
-module.exports = TeamAbl;
+module.exports = new TeamAbl();

@@ -1,7 +1,8 @@
 const OcMongo = require("../libs/oc_mongo");
 const Config = require("../config/config")
 
-const MONGO_URI = Config.mongodbUri + "?ssl=true&retryWrites=true&w=majority";
+const ssl = process.env.NODE_ENV === "production" ? "ssl=true&" : "";
+const MONGO_URI = Config.mongodbUri + "?" + ssl + "retryWrites=true&w=majority";
 
 class Dao extends OcMongo.Dao {
   constructor(collectionName) {

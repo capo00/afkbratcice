@@ -1,9 +1,10 @@
 const express = require("express");
 // const OcAuth = require("oc_app-auth");
 // const OcBinaryStore = require("oc_app-binarystore");
+// const OcAppCore = require("oc_app-core");
 const OcAuth = require("../../oc_app-auth");
 const OcBinaryStore = require("../../oc_binarystore");
-const AppError = require("./app-error");
+const OcAppCore = require("../../oc_app-core");
 
 function authorization(profiles) {
   return (req, res, next) => {
@@ -89,7 +90,7 @@ const Command = {
 
           if (dtoOut !== false) res.json(dtoOut == null ? {} : dtoOut);
         } catch (e) {
-          if (e instanceof AppError) {
+          if (e instanceof OcAppCore.AppError) {
             console.error(`[${new Date().toISOString()}](${method}) /${uc} Expected exception. dtoIn = `, dtoIn, e);
             res.status(e.status || 500).send(e.toObject());
           } else {

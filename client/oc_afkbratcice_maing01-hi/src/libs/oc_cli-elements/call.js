@@ -10,7 +10,7 @@ function serializeDtoIn(dtoIn) {
 const Call = {
   async get(uri, dtoIn = undefined, opts = undefined) {
     if (dtoIn) {
-      uri = new URL(uri);
+      uri = new URL(uri, location.origin);
       uri.search = new URLSearchParams(serializeDtoIn(dtoIn));
     }
     try {
@@ -32,7 +32,9 @@ const Call = {
         body = new FormData();
         for (let k in dtoIn) {
           const v = dtoIn[k];
-          body.append(k, v && typeof v === "object" && !(v instanceof File) ? JSON.stringify(dtoIn[k]) : dtoIn[k]);
+          if (v !== undefined) {
+            body.append(k, v && typeof v === "object" && !(v instanceof File) ? JSON.stringify(dtoIn[k]) : dtoIn[k]);
+          }
         }
         contentType = undefined;
       } else {
@@ -40,8 +42,10 @@ const Call = {
       }
     }
 
+    let response, data;
+
     try {
-      const response = await fetch(uri, {
+      response = await fetch(uri, {
         ...opts,
         method: "POST",
         body,
@@ -50,12 +54,21 @@ const Call = {
           ...opts?.headers,
         },
       });
-      response.data = await response.json();
-      return response;
+      data = await response.json();
     } catch (e) {
       console.error("Error in fetch", e);
       throw e;
     }
+
+    if (response.status >= 400) {
+      const e = new Error(data.message);
+      e.dtoIn = dtoIn;
+      e.dtoOut = data;
+      throw e;
+    }
+
+    response.data = data;
+    return response;
   },
 
   async cmdGet(...args) {

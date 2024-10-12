@@ -10,6 +10,7 @@ import logoUri from "../assets/AFK_erb_light_160x160.png";
 const Home = Utils.Component.lazy(() => import("../routes/home.js"));
 const Teams = Utils.Component.lazy(() => import("../routes/profile/teams.js"));
 const Binaries = Utils.Component.lazy(() => import("../routes/profile/binaries.js"));
+const Seasons = Utils.Component.lazy(() => import("../routes/profile/seasons.js"));
 const TheChase = Utils.Component.lazy(() => import("../routes/the-chase.js"));
 //@@viewOff:imports
 
@@ -43,6 +44,7 @@ const MENU = [
     itemList: [
       { children: "Týmy", href: "profile/teams", profile: "operatives" },
       { children: "Soubory", href: "profile/binaries", profile: "operatives" },
+      { children: "Sezóny", href: "profile/seasons", profile: "operatives" },
     ],
   },
 ];
@@ -52,6 +54,7 @@ const ROUTE_MAP = {
   home: (props) => <Home {...props} />,
   "profile/teams": (props) => <Teams {...props} />,
   "profile/binaries": (props) => <Binaries {...props} />,
+  "profile/seasons": (props) => <Seasons {...props} />,
   theChase: (props) => <TheChase {...props} />,
   // controlPanel: (props) => <ControlPanel {...props} />,
   "*": () => (

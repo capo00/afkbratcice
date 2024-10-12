@@ -23,8 +23,7 @@ const Page = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <>
-        <Top {...topProps} />
+      <Top {...topProps}>
         <main
           className={Config.Css.css({
             paddingInline: spacing.d,
@@ -33,7 +32,7 @@ const Page = createVisualComponent({
         >
           {children}
         </main>
-      </>
+      </Top>
     );
     //@@viewOff:render
   },

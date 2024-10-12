@@ -1,8 +1,7 @@
 const os = require("os");
-const binaryDao = require("../dao/binary-dao");
+const dao = require("../dao/binary-dao");
 const multer = require("multer");
-// TODO fix path to extended lib because of cyclic deps
-const AppError = require("../../oc_app-server/services/app-error");
+const OcAppCore = require("../../oc_app-core");
 const GoogleFileAbl = require("./google-file-abl");
 
 const storage = multer.diskStorage({
@@ -12,60 +11,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-const ERROR_CODE_PREFIX = "oc_binarystore/binary/";
-const BinaryError = {
-  DoesNotExists: class extends AppError.DoesNotExists {
-    constructor(e, opts) {
-      super("Binary does not exist", { cause: e, codePrefix: ERROR_CODE_PREFIX, ...opts });
-    }
-  },
+class BinaryAbl extends OcAppCore.Crud {
 
-  CreateFailed: class extends AppError.Failed {
-    static CODE = ERROR_CODE_PREFIX + "createFailed";
-
-    constructor(e, opts) {
-      super("Creating of binary was failed", { cause: e, code: BinaryError.CreateFailed.CODE, ...opts });
-    }
-  },
-
-  UpdateFailed: class extends AppError.Failed {
-    static CODE = ERROR_CODE_PREFIX + "updateFailed";
-
-    constructor(e, opts) {
-      super("Updating of binary was failed", { cause: e, code: BinaryError.UpdateFailed.CODE, ...opts });
-    }
-  },
-
-  DeleteFailed: class extends AppError.Failed {
-    static CODE = ERROR_CODE_PREFIX + "deleteFailed";
-
-    constructor(e, opts) {
-      super("Deleting of binary was failed", { cause: e, code: BinaryError.DeleteFailed.CODE, ...opts });
-    }
-  },
-}
-
-class BinaryAbl {
-  static async list(pageInfo) {
-    return (await binaryDao.list(pageInfo)).map(({ gFileId, ...item }) => ({
-      ...item,
-      uri: GoogleFileAbl.getUri(gFileId),
-    }));
+  constructor() {
+    super("sys/binary", dao);
   }
 
-  static async get(id) {
-    const { gFileId, ...data } = await BinaryAbl.#get(id);
-    return data;
-  }
 
-  static async create(data) {
+  async create(data) {
     const { file, name, ...restParams } = data;
 
     let gFile;
     try {
       gFile = await GoogleFileAbl.create(file);
 
-      const { gFileId, _id, ...binaryData } = await binaryDao.create({
+      const binaryData = await this.dao.create({
         name: name ?? gFile.name,
         gFileId: gFile.id,
         size: file.size,
@@ -73,7 +33,7 @@ class BinaryAbl {
         ...restParams,
       });
 
-      return { ...binaryData, uri: gFile.uri };
+      return this._getData({ ...binaryData, uri: gFile.uri });
     } catch (e) {
       if (gFile) {
         try {
@@ -82,14 +42,14 @@ class BinaryAbl {
           console.error("Binary cannot be deleted from GoogleFile", gFile.id, gFile.uri);
         }
       }
-      throw new BinaryError.CreateFailed(e);
+      throw new OcAppCore.Crud.Error.CreateFailed(this.name, e);
     }
   }
 
-  static async update(data) {
+  async update(data) {
     const { id, file, name, sys, ...updatedParams } = data;
     try {
-      const binary = await BinaryAbl.#get(id);
+      const binary = await this._get(id);
 
       let uri;
       if (file) {
@@ -102,40 +62,41 @@ class BinaryAbl {
 
       if (name) updatedParams.name = name;
 
-      const { gFileId: _, ...binaryData } = await binaryDao.update({
+      const binaryData = await this.dao.update({
         ...binary,
         ...updatedParams,
       });
 
-      return { ...binaryData, uri: uri ?? GoogleFileAbl.getUri(binary.gFileId) };
+      return this._getData({ ...binaryData, uri });
     } catch (e) {
-      throw new BinaryError.UpdateFailed(e);
+      throw new OcAppCore.Crud.Error.UpdateFailed(this.name, e);
     }
   }
 
-  static async delete(id) {
+  async delete(id) {
     try {
-      const { gFileId } = await BinaryAbl.#get(id);
+      const { gFileId } = await this._get(id) || {};
 
-      await GoogleFileAbl.delete(gFileId);
-
-      await binaryDao.delete(id);
+      if (gFileId) {
+        await GoogleFileAbl.delete(gFileId);
+        await this.dao.delete(id);
+      }
     } catch (e) {
-      throw new BinaryError.DeleteFailed(e);
+      throw new OcAppCore.Crud.Error.DeleteFailed(this.name, e);
     }
   }
 
-  static parseFormDataRequest(req) {
+  parseFormDataRequest(req) {
     return new Promise((resolve, reject) => upload.any()(req, null, (err) => err ? reject(err) : resolve()));
   }
 
-  static async #get(id) {
-    try {
-      return await binaryDao.get(id);
-    } catch (e) {
-      throw new BinaryError.DoesNotExists(e, { paramMap: { id } });
-    }
+  _getData(object) {
+    const { gFileId, ...data } = object;
+    return {
+      ...data,
+      uri: data.uri || GoogleFileAbl.getUri(gFileId),
+    };
   }
 }
 
-module.exports = BinaryAbl;
+module.exports = new BinaryAbl();

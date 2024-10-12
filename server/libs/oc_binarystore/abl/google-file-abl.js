@@ -1,8 +1,7 @@
 const { google } = require("googleapis");
 const fs = require("fs");
 const Config = require("../config/config");
-// TODO fix path to extended lib because of cyclic deps
-const AppError = require("../../oc_app-server/services/app-error");
+const OcAppCore = require("../../oc_app-core");
 
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
@@ -25,13 +24,13 @@ function googleFiles() {
 
 const ERROR_CODE_PREFIX = "oc_binarystore/google-file/";
 const Error = {
-  DoesNotExists: class extends AppError.DoesNotExists {
+  DoesNotExists: class extends OcAppCore.AppError.DoesNotExists {
     constructor(e, opts) {
       super("Binary does not exist", { cause: e, codePrefix: ERROR_CODE_PREFIX, ...opts });
     }
   },
 
-  CreateFailed: class extends AppError.Failed {
+  CreateFailed: class extends OcAppCore.AppError.Failed {
     static CODE = ERROR_CODE_PREFIX + "createFailed";
 
     constructor(e, opts) {
@@ -42,7 +41,7 @@ const Error = {
     }
   },
 
-  UpdateFailed: class extends AppError.Failed {
+  UpdateFailed: class extends OcAppCore.AppError.Failed {
     static CODE = ERROR_CODE_PREFIX + "updateFailed";
 
     constructor(e, opts) {
@@ -53,7 +52,7 @@ const Error = {
     }
   },
 
-  DeleteFailed: class extends AppError.Failed {
+  DeleteFailed: class extends OcAppCore.AppError.Failed {
     static CODE = ERROR_CODE_PREFIX + "deleteFailed";
 
     constructor(e, opts) {

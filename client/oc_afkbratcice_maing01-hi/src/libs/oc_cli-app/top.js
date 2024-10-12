@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, Utils, useStickyTop, useRoute, useLsi, useState } from "uu5g05";
+import { createVisualComponent, Utils, useStickyTop, useRoute, useLsi, useState, useScreenSize } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import OcAuth from "../oc_cli-auth";
 import Config from "./config/config.js";
@@ -16,9 +16,10 @@ function updateHref({ href, itemList, ...item }, setRoute) {
   return item;
 }
 
-function Photo() {
+function Photo({ screenSize }) {
   const session = OcAuth.useSession();
   const title = useLsi({ cs: "Přihlášený uživatel" });
+  const isSmall = screenSize === "xs";
 
   const [uri, setUri] = useState(session.identity.photo);
 
@@ -27,7 +28,11 @@ function Photo() {
       alt="User"
       src={uri}
       height="90%"
-      className={Config.Css.css({ marginLeft: -8, marginRight: -4, borderRadius: "50%" })}
+      className={Config.Css.css({
+        marginInlineStart: isSmall ? -24 : -8,
+        marginInlineEnd: isSmall ? -24 : -4,
+        borderRadius: "50%",
+      })}
       title={title}
       onError={() => setUri(anonymousUri)}
       referrerPolicy="no-referrer"
@@ -35,7 +40,7 @@ function Photo() {
   );
 }
 
-function getLoginButton(session, item) {
+function getLoginButton(session, screenSize, item) {
   let onClick,
     itemList,
     children,
@@ -44,7 +49,7 @@ function getLoginButton(session, item) {
   if (session.state === "notAuthenticated") onClick = () => session.login();
   else if (session.state === "authenticated") {
     icon = null;
-    children = <Photo />;
+    children = <Photo screenSize={screenSize} />;
     itemList = item?.itemList
       ? item.itemList
           .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
@@ -71,15 +76,18 @@ const Top = createVisualComponent({
 
   render(props) {
     const { logoUri, logoHref, logoTooltip, menuList, ...restProps } = props;
+    let { children } = restProps;
 
     const [, setRoute] = useRoute();
+    const [screenSize] = useScreenSize();
 
     const { ref, style, visibilityMatches, metrics } = useStickyTop("onScrollUp", true);
 
     const spacing = Uu5Elements.useSpacing();
 
-    const logoHeight = 160;
-    const buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
+    const logoHeight = screenSize === "xs" ? 80 : 136;
+    let buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
+    if (screenSize === "xs") buttonXlHeight /= 2;
 
     const logoStyles = {
       position: "absolute",
@@ -92,7 +100,7 @@ const Top = createVisualComponent({
     const coverStyles = {
       position: "relative",
       margin: "0 auto",
-      paddingLeft: logoStyles.height - 24,
+      paddingLeft: logoStyles.height - (screenSize === "xs" ? 16 : 24),
       transition: "padding 300ms ease",
     };
 
@@ -120,9 +128,9 @@ const Top = createVisualComponent({
     const updatedMenuList = [...menuList];
 
     if (identityItemIndex > -1) {
-      updatedMenuList[identityItemIndex] = getLoginButton(session, menuList[identityItemIndex]);
+      updatedMenuList[identityItemIndex] = getLoginButton(session, screenSize, menuList[identityItemIndex]);
     } else {
-      updatedMenuList.push(getLoginButton(session));
+      updatedMenuList.push(getLoginButton(session, screenSize));
     }
 
     //@@viewOn:render
@@ -135,24 +143,48 @@ const Top = createVisualComponent({
       }),
     );
 
+    const [menu, setMenu] = useState(null);
+
+    let itemList = updatedMenuList.map((item) => updateHref(item, setRoute));
+    if (screenSize === "xs") {
+      const identityItem = itemList.splice(identityItemIndex > -1 ? identityItemIndex : itemList.length - 1, 1)[0];
+      const hiddenMenu = itemList;
+      const hiddenIdentity = identityItem.itemList;
+      delete identityItem.itemList;
+
+      itemList = [
+        { icon: "uugds-menu", onClick: () => setMenu(menu ? null : hiddenMenu) },
+        { ...identityItem, onClick: () => setMenu(menu ? null : hiddenIdentity) },
+      ];
+
+      children = (
+        <Uu5Elements.Drawer
+          open={!!menu}
+          onClose={() => setMenu(null)}
+          content={menu ? <Uu5Elements.MenuList itemBorderRadius="moderate" itemList={menu} /> : null}
+          position="right"
+        >
+          {children}
+        </Uu5Elements.Drawer>
+      );
+    }
+
     return (
-      <div {...attrs} ref={ref}>
-        <div className={Config.Css.css(coverStyles)}>
-          <img
-            alt={logoTooltip}
-            src={logoUri}
-            className={Config.Css.css(logoStyles)}
-            onClick={() => setRoute(logoHref)}
-            title={logoTooltip}
-          />
-          <Uu5Elements.ButtonGroup
-            itemList={updatedMenuList.map((item) => updateHref(item, setRoute))}
-            borderRadius="none"
-            size="xl"
-            significance="subdued"
-          />
+      <>
+        <div {...attrs} ref={ref}>
+          <div className={Config.Css.css(coverStyles)}>
+            <img
+              alt={logoTooltip}
+              src={logoUri}
+              className={Config.Css.css(logoStyles)}
+              onClick={() => setRoute(logoHref)}
+              title={logoTooltip}
+            />
+            <Uu5Elements.ActionGroup itemList={itemList} size="xl" />
+          </div>
         </div>
-      </div>
+        {children}
+      </>
     );
     //@@viewOff:render
   },

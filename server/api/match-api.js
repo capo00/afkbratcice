@@ -1,9 +1,8 @@
 const UuDataTypes = require("uu_datatypesg01");
-const OcBinaryStore = require("../libs/oc_binarystore");
-const Abl = OcBinaryStore.Abl.Binary;
+const Abl = require("../abl/match-abl");
 
 module.exports = {
-  "binary/list": {
+  "match/list": {
     method: "get",
     validator: UuDataTypes.exact({
       pageInfo: UuDataTypes.exact({
@@ -16,7 +15,7 @@ module.exports = {
       return { itemList };
     },
   },
-  "binary/get": {
+  "match/get": {
     method: "get",
     validator: UuDataTypes.exact({
       id: UuDataTypes.string,
@@ -25,36 +24,55 @@ module.exports = {
       return await Abl.get(dtoIn.id);
     },
   },
-  "binary/create": {
+  "match/create": {
     method: "post",
     auth: ["operatives"],
     // TODO add file or shape/object to UuDataTypes
     // validator: UuDataTypes.exact({
-    //   name: UuDataTypes.string,
-    //   file: UuDataTypes.file,
-    //   tagList: UuDataTypes.array,
+    //   homeTeamId: UuDataTypes.string,
+    //   guestTeamId: UuDataTypes.string,
+    //   seasonId: UuDataTypes.string,
+    //   playerList: UuDataTypes.array,
+    //   round: UuDataTypes.string,
+    //   time: UuDataTypes.string,
+    //   place: UuDataTypes.string,
+    //   departureTime: UuDataTypes.string,
+    //   homeGoals: UuDataTypes.number,
+    //   guestGoals: UuDataTypes.number,
+    //   homeGoalsHalf: UuDataTypes.number,
+    //   guestGoalsHalf: UuDataTypes.number,
+    //   penalty: UuDataTypes.bool,
     // }),
     fn: async ({ dtoIn }) => {
-      console.log("dtoIn", dtoIn);
       return await Abl.create(dtoIn);
     },
   },
-  "binary/update": {
+  "match/update": {
     method: "post",
     auth: ["operatives"],
     // TODO add file or shape/object to UuDataTypes
     // validator: UuDataTypes.exact({
     //   id: UuDataTypes.string,
-    //   name: UuDataTypes.string,
-    //   file: UuDataTypes.file,
-    //   tagList: UuDataTypes.array,
+    //   homeTeamId: UuDataTypes.string,
+    //   guestTeamId: UuDataTypes.string,
+    //   seasonId: UuDataTypes.string,
+    //   playerList: UuDataTypes.array,
+    //   round: UuDataTypes.string,
+    //   time: UuDataTypes.string,
+    //   place: UuDataTypes.string,
+    //   departureTime: UuDataTypes.string,
+    //   homeGoals: UuDataTypes.number,
+    //   guestGoals: UuDataTypes.number,
+    //   homeGoalsHalf: UuDataTypes.number,
+    //   guestGoalsHalf: UuDataTypes.number,
+    //   penalty: UuDataTypes.bool,
     // }),
     fn: async ({ dtoIn }) => {
       delete dtoIn.sys;
       return await Abl.update(dtoIn);
     },
   },
-  "binary/delete": {
+  "match/delete": {
     method: "post",
     auth: ["operatives"],
     validator: UuDataTypes.exact({

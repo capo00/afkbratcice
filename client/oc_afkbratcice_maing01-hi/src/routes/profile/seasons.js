@@ -1,8 +1,8 @@
 //@@viewOn:imports
-import { createVisualComponent } from "uu5g05";
+import { Utils, createVisualComponent } from "uu5g05";
 import Config from "../config/config.js";
 import * as OcApp from "../../libs/oc_cli-app";
-import TeamCrud from "../../core/team/team-crud";
+import SeasonCrud from "../../core/season/season-crud";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -14,10 +14,10 @@ import TeamCrud from "../../core/team/team-crud";
 //@@viewOn:helpers
 //@@viewOff:helpers
 
-const Teams = OcApp.withRoute(
+const Seasons = OcApp.withRoute(
   createVisualComponent({
     //@@viewOn:statics
-    uu5Tag: Config.TAG + "Teams",
+    uu5Tag: Config.TAG + "Seasons",
     //@@viewOff:statics
 
     //@@viewOn:propTypes
@@ -36,7 +36,7 @@ const Teams = OcApp.withRoute(
       //@@viewOff:interface
 
       //@@viewOn:render
-      return <TeamCrud />;
+      return <SeasonCrud />;
       //@@viewOff:render
     },
   }),
@@ -44,6 +44,6 @@ const Teams = OcApp.withRoute(
 );
 
 //@@viewOn:exports
-export { Teams };
-export default Teams;
+export { Seasons };
+export default Seasons;
 //@@viewOff:exports
