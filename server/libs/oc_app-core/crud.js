@@ -36,6 +36,13 @@ const CrudError = {
       super(`Deleting of ${name} was failed`, { cause: e, code, ...opts });
     }
   },
+
+  DeleteManyFailed: class extends AppError.Failed {
+    constructor(name, e, opts) {
+      const code = [ERROR_CODE_PREFIX, name, "deleteManyFailed"].join("/");
+      super(`Deleting many of ${name} was failed`, { cause: e, code, ...opts });
+    }
+  },
 }
 
 class Crud {
@@ -92,6 +99,14 @@ class Crud {
     }
   }
 
+  async deleteMany(idList) {
+    try {
+      return await this.dao.deleteMany(idList);
+    } catch (e) {
+      throw new CrudError.DeleteManyFailed(this.name, e);
+    }
+  }
+
   async _get(id) {
     try {
       return await this.dao.get(id);
@@ -100,7 +115,7 @@ class Crud {
     }
   }
 
-  _getData(object) {
+  _getData({ _id, ...object }) {
     return object;
   }
 }

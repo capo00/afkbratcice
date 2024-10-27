@@ -46,6 +46,26 @@ module.exports = {
       return await Abl.create(dtoIn);
     },
   },
+  "match/createMany": {
+    method: "post",
+    auth: ["operatives"],
+    // validator: UuDataTypes.exact({
+    //   itemList: UuDataTypes.arrayOf(UuDataTypes.exact({
+    //     seasonId: UuDataTypes.string,
+    //     homeTeamId: UuDataTypes.string,
+    //     guestTeamId: UuDataTypes.string,
+    //     round: UuDataTypes.string,
+    //     time: UuDataTypes.string,
+    //     homeGoals: UuDataTypes.number,
+    //     guestGoals: UuDataTypes.number,
+    //     homeGoalsHalf: UuDataTypes.number,
+    //     guestGoalsHalf: UuDataTypes.number,
+    //   })),
+    // }),
+    fn: async ({ dtoIn }) => {
+      return await Abl.createMany(dtoIn.itemList);
+    },
+  },
   "match/update": {
     method: "post",
     auth: ["operatives"],
@@ -80,20 +100,14 @@ module.exports = {
       return await Abl.delete(dtoIn.id);
     },
   },
-  "match/createMany": {
+  "match/deleteMany": {
     method: "post",
     auth: ["operatives"],
-    // validator: UuDataTypes.exact({
-    //   itemList: UuDataTypes.arrayOf(UuDataTypes.exact({
-    //     seasonId: UuDataTypes.string,
-    //     homeTeamId: UuDataTypes.string,
-    //     guestTeamId: UuDataTypes.string,
-    //     round: UuDataTypes.string,
-    //     time: UuDataTypes.string,
-    //   })),
-    // }),
+    validator: UuDataTypes.exact({
+      idList: UuDataTypes.arrayOf(UuDataTypes.string),
+    }),
     fn: async ({ dtoIn }) => {
-      return await Abl.createMany(dtoIn.itemList);
+      return await Abl.deleteMany(dtoIn.idList);
     },
   },
 }

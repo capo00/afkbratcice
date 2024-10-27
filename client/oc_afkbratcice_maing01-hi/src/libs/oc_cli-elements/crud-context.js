@@ -11,6 +11,7 @@ function getCalls(entity) {
     createMany: (dtoIn) => Call.cmdPost(entity + "/createMany", dtoIn),
     updateItem: (dtoIn) => Call.cmdPost(entity + "/update", dtoIn),
     deleteItem: (dtoIn) => Call.cmdPost(entity + "/delete", dtoIn),
+    deleteMany: (dtoIn) => Call.cmdPost(entity + "/deleteMany", dtoIn),
   };
 }
 
@@ -42,6 +43,7 @@ const CrudContext = {
             load: calls.load,
             create: calls.createItem,
             createMany: calls.createMany,
+            deleteMany: calls.deleteMany,
           },
           itemHandlerMap: {
             delete: calls.deleteItem,

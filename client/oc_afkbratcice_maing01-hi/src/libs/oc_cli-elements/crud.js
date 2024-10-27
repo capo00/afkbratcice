@@ -13,7 +13,7 @@ function getSortFn(sort, code) {
   let fn;
   switch (typeof sort) {
     case "function":
-      fn = (a, b) => a.data ? sort(a.data[code], b.data[code], a, b) : 0;
+      fn = (a, b) => (a.data ? sort(a.data[code], b.data[code], a, b) : 0);
       break;
     default:
       fn = (a, b) => {
@@ -133,6 +133,35 @@ const FormModal = createComponent({
   },
 });
 
+function BulkActionBar({ handlerMap, setRemoveData }) {
+  const { selectedData } = Uu5Tiles.useController();
+
+  return (
+    <Uu5TilesControls.BulkActionBar
+      actionList={[
+        {
+          icon: "uugds-delete",
+          children: "Delete",
+          colorScheme: "negative",
+          onClick: (e) => {
+            setRemoveData({
+              callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
+              header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
+              info: (
+                <Lsi
+                  lsi={{
+                    cs: `Opravdu chcete smazat položky?`,
+                  }}
+                />
+              ),
+            });
+          },
+        },
+      ]}
+    />
+  );
+}
+
 const Crud = createVisualComponent({
   //@@viewOn:statics
   uu5Tag: Config.TAG + "Crud",
@@ -197,9 +226,20 @@ const Crud = createVisualComponent({
           {
             icon: "uugds-delete",
             children: <Lsi lsi={{ cs: "Smazat" }} />,
-            colorScheme: "red",
+            colorScheme: "negative",
             disabled: data.state === "pending",
-            onClick: () => setRemoveData({ callback: data.handlerMap.delete, id: data.data.id, name: data.data.name }),
+            onClick: () =>
+              setRemoveData({
+                callback: () => data.handlerMap.delete({ id: data.data.id }),
+                header: <Lsi lsi={{ cs: "Smazat položku?" }} />,
+                info: (
+                  <Lsi
+                    lsi={{
+                      cs: `Opravdu chcete smazat položku${data.data.name ? ` "${data.data.name}"` : ""}?`,
+                    }}
+                  />
+                ),
+              }),
           },
         ];
 
@@ -263,6 +303,7 @@ const Crud = createVisualComponent({
           filterDefinitionList={filterDefinitionList}
           filterList={filterList}
           onFilterChange={(e) => setFilterList(e.data.filterList)}
+          selectable="multiple"
         >
           <Uu5Elements.Block {...blockProps} actionList={actionList}>
             {filterDefinitionList && (
@@ -271,6 +312,7 @@ const Crud = createVisualComponent({
                 <Uu5TilesControls.FilterManagerModal />
               </>
             )}
+            <BulkActionBar handlerMap={handlerMap} setRemoveData={setRemoveData} />
             <Uu5TilesElements.List
               columnList={
                 state === "pendingNoData"
@@ -345,14 +387,8 @@ const Crud = createVisualComponent({
           open={!!removeData}
           onClose={() => setRemoveData()}
           icon={<Uu5Elements.Svg code="uugdssvg-svg-delete" />}
-          header={<Lsi lsi={{ cs: "Smazat položku?" }} />}
-          info={
-            <Lsi
-              lsi={{
-                cs: `Opravdu chcete smazat položku${removeData?.name ? ` "${removeData.name}"` : ""}?`,
-              }}
-            />
-          }
+          header={removeData?.header}
+          info={removeData?.info}
           actionDirection="horizontal"
           actionList={[
             {
@@ -363,10 +399,10 @@ const Crud = createVisualComponent({
             {
               children: <Lsi lsi={{ cs: "Smazat" }} />,
               onClick: (e) => {
-                removeData.callback({ id: removeData.id });
+                removeData.callback();
                 setRemoveData();
               },
-              colorScheme: "red",
+              colorScheme: "negative",
               significance: "highlighted",
             },
           ]}

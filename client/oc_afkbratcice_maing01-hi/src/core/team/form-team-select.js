@@ -32,6 +32,7 @@ const FormTeamSelect = createVisualComponent({
         }
       });
       data.sort((a, b) => a.name.localeCompare(b.name));
+      // console.log(JSON.stringify(Object.fromEntries(data.map((item) => [item.name, item.id]))));
     }
 
     //@@viewOn:render

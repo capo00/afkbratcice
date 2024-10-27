@@ -121,6 +121,10 @@ class Dao {
     await this._exec(() => this.coll.deleteOne(convertId({ id })));
   }
 
+  async deleteMany(idList) {
+    await this._exec(() => this.coll.deleteMany({ _id: { $in: idList.map((id) => new ObjectId(id)) } }));
+  }
+
   _find(filter, options, sort, skip, limit) {
     return this.coll
       .find(convertId(filter), options)
