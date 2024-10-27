@@ -1,6 +1,6 @@
 //@@viewOn:imports
 import { createVisualComponent, Lsi } from "uu5g05";
-import Uu5Forms, { FormSwitchSelect } from "uu5g05-forms";
+import Uu5Forms from "uu5g05-forms";
 import Uu5ImagingTools from "uu5imagingg01-tools";
 import Config from "../config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
@@ -40,7 +40,7 @@ const CONFIG = {
     label: { cs: "Velikost" },
     output: false,
     input: {
-      Component: FormSwitchSelect,
+      Component: Uu5Forms.FormSwitchSelect,
       props: {
         itemList: Object.entries(ADJUSTMENT_MAP).map(([value, children]) => ({ value, children })),
         initialValue: Object.keys(ADJUSTMENT_MAP)[0],

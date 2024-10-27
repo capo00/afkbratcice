@@ -24,7 +24,7 @@ const Router = createComponent({
           rewrite: PropTypes.string,
           redirect: PropTypes.string,
         }),
-      ])
+      ]),
     ),
     errorFallback: PropTypes.func,
   },

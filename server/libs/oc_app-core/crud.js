@@ -16,6 +16,13 @@ const CrudError = {
     }
   },
 
+  CreateManyFailed: class extends AppError.Failed {
+    constructor(name, e, opts) {
+      const code = [ERROR_CODE_PREFIX, name, "createManyFailed"].join("/");
+      super(`Creating many of ${name} was failed`, { cause: e, code, ...opts });
+    }
+  },
+
   UpdateFailed: class extends AppError.Failed {
     constructor(name, e, opts) {
       const code = [ERROR_CODE_PREFIX, name, "updateFailed"].join("/");
@@ -51,6 +58,15 @@ class Crud {
       return this._getData(await this.dao.create(data));
     } catch (e) {
       throw new CrudError.CreateFailed(this.name, e);
+    }
+  }
+
+  async createMany(data) {
+    try {
+      const daoDtoOut = await this.dao.createMany(data);
+      return daoDtoOut.map((item) => this._getData(item));
+    } catch (e) {
+      throw new CrudError.CreateManyFailed(this.name, e);
     }
   }
 

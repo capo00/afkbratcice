@@ -16,14 +16,21 @@ class TeamAbl extends OcAppCore.Crud {
 
   async create(item) {
     const { logo: logoFile, ...restParams } = item;
-    const logo = await OcBinaryStore.Abl.Binary.create({ file: logoFile, tagList: CREATE_TAG_LIST });
+    let logo = {};
+
+    if (logoFile) {
+      logo = await OcBinaryStore.Abl.Binary.create({ file: logoFile, tagList: CREATE_TAG_LIST });
+    }
+
     try {
       return await super.create({ ...restParams, logoId: logo.id, logoUri: logo.uri });
     } catch (e) {
-      try {
-        await OcBinaryStore.Abl.Binary.delete(logo.id);
-      } catch (e) {
-        console.error("Binary cannot be deleted", logo.id);
+      if (logoFile) {
+        try {
+          await OcBinaryStore.Abl.Binary.delete(logo.id);
+        } catch (e) {
+          console.error("Binary cannot be deleted", logo.id);
+        }
       }
       throw e;
     }

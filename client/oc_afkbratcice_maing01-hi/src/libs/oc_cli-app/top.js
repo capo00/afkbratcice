@@ -154,7 +154,7 @@ const Top = createVisualComponent({
 
       itemList = [
         { icon: "uugds-menu", onClick: () => setMenu(menu ? null : hiddenMenu) },
-        { ...identityItem, onClick: () => setMenu(menu ? null : hiddenIdentity) },
+        { ...identityItem, onClick: identityItem.onClick ?? (() => setMenu(menu ? null : hiddenIdentity)) },
       ];
 
       children = (

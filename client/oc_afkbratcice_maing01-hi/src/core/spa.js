@@ -11,6 +11,7 @@ const Home = Utils.Component.lazy(() => import("../routes/home.js"));
 const Teams = Utils.Component.lazy(() => import("../routes/profile/teams.js"));
 const Binaries = Utils.Component.lazy(() => import("../routes/profile/binaries.js"));
 const Seasons = Utils.Component.lazy(() => import("../routes/profile/seasons.js"));
+const Matches = Utils.Component.lazy(() => import("../routes/profile/matches.js"));
 const TheChase = Utils.Component.lazy(() => import("../routes/the-chase.js"));
 //@@viewOff:imports
 
@@ -45,6 +46,7 @@ const MENU = [
       { children: "Týmy", href: "profile/teams", profile: "operatives" },
       { children: "Soubory", href: "profile/binaries", profile: "operatives" },
       { children: "Sezóny", href: "profile/seasons", profile: "operatives" },
+      { children: "Zápasy", href: "profile/matches", profile: "operatives" },
     ],
   },
 ];
@@ -55,6 +57,7 @@ const ROUTE_MAP = {
   "profile/teams": (props) => <Teams {...props} />,
   "profile/binaries": (props) => <Binaries {...props} />,
   "profile/seasons": (props) => <Seasons {...props} />,
+  "profile/matches": (props) => <Matches {...props} />,
   theChase: (props) => <TheChase {...props} />,
   // controlPanel: (props) => <ControlPanel {...props} />,
   "*": () => (

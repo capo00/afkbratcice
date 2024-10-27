@@ -27,7 +27,6 @@ module.exports = {
   "match/create": {
     method: "post",
     auth: ["operatives"],
-    // TODO add file or shape/object to UuDataTypes
     // validator: UuDataTypes.exact({
     //   homeTeamId: UuDataTypes.string,
     //   guestTeamId: UuDataTypes.string,
@@ -50,7 +49,6 @@ module.exports = {
   "match/update": {
     method: "post",
     auth: ["operatives"],
-    // TODO add file or shape/object to UuDataTypes
     // validator: UuDataTypes.exact({
     //   id: UuDataTypes.string,
     //   homeTeamId: UuDataTypes.string,
@@ -80,6 +78,22 @@ module.exports = {
     }),
     fn: async ({ dtoIn }) => {
       return await Abl.delete(dtoIn.id);
+    },
+  },
+  "match/createMany": {
+    method: "post",
+    auth: ["operatives"],
+    // validator: UuDataTypes.exact({
+    //   itemList: UuDataTypes.arrayOf(UuDataTypes.exact({
+    //     seasonId: UuDataTypes.string,
+    //     homeTeamId: UuDataTypes.string,
+    //     guestTeamId: UuDataTypes.string,
+    //     round: UuDataTypes.string,
+    //     time: UuDataTypes.string,
+    //   })),
+    // }),
+    fn: async ({ dtoIn }) => {
+      return await Abl.createMany(dtoIn.itemList);
     },
   },
 }

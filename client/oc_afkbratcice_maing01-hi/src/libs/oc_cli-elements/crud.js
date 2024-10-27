@@ -1,10 +1,11 @@
 //@@viewOn:imports
-import { createVisualComponent, createComponent, useCallback, useState, Lsi } from "uu5g05";
+import { createVisualComponent, createComponent, useCallback, useState, Lsi, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import Uu5Tiles from "uu5tilesg02";
 import Uu5TilesElements from "uu5tilesg02-elements";
 import Uu5TilesControls from "uu5tilesg02-controls";
+import Uu5CodeKit from "uu5codekitg01";
 import Config from "./config/config.js";
 
 //@@viewOff:imports
@@ -12,20 +13,24 @@ function getSortFn(sort, code) {
   let fn;
   switch (typeof sort) {
     case "function":
-      fn = (a, b) => sort(a.data[code], b.data[code], a, b);
+      fn = (a, b) => a.data ? sort(a.data[code], b.data[code], a, b) : 0;
       break;
     default:
       fn = (a, b) => {
-        if (sort === -1) [b, a] = [a, b];
-
-        const aValue = a.data[code];
-        const bValue = b.data[code];
-
         let result;
-        if (typeof aValue === "string" && typeof bValue === "string") {
-          result = aValue.localeCompare(bValue);
+        if (!a.data) {
+          result = 0;
         } else {
-          result = aValue < bValue ? -1 : 1;
+          if (sort === -1) [b, a] = [a, b];
+
+          const aValue = a.data[code];
+          const bValue = b.data[code];
+
+          if (typeof aValue === "string" && typeof bValue === "string") {
+            result = aValue.localeCompare(bValue);
+          } else {
+            result = aValue < bValue ? -1 : 1;
+          }
         }
 
         return result;
@@ -58,18 +63,18 @@ function generate(cfg) {
         value: code,
         ...(sort || horizontalAlignment
           ? {
-              headerComponent: (
-                <Uu5TilesElements.Table.HeaderCell
-                  horizontalAlignment={horizontalAlignment}
-                  sorterKey={sort ? code : undefined}
-                />
-              ),
-            }
+            headerComponent: (
+              <Uu5TilesElements.Table.HeaderCell
+                horizontalAlignment={horizontalAlignment}
+                sorterKey={sort ? code : undefined}
+              />
+            ),
+          }
           : null),
         ...(horizontalAlignment
           ? {
-              cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment={horizontalAlignment} />,
-            }
+            cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment={horizontalAlignment} />,
+          }
           : null),
         ...restColumnProps,
       });
@@ -89,7 +94,7 @@ function generate(cfg) {
         label,
         ...filterProps,
         filter: (item, value) => {
-          if (value === undefined) return true;
+          if (value === undefined || !item.data) return true;
           return filterProps.filter(item.data[code], value, item);
         },
       });
@@ -98,6 +103,7 @@ function generate(cfg) {
 
   return { seriesList, columnList, sorterList, filterList };
 }
+
 function ModalFooter({ onClose }) {
   const count = onClose ? 2 : 1;
 
@@ -113,7 +119,7 @@ function ModalFooter({ onClose }) {
   );
 }
 
-const CreateUpdateModal = createComponent({
+const FormModal = createComponent({
   render(props) {
     const { onSubmit, onClose, open, initialValue, children, ...modalProps } = props;
 
@@ -146,16 +152,20 @@ const Crud = createVisualComponent({
       columnList,
       seriesList,
       sorterDefinitionList,
+      initialSorterList,
       filterDefinitionList,
+      initialFilterList,
       children,
       onPreSubmit,
       ...blockProps
     } = props;
 
     const [editData, setEditData] = useState();
+    const [manyData, setManyData] = useState();
     const [removeData, setRemoveData] = useState();
-    const [sorterList, setSorterList] = useState();
-    const [filterList, setFilterList] = useState();
+    const [sorterList, setSorterList] = useState(initialSorterList);
+    const [filterList, setFilterList] = useState(initialFilterList);
+    const [displayData, setDisplayData] = useState();
 
     const { state, data, handlerMap, pageSize } = dataList;
 
@@ -170,16 +180,36 @@ const Crud = createVisualComponent({
       [handlerMap.loadNext],
     );
 
-    const disabled = state === "pendingNoData";
+    const disabled = state === "itemPending";
     const getActionList = useCallback(
       ({ rowIndex, data }) => {
-        const actionList = [
+        const items = [
+          {
+            icon: "uugdsstencil-it-json",
+            children: <Lsi lsi={{ cs: "Zobrazit data" }} />,
+            onClick: () => setDisplayData(data.data),
+          },
+          {
+            icon: "uugds-copy",
+            children: <Lsi lsi={{ cs: "Zkopírovat ID" }} />,
+            onClick: () => Utils.Clipboard.write(data.data.id),
+          },
           {
             icon: "uugds-delete",
-            tooltip: { cs: "Smazat" },
+            children: <Lsi lsi={{ cs: "Smazat" }} />,
             colorScheme: "red",
-            disabled,
+            disabled: data.state === "pending",
             onClick: () => setRemoveData({ callback: data.handlerMap.delete, id: data.data.id, name: data.data.name }),
+          },
+        ];
+
+        let actionList = [
+          {
+            icon: "uugds-menu",
+            tooltip: { cs: "Více" },
+            itemList: items,
+            iconOpen: null,
+            iconClosed: null,
           },
         ];
 
@@ -187,9 +217,12 @@ const Crud = createVisualComponent({
           actionList.unshift({
             icon: "uugds-pencil",
             tooltip: { cs: "Upravit" },
-            disabled,
+            disabled: data.state === "pending",
             onClick: () => setEditData({ callback: data.handlerMap.update, data: data.data }),
           });
+        } else {
+          actionList.unshift(items.shift());
+          actionList[1].itemList = items;
         }
 
         return actionList;
@@ -202,9 +235,16 @@ const Crud = createVisualComponent({
       actionList.push({
         children: <Lsi lsi={{ cs: "Vytvořit" }} />,
         icon: "uugds-plus",
-        onClick: () => setEditData({ callback: handlerMap.create }),
+        onLabelClick: () => setEditData({ callback: handlerMap.create }),
         colorScheme: "primary",
         significance: "common",
+        itemList: [
+          {
+            children: <Lsi lsi={{ cs: "Hromadně" }} />,
+            icon: "uugds-plus",
+            onClick: () => setManyData({ callback: handlerMap.createMany }),
+          },
+        ],
       });
     }
     if (filterDefinitionList) {
@@ -227,7 +267,7 @@ const Crud = createVisualComponent({
           <Uu5Elements.Block {...blockProps} actionList={actionList}>
             {filterDefinitionList && (
               <>
-                <Uu5TilesControls.FilterBar />
+                <Uu5TilesControls.FilterBar initialExpanded={!!initialFilterList?.length} />
                 <Uu5TilesControls.FilterManagerModal />
               </>
             )}
@@ -251,7 +291,7 @@ const Crud = createVisualComponent({
         </Uu5Tiles.ControllerProvider>
 
         {children && !!editData && (
-          <CreateUpdateModal
+          <FormModal
             header={<Lsi lsi={{ cs: editData?.data ? "Upravit" : "Vytvořit" }} />}
             open={!!editData}
             onClose={() => setEditData()}
@@ -271,7 +311,34 @@ const Crud = createVisualComponent({
             initialValue={editData?.data}
           >
             {typeof children === "function" ? children({ type: editData?.data ? "update" : "create" }) : children}
-          </CreateUpdateModal>
+          </FormModal>
+        )}
+
+        {manyData && (
+          <FormModal
+            header={<Lsi lsi={{ cs: "Vytvořit hromadně" }} />}
+            open={!!manyData}
+            onClose={() => setManyData()}
+            onSubmit={async (e) => {
+              const { itemList } = e.data.value;
+              if (itemList != null) await manyData.callback({ itemList: JSON.parse(itemList) });
+              setManyData();
+            }}
+          >
+            <Uu5Forms.Form.View>
+              <Uu5CodeKit.FormJson name="itemList" format="pretty" displayGutter={false} required />
+            </Uu5Forms.Form.View>
+          </FormModal>
+        )}
+
+        {displayData && (
+          <Uu5Elements.Modal
+            header={<Lsi lsi={{ cs: "Data" }} />}
+            open={!!displayData}
+            onClose={() => setDisplayData()}
+          >
+            <Uu5CodeKit.Json.Input value={displayData} format="pretty" displayGutter={false} readOnly />
+          </Uu5Elements.Modal>
         )}
 
         <Uu5Elements.Dialog

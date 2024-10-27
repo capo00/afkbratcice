@@ -1,74 +1,28 @@
 //@@viewOn:imports
 import { createVisualComponent, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms, { useFormApi } from "uu5g05-forms";
+import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
 import { SeasonProvider } from "./season-context";
-import { TeamProvider, useTeam } from "../team/team-context";
+import { TeamProvider } from "../team/team-context";
 import ageConfig from "../config/age-config";
+import FormTeamSelect from "../team/form-team-select";
+import TeamLink from "../team/team-link";
 //@@viewOff:imports
 
 //@@viewOn:constants
 const COMPETITION_LIST = ["IV. třída", "III. třída", "Okresní přebor"];
 
-function TeamLink({ id, teamList }) {
-  const data = teamList.find(({ data }) => data.id === id)?.data ?? {};
-
-  return (
-    <Uu5Elements.Link href="#" className={Config.Css.css({ display: "inline-flex", alignItems: "center" })}>
-      <OcElements.Image
-        src={data.logoUri}
-        alt="Logo"
-        className={Config.Css.css({
-          height: "1.3em",
-          marginInlineEnd: "0.7em",
-        })}
-      />
-      {data.name}
-    </Uu5Elements.Link>
-  );
-}
-
 function TeamItems({ itemList }) {
-  const { data } = useTeam();
   return (
     <>
       {itemList?.map?.((id) => (
         <div key={id} className={Config.Css.css({ "& + &": { marginTop: 8 } })}>
-          <TeamLink id={id} teamList={data} />
+          <TeamLink id={id} />
         </div>
       ))}
     </>
-  );
-}
-
-function FormTeams(props) {
-  const formApi = useFormApi();
-  const { data: teamData } = useTeam();
-
-  let data;
-  if (teamData) {
-    data = [];
-    teamData.forEach(({ data: team }) => {
-      if (team.age === formApi.value.age) {
-        data.push(team);
-      }
-    });
-    data.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  const Component = data ? Uu5Forms.FormTextSelect : Uu5Forms.TextSelect;
-
-  return (
-    <Component
-      {...props}
-      pending={!data}
-      itemList={data?.map(({ id, name }) => ({
-        value: id,
-        children: name,
-      }))}
-    />
   );
 }
 
@@ -114,7 +68,7 @@ const CONFIG = {
     label: { cs: "Týmy" },
     output: (value, item) => <TeamItems itemList={value} />,
     input: {
-      Component: FormTeams,
+      Component: FormTeamSelect,
       props: {
         multiple: true,
       },

@@ -6,7 +6,7 @@ class MatchDao extends Dao {
   }
 
   createIndexes() {
-    super.createIndex({ seasonId: 1, teamHomeId: 1, teamGuestId: 1 }, { unique: true });
+    super.createIndex({ seasonId: 1, homeTeamId: 1, guestTeamId: 1 }, { unique: true });
     super.createIndex({ time: 1 });
   }
 }
