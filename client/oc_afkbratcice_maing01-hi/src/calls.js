@@ -10,16 +10,6 @@ const CALLS_BASE_URI =
   (process.env.NODE_ENV !== "production" ? Environment.get("callsBaseUri") : null) || Environment.appBaseUri;
 
 const Calls = {
-  loadTeams(dtoIn) {
-    const commandUri = Calls.getCommandUri("team/list");
-    return Call.get(commandUri, dtoIn);
-  },
-
-  createBinary(dtoIn) {
-    const commandUri = Calls.getCommandUri("binary/create");
-    return Call.post(commandUri, dtoIn);
-  },
-
   // // example for mock calls
   // loadDemoContent(dtoIn) {
   //   const commandUri = Calls.getCommandUri("loadDemoContent");

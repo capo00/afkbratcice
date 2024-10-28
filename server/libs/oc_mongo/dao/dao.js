@@ -89,6 +89,10 @@ class Dao {
     return this.find(undefined, pageInfo);
   }
 
+  listByIdList(idList) {
+    return this.find({ _id: { $in: idList.map((id) => new ObjectId(id)) } });
+  }
+
   get(id) {
     return this.findOne({ id });
   }

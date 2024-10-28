@@ -52,7 +52,7 @@ class Crud {
     this.dao = dao;
   }
 
-  async list(pageInfo) {
+  async list({ pageInfo }) {
     return (await this.dao.list(pageInfo)).map(this._getData);
   }
 

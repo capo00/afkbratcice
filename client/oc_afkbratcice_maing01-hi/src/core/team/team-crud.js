@@ -83,7 +83,6 @@ const TeamCrud = createVisualComponent({
         {(dataList) => (
           <OcElements.Crud
             header={<Lsi lsi={{ cs: "Týmy" }} />}
-            headerType="heading"
             {...props}
             dataList={dataList}
             seriesList={seriesList}

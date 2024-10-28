@@ -11,7 +11,7 @@ module.exports = {
       }),
     }),
     fn: async ({ dtoIn }) => {
-      const itemList = await Abl.list(dtoIn?.pageInfo);
+      const itemList = await Abl.list(dtoIn);
       return { itemList };
     },
   },
@@ -108,6 +108,24 @@ module.exports = {
     }),
     fn: async ({ dtoIn }) => {
       return await Abl.deleteMany(dtoIn.idList);
+    },
+  },
+  "match/getLast": {
+    method: "get",
+    validator: UuDataTypes.exact({
+      teamId: UuDataTypes.string,
+    }),
+    fn: async ({ dtoIn }) => {
+      return await Abl.getLast(dtoIn);
+    },
+  },
+  "match/getNext": {
+    method: "get",
+    validator: UuDataTypes.exact({
+      teamId: UuDataTypes.string,
+    }),
+    fn: async ({ dtoIn }) => {
+      return await Abl.getNext(dtoIn);
     },
   },
 }

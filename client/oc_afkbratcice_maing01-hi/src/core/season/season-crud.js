@@ -8,7 +8,7 @@ import { SeasonProvider } from "./season-context";
 import { TeamProvider } from "../team/team-context";
 import ageConfig from "../config/age-config";
 import FormTeamSelect from "../team/form-team-select";
-import TeamLink from "../team/team-link";
+import TeamItem from "../team/team-item";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -19,7 +19,7 @@ function TeamItems({ itemList }) {
     <>
       {itemList?.map?.((id) => (
         <div key={id} className={Config.Css.css({ "& + &": { marginTop: 8 } })}>
-          <TeamLink id={id} />
+          <TeamItem id={id} />
         </div>
       ))}
     </>
@@ -30,7 +30,7 @@ const CONFIG = {
   age: ageConfig,
   competition: {
     label: { cs: "Soutěž" },
-    columnProps: { maxWidth: "m" },
+    columnProps: { maxWidth: 160 },
     sort: (a, b) => COMPETITION_LIST.indexOf(a) - COMPETITION_LIST.indexOf(b),
     filterProps: {
       filter: (itemValue, value) => itemValue?.every?.((v) => value.includes(v)),
@@ -49,8 +49,8 @@ const CONFIG = {
     },
   },
   yearFrom: {
-    label: { cs: "Rok zahájení" },
-    columnProps: { maxWidth: "m" },
+    label: { cs: "Rok" },
+    columnProps: { maxWidth: "min-content" },
     sort: true,
     filterProps: {
       filter: (itemValue, value) => itemValue >= value[0] && itemValue <= value[1],
@@ -67,6 +67,7 @@ const CONFIG = {
   teamList: {
     label: { cs: "Týmy" },
     output: (value, item) => <TeamItems itemList={value} />,
+    columnProps: { maxWidth: 264 },
     input: {
       Component: FormTeamSelect,
       props: {
@@ -117,7 +118,6 @@ const SeasonCrud = createVisualComponent({
           {(dataList) => (
             <OcElements.Crud
               header={<Lsi lsi={{ cs: "Sezóny" }} />}
-              headerType="heading"
               {...props}
               dataList={dataList}
               seriesList={seriesList}

@@ -153,7 +153,6 @@ const BinaryCrud = createVisualComponent({
         {(dataList) => (
           <OcElements.Crud
             header={<Lsi lsi={{ cs: "Soubory" }} />}
-            headerType="heading"
             {...props}
             dataList={dataList}
             seriesList={seriesList}

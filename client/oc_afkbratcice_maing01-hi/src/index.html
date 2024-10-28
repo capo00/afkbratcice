@@ -29,22 +29,6 @@
     <!-- Add extra <link>s or <script>s here if necessary. -->
 
     ` %><%= htmlWebpackPlugin.options.ejsFixUrls(template) %>
-
-    <script>
-      function getQuestionList(q) {
-        return q.replace(/\d\.\s+KOLO\s/g, "").split("\n").map(r => r.replace(/^\d\.\s+/, ""));
-      }
-      function getAnswerList(a) {
-        return a.split("\n").map(r => r.replace(/^\d\.\s+/, ""));
-      }
-      function getDataList(q, a) {
-        const questionList = getQuestionList(q);
-        const answerList = getAnswerList(a);
-        const dataList = questionList.map((q, i) => ({ question: q, answer: answerList[i] }));
-        console.log(JSON.stringify(dataList, null, 2));
-        return dataList;
-      }
-    </script>
   </head>
 
   <body class="uu-gdsg01-unicorn" style="background-color: #0f0f0f; color: #fff;">

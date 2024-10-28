@@ -26,7 +26,7 @@ const Page = createVisualComponent({
       <Top {...topProps}>
         <main
           className={Config.Css.css({
-            paddingInline: spacing.d,
+            paddingInline: spacing.c,
             marginTop: spacing.d,
           })}
         >

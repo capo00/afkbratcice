@@ -1,17 +1,16 @@
 //@@viewOn:imports
-import { createVisualComponent, Utils, useStickyTop, useRoute, useLsi, useState, useScreenSize } from "uu5g05";
+import { createVisualComponent, Utils, useStickyTop, useRoute, useLsi, useState, useScreenSize, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import OcAuth from "../oc_cli-auth";
 import Config from "./config/config.js";
 import anonymousUri from "./assets/anonymous.png";
-
 //@@viewOff:imports
 
-function updateHref({ href, itemList, ...item }, setRoute) {
+function updateHref({ href, params, itemList, ...item }, setRoute) {
   if (itemList) item.itemList = itemList.map((it) => updateHref(it, setRoute));
   if (href) {
     const key = itemList ? "onLabelClick" : "onClick";
-    item[key] = () => setRoute(href);
+    item[key] = () => setRoute(href, params);
   }
   return item;
 }
@@ -55,7 +54,11 @@ function getLoginButton(session, screenSize, item) {
           .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
           .filter(Boolean)
       : [];
-    itemList.push({ icon: "uugds-log-out", children: "Odhlásit", onClick: () => session.logout() });
+    itemList.push({
+      icon: "uugds-log-out",
+      children: <Lsi lsi={{ cs: "Odhlásit" }} />,
+      onClick: () => session.logout(),
+    });
   }
 
   return { icon, onClick, itemList, children };
@@ -138,7 +141,7 @@ const Top = createVisualComponent({
       restProps,
       Config.Css.css({
         ...style,
-        background: "linear-gradient(180deg, rgba(15,15,15,1) 50%, transparent 100%)",
+        background: "#0f0f0f",
         paddingInline: spacing.d,
       }),
     );

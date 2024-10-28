@@ -6,11 +6,11 @@ import Config from "../config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
 import { MatchProvider } from "./match-context";
 import FormTeamSelect from "../team/form-team-select";
-import TeamLink from "../team/team-link";
 import { SeasonProvider } from "../season/season-context";
 import FormSeasonSelect from "../season/form-season-select";
 import { TeamProvider } from "../team/team-context";
 import SeasonText from "../season/season-text";
+import TeamItem from "../team/team-item";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -72,18 +72,25 @@ const CONFIG = {
   homeTeamId: {
     label: { cs: "Domácí" },
     output(value, item) {
-      return <TeamLink id={value} />;
+      return <TeamItem id={value} />;
     },
     columnProps: {}, // must be here empty, because of full width of table
     input: {
       Component: FormTeamSelect,
       props: { required: true, compareKey: "guestTeamId" },
     },
+    filterProps: {
+      label: { cs: "Tým" },
+      filter: (itemValue, value, item) => {
+        return itemValue === value || item.data.guestTeamId === value;
+      },
+      inputType: FormTeamSelect,
+    },
   },
   guestTeamId: {
     label: { cs: "Hosté" },
     output(value, item) {
-      return <TeamLink id={value} />;
+      return <TeamItem id={value} />;
     },
     columnProps: {}, // must be here empty, because of full width of table
     input: {
@@ -172,7 +179,6 @@ const MatchCrud = createVisualComponent({
             {(dataList) => (
               <OcElements.Crud
                 header={<Lsi lsi={{ cs: "Zápasy" }} />}
-                headerType="heading"
                 {...props}
                 dataList={dataList}
                 seriesList={seriesList}

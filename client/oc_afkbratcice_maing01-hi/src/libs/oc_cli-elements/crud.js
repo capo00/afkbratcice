@@ -172,7 +172,9 @@ const Crud = createVisualComponent({
   //@@viewOff:propTypes
 
   //@@viewOn:defaultProps
-  defaultProps: {},
+  defaultProps: {
+    headerType: "heading",
+  },
   //@@viewOff:defaultProps
 
   render(props) {

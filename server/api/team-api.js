@@ -12,7 +12,7 @@ module.exports = {
       }),
     }),
     fn: async ({ dtoIn }) => {
-      const itemList = await Abl.list(dtoIn?.pageInfo, { age: dtoIn?.age });
+      const itemList = await Abl.list(dtoIn);
       return { itemList };
     },
   },

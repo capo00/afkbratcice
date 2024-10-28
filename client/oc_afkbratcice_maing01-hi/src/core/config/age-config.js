@@ -4,7 +4,7 @@ import Config from "./config";
 export default {
   label: { cs: "Kategorie" },
   output: (value, item) => Config.AGE_MAP[value].name,
-  columnProps: { maxWidth: "m" },
+  columnProps: { maxWidth: 140 },
   sort: (a, b) => {
     const keys = Object.keys(Config.AGE_MAP);
     return keys.indexOf(a) - keys.indexOf(b);

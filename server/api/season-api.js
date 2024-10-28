@@ -1,5 +1,6 @@
 const UuDataTypes = require("uu_datatypesg01");
 const Abl = require("../abl/season-abl");
+const MatchAbl = require("../abl/match-abl");
 
 module.exports = {
   "season/list": {
@@ -11,7 +12,7 @@ module.exports = {
       }),
     }),
     fn: async ({ dtoIn }) => {
-      const itemList = await Abl.list(dtoIn?.pageInfo);
+      const itemList = await Abl.list(dtoIn);
       return { itemList };
     },
   },
@@ -33,7 +34,7 @@ module.exports = {
     //   competition: UuDataTypes.oneOf(["III. třída"]),
     //   yearFrom: UuDataTypes.number,
     //   desc: UuDataTypes.string,
-    //   teamList: UuDataTypes.array,
+    //   teamList: UuDataTypes.arrayOf(UuDataTypes.string),
     // }),
     fn: async ({ dtoIn }) => {
       return await Abl.create(dtoIn);
@@ -64,6 +65,16 @@ module.exports = {
     }),
     fn: async ({ dtoIn }) => {
       return await Abl.delete(dtoIn.id);
+    },
+  },
+  "season/getTable": {
+    method: "get",
+    validator: UuDataTypes.exact({
+      id: UuDataTypes.string,
+      teamId: UuDataTypes.string,
+    }),
+    fn: async ({ dtoIn }) => {
+      return await MatchAbl.getTable({ seasonId: dtoIn.id, teamId: dtoIn.teamId });
     },
   },
 }
