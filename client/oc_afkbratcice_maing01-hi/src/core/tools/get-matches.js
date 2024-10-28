@@ -1,22 +1,22 @@
 let TEAMS = {
-  "FK Chotusice 1932 B": "671d7179f07fb9d019412ec2",
-  "FK KAVALIER SÁZAVA B": "671d7190f07fb9d019412ec4",
-  "FK Uhlířské Janovice B": "671d7097eb916497e042226e",
-  "FK Záboří nad Labem": "671d6fa0eb916497e0422268",
-  "SK Malešov B": "671d722af07fb9d019412eca",
-  "SK Nepoměřice": "671d7252f07fb9d019412ece",
-  "SK  Spartak Žleby": "671d7242f07fb9d019412ecc",
-  "SK Zbraslavice": "671d70aceb916497e0422270",
-  "Sokol Močovice": "671d7162f07fb9d019412ec0",
-  "TJ AFK Bratčice": "671d6f8deb916497e0422266",
-  "TJ Dynamo Horní Bučice": "671d71abf07fb9d019412ec6",
-  "TJ Sokol Malín": "671d7085eb916497e042226c",
-  "TJ Sokol Vlkaneč": "671d71c3f07fb9d019412ec8",
-  "TJ Star Tupadly B": "671d6fbaeb916497e042226a",
+  "FK Chotusice 1932 B": "671f0114d71ca3be5d7a8a6b",
+  "FK KAVALIER SÁZAVA B": "671f0182d71ca3be5d7a8a76",
+  "FK Uhlířské Janovice B": "671f019cd71ca3be5d7a8a7a",
+  "FK Záboří nad Labem": "671f00e0d71ca3be5d7a8a67",
+  "SK Malešov B": "671f0126d71ca3be5d7a8a6d",
+  "SK Nepoměřice": "671f0156d71ca3be5d7a8a73",
+  "SK  Spartak Žleby": "671f018fd71ca3be5d7a8a78",
+  "SK Zbraslavice": "671f01a9d71ca3be5d7a8a7c",
+  "Sokol Močovice": "671f016cd71ca3be5d7a8a74",
+  "TJ AFK Bratčice": "671f00b9d71ca3be5d7a8a63",
+  "TJ Dynamo Horní Bučice": "671f0105d71ca3be5d7a8a69",
+  "TJ Sokol Malín": "671f00ced71ca3be5d7a8a65",
+  "TJ Sokol Vlkaneč": "671f0144d71ca3be5d7a8a71",
+  "TJ Star Tupadly B": "671f0136d71ca3be5d7a8a6f",
 };
 
 // Season 2024 Muži III. třída (dev)
-let seasonId = "671d72cdf07fb9d019412ecf";
+let seasonId = "671f01c1d71ca3be5d7a8a7d";
 
 let matches = [];
 
