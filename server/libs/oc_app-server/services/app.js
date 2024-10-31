@@ -2,7 +2,17 @@ const path = require("path");
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
-require('dotenv').config();
+
+const dotenv = require('dotenv');
+
+// Check for NODE_ENV and load corresponding .env file
+if (process.env.NODE_ENV === "development") {
+  // Load development .env
+  dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+} else {
+  // Load default .env file, then override with environment-specific if applicable
+  dotenv.config(); // Load .env by default
+}
 
 // const OcAuth = require("oc_app-auth");
 const OcAuth = require("../../oc_app-auth");

@@ -37,7 +37,7 @@ const AppConfig = createVisualComponent({
               await handlerMap.update(typeof config === "string" ? JSON.parse(config) : config);
             }}
           >
-            <Uu5CodeKit.FormJson name="config" initialValue={config} format="pretty" />
+            <Uu5CodeKit.FormJson name="config" initialValue={config} format="pretty" theme="tomorrow_night" />
 
             <Uu5Forms.SubmitButton name="submit" className={Config.Css.css({ justifySelf: "end" })} />
           </Uu5Forms.Form>

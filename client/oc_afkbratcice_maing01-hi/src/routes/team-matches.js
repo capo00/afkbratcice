@@ -2,7 +2,7 @@
 import { createVisualComponent } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
-import SeasonTable from "../core/season/season-table";
+import MatchLastList from "../core/match/match-last-list";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -38,7 +38,7 @@ const TeamMatches = createVisualComponent({
     //@@viewOn:render
     return (
       <Uu5Elements.Grid templateColumns="1fr" rowGap={spacing.c}>
-        <div>TODO matches prev</div>
+        <MatchLastList teamId={id} />
         <div>TODO matches next</div>
       </Uu5Elements.Grid>
     );

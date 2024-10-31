@@ -1,5 +1,6 @@
 //@@viewOn:imports
 import { createVisualComponent, Lsi } from "uu5g05";
+import { UuDate } from "uu_i18ng01";
 import Uu5Forms from "uu5g05-forms";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config.js";
@@ -14,6 +15,17 @@ import TeamItem from "../team/team-item";
 //@@viewOff:imports
 
 //@@viewOn:constants
+const today = new UuDate();
+const month = today.getMonth();
+const year = today.getYear();
+
+let matchDateRange;
+if (month > 2 && month < 8)
+  matchDateRange = [new UuDate([year, 1, 1]).toIsoString(), new UuDate([year, 7, 31]).toIsoString()];
+else if (month >= 8)
+  matchDateRange = [new UuDate([year, 8, 1]).toIsoString(), new UuDate([year, 12, 31]).toIsoString()];
+else matchDateRange = [new UuDate([year - 1, 8, 1]).toIsoString(), new UuDate([year - 1, 12, 31]).toIsoString()];
+
 const CONFIG = {
   seasonId: {
     label: { cs: "Sezóna" },
@@ -29,6 +41,7 @@ const CONFIG = {
   round: {
     label: { cs: "Kolo" },
     columnProps: { maxWidth: "xs" },
+    sort: true,
     input: {
       Component: Uu5Forms.FormTextSelect,
       props: { itemList: Array.from({ length: 15 }, (_, i) => ({ value: i + 1, text: i + 1 + "" })) },
@@ -57,6 +70,7 @@ const CONFIG = {
   },
   place: {
     label: { cs: "Místo" },
+    visible: false,
     columnProps: { maxWidth: "max-content" },
     input: {
       Component: Uu5Forms.FormText,
@@ -64,6 +78,7 @@ const CONFIG = {
   },
   departureTime: {
     label: { cs: "Čas odjezdu" },
+    visible: false,
     columnProps: { maxWidth: 136 },
     input: {
       Component: Uu5Forms.FormTime,
@@ -184,9 +199,12 @@ const MatchCrud = createVisualComponent({
                 seriesList={seriesList}
                 columnList={columnList}
                 sorterDefinitionList={sorterList}
-                initialSorterList={[{ key: "time", ascending: true }]}
+                initialSorterList={[
+                  { key: "time", ascending: true },
+                  { key: "round", ascending: true },
+                ]}
                 filterDefinitionList={filterList}
-                initialFilterList={[{ key: "time", value: ["2024-07-01", "2024-12-31"] }]}
+                initialFilterList={[{ key: "time", value: matchDateRange }]}
                 onPreSubmit={async (e) => {
                   delete e.data.value.age;
                 }}

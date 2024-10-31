@@ -6,7 +6,7 @@
 
 ## Local development
 1. do not use pnpm, because gcloud cannot work with pnpm
-2. in root -> `npm start` -> run server & client
+2. in root -> `npm run dev` -> run server & client
 3. start on http://localhost:8080
 4. if dtb connection fail, necessary to resume dtb on https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters
 
@@ -26,6 +26,3 @@ To view your application in the web browser run:
 
 To take a quick anonymous survey, run:
 `$ gcloud survey`
-
-## TODO: 
-2. fb login

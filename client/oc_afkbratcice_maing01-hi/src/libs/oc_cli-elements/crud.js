@@ -2,10 +2,9 @@
 import { createVisualComponent, createComponent, useCallback, useState, Lsi, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
-import Uu5Tiles from "uu5tilesg02";
 import Uu5TilesElements from "uu5tilesg02-elements";
-import Uu5TilesControls from "uu5tilesg02-controls";
 import Uu5CodeKit from "uu5codekitg01";
+import { withServerlessTable, ListBlock } from "../uu5tilesg02-extension";
 import Config from "./config/config.js";
 
 //@@viewOff:imports
@@ -47,13 +46,14 @@ function generate(cfg) {
   const filterList = [];
 
   for (let code in cfg) {
-    const { label, output, columnProps, sort, filterProps } = cfg[code];
+    const { label, output, columnProps, sort, filterProps, visible } = cfg[code];
 
     if (output !== false) {
       seriesList.push({
         value: code,
         label,
         dataItem: output ? (item) => output(item.data.data[code], item.data) : undefined,
+        visible,
       });
     }
 
@@ -63,18 +63,18 @@ function generate(cfg) {
         value: code,
         ...(sort || horizontalAlignment
           ? {
-            headerComponent: (
-              <Uu5TilesElements.Table.HeaderCell
-                horizontalAlignment={horizontalAlignment}
-                sorterKey={sort ? code : undefined}
-              />
-            ),
-          }
+              headerComponent: (
+                <Uu5TilesElements.Table.HeaderCell
+                  horizontalAlignment={horizontalAlignment}
+                  sorterKey={sort ? code : undefined}
+                />
+              ),
+            }
           : null),
         ...(horizontalAlignment
           ? {
-            cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment={horizontalAlignment} />,
-          }
+              cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment={horizontalAlignment} />,
+            }
           : null),
         ...restColumnProps,
       });
@@ -133,34 +133,7 @@ const FormModal = createComponent({
   },
 });
 
-function BulkActionBar({ handlerMap, setRemoveData }) {
-  const { selectedData } = Uu5Tiles.useController();
-
-  return (
-    <Uu5TilesControls.BulkActionBar
-      actionList={[
-        {
-          icon: "uugds-delete",
-          children: "Delete",
-          colorScheme: "negative",
-          onClick: (e) => {
-            setRemoveData({
-              callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
-              header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
-              info: (
-                <Lsi
-                  lsi={{
-                    cs: `Opravdu chcete smazat položky?`,
-                  }}
-                />
-              ),
-            });
-          },
-        },
-      ]}
-    />
-  );
-}
+const ServerlessTable = withServerlessTable(ListBlock);
 
 const Crud = createVisualComponent({
   //@@viewOn:statics
@@ -172,9 +145,7 @@ const Crud = createVisualComponent({
   //@@viewOff:propTypes
 
   //@@viewOn:defaultProps
-  defaultProps: {
-    headerType: "heading",
-  },
+  defaultProps: {},
   //@@viewOff:defaultProps
 
   render(props) {
@@ -194,8 +165,6 @@ const Crud = createVisualComponent({
     const [editData, setEditData] = useState();
     const [manyData, setManyData] = useState();
     const [removeData, setRemoveData] = useState();
-    const [sorterList, setSorterList] = useState(initialSorterList);
-    const [filterList, setFilterList] = useState(initialFilterList);
     const [displayData, setDisplayData] = useState();
 
     const { state, data, handlerMap, pageSize } = dataList;
@@ -213,7 +182,7 @@ const Crud = createVisualComponent({
 
     const disabled = state === "itemPending";
     const getActionList = useCallback(
-      ({ rowIndex, data }) => {
+      ({ data }) => {
         const items = [
           {
             icon: "uugdsstencil-it-json",
@@ -272,67 +241,65 @@ const Crud = createVisualComponent({
       [disabled],
     );
 
-    let actionList = [{ component: <Uu5TilesControls.SearchButton /> }];
+    let actionList;
     if (children) {
-      actionList.push({
-        children: <Lsi lsi={{ cs: "Vytvořit" }} />,
-        icon: "uugds-plus",
-        onLabelClick: () => setEditData({ callback: handlerMap.create }),
-        colorScheme: "primary",
-        significance: "common",
-        itemList: [
-          {
-            children: <Lsi lsi={{ cs: "Hromadně" }} />,
-            icon: "uugds-plus",
-            onClick: () => setManyData({ callback: handlerMap.createMany }),
-          },
-        ],
-      });
-    }
-    if (filterDefinitionList) {
-      actionList.push({ component: <Uu5TilesControls.FilterButton /> });
+      actionList = [
+        {
+          children: <Lsi lsi={{ cs: "Vytvořit" }} />,
+          icon: "uugds-plus",
+          onLabelClick: () => setEditData({ callback: handlerMap.create }),
+          colorScheme: "primary",
+          significance: "common",
+          itemList: [
+            {
+              children: <Lsi lsi={{ cs: "Hromadně" }} />,
+              icon: "uugds-plus",
+              onClick: () => setManyData({ callback: handlerMap.createMany }),
+            },
+          ],
+        },
+      ];
     }
 
     //@@viewOn:render
     return (
       <>
-        <Uu5Tiles.ControllerProvider
-          data={state === "pendingNoData" ? [{}, {}, {}, {}, {}] : data}
-          serieList={state === "pendingNoData" ? undefined : seriesList}
-          sorterDefinitionList={sorterDefinitionList}
-          sorterList={sorterList}
-          onSorterChange={(e) => setSorterList(e.data.sorterList)}
+        <ServerlessTable
+          loading={state === "pendingNoData"}
+          data={data}
+          serieList={seriesList}
           filterDefinitionList={filterDefinitionList}
-          filterList={filterList}
-          onFilterChange={(e) => setFilterList(e.data.filterList)}
+          initialFilterList={initialFilterList}
+          sorterDefinitionList={sorterDefinitionList}
+          initialSorterList={initialSorterList}
           selectable="multiple"
-        >
-          <Uu5Elements.Block {...blockProps} actionList={actionList}>
-            {filterDefinitionList && (
-              <>
-                <Uu5TilesControls.FilterBar initialExpanded={!!initialFilterList?.length} />
-                <Uu5TilesControls.FilterManagerModal />
-              </>
-            )}
-            <BulkActionBar handlerMap={handlerMap} setRemoveData={setRemoveData} />
-            <Uu5TilesElements.List
-              columnList={
-                state === "pendingNoData"
-                  ? columnList.map((col) => ({ ...col, cell: () => <Uu5Elements.Skeleton borderRadius="moderate" /> }))
-                  : columnList
-              }
-              getActionList={getActionList}
-              tileMinWidth={200}
-              tileMaxWidth={400}
-              verticalAlignment="center"
-              onLoad={onLoad}
-              virtualization
-              borderRadius="moderate"
-            >
-              <Uu5TilesElements.Grid.DefaultTile />
-            </Uu5TilesElements.List>
-          </Uu5Elements.Block>
-        </Uu5Tiles.ControllerProvider>
+          {...blockProps}
+          actionList={actionList}
+          initialFilterBarExpanded={!!initialFilterList?.length}
+          columnList={columnList}
+          getItemActionList={getActionList}
+          onLoad={onLoad}
+          getBulkActionList={(selectedData) => [
+            {
+              icon: "uugds-delete",
+              children: "Delete",
+              colorScheme: "negative",
+              onClick: (e) => {
+                setRemoveData({
+                  callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
+                  header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
+                  info: (
+                    <Lsi
+                      lsi={{
+                        cs: `Opravdu chcete smazat položky?`,
+                      }}
+                    />
+                  ),
+                });
+              },
+            },
+          ]}
+        />
 
         {children && !!editData && (
           <FormModal
@@ -370,7 +337,13 @@ const Crud = createVisualComponent({
             }}
           >
             <Uu5Forms.Form.View>
-              <Uu5CodeKit.FormJson name="itemList" format="pretty" displayGutter={false} required />
+              <Uu5CodeKit.FormJson
+                name="itemList"
+                format="pretty"
+                displayGutter={false}
+                required
+                theme="tomorrow_night"
+              />
             </Uu5Forms.Form.View>
           </FormModal>
         )}
@@ -381,7 +354,13 @@ const Crud = createVisualComponent({
             open={!!displayData}
             onClose={() => setDisplayData()}
           >
-            <Uu5CodeKit.Json.Input value={displayData} format="pretty" displayGutter={false} readOnly />
+            <Uu5CodeKit.Json.Input
+              value={displayData}
+              format="pretty"
+              displayGutter={false}
+              readOnly
+              theme="tomorrow_night"
+            />
           </Uu5Elements.Modal>
         )}
 
