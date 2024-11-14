@@ -6,7 +6,7 @@ import Call from "./call";
 
 function getCalls(entity) {
   return {
-    load: (dtoIn) => Call.cmdGet(entity + "/list", dtoIn),
+    list: (dtoIn) => Call.cmdGet(entity + "/list", dtoIn),
     createItem: (dtoIn) => Call.cmdPost(entity + "/create", dtoIn),
     createMany: (dtoIn) => Call.cmdPost(entity + "/createMany", dtoIn),
     updateItem: (dtoIn) => Call.cmdPost(entity + "/update", dtoIn),
@@ -40,7 +40,7 @@ const CrudContext = {
         const dataList = useDataList({
           pageSize,
           handlerMap: {
-            load: calls.load,
+            load: calls.list,
             create: calls.createItem,
             createMany: calls.createMany,
             deleteMany: calls.deleteMany,

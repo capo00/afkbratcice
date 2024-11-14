@@ -1,4 +1,5 @@
 const AppError = require("./app-error");
+const dao = require("../../dao/team-dao");
 
 const ERROR_CODE_PREFIX = "oc_app-server";
 const CrudError = {
@@ -52,8 +53,14 @@ class Crud {
     this.dao = dao;
   }
 
-  async list({ pageInfo }) {
-    return (await this.dao.list(pageInfo)).map(this._getData);
+  async list({ pageInfo, idList }) {
+    let dtoOut;
+    if (idList) {
+      dtoOut = (await this.dao.listByIdList(idList)).map(this._getData);
+    } else {
+      dtoOut = (await this.dao.list(pageInfo)).map(this._getData);
+    }
+    return dtoOut;
   }
 
   async get(id) {
@@ -111,7 +118,7 @@ class Crud {
     try {
       return await this.dao.get(id);
     } catch (e) {
-      throw new CrudError.DoesNotExists(e);
+      throw new CrudError.DoesNotExists(this.name, e);
     }
   }
 

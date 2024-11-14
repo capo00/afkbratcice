@@ -9,6 +9,7 @@ import logoUri from "../assets/AFK_erb_light_160x160.png";
 import { AppProvider } from "./app/app-context";
 
 const Home = Utils.Component.lazy(() => import("../routes/home.js"));
+const History = Utils.Component.lazy(() => import("../routes/history.js"));
 const Team = Utils.Component.lazy(() => import("../routes/team.js"));
 const TeamMatches = Utils.Component.lazy(() => import("../routes/team-matches.js"));
 const TeamTable = Utils.Component.lazy(() => import("../routes/team-table.js"));
@@ -56,6 +57,7 @@ const MENU = [
 const ROUTE_MAP = {
   "": { redirect: "home" },
   home: (props) => <Home {...props} />,
+  history: (props) => <History {...props} />,
 
   "profile/teams": (props) => <TeamsEdit {...props} />,
   "profile/seasons": (props) => <SeasonsEdit {...props} />,

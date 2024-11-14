@@ -1,6 +1,6 @@
 class AppError extends Error {
-  constructor(msg, { cause, code, paramMap, dtoOut, status = 500 } = {}) {
-    super(msg, { cause });
+  constructor(msg, { cause, code, paramMap, dtoOut, message, status = 500 } = {}) {
+    super(message ?? msg, { cause });
     this.code = code;
     this.paramMap = paramMap;
     this.dtoOut = dtoOut;
@@ -21,7 +21,7 @@ class AppError extends Error {
 
 AppError.DoesNotExists = class extends AppError {
   constructor(msg, { codePrefix, ...opts } = {}) {
-    super(msg, { ...opts, code: codePrefix + "doesNotExist", status: 404 });
+    super(msg, { code: codePrefix + "/doesNotExist", ...opts, status: 404 });
   }
 };
 

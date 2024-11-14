@@ -90,6 +90,7 @@ class Dao {
   }
 
   listByIdList(idList) {
+    console.log(idList.map((id) => new ObjectId(id)));
     return this.find({ _id: { $in: idList.map((id) => new ObjectId(id)) } });
   }
 

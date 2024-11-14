@@ -1,7 +1,6 @@
 const OcAppCore = require("../libs/oc_app-core");
 const dao = require("../dao/team-dao");
 const OcBinaryStore = require("../libs/oc_binarystore");
-const getTeamMap = require("./get-team-map");
 
 const CREATE_TAG_LIST = ["sys", "team"];
 
@@ -13,12 +12,10 @@ class TeamAbl extends OcAppCore.Crud {
 
   async list({ pageInfo, age, idList }) {
     let dtoOut;
-    if (idList) {
-      dtoOut = (await dao.listByIdList(idList)).map(this._getData);
-    } else if (age) {
+    if (age) {
       dtoOut = (await dao.listByAge(age)).map(this._getData);
     } else {
-      dtoOut = await super.list({ pageInfo });
+      dtoOut = await super.list({ pageInfo, idList });
     }
     return dtoOut;
   }
