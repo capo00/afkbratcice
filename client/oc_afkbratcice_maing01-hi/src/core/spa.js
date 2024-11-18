@@ -23,8 +23,7 @@ const AppEdit = Utils.Component.lazy(() => import("../routes/profile/app.js"));
 const TheChase = Utils.Component.lazy(() => import("../routes/the-chase.js"));
 //@@viewOff:imports
 
-// TODO change color to dark red (after release of UuGds)
-Uu5Elements.UuGds.setMeaningColor("primary", "red");
+Uu5Elements.UuGds.setMeaningColor("primary", "#8b0000");
 Uu5Elements.UuGds.setMeaningColor("negative", "orange");
 Uu5Elements.UuGds.setMeaningColor("warning", "yellow");
 

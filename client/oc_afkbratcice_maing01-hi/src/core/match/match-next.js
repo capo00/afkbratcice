@@ -5,6 +5,7 @@ import Config from "../config/config.js";
 import { Call } from "../../libs/oc_cli-elements";
 import MatchTeam from "./match-team";
 import MatchInfo from "./match-info";
+import MatchResult from "./match-result";
 //@@viewOff:imports
 
 function getCountdown(dateTo) {
@@ -67,19 +68,52 @@ function Countdown({ dateTo, ...restProps }) {
   );
 }
 
+const MATCH_DURATION_MS = 1.75 * 60 * 60 * 1000;
+
+function getMatchTimeState(time) {
+  const timeDate = new Date(time);
+  const timeMs = timeDate.getTime();
+  const timeNowMs = new Date().getTime();
+
+  // future
+  let state = 0;
+  if (timeNowMs < timeMs) {
+    // past (negative ms)
+    state = timeNowMs - timeMs;
+  } else if (timeNowMs <= timeMs + MATCH_DURATION_MS) {
+    // current (positive ms)
+    state = timeMs + MATCH_DURATION_MS - timeNowMs;
+  }
+
+  return state;
+}
+
+function MatchCountdownView({ data, className }) {
+  const [state, setState] = useState(() => getMatchTimeState(data.time));
+
+  useEffect(() => {
+    if (state) {
+      const timeout = setTimeout(() => setState(getMatchTimeState(data.time)), Math.abs(state));
+      return () => clearTimeout(timeout);
+    }
+  }, [state, data.time]);
+
+  return state < 0 ? (
+    <Uu5Elements.Text category="interface" segment="title" type="major">
+      {({ style }) => (
+        <Countdown dateTo={new Date(data.time)} className={Utils.Css.joinClassName(className, Config.Css.css(style))} />
+      )}
+    </Uu5Elements.Text>
+  ) : (
+    <MatchResult data={data} animation={state > 0} />
+  );
+}
+
 function MatchCountdown({ data, name }) {
   return (
     <Uu5Elements.Grid.Item alignSelf={data ? "center" : undefined} gridArea={name}>
       {data ? (
-        ({ style }) => (
-          <>
-            <Uu5Elements.Text category="interface" segment="title" type="major">
-              {({ style: textStyle }) => (
-                <Countdown dateTo={new Date(data.time)} className={Config.Css.css({ ...style, ...textStyle })} />
-              )}
-            </Uu5Elements.Text>
-          </>
-        )
+        ({ style }) => <MatchCountdownView data={data} className={Config.Css.css(style)} />
       ) : (
         <Uu5Elements.Skeleton borderRadius="moderate" height="100%" width={190} />
       )}

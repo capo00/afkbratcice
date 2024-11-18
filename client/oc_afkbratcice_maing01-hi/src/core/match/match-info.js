@@ -6,13 +6,13 @@ import Config from "../config/config.js";
 
 function MatchInfo({ data, name }) {
   return (
-    <Uu5Elements.Grid templateColumns="1fr auto 1fr" columnGap={8} rowGap={4}>
+    <Uu5Elements.Grid templateColumns="1fr auto 1fr" columnGap={8} rowGap={4} alignItems="center">
       {({ style }) => (
         <Uu5Elements.Grid.Item gridArea={name} className={Config.Css.css(style)}>
           {data ? (
             <>
               <Uu5Elements.Grid.Item justifySelf="end">{data.season.competition}</Uu5Elements.Grid.Item>
-              <Uu5Elements.Grid.Item rowSpan={2}>
+              <Uu5Elements.Grid.Item rowSpan={2} alignSelf="stretch">
                 {({ style }) => (
                   <Uu5Elements.Line direction="vertical" significance="subdued" className={Config.Css.css(style)} />
                 )}
