@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createComponent, useDataList, useMemo, Utils } from "uu5g05";
+import { createComponent, useDataList, useUpdateEffect, useMemo, Utils } from "uu5g05";
 import Config from "./config/config.js";
 import Call from "./call";
 //@@viewOff:imports
@@ -35,9 +35,10 @@ const CrudContext = {
       //@@viewOff:defaultProps
 
       render(props) {
-        const { children, calls = getCalls(entity), pageSize } = props;
+        const { children, calls = getCalls(entity), pageSize, dtoIn } = props;
 
         const dataList = useDataList({
+          initialDtoIn: dtoIn,
           pageSize,
           handlerMap: {
             load: calls.list,
@@ -50,6 +51,13 @@ const CrudContext = {
             update: calls.updateItem,
           },
         });
+
+        useUpdateEffect(
+          () => {
+            dataList.handlerMap.load(dtoIn);
+          },
+          dtoIn ? Object.values(dtoIn) : [],
+        );
 
         const value = useMemo(() => {
           return {

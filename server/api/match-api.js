@@ -5,6 +5,8 @@ module.exports = {
   "match/list": {
     method: "get",
     validator: UuDataTypes.exact({
+      teamId: UuDataTypes.string,
+      seasonId: UuDataTypes.string,
       pageInfo: UuDataTypes.exact({
         pageSize: UuDataTypes.number,
         pageIndex: UuDataTypes.number

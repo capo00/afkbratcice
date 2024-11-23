@@ -15,6 +15,13 @@ class MatchDao extends Dao {
     return super.find({ seasonId });
   }
 
+  listByTeam(teamId, seasonId) {
+    return super.find({
+      $or: [{ homeTeamId: teamId }, { guestTeamId: teamId }],
+      seasonId,
+    });
+  }
+
   getLastMatch(teamId) {
     return this.findOne({
       $or: [{ homeTeamId: teamId }, { guestTeamId: teamId }],

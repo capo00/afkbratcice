@@ -21,10 +21,16 @@ function ListBlock({
   initialSorterList,
   selectable,
 
+  viewType = "list",
+
   // List
   columnList,
   getItemActionList,
   onLoad,
+  children,
+  spacing,
+  hideHeader,
+  borderRadius = "moderate",
 
   // FilterBar
   initialFilterBarExpanded,
@@ -32,20 +38,27 @@ function ListBlock({
   // BulkActionBar
   getBulkActionList,
 
+  // Series
+  displaySeriesButton = true,
+
   // Block
   actionList = [],
   headerType = "heading",
+
   ...blockProps
 }) {
   const actionListDef = useMemo(
-    () => [
-      { component: <Uu5TilesControls.SearchButton /> },
-      { component: <Uu5TilesControls.FilterButton type="bar" disabled={!filterDefinitionList} /> },
-      { component: <Uu5TilesControls.SerieButton disabled={!serieList?.[0]?.label} /> },
-      ...actionList,
-    ],
+    () =>
+      [
+        { component: <Uu5TilesControls.SearchButton /> },
+        { component: <Uu5TilesControls.FilterButton type="bar" disabled={!filterDefinitionList} /> },
+        displaySeriesButton ? { component: <Uu5TilesControls.SerieButton disabled={!serieList?.[0]?.label} /> } : null,
+        ...actionList,
+      ].filter(Boolean),
     [actionList],
   );
+
+  const ViewComp = viewType === "list" ? Uu5TilesElements.List : Uu5TilesElements.Table;
 
   return (
     <ServerlessControllerProvider
@@ -63,18 +76,20 @@ function ListBlock({
         <Uu5TilesControls.SerieManagerModal />
         {getBulkActionList && <BulkActionBar getActionList={getBulkActionList} />}
 
-        <Uu5TilesElements.List
+        <ViewComp
           columnList={columnList}
-          tileMinWidth={200}
-          tileMaxWidth={400}
+          tileMinWidth={400}
+          tileMaxWidth={500}
           verticalAlignment="center"
           virtualization="table"
-          borderRadius="moderate"
+          borderRadius={borderRadius}
           getActionList={getItemActionList}
           onLoad={onLoad}
+          spacing={spacing}
+          hideHeader={hideHeader}
         >
           <Uu5TilesElements.Grid.DefaultTile />
-        </Uu5TilesElements.List>
+        </ViewComp>
       </Uu5Elements.Block>
     </ServerlessControllerProvider>
   );

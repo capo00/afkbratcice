@@ -53,16 +53,20 @@ const TeamItem = createVisualComponent({
       }),
     );
 
+    const imageSrc = logoUri || data.logoUri;
+    const imageClassName = Config.Css.css({
+      display: "inline-block",
+      height,
+      aspectRatio: "1/1",
+    });
+
     return (
       <span {...attrs}>
-        <OcElements.Image
-          src={logoUri || data.logoUri}
-          alt=" "
-          className={Config.Css.css({
-            height,
-            aspectRatio: "1/1",
-          })}
-        />
+        {imageSrc ? (
+          <OcElements.Image src={imageSrc} alt=" " className={imageClassName} />
+        ) : (
+          <span className={imageClassName} />
+        )}
         {displayName && text}
       </span>
     );

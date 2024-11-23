@@ -159,6 +159,10 @@ const Crud = createVisualComponent({
       initialFilterList,
       children,
       onPreSubmit,
+      readOnly,
+      hideColumns,
+      tile,
+      compact,
       ...blockProps
     } = props;
 
@@ -216,7 +220,7 @@ const Crud = createVisualComponent({
 
         let actionList = [
           {
-            icon: "uugds-menu",
+            icon: "uugds-dots-vertical",
             tooltip: { cs: "Více" },
             itemList: items,
             iconOpen: null,
@@ -225,12 +229,19 @@ const Crud = createVisualComponent({
         ];
 
         if (children) {
-          actionList.unshift({
+          const updateItem = {
             icon: "uugds-pencil",
             tooltip: { cs: "Upravit" },
             disabled: data.state === "pending",
             onClick: () => setEditData({ callback: data.handlerMap.update, data: data.data }),
-          });
+          };
+
+          if (compact) {
+            updateItem.children = <Lsi lsi={{ cs: "Upravit" }} />;
+            items.unshift(updateItem);
+          } else {
+            actionList.unshift(updateItem);
+          }
         } else {
           actionList.unshift(items.shift());
           actionList[1].itemList = items;
@@ -242,7 +253,7 @@ const Crud = createVisualComponent({
     );
 
     let actionList;
-    if (children) {
+    if (children && !readOnly) {
       actionList = [
         {
           children: <Lsi lsi={{ cs: "Vytvořit" }} />,
@@ -267,39 +278,52 @@ const Crud = createVisualComponent({
         <ServerlessTable
           loading={state === "pendingNoData"}
           data={data}
-          serieList={seriesList}
+          serieList={
+            hideColumns
+              ? seriesList.map((series) =>
+                  hideColumns.includes(series.value) ? { ...series, visible: false } : series,
+                )
+              : seriesList
+          }
           filterDefinitionList={filterDefinitionList}
           initialFilterList={initialFilterList}
           sorterDefinitionList={sorterDefinitionList}
           initialSorterList={initialSorterList}
-          selectable="multiple"
+          selectable={readOnly ? undefined : "multiple"}
+          displaySeriesButton={!readOnly}
           {...blockProps}
           actionList={actionList}
           initialFilterBarExpanded={!!initialFilterList?.length}
           columnList={columnList}
-          getItemActionList={getActionList}
+          getItemActionList={readOnly ? undefined : getActionList}
           onLoad={onLoad}
-          getBulkActionList={(selectedData) => [
-            {
-              icon: "uugds-delete",
-              children: "Delete",
-              colorScheme: "negative",
-              onClick: (e) => {
-                setRemoveData({
-                  callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
-                  header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
-                  info: (
-                    <Lsi
-                      lsi={{
-                        cs: `Opravdu chcete smazat položky?`,
-                      }}
-                    />
-                  ),
-                });
-              },
-            },
-          ]}
-        />
+          getBulkActionList={
+            readOnly
+              ? undefined
+              : (selectedData) => [
+                  {
+                    icon: "uugds-delete",
+                    children: "Delete",
+                    colorScheme: "negative",
+                    onClick: (e) => {
+                      setRemoveData({
+                        callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
+                        header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
+                        info: (
+                          <Lsi
+                            lsi={{
+                              cs: `Opravdu chcete smazat položky?`,
+                            }}
+                          />
+                        ),
+                      });
+                    },
+                  },
+                ]
+          }
+        >
+          {tile}
+        </ServerlessTable>
 
         {children && !!editData && (
           <FormModal

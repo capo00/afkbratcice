@@ -105,11 +105,10 @@ function getRouteMap(appData) {
 
   for (let age in appData.teams) {
     const team = appData.teams[age];
-    const params = { id: team.teamId };
-    routeMap.team = (props) => <Team {...props} params={{ ...props.params, ...params }} />;
-    routeMap["team/matches"] = (props) => <TeamMatches {...props} params={{ ...props.params, ...params }} />;
+    routeMap.team = (props) => <Team {...props} params={{ id: team.teamId, ...props.params }} />;
+    routeMap["team/matches"] = (props) => <TeamMatches {...props} params={{ id: team.teamId, ...props.params }} />;
     if (age !== "old") {
-      routeMap["team/table"] = (props) => <TeamTable {...props} params={{ ...props.params, ...params }} />;
+      routeMap["team/table"] = (props) => <TeamTable {...props} params={{ id: team.teamId, ...props.params }} />;
     }
   }
 

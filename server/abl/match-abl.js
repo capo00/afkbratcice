@@ -85,9 +85,11 @@ class MatchAbl extends OcAppCore.Crud {
     super("match", dao);
   }
 
-  async list({ pageInfo, seasonId }) {
+  async list({ pageInfo, seasonId, teamId }) {
     let dtoOut;
-    if (seasonId) {
+    if (teamId) {
+      dtoOut = (await dao.listByTeam(teamId, seasonId)).map(this._getData);
+    } else if (seasonId) {
       dtoOut = (await dao.listBySeason(seasonId)).map(this._getData);
     } else {
       dtoOut = await super.list({ pageInfo });

@@ -35,7 +35,6 @@ module.exports = {
     //   tagList: UuDataTypes.array,
     // }),
     fn: async ({ dtoIn }) => {
-      console.log("dtoIn", dtoIn);
       return await Abl.create(dtoIn);
     },
   },

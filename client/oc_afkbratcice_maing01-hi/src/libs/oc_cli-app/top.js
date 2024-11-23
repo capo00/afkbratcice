@@ -143,12 +143,26 @@ const Top = createVisualComponent({
         ...style,
         background: "#0f0f0f",
         paddingInline: spacing.d,
+        ...(screenSize === "xs"
+          ? {
+              // because of Drawer (Menu) does not have a className and must be for whole height
+              // in case small content the menu is small
+              "& + div": {
+                minHeight: "calc(100vh - 72px)",
+              },
+            }
+          : null),
       }),
     );
 
     const [menu, setMenu] = useState(null);
 
-    let itemList = updatedMenuList.map((item) => updateHref(item, setRoute));
+    let itemList = updatedMenuList.map((item) =>
+      updateHref(item, (...args) => {
+        setRoute(...args);
+        setMenu(null);
+      }),
+    );
     if (screenSize === "xs") {
       const identityItem = itemList.splice(identityItemIndex > -1 ? identityItemIndex : itemList.length - 1, 1)[0];
       const hiddenMenu = itemList;

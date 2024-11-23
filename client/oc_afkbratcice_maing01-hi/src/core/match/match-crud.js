@@ -1,8 +1,9 @@
 //@@viewOn:imports
-import { createVisualComponent, Lsi } from "uu5g05";
+import { createVisualComponent, Lsi, useContentSize, useMemo, Utils } from "uu5g05";
 import { UuDate } from "uu_i18ng01";
 import Uu5Forms from "uu5g05-forms";
 import Uu5Elements from "uu5g05-elements";
+import Uu5TilesElements from "uu5tilesg02-elements";
 import Config from "../config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
 import { MatchProvider } from "./match-context";
@@ -12,6 +13,7 @@ import FormSeasonSelect from "../season/form-season-select";
 import { TeamProvider } from "../team/team-context";
 import SeasonText from "../season/season-text";
 import TeamItem from "../team/team-item";
+import MatchResult from "./match-result";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -40,7 +42,7 @@ const CONFIG = {
   },
   round: {
     label: { cs: "Kolo" },
-    columnProps: { maxWidth: "xs" },
+    columnProps: { maxWidth: 112 },
     sort: true,
     input: {
       Component: Uu5Forms.FormTextSelect,
@@ -50,9 +52,9 @@ const CONFIG = {
   time: {
     label: { cs: "Datum a čas" },
     output(value, item) {
-      return <Uu5Elements.DateTime value={value} />;
+      return <Uu5Elements.DateTime value={value} format="(dd) D. M. YYYY HH:mm" />;
     },
-    columnProps: { maxWidth: "max-content" },
+    columnProps: { maxWidth: "max-content", horizontalAlignment: "right" },
     sort: true,
     filterProps: {
       label: { cs: "Datum od - do" },
@@ -100,6 +102,7 @@ const CONFIG = {
         return itemValue === value || item.data.guestTeamId === value;
       },
       inputType: FormTeamSelect,
+      // inputProps: { name: "team" }, // TODO exists inputProps in filterProps? necessary to change name for this because of duplicity during opening filter
     },
   },
   guestTeamId: {
@@ -126,7 +129,7 @@ const CONFIG = {
       }
       return result;
     },
-    columnProps: { maxWidth: "xs", label: { cs: "Góly" } },
+    columnProps: { maxWidth: "s", label: { cs: "Výsledek" } },
     input: {
       Component: Uu5Forms.FormNumber,
       props: { min: 0 },
@@ -164,6 +167,53 @@ const CONFIG = {
 
 //@@viewOn:helpers
 const { seriesList, columnList, sorterList, filterList } = OcElements.Crud.generate(CONFIG);
+
+function MatchRow(props) {
+  //@@viewOn:private
+  const { data: { data = {} } = {}, ...restProps } = props;
+  const { componentProps, elementProps } = Utils.VisualComponent.splitProps(restProps);
+  // console.log("MatchRow", data, componentProps);
+  //@@viewOff:private
+
+  //@@viewOn:interface
+  //@@viewOff:interface
+
+  //@@viewOn:render
+  return (
+    <Uu5Elements.Grid templateColumns="1fr max-content">
+      {({ style }) => (
+        <td>
+          <div {...elementProps} className={Utils.Css.joinClassName(elementProps.className, Config.Css.css(style))}>
+            <Uu5Elements.Grid.Item
+              colSpan={2}
+              className={Config.Css.css({ display: "flex", justifyContent: "space-between" })}
+            >
+              <span>{data.round ? `${data.round}. kolo` : "Přátelský"}</span>
+              <Uu5Elements.DateTime value={data.time} format="(dd) D. M. YYYY" />
+            </Uu5Elements.Grid.Item>
+            <TeamItem id={data.homeTeamId} />
+            <Uu5Elements.Grid.Item rowSpan={2}>
+              {data.homeGoals == null ? (
+                <Uu5Elements.DateTime value={data.time} dateFormat="none" />
+              ) : (
+                <MatchResult data={data} />
+              )}
+            </Uu5Elements.Grid.Item>
+            <TeamItem id={data.guestTeamId} />
+          </div>
+        </td>
+      )}
+    </Uu5Elements.Grid>
+  );
+  //@@viewOff:render
+}
+
+function getSeriesListXs(seriesList) {
+  return seriesList.map(({ ...series }) => {
+    if (series.value !== "homeTeamId") series.visible = false;
+    return series;
+  });
+}
 //@@viewOff:helpers
 
 const MatchCrud = createVisualComponent({
@@ -181,33 +231,52 @@ const MatchCrud = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    //@@viewOff:private
+    const { teamId, seasonId, ...restProps } = props;
 
-    //@@viewOn:interface
-    //@@viewOff:interface
+    const dtoIn = useMemo(() => {
+      const result = {};
+      if (teamId) result.teamId = teamId;
+      if (seasonId) result.seasonId = seasonId;
+      return result;
+    }, [teamId, seasonId]);
+
+    const contentSize = useContentSize();
+    const isSmall = ["xs", "s"].includes(contentSize);
+    //@@viewOff:private
 
     //@@viewOn:render
     return (
       <TeamProvider>
         <SeasonProvider>
-          <MatchProvider>
+          <MatchProvider dtoIn={dtoIn}>
             {(dataList) => (
               <OcElements.Crud
+                key={isSmall}
                 header={<Lsi lsi={{ cs: "Zápasy" }} />}
-                {...props}
+                {...restProps}
                 dataList={dataList}
-                seriesList={seriesList}
-                columnList={columnList}
+                seriesList={isSmall ? getSeriesListXs(seriesList) : seriesList}
+                columnList={
+                  isSmall
+                    ? columnList.map((col) => (col.value === "homeTeamId" ? { ...col, cellComponent: MatchRow } : col))
+                    : columnList
+                }
                 sorterDefinitionList={sorterList}
                 initialSorterList={[
                   { key: "time", ascending: true },
                   { key: "round", ascending: true },
                 ]}
                 filterDefinitionList={filterList}
-                initialFilterList={[{ key: "time", value: matchDateRange }]}
+                initialFilterList={teamId ? undefined : [{ key: "time", value: matchDateRange }]}
                 onPreSubmit={async (e) => {
                   delete e.data.value.age;
                 }}
+                spacing={isSmall && !restProps.readOnly ? "tight" : undefined}
+                viewType="table"
+                hideHeader={isSmall}
+                compact={isSmall}
+                displaySeriesButton={!isSmall}
+                borderRadius={isSmall ? "none" : undefined}
               >
                 <Uu5Forms.Form.View
                   gridLayout={{
