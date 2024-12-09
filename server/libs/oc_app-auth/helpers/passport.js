@@ -4,12 +4,13 @@ const Identity = require("../abl/identity");
 const Config = require("../config/config");
 
 module.exports = {
-  init(prefixPath = "/") {
+  init(prefixPath = "") {
     passport.use(
       new GoogleStrategy(
         {
           clientID: Config.google.clientId,
           clientSecret: Config.google.clientSecret,
+          // this is overridden in routes.js
           callbackURL: prefixPath + "/" + Config.google.callbackUc,
         },
         async (accessToken, refreshToken, profile, done) => {

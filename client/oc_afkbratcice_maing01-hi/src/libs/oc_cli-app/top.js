@@ -147,6 +147,7 @@ const Top = createVisualComponent({
           ? {
               // because of Drawer (Menu) does not have a className and must be for whole height
               // in case small content the menu is small
+            // TODO 72 calculate from ref of the top in layout effect
               "& + div": {
                 minHeight: "calc(100vh - 72px)",
               },

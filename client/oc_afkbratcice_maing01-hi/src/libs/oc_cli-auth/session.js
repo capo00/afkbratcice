@@ -41,7 +41,11 @@ function SessionProvider(props) {
 
         const width = Math.min(window.innerWidth, 600);
         const height = Math.min(window.innerHeight, 870);
-        window.open(CMD_PREFIX + "/google", null, `top=${window.innerHeight / 2 - height / 2},left=${window.innerWidth / 2 - width / 2},width=${width},height=${height}`);
+        window.open(
+          CMD_PREFIX + "/google",
+          null,
+          `top=${window.innerHeight / 2 - height / 2},left=${window.innerWidth / 2 - width / 2},width=${width},height=${height}`,
+        );
       },
       async logout() {
         await fetch(CMD_PREFIX + "/logout", {
@@ -49,15 +53,11 @@ function SessionProvider(props) {
           credentials: "include", // This ensures cookies are sent with the request
         });
         setIdentity(null);
-      }
+      },
     };
   }, [identity]);
 
-  return (
-    <SessionContext.Provider value={value}>
-      {props.children}
-    </SessionContext.Provider>
-  )
+  return <SessionContext.Provider value={value}>{props.children}</SessionContext.Provider>;
 }
 
 function useSession() {
