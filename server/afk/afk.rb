@@ -14,16 +14,20 @@ TEAMS = {
   "FK Chotusice 1932 B" => 47,
   "TJ Dynamo Horní Bučice" => 2,
   "Sokol Močovice" => 50,
-  "SK Nepoměřice" => 56,
-  "FK KAVALIER SÁZAVA B" => 13,
+  # "SK Nepoměřice" => 56,
+  # "FK KAVALIER SÁZAVA B" => 13,
   "TJ Star Tupadly B" => 12,
-  "FK Uhlířské Janovice B" => 62,
+  # "FK Uhlířské Janovice B" => 62,
   "TJ Sokol Vlkaneč" => 46,
   "SK Zbraslavice" => 60,
-  "TJ Sokol Malín" => 63,
+  # "TJ Sokol Malín" => 63,
   "SK Malešov B" => 64,
   "SK  Spartak Žleby" => 35,
-  "FK Záboří nad Labem" => 38
+  "FK Záboří nad Labem" => 38,
+  "TJ Slovan Horky" => 39,
+  "FK Miskovice" => 61,
+  "Sokol Potěhy" => 4,
+
 }
 
 doc = Nokogiri::HTML5(File.open("schedule.html"))
@@ -42,8 +46,8 @@ rounds.each do |round_el|
     date = "#{date_match[3]}-#{date_match[2].rjust(2, "0")}-#{date_match[1].rjust(2, "0")} #{date_match[4]}:#{date_match[5]}:00"
 
     teams = round_match.xpath(".//a[contains(@class, 'MatchRound-match')]//span[contains(@class, 'H7')]")
-    team_home = teams[0].text
-    team_guest = teams[1].text
+    team_home = teams[0].text.strip
+    team_guest = teams[1].text.strip
 
     id_home = TEAMS[team_home]
     id_guest = TEAMS[team_guest]
