@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useMemo, useEffect } from "react";
+import { Utils, useContext, useState, useMemo, useEffect } from "uu5g05";
 
 const CMD_PREFIX = "/auth";
 
-const SessionContext = createContext({});
+const [SessionContext] = Utils.Context.create({});
 
 function SessionProvider(props) {
   const [identity, setIdentity] = useState();

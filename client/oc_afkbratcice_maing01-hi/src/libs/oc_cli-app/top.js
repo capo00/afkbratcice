@@ -51,9 +51,10 @@ function getLoginButton(session, screenSize, item) {
     children = <Photo screenSize={screenSize} />;
     itemList = item?.itemList
       ? item.itemList
-          .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
-          .filter(Boolean)
+        .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
+        .filter(Boolean)
       : [];
+    itemList.unshift({ icon: "uugds-account", children: session.identity.identity });
     itemList.push({
       icon: "uugds-log-out",
       children: <Lsi lsi={{ cs: "Odhlásit" }} />,
@@ -87,6 +88,8 @@ const Top = createVisualComponent({
     const { ref, style, visibilityMatches, metrics } = useStickyTop("onScrollUp", true);
 
     const spacing = Uu5Elements.useSpacing();
+
+    const [menu, setMenu] = useState(null);
 
     const logoHeight = screenSize === "xs" ? 80 : 136;
     let buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
@@ -127,54 +130,37 @@ const Top = createVisualComponent({
     // adding loginButton, because ButtonGroup does not support { component: LoginButton }
     const session = OcAuth.useSession();
 
-    const identityItemIndex = menuList.findIndex((item) => item.key === "identity");
-    const updatedMenuList = [...menuList];
+    let itemList;
+    if (menuList) {
+      const identityItemIndex = menuList.findIndex((item) => item.key === "identity");
+      const updatedMenuList = [...menuList];
 
-    if (identityItemIndex > -1) {
-      updatedMenuList[identityItemIndex] = getLoginButton(session, screenSize, menuList[identityItemIndex]);
-    } else {
-      updatedMenuList.push(getLoginButton(session, screenSize));
+      if (identityItemIndex > -1) {
+        updatedMenuList[identityItemIndex] = getLoginButton(session, screenSize, menuList[identityItemIndex]);
+      } else {
+        updatedMenuList.push(getLoginButton(session, screenSize));
+      }
+
+      itemList = updatedMenuList.map((item) =>
+        updateHref(item, (...args) => {
+          setRoute(...args);
+          setMenu(null);
+        }),
+      );
+      if (screenSize === "xs") {
+        const identityItem = itemList.splice(identityItemIndex > -1 ? identityItemIndex : itemList.length - 1, 1)[0];
+        const hiddenMenu = itemList;
+        const hiddenIdentity = identityItem.itemList;
+        delete identityItem.itemList;
+
+        itemList = [
+          { icon: "uugds-menu", onClick: () => setMenu(menu ? null : hiddenMenu) },
+          { ...identityItem, onClick: identityItem.onClick ?? (() => setMenu(menu ? null : hiddenIdentity)) },
+        ];
+      }
     }
 
-    //@@viewOn:render
-    const attrs = Utils.VisualComponent.getAttrs(
-      restProps,
-      Config.Css.css({
-        ...style,
-        background: "#0f0f0f",
-        paddingInline: spacing.d,
-        ...(screenSize === "xs"
-          ? {
-              // because of Drawer (Menu) does not have a className and must be for whole height
-              // in case small content the menu is small
-            // TODO 72 calculate from ref of the top in layout effect
-              "& + div": {
-                minHeight: "calc(100vh - 72px)",
-              },
-            }
-          : null),
-      }),
-    );
-
-    const [menu, setMenu] = useState(null);
-
-    let itemList = updatedMenuList.map((item) =>
-      updateHref(item, (...args) => {
-        setRoute(...args);
-        setMenu(null);
-      }),
-    );
     if (screenSize === "xs") {
-      const identityItem = itemList.splice(identityItemIndex > -1 ? identityItemIndex : itemList.length - 1, 1)[0];
-      const hiddenMenu = itemList;
-      const hiddenIdentity = identityItem.itemList;
-      delete identityItem.itemList;
-
-      itemList = [
-        { icon: "uugds-menu", onClick: () => setMenu(menu ? null : hiddenMenu) },
-        { ...identityItem, onClick: identityItem.onClick ?? (() => setMenu(menu ? null : hiddenIdentity)) },
-      ];
-
       children = (
         <Uu5Elements.Drawer
           open={!!menu}
@@ -187,6 +173,26 @@ const Top = createVisualComponent({
       );
     }
 
+    //@@viewOn:render
+    const attrs = Utils.VisualComponent.getAttrs(
+      restProps,
+      Config.Css.css({
+        ...style,
+        background: "#0f0f0f",
+        paddingInline: spacing.d,
+        ...(screenSize === "xs"
+          ? {
+            // because of Drawer (Menu) does not have a className and must be for whole height
+            // in case small content the menu is small
+            // TODO 72 calculate from ref of the top in layout effect
+            "& + div": {
+              minHeight: "calc(100vh - 72px)",
+            },
+          }
+          : null),
+      }),
+    );
+
     return (
       <>
         <div {...attrs} ref={ref}>
@@ -198,7 +204,7 @@ const Top = createVisualComponent({
               onClick={() => setRoute(logoHref)}
               title={logoTooltip}
             />
-            <Uu5Elements.ActionGroup itemList={itemList} size="xl" />
+            {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
           </div>
         </div>
         {children}

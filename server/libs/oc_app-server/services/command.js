@@ -52,7 +52,7 @@ async function getDtoIn(req, validator, res, method, uc) {
       dtoIn = validator({ dtoIn }, "dtoIn");
     } catch (e) {
       console.error(`[${new Date().toISOString()}](${method}) /${uc} Validator exception. dtoIn = `, dtoIn, e);
-      res.status(500).send({ message: "Validator exception", error: e });
+      res.status(400).send({ message: "Validator exception", error: e });
     }
   }
 

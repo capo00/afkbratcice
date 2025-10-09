@@ -36,7 +36,7 @@ module.exports = {
       return res.json({ identity });
     });
 
-// Register
+    // Register
     router.post("/register", async (req, res) => {
       const { firstName, surname, email, password } = req.body;
 
@@ -63,7 +63,7 @@ module.exports = {
       }
     });
 
-// Login
+    // Login
     router.post("/login", async (req, res) => {
       const { email, password } = req.body;
 

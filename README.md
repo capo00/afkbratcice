@@ -6,9 +6,10 @@
 
 ## Local development
 1. do not use pnpm, because gcloud cannot work with pnpm
-2. in root -> `npm run dev` -> run server & client
-3. start on http://localhost:8080
-4. if dtb connection fail, necessary to resume dtb on https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters
+2. run mongo db
+3. in root -> `npm run dev` -> run server & client
+4. start on http://localhost:8080
+5. if dtb connection fail, necessary to resume dtb on https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters
 
 ## Deploy
 Deploy to [Google Cloud](https://console.cloud.google.com/home/dashboard?project=afkbratcice&supportedpurview=project)
