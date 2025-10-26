@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, Lsi, useState } from "uu5g05";
+import { createVisualComponent, Lsi, useState, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import { PageProvider, usePage } from "./page-context";
@@ -34,7 +34,7 @@ const PageView = createVisualComponent({
   //@@viewOff:defaultProps
 
   render(props) {
-    const { name, onCreate } = props;
+    const { name, maxWidth, onCreate, className, ...restProps } = props;
     const { data, state, handlerMap } = usePage();
     const { identity } = OcAuth.useSession();
 
@@ -43,12 +43,22 @@ const PageView = createVisualComponent({
     let actionList;
 
     if (identity?.profileList?.includes("operatives")) {
-      actionList = [{ children: "Upravit", onClick: () => setEdit((e) => !e) }];
+      const editProps = edit
+        ? { icon: "uugds-check", children: <Lsi lsi={{ cs: "Uložit" }} />, colorScheme: "positive" }
+        : { icon: "uugds-edit-inline", children: <Lsi lsi={{ cs: "Upravit" }} /> };
+      actionList = [{ ...editProps, onClick: () => setEdit((v) => !v), width: 104 }];
     }
 
     //@@viewOn:render
     return (
-      <Uu5Elements.Block headerType="heading" header={<Lsi lsi={name} />} actionList={actionList}>
+      <Uu5Elements.Block
+        headerType="heading"
+        header={<Lsi lsi={name} />}
+        actionList={actionList}
+        maxWidth={maxWidth}
+        className={Utils.Css.joinClassName(className, Config.Css.css({ maxWidth, marginInline: "auto" }))}
+        {...restProps}
+      >
         {state === "pendingNoData" ? (
           Array.from({ length: 5 }, (_, i) => <Uu5Elements.Skeleton key={i} borderRadius="moderate" height={160} />)
         ) : state === "readyNoData" ? (
@@ -105,12 +115,12 @@ const Page = createVisualComponent({
   //@@viewOff:defaultProps
 
   render(props) {
-    const { id, name, onCreate } = props;
+    const { id, name, maxWidth, onCreate } = props;
 
     //@@viewOn:render
     return (
       <PageProvider id={id}>
-        <PageView name={name} onCreate={onCreate} />
+        <PageView name={name} maxWidth={maxWidth} onCreate={onCreate} />
       </PageProvider>
     );
     //@@viewOff:render

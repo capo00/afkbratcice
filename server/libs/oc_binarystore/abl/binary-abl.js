@@ -2,7 +2,7 @@ const os = require("os");
 const dao = require("../dao/binary-dao");
 const multer = require("multer");
 const OcAppCore = require("../../oc_app-core");
-const GoogleFileAbl = require("./google-file-abl");
+const GoogleBucketAbl = require("./google-bucket-abl");
 
 const storage = multer.diskStorage({
   destination: os.tmpdir(),
@@ -23,7 +23,7 @@ class BinaryAbl extends OcAppCore.Crud {
 
     let gFile;
     try {
-      gFile = await GoogleFileAbl.create(file);
+      gFile = await GoogleBucketAbl.create(file);
 
       const binaryData = await this.dao.create({
         name: name ?? gFile.name,
@@ -37,7 +37,7 @@ class BinaryAbl extends OcAppCore.Crud {
     } catch (e) {
       if (gFile) {
         try {
-          await GoogleFileAbl.delete(gFile.id);
+          await GoogleBucketAbl.delete(gFile.id);
         } catch (e) {
           console.error("Binary cannot be deleted from GoogleFile", gFile.id, gFile.uri);
         }
@@ -54,9 +54,10 @@ class BinaryAbl extends OcAppCore.Crud {
       let uri;
       if (file) {
         // Update file metadata or content
-        const gFile = await GoogleFileAbl.update(binary.gFileId, file);
+        const gFile = await GoogleBucketAbl.update(binary.gFileId, file);
         updatedParams.size = file.size;
         updatedParams.mimeType = file.mimetype;
+        updatedParams.gFileId = gFile.id;
         uri = gFile.uri;
       }
 
@@ -78,7 +79,7 @@ class BinaryAbl extends OcAppCore.Crud {
       const { gFileId } = await this._get(id) || {};
 
       if (gFileId) {
-        await GoogleFileAbl.delete(gFileId);
+        await GoogleBucketAbl.delete(gFileId);
         await this.dao.delete(id);
       }
     } catch (e) {
@@ -94,7 +95,7 @@ class BinaryAbl extends OcAppCore.Crud {
     const { gFileId, ...data } = object;
     return {
       ...data,
-      uri: data.uri || GoogleFileAbl.getUri(gFileId),
+      uri: data.uri || GoogleBucketAbl.getUri(gFileId),
     };
   }
 }

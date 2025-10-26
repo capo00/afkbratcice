@@ -124,7 +124,7 @@ const SeasonTable = createVisualComponent({
   //@@viewOff:defaultProps
 
   render(props) {
-    const { seasonId, teamId, compact, ...tableProps } = props;
+    const { seasonId, teamId, compact, ...restProps } = props;
     const [, setRoute] = useRoute();
 
     const { state, data } = useDataObject({
@@ -132,6 +132,8 @@ const SeasonTable = createVisualComponent({
         load: () => Call.cmdGet("season/getTable", seasonId ? { id: seasonId } : { teamId }),
       },
     });
+
+    const space = Uu5Elements.useSpacing();
 
     let columnList = COLUMN_LIST;
 
@@ -146,7 +148,7 @@ const SeasonTable = createVisualComponent({
         ...col,
         cellComponent: (props) => {
           let significance, colorScheme;
-          if (props.data.team.id === teamId) {
+          if (props.data?.team?.id === teamId) {
             significance = "distinct";
             colorScheme = "primary";
           }
@@ -156,7 +158,7 @@ const SeasonTable = createVisualComponent({
               horizontalAlignment={horizontalAlignment}
               significance={significance}
               colorScheme={colorScheme}
-              onClick={() => setRoute("team", { id: props.data.team.id })}
+              onClick={props.data?.team?.id ? () => setRoute("team", { id: props.data?.team?.id }) : undefined}
             />
           );
         },
@@ -172,9 +174,19 @@ const SeasonTable = createVisualComponent({
       data?.table?.map((item, i) => ({ order: i + 1 + ".", ...item })) || Array.from({ length: 12 }, () => ({}));
 
     //@@viewOn:render
-    return (
+    return state === "ready" && Object.keys(data).length === 0 ? (
+      <Uu5Elements.Box
+        {...restProps}
+        className={Utils.Css.joinClassName(restProps.className, Config.Css.css({ paddingBlock: space.d, paddingInline: space.c }))}
+        borderRadius="moderate"
+        shape="background"
+        significance="distinct"
+      >
+        Žádná tabulka
+      </Uu5Elements.Box>
+    ) : (
       <Uu5TilesElements.Table
-        {...tableProps}
+        {...restProps}
         data={tableData}
         columnList={columnList}
         spacing={compact ? "tight" : undefined}

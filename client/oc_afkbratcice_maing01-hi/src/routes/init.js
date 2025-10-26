@@ -1,9 +1,8 @@
 //@@viewOn:imports
-import { Lsi, createVisualComponent } from "uu5g05";
+import { createVisualComponent } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
-import { useApp } from "../core/app/app-context";
-import OcEcc from "../libs/oc_ecc";
+import { useApp } from "../core/app/app-context.js";
 //@@viewOff:imports
 
 //@@viewOn:constants
@@ -15,9 +14,9 @@ import OcEcc from "../libs/oc_ecc";
 //@@viewOn:helpers
 //@@viewOff:helpers
 
-let History = createVisualComponent({
+let Init = createVisualComponent({
   //@@viewOn:statics
-  uu5Tag: Config.TAG + "History",
+  uu5Tag: Config.TAG + "Init",
   //@@viewOff:statics
 
   //@@viewOn:propTypes
@@ -30,25 +29,20 @@ let History = createVisualComponent({
 
   render(props) {
     //@@viewOn:private
-    const { data, handlerMap } = useApp();
+    const { handlerMap } = useApp();
     //@@viewOff:private
 
     //@@viewOn:render
     return (
-      <OcEcc.Page
-        id={data.history?.eccPageId}
-        name={{ cs: "Historie" }}
-        onCreate={(e) => {
-          handlerMap.update({ history: { eccPageId: e.data.id } });
-        }}
-        maxWidth={1200}
-      />
+      <div>
+        <Uu5Elements.Button onClick={() => handlerMap.init()}>Init</Uu5Elements.Button>
+      </div>
     );
     //@@viewOff:render
   },
 });
 
 //@@viewOn:exports
-export { History };
-export default History;
+export { Init };
+export default Init;
 //@@viewOff:exports

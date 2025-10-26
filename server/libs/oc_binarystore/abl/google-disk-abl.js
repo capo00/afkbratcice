@@ -76,7 +76,7 @@ class GoogleFile {
           name: file.originalname,
           parents: [Config.publicFolderId],
         },
-        fields: "id,name",
+        fields: "id,name,webViewLink",
       });
 
       return { ...data, uri: getGoogleFileUri(data.id) };

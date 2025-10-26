@@ -10,8 +10,15 @@ module.exports = {
   "app/update": {
     method: "post",
     auth: ["authorities"],
-    fn: async ({dtoIn}) => {
+    fn: async ({ dtoIn }) => {
       return await Abl.update(dtoIn);
+    },
+  },
+  "app/init": {
+    method: "post",
+    auth: ["authorities"],
+    fn: async ({ dtoIn }) => {
+      return await Abl.init(dtoIn);
     },
   },
 }

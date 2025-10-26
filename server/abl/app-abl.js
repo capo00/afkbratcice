@@ -1,5 +1,6 @@
 const OcAppCore = require("../libs/oc_app-core");
 const dao = require("../dao/app-dao");
+const teamAbl = require("./team-abl");
 
 const ERROR_CODE_PREFIX = "oc_afkbratcice";
 const Error = {
@@ -24,9 +25,28 @@ class AppAbl {
     if (config) {
       dtoOut = this._getData(config);
     } else {
-      dtoOut = { teams: { men: { teamId: "" } } };
+      // dtoOut = { teams: { men: { teamId: "" } } };
     }
     return dtoOut;
+  }
+
+  async init() {
+    let config = await this._get();
+
+    if (!config) {
+      const team = await teamAbl.create({
+        name: "TJ AFK Bratčice",
+        age: "men",
+      });
+
+      config = await this.update({
+        teams: {
+          [team.age]: { teamId: team.id },
+        },
+      });
+    }
+
+    return config;
   }
 
   async update(data, { merge = true } = {}) {

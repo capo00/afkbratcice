@@ -29,6 +29,17 @@
     <!-- Add extra <link>s or <script>s here if necessary. -->
 
     ` %><%= htmlWebpackPlugin.options.ejsFixUrls(template) %>
+
+    <script>
+      Uu5Loader.config({
+        imports: {
+          react: "https://cdn.plus4u.net/libs/react/18.3.1/react.min.js",
+          "react-dom": "https://cdn.plus4u.net/libs/react-dom/18.3.1/react-dom.min.js",
+          "prop-types": "https://cdn.plus4u.net/libs/prop-types/15.8.1/prop-types.min.js",
+          "immutable": "https://cdn.plus4u.net/libs/immutable/3.8.2/immutable.min.js",
+        },
+      });
+    </script>
   </head>
 
   <body class="uu-gdsg01-unicorn" style="background-color: #0f0f0f; color: #fff;">

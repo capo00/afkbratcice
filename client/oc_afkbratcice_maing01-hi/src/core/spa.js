@@ -9,6 +9,7 @@ import logoUri from "../assets/AFK_erb_light_160x160.png";
 import { AppProvider } from "./app/app-context";
 
 const Home = Utils.Component.lazy(() => import("../routes/home.js"));
+const Init = Utils.Component.lazy(() => import("../routes/init.js"));
 const History = Utils.Component.lazy(() => import("../routes/history.js"));
 const Team = Utils.Component.lazy(() => import("../routes/team.js"));
 const TeamMatches = Utils.Component.lazy(() => import("../routes/team-matches.js"));
@@ -86,17 +87,20 @@ function getMenuList(appData) {
     menuList = [...MENU];
     menuList.splice(index, 1);
 
-    Object.keys(appData.teams).forEach((age, i) => {
-      menuList.splice(index + i, 0, {
-        children: Config.AGE_MAP[age].name,
-        href: "team",
-        itemList: [
-          { children: <Lsi lsi={{ cs: "Zápasy" }} />, href: "team/matches" },
-          age === "old" ? null : { children: <Lsi lsi={{ cs: "Tabulka" }} />, href: "team/table" },
-        ].filter(Boolean),
+    if (appData.teams) {
+      Object.keys(appData.teams).forEach((age, i) => {
+        menuList.splice(index + i, 0, {
+          children: Config.AGE_MAP[age].name,
+          href: "team",
+          itemList: [
+            { children: <Lsi lsi={{ cs: "Zápasy" }} />, href: "team/matches" },
+            age === "old" ? null : { children: <Lsi lsi={{ cs: "Tabulka" }} />, href: "team/table" },
+          ].filter(Boolean),
+        });
       });
-    });
+    }
   }
+
   return menuList;
 }
 
@@ -137,19 +141,19 @@ const Spa = createVisualComponent({
     return (
       <SpaProvider>
         <AppProvider>
-          {({ data }) =>
-            data ? (
+          {({ state, data }) => {
+            return state === "ready" ? (
               <Uu5Elements.SpacingProvider type="loose">
                 <SpaView>
                   <Page logoUri={logoUri} logoHref="home" logoTooltip="AFK BRATČICE" menuList={getMenuList(data)}>
-                    <Router routeMap={getRouteMap(data)} />
+                    {Object.keys(data).length > 0 ? <Router routeMap={getRouteMap(data)} /> : <Init />}
                   </Page>
                 </SpaView>
               </Uu5Elements.SpacingProvider>
             ) : (
               <Uu5Elements.Pending size="max" />
             )
-          }
+          }}
         </AppProvider>
       </SpaProvider>
     );

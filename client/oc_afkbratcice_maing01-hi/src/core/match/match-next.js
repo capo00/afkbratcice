@@ -135,7 +135,7 @@ const MatchNext = createVisualComponent({
   //@@viewOff:defaultProps
 
   render(props) {
-    const { teamId } = props;
+    const { teamId, className, ...restProps } = props;
 
     const { data } = useDataObject({
       handlerMap: {
@@ -145,17 +145,17 @@ const MatchNext = createVisualComponent({
 
     const contentSize = useContentSize();
     const isSmall = ["xs", "s"].includes(contentSize);
+    const space = Uu5Elements.useSpacing();
+
+    const boxProps = { ...restProps, borderRadius: "moderate", shape: "background", significance: "distinct", className: Utils.Css.joinClassName(className, Config.Css.css({ paddingBlock: space.d, paddingInline: space.c })), /* height: 184 */ };
 
     //@@viewOn:render
-    return (
+    return !data || Object.keys(data).length > 0 ? (
       <Uu5Elements.Grid templateAreas="homeTeam countdown guestTeam, info info info" templateColumns="1fr auto 1fr">
         {({ style }) => (
           <Uu5Elements.Box
-            borderRadius="moderate"
-            className={Config.Css.css({ ...style, padding: "32px 24px" })}
-            // height={184}
-            shape="background"
-            significance="distinct"
+            {...boxProps}
+            className={Utils.Css.joinClassName(boxProps.className, Config.Css.css(style))}
           >
             <MatchTeam data={data} name="homeTeam" align="end" displayName={!isSmall} />
             <MatchTeam data={data} name="guestTeam" displayName={!isSmall} />
@@ -164,6 +164,10 @@ const MatchNext = createVisualComponent({
           </Uu5Elements.Box>
         )}
       </Uu5Elements.Grid>
+    ) : (
+      <Uu5Elements.Box {...boxProps}>
+        Žádný další zápas
+      </Uu5Elements.Box>
     );
     //@@viewOff:render
   },

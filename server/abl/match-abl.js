@@ -119,9 +119,14 @@ class MatchAbl extends OcAppCore.Crud {
     let season;
     if (seasonId) season = await seasonAbl.get(seasonId);
     else season = await seasonAbl.getCurrentByTeam(teamId);
-    const teamList = await teamAbl.list({ idList: season.teamList });
-    const matchList = await this.list({ seasonId });
-    return { table: createTable(matchList, getTeamMap(teamList)) };
+
+    let table;
+    if (season) {
+      const teamList = await teamAbl.list({ idList: season.teamList });
+      const matchList = await this.list({ seasonId });
+      table = createTable(matchList, getTeamMap(teamList));
+    }
+    return table ? { table } : undefined;
   }
 
 

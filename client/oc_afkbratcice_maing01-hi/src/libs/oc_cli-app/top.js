@@ -16,11 +16,11 @@ function updateHref({ href, params, itemList, ...item }, setRoute) {
 }
 
 function Photo({ screenSize }) {
-  const session = OcAuth.useSession();
-  const title = useLsi({ cs: "Přihlášený uživatel" });
+  const { identity } = OcAuth.useSession();
+  const title = `${identity.name} (${identity.identity})`;
   const isSmall = screenSize === "xs";
 
-  const [uri, setUri] = useState(session.identity.photo);
+  const [uri, setUri] = useState(identity.photo);
 
   return (
     <img
@@ -51,8 +51,8 @@ function getLoginButton(session, screenSize, item) {
     children = <Photo screenSize={screenSize} />;
     itemList = item?.itemList
       ? item.itemList
-          .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
-          .filter(Boolean)
+        .map(({ profile, ...it }) => (session.identity?.profileList?.includes(profile) ? it : null))
+        .filter(Boolean)
       : [];
     itemList.push({
       icon: "uugds-log-out",
@@ -145,13 +145,13 @@ const Top = createVisualComponent({
         paddingInline: spacing.d,
         ...(screenSize === "xs"
           ? {
-              // because of Drawer (Menu) does not have a className and must be for whole height
-              // in case small content the menu is small
+            // because of Drawer (Menu) does not have a className and must be for whole height
+            // in case small content the menu is small
             // TODO 72 calculate from ref of the top in layout effect
-              "& + div": {
-                minHeight: "calc(100vh - 72px)",
-              },
-            }
+            "& + div": {
+              minHeight: "calc(100vh - 72px)",
+            },
+          }
           : null),
       }),
     );

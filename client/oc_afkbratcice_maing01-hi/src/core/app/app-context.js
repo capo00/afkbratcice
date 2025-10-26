@@ -24,6 +24,7 @@ const AppProvider = createComponent({
       handlerMap: {
         load: () => OcElements.Call.cmdGet("app/get"),
         update: (data) => OcElements.Call.cmdPost("app/update", data),
+        init: () => OcElements.Call.cmdPost("app/init"),
       },
     });
 

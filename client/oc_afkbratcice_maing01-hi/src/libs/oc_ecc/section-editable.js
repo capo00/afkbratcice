@@ -5,7 +5,6 @@ import Uu5Forms from "uu5g05-forms";
 import Uu5RichTextElements from "uu5richtextg01-elements";
 import Uu5CodeKit from "uu5codekitg01";
 import Config from "./config/config.js";
-
 //@@viewOff:imports
 
 function Editor({ value, onBlur, ...props }) {
