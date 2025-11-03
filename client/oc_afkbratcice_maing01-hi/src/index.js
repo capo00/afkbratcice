@@ -14,6 +14,17 @@ if (!navigator.userAgent.match(/iPhone|iPad|iPod/)) {
   document.head.appendChild(link);
 }
 
+// Register service worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      await navigator.serviceWorker.register("/service-worker.js");
+    } catch (err) {
+      console.error("Service Worker registration failed:", err);
+    }
+  });
+}
+
 // store the target element selector to use it again during hot update
 let _targetElementId;
 

@@ -41,14 +41,14 @@ class EccSectionAbl extends OcAppCore.Crud {
 
   async unlock({ id, uu5String }, { identity }) {
     const { lock, ...section } = await this._get(id);
-    const { timeFrom, ...lockedBy } = lock;
+    const { timeFrom, ...lockedBy } = lock ?? {};
 
     const timeDiffMs = Date.now() - new Date(timeFrom).getTime();
     if (timeDiffMs < MAX_LOCK_MS && lockedBy.identity !== identity) {
       throw new Error.Locked(this.name, undefined, { lockedBy });
     }
 
-    return await super.update({ ...section, uu5String }, { merge: false });
+    return await super.update(uu5String === undefined ? section : { ...section, uu5String }, { merge: false });
   }
 }
 

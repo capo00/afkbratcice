@@ -63,18 +63,18 @@ function generate(cfg) {
         value: code,
         ...(sort || horizontalAlignment
           ? {
-              headerComponent: (
-                <Uu5TilesElements.Table.HeaderCell
-                  horizontalAlignment={horizontalAlignment}
-                  sorterKey={sort ? code : undefined}
-                />
-              ),
-            }
+            headerComponent: (
+              <Uu5TilesElements.Table.HeaderCell
+                horizontalAlignment={horizontalAlignment}
+                sorterKey={sort ? code : undefined}
+              />
+            ),
+          }
           : null),
         ...(horizontalAlignment
           ? {
-              cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment={horizontalAlignment} />,
-            }
+            cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment={horizontalAlignment} />,
+          }
           : null),
         ...restColumnProps,
       });
@@ -163,6 +163,7 @@ const Crud = createVisualComponent({
       hideColumns,
       tile,
       compact,
+      getActionList: propsGetActionList,
       ...blockProps
     } = props;
 
@@ -216,6 +217,7 @@ const Crud = createVisualComponent({
                 ),
               }),
           },
+          ...(propsGetActionList?.({ data }) ?? []),
         ];
 
         let actionList = [
@@ -281,8 +283,8 @@ const Crud = createVisualComponent({
           serieList={
             hideColumns
               ? seriesList.map((series) =>
-                  hideColumns.includes(series.value) ? { ...series, visible: false } : series,
-                )
+                hideColumns.includes(series.value) ? { ...series, visible: false } : series,
+              )
               : seriesList
           }
           filterDefinitionList={filterDefinitionList}
@@ -301,25 +303,25 @@ const Crud = createVisualComponent({
             readOnly
               ? undefined
               : (selectedData) => [
-                  {
-                    icon: "uugds-delete",
-                    children: "Delete",
-                    colorScheme: "negative",
-                    onClick: (e) => {
-                      setRemoveData({
-                        callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
-                        header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
-                        info: (
-                          <Lsi
-                            lsi={{
-                              cs: `Opravdu chcete smazat položky?`,
-                            }}
-                          />
-                        ),
-                      });
-                    },
+                {
+                  icon: "uugds-delete",
+                  children: "Delete",
+                  colorScheme: "negative",
+                  onClick: (e) => {
+                    setRemoveData({
+                      callback: () => handlerMap.deleteMany({ idList: selectedData.map(({ data }) => data.id) }),
+                      header: <Lsi lsi={{ cs: "Smazat položky?" }} />,
+                      info: (
+                        <Lsi
+                          lsi={{
+                            cs: `Opravdu chcete smazat položky?`,
+                          }}
+                        />
+                      ),
+                    });
                   },
-                ]
+                },
+              ]
           }
         >
           {tile}

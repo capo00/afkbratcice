@@ -37,6 +37,10 @@ const App = {
     // Define your api here
     Command.createCommands(app, api);
 
+    app.get("/service-worker.js", (req, res) => {
+      res.sendFile(path.resolve(publicPath, "service-worker.js"));
+    });
+
     // All other GET requests not handled before will return our React app
     app.get("*", (req, res) => {
       res.sendFile(path.resolve(publicPath, "index.html"));

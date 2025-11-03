@@ -116,7 +116,7 @@ class Dao {
     const { id, ...restData } = data;
 
     const newData = updateData(restData);
-    await this._exec(() => this.coll.updateOne(convertId({ id }), { $set: newData }));
+    await this._exec(() => this.coll.replaceOne(convertId({ id }), newData));
 
     return { id, ...newData };
   }

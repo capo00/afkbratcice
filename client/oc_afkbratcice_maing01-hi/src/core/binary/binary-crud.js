@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, Lsi } from "uu5g05";
+import { createVisualComponent, Lsi, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import Uu5ImagingTools from "uu5imagingg01-tools";
@@ -174,6 +174,13 @@ const BinaryCrud = createVisualComponent({
                 });
               }
             }}
+            getActionList={({ data }) => [
+              {
+                icon: "uugds-copy",
+                children: <Lsi lsi={{ cs: "Zkopírovat uri" }} />,
+                onClick: () => Utils.Clipboard.write(data.data.uri),
+              },
+            ]}
           >
             {({ type }) => (
               <Uu5Forms.Form.View gridLayout={{ xs: "name, file, tagList", s: "name file, tagList tagList" }}>

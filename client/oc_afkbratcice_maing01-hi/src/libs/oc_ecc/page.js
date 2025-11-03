@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, Lsi, useState, Utils } from "uu5g05";
+import { createVisualComponent, Lsi, useState, Utils, ToolbarProvider } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import { PageProvider, usePage } from "./page-context";
@@ -51,51 +51,54 @@ const PageView = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Uu5Elements.Block
-        headerType="heading"
-        header={<Lsi lsi={name} />}
-        actionList={actionList}
-        maxWidth={maxWidth}
-        className={Utils.Css.joinClassName(className, Config.Css.css({ maxWidth, marginInline: "auto" }))}
-        {...restProps}
-      >
-        {state === "pendingNoData" ? (
-          Array.from({ length: 5 }, (_, i) => <Uu5Elements.Skeleton key={i} borderRadius="moderate" height={160} />)
-        ) : state === "readyNoData" ? (
-          <CreatePageButton name={name} onCreate={onCreate} colorScheme="primary" significance="highlighted" />
-        ) : (
-          <Uu5Elements.Grid rowGap={40}>
-            {data.sectionList.map((section, i) => {
-              return (
-                <Section
-                  key={section.data?.id ?? i}
-                  editMode={edit ? {} : null}
-                  dto={section}
-                  onCreateBefore={() => handlerMap.createSectionBefore({ sectionId: section.data.id })}
-                  onCreateAfter={() => handlerMap.createSectionAfter({ sectionId: section.data.id })}
-                  onMoveUp={() => {
-                    const sectionList = moveItem(
-                      data.sectionList.map(({ id }) => id),
-                      section.data.id,
-                      "up",
-                    );
-                    handlerMap.updateSectionOrder({ sectionList });
-                  }}
-                  onMoveDown={() => {
-                    const sectionList = moveItem(
-                      data.sectionList.map(({ id }) => id),
-                      section.data.id,
-                      "down",
-                    );
-                    handlerMap.updateSectionOrder({ sectionList });
-                  }}
-                  onDelete={() => handlerMap.deleteSection({ sectionId: section.data.id })}
-                />
-              );
-            })}
-          </Uu5Elements.Grid>
-        )}
-      </Uu5Elements.Block>
+      <ToolbarProvider>
+        <Uu5Elements.Block
+          headerType="heading"
+          header={<Lsi lsi={name} />}
+          actionList={actionList}
+          maxWidth={maxWidth}
+          className={Utils.Css.joinClassName(className, Config.Css.css({ maxWidth, marginInline: "auto" }))}
+          {...restProps}
+        >
+          <Uu5Elements.Toolbar />
+          {state === "pendingNoData" ? (
+            Array.from({ length: 5 }, (_, i) => <Uu5Elements.Skeleton key={i} borderRadius="moderate" height={160} />)
+          ) : state === "readyNoData" ? (
+            <CreatePageButton name={name} onCreate={onCreate} colorScheme="primary" significance="highlighted" />
+          ) : (
+            <Uu5Elements.Grid rowGap={40}>
+              {data.sectionList.map((section, i) => {
+                return (
+                  <Section
+                    key={section.data?.id ?? i}
+                    editMode={edit ? {} : null}
+                    dto={section}
+                    onCreateBefore={() => handlerMap.createSectionBefore({ sectionId: section.data.id })}
+                    onCreateAfter={() => handlerMap.createSectionAfter({ sectionId: section.data.id })}
+                    onMoveUp={() => {
+                      const sectionList = moveItem(
+                        data.sectionList.map(({ id }) => id),
+                        section.data.id,
+                        "up",
+                      );
+                      handlerMap.updateSectionOrder({ sectionList });
+                    }}
+                    onMoveDown={() => {
+                      const sectionList = moveItem(
+                        data.sectionList.map(({ id }) => id),
+                        section.data.id,
+                        "down",
+                      );
+                      handlerMap.updateSectionOrder({ sectionList });
+                    }}
+                    onDelete={() => handlerMap.deleteSection({ sectionId: section.data.id })}
+                  />
+                );
+              })}
+            </Uu5Elements.Grid>
+          )}
+        </Uu5Elements.Block>
+      </ToolbarProvider>
     );
     //@@viewOff:render
   },

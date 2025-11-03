@@ -44,6 +44,7 @@
     "clean": "uu_appg01_devkit clean",
     "test": "uu_appg01_devkit test",
     "build": "uu_appg01_devkit build",
+    "postbuild": "node tools/postbuild.js",
     "package": "uu_appg01_devkit package",
     "start": "uu_appg01_devkit start",
     "prettify": "uu_appg01_devkit prettify",
