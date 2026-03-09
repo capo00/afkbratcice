@@ -1,0 +1,14 @@
+{
+  "name": "web-scraping",
+  "version": "1.0.0",
+  "description": "Scrapes match data from fotbal.cz",
+  "type": "module",
+  "scripts": {
+    "scrape": "node scrape.js",
+    "scrape:url": "node scrape.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^24.7.0"
+  }
+}
