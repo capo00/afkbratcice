@@ -29,6 +29,21 @@ const TEAMS = {
   "Sokol Potěhy": 4,
 };
 
+// žáci
+// const TEAMS = {
+//   "TJ Slavoj Vrdy": 22,
+//   "TJ Jiskra Zruč nad Sázavou": 69,
+//   "TJ Sokol Družba Suchdol": 19,
+//   "FK Chotusice 1932": 20,
+//   "TJ AFK Bratčice": 15,
+//   "TJ Sokol Malín": 68,
+//   "TJ Star Tupadly": 24,
+//   "TJ Sokol Paběnice": 70,
+//   "SK Církvice/SK 1933 ČUS Nové Dvory": 71,
+//   "Sparta Kutná Hora B": 67,
+//   "FK Uhlířské Janovice": 66,
+// }
+
 async function getHtml(source) {
   if (existsSync(source)) {
     return readFileSync(source, "utf-8");
