@@ -6,6 +6,7 @@ import OcAuth from "../libs/oc_cli-auth";
 import Config from "./config/config.js";
 import { Call } from "../libs/oc_cli-elements/index.js";
 import MatchList from "./match-list.js";
+import StandingsList from "./standings-list.js";
 import TeamOverview from "./team-overview.js";
 //@@viewOff:imports
 
@@ -17,7 +18,27 @@ import TeamOverview from "./team-overview.js";
 
 //@@viewOn:helpers
 function getTurnamentActionList(dto, identity) {
-  // TODO update only for auth, for operatives updateData
+  const { data, handlerMap } = dto;
+  const isAuth = identity?.profileList?.includes?.("authorities") && data?.owner === identity?.identity;
+  const isOperative = data?.operativeList?.includes?.(identity?.identity);
+  const canManage = isAuth || isOperative;
+
+  if (!canManage) return undefined;
+
+  const actionList = [];
+
+  if (data?.state === "initial") {
+    actionList.push({
+      icon: "uugds-calendar",
+      children: "Vytvořit rozpis",
+      onClick: async () => {
+        await handlerMap.createSchedule();
+        handlerMap.load();
+      },
+    });
+  }
+
+  return actionList.length > 0 ? actionList : undefined;
 }
 //@@viewOff:helpers
 
@@ -45,6 +66,8 @@ const TurnamentDetail = createVisualComponent({
         load: () => Call.cmdGet("turnament/get", { id }),
         update: (dtoIn) => Call.cmdPost("turnament/update", { ...dtoIn, id }),
         updateData: (dtoIn) => Call.cmdPost("turnament/updateData", { ...dtoIn, id }),
+        setResult: (dtoIn) => Call.cmdPost("turnament/setResult", { ...dtoIn, id }),
+        createSchedule: () => Call.cmdPost("turnament/createSchedule", { id }),
       },
     });
     //@@viewOff:private
@@ -60,6 +83,12 @@ const TurnamentDetail = createVisualComponent({
               dto.data.place ? { icon: "uugds-calendar", title: dto.data.place, subtitle: "Místo" } : null,
             ].filter(Boolean)} />
             {dto.data.matchList && <MatchList dto={dto} />}
+            {dto.data.matchList && (
+              <StandingsList
+                key={id + "-" + (dto.data.matchList?.filter((m) => m.result).length ?? 0)}
+                turnamentId={id}
+              />
+            )}
             <TeamOverview dto={dto} />
             <Uu5Extras.QRCode value={location.href} />
           </Uu5Elements.Grid>

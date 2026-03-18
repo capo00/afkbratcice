@@ -119,12 +119,21 @@ const API = {
     validator: UuDataTypes.exact({
       id: UuDataTypes.string,
       code: UuDataTypes.string,
-      midleResultList: UuDataTypes.arrayOf(UuDataTypes.string),
+      middleResultList: UuDataTypes.arrayOf(UuDataTypes.string),
       result: UuDataTypes.string,
       desc: UuDataTypes.string,
     }),
     fn: async ({ dtoIn, identity }) => {
       return await Abl.setResult(dtoIn, identity);
+    },
+  },
+  "turnament/getStandings": {
+    method: "get",
+    validator: UuDataTypes.exact({
+      id: UuDataTypes.string,
+    }),
+    fn: async ({ dtoIn }) => {
+      return await Abl.getStandings(dtoIn);
     },
   },
 }

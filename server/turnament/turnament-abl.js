@@ -55,9 +55,12 @@ function createGroups(teamList) {
   const groups = {};
 
   teamList.forEach((team) => {
-    const [, group, order] = team.group.match(/^(.*[A-Za-z]+)(\d+)$/);
+    const code = team.code ?? team.group ?? "";
+    const match = code.match(/^(.*[A-Za-z]+)(\d+)$/);
+    if (!match) return;
+    const [, group, order] = match;
     groups[group] ??= [];
-    groups[group][order - 1] = team;
+    groups[group][parseInt(order, 10) - 1] = team;
   });
 
   return groups;
@@ -83,12 +86,45 @@ const MATCH_CONFIG = {
     [3, 5],
     [1, 4],
     [2, 5],
-  ]
+  ],
 };
 
+/**
+ * Berger algorithm for round-robin pairing.
+ * Odd team count: add dummy, generate n rounds, filter out dummy matches.
+ * Even team count: n-1 rounds.
+ */
+function createBergerRounds(teamCount) {
+  const n = teamCount;
+  const isOdd = n % 2 === 1;
+  const size = isOdd ? n + 1 : n;
+  const rounds = isOdd ? n : n - 1;
+
+  const pairs = [];
+  let order = Array.from({ length: size }, (_, i) => i + 1);
+
+  for (let r = 0; r < rounds; r++) {
+    const half = size / 2;
+    for (let i = 0; i < half; i++) {
+      const a = order[i];
+      const b = order[size - 1 - i];
+      if (isOdd && (a === size || b === size)) continue;
+      pairs.push([a, b]);
+    }
+    const rotated = [order[0], order[size - 1], ...order.slice(1, size - 1)];
+    order = rotated;
+  }
+
+  return pairs;
+}
+
+function getMatchConfig(teamCount) {
+  return MATCH_CONFIG[teamCount + ""] ?? createBergerRounds(teamCount);
+}
+
 function createMatchListPerGroup(teamList, group = "A", placeList) {
-  const matchConfig = MATCH_CONFIG[teamList.length + ""];
-  return MATCH_CONFIG[teamList.length + ""].map(([n1, n2], i) => ({
+  const matchConfig = getMatchConfig(teamList.length);
+  return matchConfig.map(([n1, n2], i) => ({
     code: [group + n1, group + n2].join("-"),
     place: placeList ? placeList[i % placeList.length] : undefined,
   }));
@@ -99,12 +135,12 @@ function createMatchList(groups, placeList) {
   let matchList = [];
 
   if (groupCount === 1) {
-    const teamList = Object.values(groups)[0];
-    matchList = createMatchListPerGroup(teamList, "A", placeList)
+    const teamList = Object.values(groups)[0].filter(Boolean);
+    matchList = createMatchListPerGroup(teamList, "A", placeList);
   } else {
     if (!placeList || placeList.length === 1) {
       const groupMatchList = Object.entries(groups).map(([group, teamList]) => {
-        return createMatchListPerGroup(teamList, group, placeList ? [placeList[0]] : undefined);
+        return createMatchListPerGroup(teamList.filter(Boolean), group, placeList ? [placeList[0]] : undefined);
       });
       for (let i = 0; i < Math.max(...groupMatchList.map((matchList) => matchList.length)); i++) {
         groupMatchList.forEach((mList) => {
@@ -113,7 +149,7 @@ function createMatchList(groups, placeList) {
       }
     } else if (placeList.length === groupCount) {
       Object.entries(groups).forEach(([group, teamList], i) => {
-        matchList.push(...createMatchListPerGroup(teamList, group, [placeList[i]]));
+        matchList.push(...createMatchListPerGroup(teamList.filter(Boolean), group, [placeList[i]]));
       });
     }
   }
@@ -147,18 +183,18 @@ class TurnamentAbl extends OcAppCore.Crud {
     const turnament = await getTurnamentWithAccess(id, "createSchedule", ["operativeList"], identity);
 
     if (turnament.state !== "initial") {
-      new Error.InvalidState(this.name, null, { id, useCase: "createSchedule", state: turnament.state });
+      throw new Error.InvalidState(this.name, null, { id, useCase: "createSchedule", state: turnament.state });
     }
 
     if (turnament.teamList.find((team) => team.code == null)) {
-      new Error.MissingTeamListCode(this.name, null, { id, useCase: "createSchedule", teamList: turnament.teamList });
+      throw new Error.MissingTeamListCode(this.name, null, { id, useCase: "createSchedule", teamList: turnament.teamList });
     }
 
     const groups = createGroups(turnament.teamList);
 
     const groupList = Object.keys(groups);
     if (turnament.placeList?.length > 1 && groupList.length > 1 && groupList.length !== turnament.placeList.length) {
-      new Error.InvalidPlaceList(this.name, null, { id, useCase: "createSchedule", placeList: turnament.placeList, groupList });
+      throw new Error.InvalidPlaceList(this.name, null, { id, useCase: "createSchedule", placeList: turnament.placeList, groupList });
     }
 
     turnament.matchList = createMatchList(groups, turnament.placeList);
@@ -176,10 +212,78 @@ class TurnamentAbl extends OcAppCore.Crud {
       if (middleResultList) match.middleResultList = middleResultList;
       if (result) match.result = result;
     } else {
-      new Error.MatchNotFound(this.name, null, { id, useCase: "setResult", code });
+      throw new Error.MatchNotFound(this.name, null, { id, useCase: "setResult", code });
     }
 
     return super.update(turnament, { merge: false });
+  }
+
+  async getStandings({ id, group }, identity) {
+    const turnament = await dao.get(id);
+    const matchList = turnament.matchList ?? [];
+    const teamList = turnament.teamList ?? [];
+
+    const codeToTeam = {};
+    teamList.forEach((t) => {
+      const c = t.code ?? t.group;
+      if (c) codeToTeam[c] = { ...t, stats: { played: 0, wins: 0, draws: 0, losses: 0, scored: 0, conceded: 0, points: 0 } };
+    });
+
+    matchList.forEach((match) => {
+      if (!match.result) return;
+      const [homeCode, awayCode] = (match.code ?? "").split("-");
+      const m = match.result.match(/^(\d+)\s*[:–-]\s*(\d+)$/);
+      if (!m) return;
+      const homeGoals = parseInt(m[1], 10);
+      const awayGoals = parseInt(m[2], 10);
+
+      const home = codeToTeam[homeCode];
+      const away = codeToTeam[awayCode];
+      if (!home || !away) return;
+
+      home.stats.played++;
+      away.stats.played++;
+      home.stats.scored += homeGoals;
+      home.stats.conceded += awayGoals;
+      away.stats.scored += awayGoals;
+      away.stats.conceded += homeGoals;
+
+      if (homeGoals > awayGoals) {
+        home.stats.wins++;
+        home.stats.points += 3;
+        away.stats.losses++;
+      } else if (homeGoals < awayGoals) {
+        away.stats.wins++;
+        away.stats.points += 3;
+        home.stats.losses++;
+      } else {
+        home.stats.draws++;
+        away.stats.draws++;
+        home.stats.points++;
+        away.stats.points++;
+      }
+    });
+
+    let standings = Object.values(codeToTeam);
+    if (group) {
+      standings = standings.filter((t) => {
+        const c = t.code ?? t.group ?? "";
+        return c.startsWith(group) || c.match(new RegExp("^" + group + "\\d"));
+      });
+    }
+
+    standings.sort((a, b) => {
+      const s1 = a.stats;
+      const s2 = b.stats;
+      if (s2.points !== s1.points) return s2.points - s1.points;
+      const diff1 = s1.scored - s1.conceded;
+      const diff2 = s2.scored - s2.conceded;
+      if (diff2 !== diff1) return diff2 - diff1;
+      if (s2.scored !== s1.scored) return s2.scored - s1.scored;
+      return 0;
+    });
+
+    return standings;
   }
 }
 

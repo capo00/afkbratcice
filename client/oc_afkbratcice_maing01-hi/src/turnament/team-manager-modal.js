@@ -43,7 +43,7 @@ const TeamManagerModal = createVisualComponent({
         }>
           <Uu5Forms.Form.View gridLayout="name name code, desc desc desc">
             <Uu5Forms.FormText name="name" label="Název" required />
-            <Uu5Forms.FormText name="code" label="Skupina" />
+            <Uu5Forms.FormText name="code" label="Kód (např. A1, B2)" />
             <Uu5Forms.FormTextArea name="desc" label="Popis" />
           </Uu5Forms.Form.View>
         </Uu5Elements.Modal>
