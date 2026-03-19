@@ -10,7 +10,7 @@
 3. in root -> `npm run dev` -> run server & client
 4. start on http://localhost:8080
 5. if dtb connection fail, necessary to resume dtb on https://cloud.mongodb.com/v2/648433fc6d28c3603ac3dd22#/clusters
-6. for turnament, open UVE /turnament
+6. for tournament, open UVE /caio-tournament
 
 ## Deploy
 Deploy to [Google Cloud](https://console.cloud.google.com/home/dashboard?project=afkbratcice&supportedpurview=project)
