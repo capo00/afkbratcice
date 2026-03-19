@@ -14,7 +14,7 @@ const Call = {
       uri.search = new URLSearchParams(serializeDtoIn(dtoIn));
     }
     try {
-      const response = await fetch(uri, opts);
+      const response = await fetch(uri, { credentials: "include", ...opts });
       response.data = await response.json();
       return response;
     } catch (e) {
@@ -46,6 +46,7 @@ const Call = {
 
     try {
       response = await fetch(uri, {
+        credentials: "include",
         ...opts,
         method: "POST",
         body,

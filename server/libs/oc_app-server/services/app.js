@@ -35,7 +35,7 @@ const App = {
     OcAuth.init(app);
 
     // Define your api here
-    Command.createCommands(app, api);
+    Command.createCommands(app, api, { publicPath });
 
     // All other GET requests not handled before will return our React app
     app.get("*", (req, res) => {

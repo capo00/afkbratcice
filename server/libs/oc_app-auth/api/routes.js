@@ -5,21 +5,26 @@ const Identity = require("../abl/identity");
 const Config = require("../config/config");
 const fs = require("fs");
 
+const IS_PROD = process.env.NODE_ENV === "production";
+
+function getCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: IS_PROD ? "strict" : "lax",
+  };
+}
+
 module.exports = {
   init(prefixPath = "") {
     const router = express.Router();
 
     function setToken(res, token) {
-      res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict" });
+      res.cookie("token", token, getCookieOptions());
     }
 
     function removeToken(res) {
-      // Clear the cookie by setting an empty value and an expired date
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: true, // ensure "secure" is true in production to only send the cookie over HTTPS
-        sameSite: "strict",
-      });
+      res.clearCookie("token", getCookieOptions());
     }
 
     router.get("/", async (req, res) => {

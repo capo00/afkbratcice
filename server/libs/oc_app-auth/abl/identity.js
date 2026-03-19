@@ -54,6 +54,10 @@ const Identity = {
     return jwt.sign(Identity.getBasicData(identity), Config.token.jwtSecret, { expiresIn: Config.token.jwtLifetime })
   },
 
+  async search(query) {
+    return identityDao.search(query);
+  },
+
   getBasicData({ identity, firstName, surname, name, email, photo, profileList }) {
     return { identity, firstName, surname, name, email, photo, profileList };
   }

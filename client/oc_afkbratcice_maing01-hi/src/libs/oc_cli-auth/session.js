@@ -30,6 +30,16 @@ function SessionProvider(props) {
     checkAuthStatus();
   }, []);
 
+  useEffect(() => {
+    function onMessage(e) {
+      if (e.data?.type === "auth" && e.data.identity) {
+        setIdentity(e.data.identity);
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
   const value = useMemo(() => {
     let { exp, iat, ...params } = identity || {};
     if (!identity) params = identity;
@@ -37,8 +47,6 @@ function SessionProvider(props) {
       identity: params,
       state: identity === undefined ? "pending" : identity === null ? "notAuthenticated" : "authenticated",
       login() {
-        window.OcAuth = { loggedIn: ({ identity }) => setIdentity(identity) };
-
         const width = Math.min(window.innerWidth, 600);
         const height = Math.min(window.innerHeight, 870);
         window.open(

@@ -60,7 +60,7 @@ async function getDtoIn(req, validator, res, method, uc) {
 }
 
 const Command = {
-  createCommands(app, api) {
+  createCommands(app, api, { publicPath }) {
     const apis = {
       "sys/health": {
         method: "get",
@@ -85,7 +85,7 @@ const Command = {
 
         try {
           // console.info(`{${reqId}}[${new Date().toISOString()}](${method}) /${uc} start`, dtoIn);
-          const dtoOut = await fn({ dtoIn, identity, req, res, method, useCase: uc, next });
+          const dtoOut = await fn({ dtoIn, identity, req, res, method, useCase: uc, next, publicPath });
           // console.info(`{${reqId}}[${new Date().toISOString()}](${method}) /${uc} end`, dtoOut);
 
           if (dtoOut !== false) res.json(dtoOut == null ? {} : dtoOut);
