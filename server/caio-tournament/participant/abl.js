@@ -37,10 +37,10 @@ class ParticipantAbl extends OcAppCore.Crud {
     return await super.create({
       tournamentId,
       name: dtoIn.name,
-      desc: dtoIn.desc || "",
-      group: dtoIn.group || null,
-      seed: dtoIn.seed ?? 0,
-      playerList: dtoIn.playerList || [],
+      desc: dtoIn.desc,
+      group: dtoIn.group,
+      seed: dtoIn.seed,
+      playerList: dtoIn.playerList,
       stats: { played: 0, wins: 0, draws: 0, losses: 0, scored: 0, conceded: 0, points: 0 },
     });
   }

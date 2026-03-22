@@ -5,6 +5,28 @@ import Uu5TilesElements from "uu5tilesg02-elements";
 import Config from "../components/config/config.js";
 import { useParticipantList } from "../participant/participant-context.js";
 
+function isSelected(itemList, rowIndex) {
+  let result = false;
+  if (itemList[rowIndex]?.data?.score?.home == null && itemList[rowIndex]?.data?.score?.away == null) {
+    if (rowIndex === 0 || itemList[rowIndex - 1]?.data?.score?.home != null && itemList[rowIndex - 1]?.data?.score?.away != null) result = true
+  }
+  return result;
+}
+
+function cellComponent(itemList, alignment) {
+  return (props, { rowIndex }) => {
+    const selected = isSelected(itemList, rowIndex);
+    return (
+      <Uu5TilesElements.Table.Cell
+        {...props}
+        horizontalAlignment={alignment}
+        significance={selected ? "distinct" : undefined}
+        colorScheme={selected ? "primary" : undefined}
+      />
+    );
+  };
+}
+
 const MatchTable = createVisualComponent({
   uu5Tag: Config.TAG + "MatchTable",
 
@@ -39,7 +61,7 @@ const MatchTable = createVisualComponent({
                 header: "#",
                 value: "id",
                 cell: (_, { rowIndex }) => rowIndex + 1 + ".",
-                cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment="right" />,
+                cellComponent: cellComponent(itemList, "right"),
                 minWidth: "max-content",
                 maxWidth: "max-content",
               },
@@ -50,13 +72,15 @@ const MatchTable = createVisualComponent({
                   const name = getName(data.data.homeParticipantId);
                   return data.data.score?.home > data.data.score?.away ? <b>{name}</b> : name;
                 },
-                cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment="right" />,
+                cellComponent: cellComponent(itemList, "right"),
+                minWidth: "max-content",
+                maxWidth: "max-content",
               },
               {
                 header: <Lsi lsi={{ cs: "Skóre" }} />,
                 value: "score",
                 cell: ({ data }) => `${data.data.score?.home ?? "-"} : ${data.data.score?.away ?? "-"}`,
-                cellComponent: <Uu5TilesElements.Table.Cell horizontalAlignment="center" />,
+                cellComponent: cellComponent(itemList, "center"),
                 minWidth: "max-content",
                 maxWidth: "max-content",
               },
@@ -67,6 +91,11 @@ const MatchTable = createVisualComponent({
                   const name = getName(data.data.awayParticipantId);
                   return data.data.score?.away > data.data.score?.home ? <b>{name}</b> : name;
                 },
+                cellComponent: cellComponent(itemList),
+              },
+              {
+                type: "actionList",
+                cellComponent: cellComponent(itemList),
               },
             ].filter(Boolean)}
             getActionList={isReferee ? ({ data }) => {
@@ -82,6 +111,7 @@ const MatchTable = createVisualComponent({
             hideHeader
             spacing={isReferee ? "tight" : undefined}
             verticalAlignment="center"
+            cellHoverExtent={isReferee ? "row" : undefined}
           />
         )}
 

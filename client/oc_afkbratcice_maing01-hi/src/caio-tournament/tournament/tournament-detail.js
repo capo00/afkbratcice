@@ -1,6 +1,7 @@
-import { createVisualComponent } from "uu5g05";
+import { createVisualComponent, useState, useEffect } from "uu5g05";
 import Config from "./config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
+import OcAuth from "../../libs/oc_cli-auth";
 import { ParticipantListProvider } from "../participant/participant-context.js";
 import { MatchListProvider } from "../match/match-context.js";
 import { TournamentProvider } from "./tournament-context.js";
@@ -22,10 +23,22 @@ const TournamentDetail = createVisualComponent({
   render(props) {
     const { id } = props;
 
+    const session = OcAuth.useSession();
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    useEffect(() => {
+      if (session.state === "notAuthenticated") {
+        const interval = setInterval(() => {
+          setRefreshKey((prev) => prev + 1);
+        }, 60 * 1000); // 1 minute
+        return () => clearInterval(interval);
+      }
+    }, [session.state])
+
     return (
-      <TournamentProvider id={id}>
-        <ParticipantListProvider dtoIn={{ tournamentId: id }} calls={getCalls(id)}>
-          <MatchListProvider tournamentId={id}>
+      <TournamentProvider id={id} refreshKey={refreshKey}>
+        <ParticipantListProvider dtoIn={{ tournamentId: id }} calls={getCalls(id)} refreshKey={refreshKey}>
+          <MatchListProvider tournamentId={id} refreshKey={refreshKey}>
             <TournamentDetailView id={id} />
           </MatchListProvider>
         </ParticipantListProvider>

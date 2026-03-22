@@ -35,7 +35,7 @@ const CrudContext = {
       //@@viewOff:defaultProps
 
       render(props) {
-        const { children, calls = getCalls(entity), pageSize, dtoIn } = props;
+        const { children, calls = getCalls(entity), pageSize, dtoIn, refreshKey } = props;
 
         const handlerMap = {
           load: calls.list,
@@ -53,7 +53,7 @@ const CrudContext = {
             delete: calls.deleteItem,
             update: calls.updateItem,
           },
-        });
+        }, [refreshKey]);
 
         useUpdateEffect(
           () => {

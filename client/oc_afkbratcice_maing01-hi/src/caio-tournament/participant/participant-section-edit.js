@@ -23,7 +23,7 @@ const ParticipantSectionEdit = createVisualComponent({
           Component: Uu5Forms.FormNumber,
           props: { min: 1, label: <Lsi lsi={{ cs: "Pozice" }} /> },
         },
-        output: (value, dataObject) => [dataObject.data.group, value].join(""),
+        output: (value, dataObject) => dataObject.data.group && value ? [dataObject.data.group, value].join("") : "",
       },
       name: {
         label: { cs: "Název" },
@@ -38,7 +38,7 @@ const ParticipantSectionEdit = createVisualComponent({
         sort: true,
         input: {
           Component: Uu5Forms.FormSwitchSelect,
-          props: { itemList: groupList.map((g) => ({ value: g })), initialValue: groupList[0] },
+          props: { itemList: groupList.map((g) => ({ value: g })) },
         },
         visible: false,
       },
@@ -63,6 +63,7 @@ const ParticipantSectionEdit = createVisualComponent({
         viewType="table"
         spacing={readOnly ? "loose" : undefined}
         hideHeader
+        cellHoverExtent="row"
       >
         {({ type }) => {
           const gridLayout = {

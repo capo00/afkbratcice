@@ -10,6 +10,7 @@ import { useParticipantList } from "../participant/participant-context.js";
 import DetailBasicInfo from "./detail-basic-info.js";
 import GroupMatchesSection from "../group/group-matches-section.js";
 import FinalStandings from "./final-standings.js";
+import DetailSection from "./detail-section.js";
 
 function isAuthoritiesProfile(identity) {
   return identity?.profileList?.includes("authorities");
@@ -47,11 +48,11 @@ const TournamentDetailView = createVisualComponent({
   uu5Tag: Config.TAG + "TournamentDetailView",
 
   render(props) {
-    const { id } = props;
+    const { id, ...restProps } = props;
     const session = OcAuth.useSession();
 
     const [screenSize] = useScreenSize();
-    const isSmall = screenSize === "xs";
+    const isMinM = ["m", "l", "xl"].includes(screenSize);
 
     const dto = useTournament();
     const participantList = useParticipantList();
@@ -88,96 +89,86 @@ const TournamentDetailView = createVisualComponent({
     const groupList = getGroupList(data.groupCount);
     const venueList = getVenueList(data.venueCount ?? 2);
 
-    let basicInfo = <DetailBasicInfo isAuth={isAuth} isOperator={isOperator} />;
-    if (!isOperator && !isSmall) {
-      basicInfo = (
-        <Uu5Elements.Grid templateColumns="1fr 252px" columnGap={24}>
-          {basicInfo}
-          <Uu5Extras.QRCode value={`${location.href}`} size="m" className={Config.Css.css({ alignSelf: "end" })} />
-        </Uu5Elements.Grid>
+    let basicInfo = <DetailBasicInfo isAuth={isAuth} isOperator={isOperator} className={Config.Css.css({ marginBlockStart: 24 })} />;
+    let qrCode;
+    if (!isOperator && isMinM) {
+      qrCode = (
+        <Uu5Extras.QRCode
+          value={location.href}
+          size={screenSize === "m" ? "s" : "m"}
+        />
       );
     }
 
     return (
-      <>
-        {basicInfo}
+      <Uu5Elements.Grid
+        {...restProps}
+        templateColumns={{ xs: "1fr", m: "1fr 156px", l: "1fr 252px" }}
+        templateAreas={{ xs: "sidebar, main", m: "main sidebar" }}
+        columnGap={24}
+      >
+        <DetailSection isAuth={isAuth} isOperator={isOperator} className={Config.Css.css({ gridArea: "main" })}>
+          {/* <div style={{textAlign: "center"}}>
+            {window.innerWidth} x {window.innerHeight}
+          </div> */}
+          {(isCreated && (isOperator || participantList.data?.length > 0)) && (
+            <ParticipantSection
+              className={Config.Css.css({ marginBlockStart: 24 })}
+              groupList={groupList}
+              isOperator={isOperator}
+            />
+          )}
 
-        {(isCreated && (isOperator || participantList.data?.length > 0)) && (
-          <ParticipantSection
-            className={Config.Css.css({ marginBlockStart: 24 })}
-            groupList={groupList}
-            isOperator={isOperator}
-          />
-        )}
+          {isGroup && (
+            <GroupMatchesSection
+              className={Config.Css.css({ marginBlockStart: 24 })}
+              tournamentId={id}
+              venueList={venueList}
+              groupList={groupList}
+              isReferee={canRef}
+            />
+          )}
 
-        {isGroup && (
-          <GroupMatchesSection
-            className={Config.Css.css({ marginBlockStart: 24 })}
-            tournamentId={id}
-            venueList={venueList}
-            groupList={groupList}
-            isReferee={canRef}
-          />
-        )}
+          {isPlayOff && (
+            <PlayoffSection
+              className={Config.Css.css({ marginBlockStart: 24 })}
+              tournamentId={id}
+              venueList={venueList}
+              isReferee={canRef}
+            />
+          )}
 
-        {isPlayOff && (
-          <PlayoffSection
-            className={Config.Css.css({ marginBlockStart: 24 })}
-            tournamentId={id}
-            venueList={venueList}
-            isReferee={canRef}
-          />
-        )}
+          {showFinalStandings && data.finalStandingList?.length > 0 && (
+            <FinalStandings
+              className={Config.Css.css({ marginBlockStart: 24 })}
+              tournamentId={id}
+            />
+          )}
 
-        {showFinalStandings && data.finalStandings?.length > 0 && false && (
-          <div className={Config.Css.css({ marginBlockStart: 24 })}>
-            <Uu5Elements.Block headerType="heading" header={<Lsi lsi={{ cs: "Celkové umístění" }} />}>
-              <table className={Config.Css.css({ width: "100%", borderCollapse: "collapse", "& th, & td": { padding: "6px 10px", borderBottom: "1px solid #ddd", textAlign: "left" } })}>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th><Lsi lsi={{ cs: "Název" }} /></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.finalStandings.map((s, idx) => (
-                    <tr key={s.participantId || idx}>
-                      <td>{s.shared ? `${s.position}.–` : `${s.position}.`}</td>
-                      <td>{s.name}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Uu5Elements.Block>
-          </div>
-        )}
+          {showCollapsedPlayoff && (
+            <PlayoffSection
+              className={Config.Css.css({ marginBlockStart: 24 })}
+              tournamentId={id}
+              venueList={venueList}
+              collapsed
+            />
+          )}
 
-        {showFinalStandings && data.finalStandingList?.length > 0 && (
-          <FinalStandings
-            className={Config.Css.css({ marginBlockStart: 24 })}
-            tournamentId={id}
-          />
-        )}
-
-        {showCollapsedPlayoff && (
-          <PlayoffSection
-            className={Config.Css.css({ marginBlockStart: 24 })}
-            tournamentId={id}
-            venueList={venueList}
-            collapsed
-          />
-        )}
-
-        {showCollapsedGroups && (
-          <GroupMatchesSection
-            className={Config.Css.css({ marginBlockStart: 24 })}
-            tournamentId={id}
-            venueList={venueList}
-            groupList={groupList}
-            collapsed
-          />
-        )}
-      </>
+          {showCollapsedGroups && (
+            <GroupMatchesSection
+              className={Config.Css.css({ marginBlockStart: 24 })}
+              tournamentId={id}
+              venueList={venueList}
+              groupList={groupList}
+              collapsed
+            />
+          )}
+        </DetailSection >
+        <div className={Config.Css.css({ gridArea: "sidebar" })}>
+          {qrCode}
+          {basicInfo}
+        </div>
+      </Uu5Elements.Grid>
     );
   },
 });

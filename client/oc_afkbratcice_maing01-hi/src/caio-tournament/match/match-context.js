@@ -9,7 +9,7 @@ const MatchListProvider = createComponent({
   uu5Tag: Config.TAG + "MatchListProvider",
 
   render(props) {
-    let { tournamentId, phase, children } = props;
+    let { tournamentId, phase, children, refreshKey } = props;
 
     const tournamentDto = useTournament();
 
@@ -19,7 +19,7 @@ const MatchListProvider = createComponent({
       skipInitialLoad: true,
       handlerMap: { load: (dtoIn) => OcElements.Call.cmdGet("caio-tournament/match/list", { tournamentId, ...dtoIn, phase }) },
       itemHandlerMap: { setResult: (dtoIn) => OcElements.Call.cmdPost("caio-tournament/match/setResult", dtoIn) },
-    });
+    }, [refreshKey]);
 
     useEffect(() => {
       if (phase) {

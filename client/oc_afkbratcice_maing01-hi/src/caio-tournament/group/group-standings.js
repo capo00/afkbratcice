@@ -56,7 +56,7 @@ const GroupStandings = createVisualComponent({
 
     const [screenSize] = useScreenSize();
     const isSmall = screenSize === "xs";
-    
+
     const matchList = useMatchList();
     const participantList = useParticipantList();
     const groupParticipantList = participantList.data?.filter((p) => p.data.group === group)?.sort();
@@ -77,94 +77,98 @@ const GroupStandings = createVisualComponent({
         headerType="title"
         card="full"
       >
-        <Uu5TilesElements.Table
-          data={orderedParticipantList}
-          columnList={[
-            {
-              value: "_",
-              header: <b>#</b>,
-              headerComponent: headerComponent("right", "Umístění"),
-              cell: (_, { rowIndex }) => <b>{rowIndex + 1}.</b>,
-              cellComponent: cellComponent("right"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-            {
-              value: "name",
-              header: <b><Lsi lsi={{ cs: "Název" }} /></b>,
-              cell: ({ data }) => <b>{data.data.name}</b>,
-              headerComponent: headerComponent(undefined, undefined),
-              cellComponent: cellComponent(),
-            },
-            {
-              value: "stats.played",
-              header: <Lsi lsi={{ cs: "Z" }} />,
-              headerComponent: headerComponent("right", "Zápasy"),
-              cell: ({ data }) => data.data.stats.played ?? 0,
-              cellComponent: cellComponent("right"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-            {
-              value: "stats.wins",
-              header: <Lsi lsi={{ cs: "V" }} />,
-              headerComponent: headerComponent("right", "Výhry"),
-              cell: ({ data }) => data.data.stats.wins ?? 0,
-              cellComponent: cellComponent("right"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-            {
-              value: "stats.draws",
-              header: <Lsi lsi={{ cs: "R" }} />,
-              headerComponent: headerComponent("right", "Remízy"),
-              cell: ({ data }) => data.data.stats.draws ?? 0,
-              cellComponent: cellComponent("right"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-            {
-              value: "stats.looses",
-              header: <Lsi lsi={{ cs: "P" }} />,
-              headerComponent: headerComponent("right", "Prohry"),
-              cell: ({ data }) => data.data.stats.looses ?? 0,
-              cellComponent: cellComponent("right"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-            {
-              value: "stats.scored",
-              header: <Lsi lsi={{ cs: "Skóre" }} />,
-              headerComponent: <Uu5TilesElements.Table.HeaderCell horizontalAlignment="center" style={{ paddingInline: 8, paddingBlock: 13, fontSize: 11 }} />,
-              cell: ({ data }) => `${data.data.stats.scored ?? 0} : ${data.data.stats.conceded ?? 0}`,
-              cellComponent: cellComponent("center"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-            isSmall ? undefined : {
-              value: "stats.scored-conceded",
-              header: <Lsi lsi={{ cs: "+/-" }} />,
-              headerComponent: headerComponent("center"),
-              cell: ({ data }) => (data.data.stats.scored ?? 0) - (data.data.stats.conceded ?? 0),
-              cellComponent: cellComponent("center"),
-              minWidth: 40,
-              maxWidth: 40,
-            },
-            {
-              value: "stats.points",
-              header: <b><Lsi lsi={{ cs: "B" }} /></b>,
-              headerComponent: headerComponent("right", "Body"),
-              cell: ({ data }) => <b>{data.data.stats.points ?? 0}</b>,
-              cellComponent: cellComponent("right"),
-              minWidth: "max-content",
-              maxWidth: "max-content",
-            },
-          ].filter(Boolean)}
-          spacing="tight"
-          verticalAlignment="center"
-          disableColumnResize
-          borderRadius="moderate"
-        />
+        {({ style: { paddingBottom = 0, ...restStyles } = {} }) => (
+          <div className={Config.Css.css({...restStyles, paddingBottom: paddingBottom / 3})}>
+            <Uu5TilesElements.Table
+              data={orderedParticipantList}
+              columnList={[
+                {
+                  value: "_",
+                  header: <b>#</b>,
+                  headerComponent: headerComponent("right", "Umístění"),
+                  cell: (_, { rowIndex }) => <b>{rowIndex + 1}.</b>,
+                  cellComponent: cellComponent("right"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+                {
+                  value: "name",
+                  header: <b><Lsi lsi={{ cs: "Název" }} /></b>,
+                  cell: ({ data }) => <b>{data.data.name}</b>,
+                  headerComponent: headerComponent(undefined, undefined),
+                  cellComponent: cellComponent(),
+                },
+                {
+                  value: "stats.played",
+                  header: <Lsi lsi={{ cs: "Z" }} />,
+                  headerComponent: headerComponent("right", "Zápasy"),
+                  cell: ({ data }) => data.data.stats.played ?? 0,
+                  cellComponent: cellComponent("right"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+                {
+                  value: "stats.wins",
+                  header: <Lsi lsi={{ cs: "V" }} />,
+                  headerComponent: headerComponent("right", "Výhry"),
+                  cell: ({ data }) => data.data.stats.wins ?? 0,
+                  cellComponent: cellComponent("right"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+                {
+                  value: "stats.draws",
+                  header: <Lsi lsi={{ cs: "R" }} />,
+                  headerComponent: headerComponent("right", "Remízy"),
+                  cell: ({ data }) => data.data.stats.draws ?? 0,
+                  cellComponent: cellComponent("right"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+                {
+                  value: "stats.looses",
+                  header: <Lsi lsi={{ cs: "P" }} />,
+                  headerComponent: headerComponent("right", "Prohry"),
+                  cell: ({ data }) => data.data.stats.looses ?? 0,
+                  cellComponent: cellComponent("right"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+                {
+                  value: "stats.scored",
+                  header: <Lsi lsi={{ cs: "Skóre" }} />,
+                  headerComponent: <Uu5TilesElements.Table.HeaderCell horizontalAlignment="center" style={{ paddingInline: 8, paddingBlock: 13, fontSize: 11 }} />,
+                  cell: ({ data }) => `${data.data.stats.scored ?? 0} : ${data.data.stats.conceded ?? 0}`,
+                  cellComponent: cellComponent("center"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+                isSmall ? undefined : {
+                  value: "stats.scored-conceded",
+                  header: <Lsi lsi={{ cs: "+/-" }} />,
+                  headerComponent: headerComponent("center"),
+                  cell: ({ data }) => (data.data.stats.scored ?? 0) - (data.data.stats.conceded ?? 0),
+                  cellComponent: cellComponent("center"),
+                  minWidth: 40,
+                  maxWidth: 40,
+                },
+                {
+                  value: "stats.points",
+                  header: <b><Lsi lsi={{ cs: "B" }} /></b>,
+                  headerComponent: headerComponent("right", "Body"),
+                  cell: ({ data }) => <b>{data.data.stats.points ?? 0}</b>,
+                  cellComponent: cellComponent("right"),
+                  minWidth: "max-content",
+                  maxWidth: "max-content",
+                },
+              ].filter(Boolean)}
+              spacing="tight"
+              verticalAlignment="center"
+              disableColumnResize
+              borderRadius="moderate"
+            />
+          </div>
+        )}
       </Uu5Elements.Block>
     );
   },

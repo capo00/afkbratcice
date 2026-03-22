@@ -24,15 +24,21 @@ const Page = createVisualComponent({
     //@@viewOn:render
     return (
       <Top {...topProps}>
-        <main
-          className={Config.Css.css({
-            paddingInline: spacing.d,
-            marginTop: spacing.d + 8,
-          })}
-        >
-          {children}
-        </main>
-      </Top>
+        {({ topHeight = 0 } = {}) => (
+          <main
+            className={Config.Css.css({
+              paddingInline: 40,
+              paddingBlock: spacing.d + 8,
+              minHeight: `calc(100vh - ${topHeight}px)`,
+              display: "flex",
+              flexDirection: "column",
+            })}
+          >
+        {children}
+      </main>
+    )
+  }
+      </Top >
     );
     //@@viewOff:render
   },

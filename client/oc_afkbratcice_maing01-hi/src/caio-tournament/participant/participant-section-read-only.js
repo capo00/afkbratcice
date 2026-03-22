@@ -11,24 +11,28 @@ const ParticipantSectionReadOnly = createVisualComponent({
     const { groupList, ...restProps } = props;
     const dataList = useParticipantList();
 
-    const getChild = (g) => (
-      <Uu5TilesElements.Table
-        data={g ? dataList.data.filter((item) => item.data.group === g) : dataList.data}
-        columnList={[
-          {
-            header: <Lsi lsi={{ cs: "Skupina" }} />,
-            value: "seed",
-            cell: ({ data }) => data.data.group + data.data.seed,
-            horizontalAlignment: "right",
-            maxWidth: 56,
-          },
-          {
-            header: <Lsi lsi={{ cs: "Název" }} />,
-            value: "name",
-          }
-        ]}
-        spacing="loose"
-      />
+    const getChild = (g) => ({ style: { paddingBottom, ...restStyles } = {} }) => (
+      // removing paddingBottom
+      <div className={Config.Css.css({...restStyles, paddingBottom: paddingBottom / 3})}>
+        <Uu5TilesElements.Table
+          data={g ? dataList.data.filter((item) => item.data.group === g) : dataList.data}
+          columnList={[
+            {
+              header: <Lsi lsi={{ cs: "Skupina" }} />,
+              value: "seed",
+              cell: ({ data }) => data.data.group + data.data.seed,
+              horizontalAlignment: "right",
+              maxWidth: 56,
+            },
+            {
+              header: <Lsi lsi={{ cs: "Název" }} />,
+              value: "name",
+            }
+          ]}
+          hideHeader
+          spacing="loose"
+        />
+      </div>
     );
 
     return groupList.length > 1 ? (

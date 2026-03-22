@@ -90,6 +90,7 @@ const Top = createVisualComponent({
     const spacing = Uu5Elements.useSpacing();
 
     const [menu, setMenu] = useState(null);
+    const [hidden, setHidden] = useState(false);
 
     const logoHeight = screenSize === "xs" ? 80 : 128;
     let buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
@@ -130,7 +131,7 @@ const Top = createVisualComponent({
     // adding loginButton, because ButtonGroup does not support { component: LoginButton }
     const session = OcAuth.useSession();
 
-    let itemList;
+    let itemList = [];
     if (menuList) {
       const identityItemIndex = menuList.findIndex((item) => item.key === "identity");
       const updatedMenuList = [...menuList];
@@ -159,6 +160,9 @@ const Top = createVisualComponent({
         ];
       }
     }
+
+    // TODO necessary for TV device
+    itemList.unshift({ icon: "uugds-chevron-up", onClick: () => setHidden(true) });
 
     if (screenSize === "xs") {
       children = (
@@ -208,13 +212,15 @@ const Top = createVisualComponent({
 
     return (
       <>
-        <div {...attrs} ref={ref}>
-          <div className={Config.Css.css(coverStyles)}>
-            {img}
-            {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
+        {!hidden && (
+          <div {...attrs} ref={ref}>
+            <div className={Config.Css.css(coverStyles)}>
+              {img}
+              {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
+            </div>
           </div>
-        </div>
-        {children}
+        )}
+        {children({ topHeight: hidden ? 0 : metrics.height })}
       </>
     );
     //@@viewOff:render

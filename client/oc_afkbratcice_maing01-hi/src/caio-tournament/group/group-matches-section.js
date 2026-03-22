@@ -46,13 +46,17 @@ let GroupMatchesSection = createVisualComponent({
           headerType="title"
           card="full"
         >
-          <MatchTable
-            isReferee={isReferee}
-            itemList={venue && venueList.length === groupList.length && matchList.data ?
-              matchList.data.filter((m) => m.data.group === groupList[i]) :
-              matchList.data}
-            onResultChange={handleResultChange}
-          />
+          {({ style: { paddingBottom, ...restStyles } = {} }) => (
+            <div className={Config.Css.css({...restStyles, paddingBottom: paddingBottom / 3})}>
+              <MatchTable
+                isReferee={isReferee}
+                itemList={venue && venueList.length === groupList.length && matchList.data ?
+                  matchList.data.filter((m) => m.data.group === groupList[i]) :
+                  matchList.data}
+                onResultChange={handleResultChange}
+              />
+            </div>
+          )}
         </Uu5Elements.Block>
       );
     };

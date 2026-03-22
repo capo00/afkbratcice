@@ -31,6 +31,7 @@ function ListBlock({
   spacing,
   hideHeader,
   borderRadius = "moderate",
+  cellHoverExtent,
 
   // FilterBar
   initialFilterBarExpanded,
@@ -87,6 +88,7 @@ function ListBlock({
           onLoad={onLoad}
           spacing={spacing}
           hideHeader={hideHeader}
+          cellHoverExtent={cellHoverExtent}
         >
           <Uu5TilesElements.Grid.DefaultTile />
         </ViewComp>

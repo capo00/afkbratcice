@@ -8,7 +8,7 @@ const TournamentProvider = createComponent({
   uu5Tag: Config.TAG + "TournamentProvider",
 
   render(props) {
-    const { id, children } = props;
+    const { id, refreshKey, children } = props;
 
     const dto = useDataObject({
       handlerMap: {
@@ -19,7 +19,7 @@ const TournamentProvider = createComponent({
         evaluate: () => Call.cmdPost("caio-tournament/tournament/evaluate", { tournamentId: id }),
         close: () => Call.cmdPost("caio-tournament/tournament/close", { tournamentId: id }),
       },
-    });
+    }, [refreshKey]);
 
     return (
       <TournamentCtx.Provider value={dto}>
