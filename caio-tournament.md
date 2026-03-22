@@ -99,8 +99,8 @@ Uses shared `sys_identity` collection from afkbratcice's `oc_app-auth`.
 State transitions:
 ```
 created → run (generateMatches)
-run → playOff (generatePlayoff)
-playOff → completed (evaluate)
+run → playoff (generatePlayoff)
+playoff → completed (evaluate)
 completed → final (close)
 ```
 
@@ -153,17 +153,11 @@ All endpoints prefixed with `caio-tournament/`.
 | `caio-tournament/match/get` | GET | - |
 | `caio-tournament/match/setResult` | POST | Referee |
 
-## 5.4 History
+## 5.4 AuditLog
 
 | Endpoint | Method | Auth |
 |---|---|---|
-| `caio-tournament/history/list` | GET | - |
-
-## 5.5 Identity (shared with afkbratcice)
-
-| Endpoint | Method | Auth |
-|---|---|---|
-| `identity/search` | GET | Auth |
+| `caio-tournament/auditLog/list` | GET | - |
 
 ---
 

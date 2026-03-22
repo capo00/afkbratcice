@@ -1,26 +1,41 @@
 function serializeDtoIn(dtoIn) {
   const newDtoIn = {};
   for (let k in dtoIn) {
-    if (dtoIn[k] != null && typeof dtoIn[k] === "object") newDtoIn[k] = JSON.stringify(dtoIn[k]);
-    else newDtoIn[k] = dtoIn[k];
+    if (dtoIn[k] !== undefined) {
+      if (dtoIn[k] != null && typeof dtoIn[k] === "object") newDtoIn[k] = JSON.stringify(dtoIn[k]);
+      else newDtoIn[k] = dtoIn[k];
+    }
   }
   return newDtoIn;
 }
 
+function checkResponse(response, dtoIn) {
+  if (response.status >= 400) {
+    const e = new Error(response.data.message);
+    e.dtoIn = dtoIn;
+    e.dtoOut = response.data;
+    throw e;
+  }
+}
 const Call = {
   async get(uri, dtoIn = undefined, opts = undefined) {
     if (dtoIn) {
       uri = new URL(uri, location.origin);
       uri.search = new URLSearchParams(serializeDtoIn(dtoIn));
     }
+
+    let response;
     try {
-      const response = await fetch(uri, { credentials: "include", ...opts });
-      response.data = await response.json();
-      return response;
+      response = await fetch(uri, { credentials: "include", ...opts });
     } catch (e) {
       console.error("Error in fetch", e);
       throw e;
     }
+
+    response.data = await response.json();
+    checkResponse(response, dtoIn);
+
+    return response;
   },
 
   async post(uri, dtoIn = undefined, opts = undefined) {
@@ -42,7 +57,7 @@ const Call = {
       }
     }
 
-    let response, data;
+    let response;
 
     try {
       response = await fetch(uri, {
@@ -55,20 +70,14 @@ const Call = {
           ...opts?.headers,
         },
       });
-      data = await response.json();
     } catch (e) {
       console.error("Error in fetch", e);
       throw e;
     }
 
-    if (response.status >= 400) {
-      const e = new Error(data.message);
-      e.dtoIn = dtoIn;
-      e.dtoOut = data;
-      throw e;
-    }
+    response.data = await response.json();
+    checkResponse(response, dtoIn);
 
-    response.data = data;
     return response;
   },
 

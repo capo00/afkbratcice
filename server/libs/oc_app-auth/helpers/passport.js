@@ -15,7 +15,7 @@ module.exports = {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            let identity = await Identity.getByGoogleId(profile.id);
+            let identity = await Identity.findByGoogleId(profile.id);
             if (identity) {
               done(null, identity);
             } else {

@@ -2,8 +2,16 @@ const OcAppCore = require("../../libs/oc_app-core");
 const dao = require("./dao");
 const participantDao = require("../participant/dao");
 const matchDao = require("../match/dao");
+const auditLogDao = require("../audit-log/dao");
 
 const idStr = (id) => id?.toString?.() || id;
+
+function getWinnerId(match) {
+  if (match.score?.home == null || match.score?.away == null) return null;
+  if (match.score.home > match.score.away) return idStr(match.homeParticipantId);
+  if (match.score.away > match.score.home) return idStr(match.awayParticipantId);
+  return null;
+}
 
 function isAuthorities(identity) {
   return identity?.profileList?.includes("authorities");
@@ -12,17 +20,7 @@ function isAuthorities(identity) {
 function isOperator(tournament, identity) {
   if (!identity) return false;
   if (isAuthorities(identity)) return true;
-  const id = identity.identity;
-  return tournament.operativeList?.includes(id) || tournament.createdBy === id;
-}
-
-function assertAuthorities(identity) {
-  if (!isAuthorities(identity)) {
-    throw new OcAppCore.AppError.Failed("Only authorities can perform this action.", {
-      code: "caio-tournament/tournament/forbidden",
-      status: 403,
-    });
-  }
+  return tournament.operativeList?.includes(identity.identity);
 }
 
 function assertOperator(tournament, identity) {
@@ -76,7 +74,7 @@ function createBergerRounds(teamCount) {
 function headToHeadComparator(matches) {
   return (aId, bId) => {
     for (const m of matches) {
-      if (m.status !== "played") continue;
+      if (m.state !== "played") continue;
       const hId = idStr(m.homeParticipantId);
       const awId = idStr(m.awayParticipantId);
       if (hId === aId && awId === bId) {
@@ -114,16 +112,11 @@ class TournamentAbl extends OcAppCore.Crud {
     super("caio-tournament/tournament", dao);
   }
 
-  async list({ pageInfo, state, excludeState } = {}) {
-    const filter = {};
-    if (state) filter.state = state;
-    if (excludeState) filter.state = { $ne: excludeState };
-    return await dao.list(filter, pageInfo);
+  async list({ pageInfo, closed } = {}) {
+    return (await dao.list({ state: closed ? "final" : { $ne: "final" } }, pageInfo)).map(super._getData);
   }
 
-  async create(dtoIn, identity) {
-    assertAuthorities(identity);
-    const identityId = identity?.identity || null;
+  async create(dtoIn) {
     return await super.create({
       state: "created",
       type: dtoIn.type,
@@ -134,9 +127,7 @@ class TournamentAbl extends OcAppCore.Crud {
       groupCount: dtoIn.groupCount,
       venueCount: dtoIn.venueCount,
       advanceFromGroup: dtoIn.advanceFromGroup,
-      createdBy: identityId,
-      operativeList: identityId ? [identityId] : [],
-      refereeList: [],
+      operativeList: dtoIn.operativeList,
     });
   }
 
@@ -145,21 +136,20 @@ class TournamentAbl extends OcAppCore.Crud {
     assertNotFinal(item);
     assertOperator(item, identity);
     assertState(item, "created", "Tournament can only be updated in 'created' state.");
-    return await super.update({ ...item, ...dtoIn }, { merge: false });
+    return super.update({ ...item, ...dtoIn }, { merge: false });
   }
 
-  async delete(id, identity) {
-    const item = await this._get(id);
-    assertNotFinal(item);
-    assertAuthorities(identity);
+  async delete(id) {
+    await matchDao.deleteByTournamentId(id);
+    await participantDao.deleteByTournamentId(id);
+    await auditLogDao.deleteByTournamentId(id);
     return await super.delete(id);
   }
 
-  async close(tournamentId, identity) {
+  async close(tournamentId) {
     const tournament = await this._get(tournamentId);
-    assertAuthorities(identity);
     assertState(tournament, "completed", "Tournament can only be closed in 'completed' state.");
-    return await super.update({ id: tournamentId, state: "final" });
+    return await super.update({ ...tournament, state: "final" }, { merge: false });
   }
 
   async generateMatches(tournamentId, identity) {
@@ -183,7 +173,9 @@ class TournamentAbl extends OcAppCore.Crud {
     });
 
     const matches = [];
-    for (const [group, list] of Object.entries(byGroup)) {
+    const groupList = Object.entries(byGroup);
+    const groupCount = groupList.length;
+    groupList.forEach(([group, list], gIdx) => {
       const sorted = [...list].sort((a, b) => (a.seed || 0) - (b.seed || 0));
       const pairs = createBergerRounds(sorted.length);
       pairs.forEach(([i, j], round) => {
@@ -191,60 +183,27 @@ class TournamentAbl extends OcAppCore.Crud {
           tournamentId,
           phase: "group",
           group,
-          round,
+          round: round * groupCount + gIdx + 1,
           homeParticipantId: idStr(sorted[i].id),
           awayParticipantId: idStr(sorted[j].id),
           score: { home: null, away: null },
-          winnerId: null,
-          status: "scheduled",
+          state: "scheduled",
           playedAt: null,
         });
       });
-    }
-
-    const created = await matchDao.createMany(matches);
-    await dao.update({ id: tournamentId, state: "run" });
-    return created;
-  }
-
-  async checkCompletion() {
-    // completion is triggered manually via evaluate
-  }
-
-  async evaluate(tournamentId, identity) {
-    const tournament = await this._get(tournamentId);
-    assertOperator(tournament, identity);
-    assertState(tournament, "playOff", "Tournament can only be evaluated in 'playOff' state.");
-
-    const allPlayoff = await matchDao.list({
-      tournamentId,
-      phase: { $in: ["quarter", "semi", "thirdPlace", "final"] },
     });
-    const unplayed = allPlayoff.filter((m) => m.status !== "played");
-    if (unplayed.length > 0) {
-      throw new OcAppCore.AppError.Failed("All playoff matches (including 3rd place and final) must be played.", {
-        code: "caio-tournament/tournament/playoffNotFinished",
-        status: 400,
-      });
-    }
 
-    const finalStandings = await this.#buildFinalStandings(tournamentId);
-    await dao.update({ id: tournamentId, state: "completed", finalStandings });
-    return finalStandings;
-  }
-
-  async getFinalStandings(tournamentId) {
-    const tournament = await this._get(tournamentId);
-    return tournament.finalStandings || [];
+    await matchDao.createMany(matches);
+    return super.update({ ...tournament, state: "group" }, { merge: false });
   }
 
   async generatePlayoff(tournamentId, identity) {
     const tournament = await this._get(tournamentId);
     assertOperator(tournament, identity);
-    assertState(tournament, "run", "Playoff can only be generated in 'run' state.");
+    assertState(tournament, "group", "Playoff can only be generated in 'group' state.");
 
-    const groupMatches = await matchDao.list({ tournamentId, phase: "group" });
-    if (groupMatches.length === 0 || !groupMatches.every((m) => m.status === "played")) {
+    const groupMatches = await matchDao.listGroup(tournamentId);
+    if (groupMatches.length === 0 || !groupMatches.every((m) => m.state === "played")) {
       throw new OcAppCore.AppError.Failed("All group matches must be played before generating playoff.", {
         code: "caio-tournament/tournament/groupMatchesNotPlayed",
         status: 400,
@@ -274,28 +233,49 @@ class TournamentAbl extends OcAppCore.Crud {
       if (!seeded[i] || !seeded[i + 1]) continue;
       playoffMatches.push({
         tournamentId,
-        phase: firstPhase,
-        group: null,
-        round: i / 2,
+        phase: "playoff",
+        group: firstPhase,
+        round: i / 2 + 1,
         homeParticipantId: idStr(seeded[i].id),
         awayParticipantId: idStr(seeded[i + 1].id),
         score: { home: null, away: null },
-        winnerId: null,
-        status: "scheduled",
+        state: "scheduled",
         playedAt: null,
       });
     }
 
-    const created = await matchDao.createMany(playoffMatches);
-    await dao.update({ id: tournamentId, state: "playOff" });
-    return created;
+    await matchDao.createMany(playoffMatches);
+    return await super.update({ ...tournament, state: "playoff" }, { merge: false });
+  }
+
+  async evaluate(tournamentId, identity) {
+    const tournament = await this._get(tournamentId);
+    assertOperator(tournament, identity);
+    assertState(tournament, "playoff", "Tournament can only be evaluated in 'playoff' state.");
+
+    const allPlayoff = await matchDao.listPlayoff(tournamentId);
+    const unplayed = allPlayoff.filter((m) => m.state !== "played");
+    if (unplayed.length > 0) {
+      throw new OcAppCore.AppError.Failed("All playoff matches (including 3rd place and final) must be played.", {
+        code: "caio-tournament/tournament/playoffNotFinished",
+        status: 400,
+      });
+    }
+
+    const finalStandingList = await this.#buildFinalStandings(tournamentId);
+    return await super.update({ ...tournament, state: "completed", finalStandingList }, { merge: false });
+  }
+
+  async getFinalStandings(tournamentId) {
+    const tournament = await this._get(tournamentId);
+    return tournament.finalStandings || [];
   }
 
   async listStandings(tournamentId, group = null) {
     const filter = { tournamentId };
     if (group) filter.group = group;
     const participants = await participantDao.list(filter);
-    const matches = await matchDao.list({ tournamentId, phase: "group", ...(group ? { group } : {}) });
+    const matches = await matchDao.listGroup(tournamentId, group);
 
     const h2h = headToHeadComparator(matches);
     participants.sort(standingsSorter(
@@ -306,10 +286,10 @@ class TournamentAbl extends OcAppCore.Crud {
   }
 
   async playoff(tournamentId) {
-    return await matchDao.list({ tournamentId, phase: { $in: ["quarter", "semi", "thirdPlace", "final"] } });
+    return await matchDao.listPlayoff(tournamentId);
   }
 
-  #seedCross(advancing, groupCount) {
+  #seedCross(advancing) {
     const byGroup = {};
     advancing.forEach((p) => {
       byGroup[p.group] = byGroup[p.group] || [];
@@ -354,25 +334,26 @@ class TournamentAbl extends OcAppCore.Crud {
   }
 
   async #buildFinalStandings(tournamentId) {
-    const allMatches = await matchDao.list({ tournamentId });
+    const allMatches = await matchDao.list(tournamentId);
     const allParticipants = await participantDao.list({ tournamentId });
 
     const pMap = {};
     allParticipants.forEach((p) => { pMap[idStr(p.id)] = p; });
 
-    const finalMatch = allMatches.find((m) => m.phase === "final" && m.status === "played");
-    const thirdMatch = allMatches.find((m) => m.phase === "thirdPlace" && m.status === "played");
+    const finalMatch = allMatches.find((m) => m.group === "final" && m.state === "played");
+    const thirdMatch = allMatches.find((m) => m.group === "thirdPlace" && m.state === "played");
 
     const placed = new Set();
     const standings = [];
 
     const addMatchPlacement = (match, winPos, losePos) => {
       if (!match) return;
-      const winnerId = idStr(match.winnerId);
+      const winnerId = getWinnerId(match);
+      if (!winnerId) return;
       const loserId = winnerId === idStr(match.homeParticipantId)
         ? idStr(match.awayParticipantId) : idStr(match.homeParticipantId);
-      standings.push({ position: winPos, participantId: winnerId, name: pMap[winnerId]?.name || "?" });
-      standings.push({ position: losePos, participantId: loserId, name: pMap[loserId]?.name || "?" });
+      standings.push({ position: winPos, participantId: winnerId });
+      standings.push({ position: losePos, participantId: loserId });
       placed.add(winnerId);
       placed.add(loserId);
     };
@@ -380,20 +361,20 @@ class TournamentAbl extends OcAppCore.Crud {
     addMatchPlacement(finalMatch, 1, 2);
     addMatchPlacement(thirdMatch, 3, 4);
 
-    for (const phase of ["quarter", "semi"]) {
-      const phaseMatches = allMatches.filter((m) => m.phase === phase && m.status === "played");
+    for (const subPhase of ["quarter", "semi"]) {
+      const phaseMatches = allMatches.filter((m) => m.group === subPhase && m.state === "played");
       if (phaseMatches.length === 0) continue;
 
       const losers = [];
       phaseMatches.forEach((m) => {
-        const wId = idStr(m.winnerId);
+        const wId = getWinnerId(m);
         const lId = wId === idStr(m.homeParticipantId)
           ? idStr(m.awayParticipantId) : idStr(m.homeParticipantId);
         if (!placed.has(lId)) losers.push(lId);
       });
 
       const loserMatches = allMatches.filter(
-        (m) => m.phase === "group" && m.status === "played"
+        (m) => m.phase === "group" && m.state === "played"
           && losers.includes(idStr(m.homeParticipantId))
           && losers.includes(idStr(m.awayParticipantId))
       );
@@ -407,7 +388,7 @@ class TournamentAbl extends OcAppCore.Crud {
       .filter((p) => !placed.has(idStr(p.id)))
       .map((p) => ({ ...p, pid: idStr(p.id) }));
 
-    const groupMatches = allMatches.filter((m) => m.phase === "group" && m.status === "played");
+    const groupMatches = allMatches.filter((m) => m.phase === "group" && m.state === "played");
     const h2h = headToHeadComparator(groupMatches);
 
     remaining.sort(standingsSorter(
@@ -446,7 +427,6 @@ class TournamentAbl extends OcAppCore.Crud {
         standings.push({
           position: pos,
           participantId: ids[k],
-          name: pMap[ids[k]]?.name || "?",
           shared: j - i > 1,
         });
         placed.add(ids[k]);

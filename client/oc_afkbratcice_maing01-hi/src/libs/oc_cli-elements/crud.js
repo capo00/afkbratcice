@@ -104,6 +104,10 @@ function generate(cfg) {
   return { seriesList, columnList, sorterList, filterList };
 }
 
+function normalizeInitValue(data) {
+  return data ? Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v ?? undefined])) : undefined;
+}
+
 function ModalFooter({ onClose }) {
   const count = onClose ? 2 : 1;
 
@@ -163,6 +167,7 @@ const Crud = createVisualComponent({
       hideColumns,
       tile,
       compact,
+      actionList: propsActionList,
       ...blockProps
     } = props;
 
@@ -258,18 +263,21 @@ const Crud = createVisualComponent({
         {
           children: <Lsi lsi={{ cs: "Vytvořit" }} />,
           icon: "uugds-plus",
-          onLabelClick: () => setEditData({ callback: handlerMap.create }),
+          [handlerMap.createMany ? "onLabelClick" : "onClick"]: () => setEditData({ callback: handlerMap.create }),
           colorScheme: "primary",
           significance: "common",
-          itemList: [
+          itemList: handlerMap.createMany ? [
             {
               children: <Lsi lsi={{ cs: "Hromadně" }} />,
               icon: "uugds-plus",
               onClick: () => setManyData({ callback: handlerMap.createMany }),
             },
-          ],
+          ] : undefined,
         },
+        ...(propsActionList ?? []),
       ];
+    } else if (propsActionList) {
+      actionList = propsActionList;
     }
 
     //@@viewOn:render
@@ -337,13 +345,13 @@ const Crud = createVisualComponent({
               if (editData?.data) {
                 newData = {};
                 for (let k in submitData) {
-                  if (submitData[k] !== editData.data[k]) newData[k] = submitData[k];
+                  if (submitData[k] !== editData.data[k]) newData[k] = submitData[k] ?? null;
                 }
               }
               if (Object.keys(newData).length > 0) await editData.callback(newData);
               setEditData();
             }}
-            initialValue={editData?.data}
+            initialValue={normalizeInitValue(editData?.data)}
           >
             {typeof children === "function" ? children({ type: editData?.data ? "update" : "create", data: editData?.data }) : children}
           </FormModal>
@@ -420,20 +428,24 @@ const Crud = createVisualComponent({
 
 Crud.generate = generate;
 
-Crud.generateInputs = (cfg, operation) =>
-  Object.entries(cfg).map(([code, { input, label }]) => {
+Crud.generateInputs = (cfg, { operation, orderList } = {}) => {
+  const list = Object.entries(cfg);
+  if (orderList) list.sort((a, b) => orderList.indexOf(a[0]) - orderList.indexOf(b[0]));
+  
+  return list.map(([name, { input, label }]) => {
     if (input) {
       const { Component, props } = input;
       return (
         <Component
-          key={code}
-          name={code}
+          key={name}
+          name={name}
           label={label}
           {...(typeof props === "function" ? props({ operation }) : props)}
         />
       );
     }
   });
+}
 
 //@@viewOn:exports
 export { Crud };

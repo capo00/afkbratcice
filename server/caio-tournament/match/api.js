@@ -30,6 +30,7 @@ module.exports = {
     auth: true,
     validator: UuDataTypes.exact({
       id: UuDataTypes.string,
+      tournamentId: UuDataTypes.string,
       home: UuDataTypes.number,
       away: UuDataTypes.number,
     }),

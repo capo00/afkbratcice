@@ -50,17 +50,6 @@ function createData(data) {
   };
 }
 
-function updateData(data) {
-  const mts = new Date().toISOString();
-  return {
-    ...data,
-    sys: {
-      ...data.sys,
-      mts,
-    }
-  };
-}
-
 class Dao {
   constructor(collectionName, { uri = Config.mongodbUri } = {}) {
     this.uri = uri;
@@ -114,11 +103,14 @@ class Dao {
 
   async update(data) {
     const { id, ...restData } = data;
+    delete restData.sys;
 
-    const newData = updateData(restData);
-    await this._exec(() => this.coll.updateOne(convertId({ id }), { $set: newData }));
+    const mts = new Date().toISOString();
+    await this._exec(() => this.coll.updateOne(convertId({ id }), {
+      $set: { ...restData, "sys.mts": mts },
+    }));
 
-    return { id, ...newData };
+    return await this.get(id);
   }
 
   async delete(id) {
@@ -127,6 +119,10 @@ class Dao {
 
   async deleteMany(idList) {
     await this._exec(() => this.coll.deleteMany({ _id: { $in: idList.map((id) => new ObjectId(id)) } }));
+  }
+
+  async deleteByFilter(filter) {
+    await this._exec(() => this.coll.deleteMany(filter));
   }
 
   _find(filter, options, sort, skip, limit) {

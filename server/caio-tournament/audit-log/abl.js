@@ -1,13 +1,13 @@
 const OcAppCore = require("../../libs/oc_app-core");
 const dao = require("./dao");
 
-class HistoryLogAbl extends OcAppCore.Crud {
+class AuditLogAbl extends OcAppCore.Crud {
 
   constructor() {
-    super("historyLog", dao);
+    super("caio-tournament/auditLog", dao);
   }
 
-  async log(tournamentId, identityId, entityType, entityId, action, diff = {}) {
+  async create(tournamentId, identityId, entityType, entityId, action, diff = {}) {
     return await super.create({
       tournamentId,
       identityId,
@@ -15,7 +15,6 @@ class HistoryLogAbl extends OcAppCore.Crud {
       entityId,
       action,
       diff,
-      ts: new Date(),
     });
   }
 
@@ -27,4 +26,4 @@ class HistoryLogAbl extends OcAppCore.Crud {
   }
 }
 
-module.exports = new HistoryLogAbl();
+module.exports = new AuditLogAbl();

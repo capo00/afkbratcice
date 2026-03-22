@@ -1,8 +1,8 @@
-import { createVisualComponent, useDataList, useState, Lsi } from "uu5g05";
+import { createVisualComponent, createComponent, Lsi, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms from "uu5g05-forms";
 import Config from "./config/config.js";
-import { Call } from "../../libs/oc_cli-elements/call.js";
+import { MatchListProvider, useMatchList } from "../match/match-context.js";
+import MatchTable from "../match/match-table.js";
 
 const PHASE_LABELS = {
   quarter: { cs: "Čtvrtfinále" },
@@ -11,148 +11,94 @@ const PHASE_LABELS = {
   final: { cs: "Finále" },
 };
 
-const PlayoffSection = createVisualComponent({
+function withCollapsible(Component) {
+  const Comp = createComponent({
+    uu5Tag: Config.TAG + "Collapsible",
+    render(props) {
+      const { tournamentId, isReferee, venueList, collapsed, ...restProps } = props;
+
+      return collapsed ? (
+        <Uu5Elements.Block {...restProps} header={<Lsi lsi={{ cs: "Playoff" }} />} headerType="title" collapsible collapsed>
+          <MatchListProvider tournamentId={tournamentId} phase="playoff">
+            <Component tournamentId={tournamentId} isReferee={isReferee} venueList={venueList} />
+          </MatchListProvider>
+        </Uu5Elements.Block>
+      ) : <Component {...props} />
+    },
+  });
+  Utils.Component.mergeStatics(Comp, Component);
+  return Comp;
+}
+
+let PlayoffSection = createVisualComponent({
   uu5Tag: Config.TAG + "PlayoffSection",
 
   render(props) {
-    const { tournamentId, participants, canSetResult } = props;
-    const [editMatch, setEditMatch] = useState(null);
+    const { tournamentId, isReferee, venueList, collapsed, ...restProps } = props;
 
-    const matchList = useDataList({
-      handlerMap: {
-        load: () => Call.cmdGet("caio-tournament/tournament/playoff", { tournamentId }),
-      },
-      itemIdentifier: "id",
+    const matchList = useMatchList();
+
+    const venueMatchList = Array.from({ length: venueList?.length || 1 }, () => ({}));
+    matchList.data?.forEach((match, i) => {
+      const idx = i % venueList.length;
+      venueMatchList[idx][match.data.group] ??= [];
+      venueMatchList[idx][match.data.group].push(match);
     });
 
-    const participantMap = {};
-    (participants || []).forEach((p) => {
-      const item = p.data || p;
-      participantMap[item.id || item._id] = item;
-    });
+    const gridProps = collapsed ? null : restProps;
 
-    const getName = (id) => {
-      if (!id) return "?";
-      const idStr = id?.toString?.() || id;
-      return participantMap[idStr]?.name || idStr;
-    };
-
-    if (matchList.state === "pendingNoData") {
-      return <Uu5Elements.Pending size="l" />;
+    function handleResultChange() {
+      matchList.handlerMap.load?.();
     }
 
-    const matches = (matchList.data || []).map((d) => d.data || d);
-    const byPhase = {};
-    matches.forEach((m) => {
-      byPhase[m.phase] = byPhase[m.phase] || [];
-      byPhase[m.phase].push(m);
-    });
-
-    const phaseOrder = ["quarter", "semi", "thirdPlace", "final"];
-
-    return (
-      <Uu5Elements.Block headerType="heading" header={<Lsi lsi={{ cs: "Play-off" }} />}>
-        {phaseOrder.map((phase) => {
-          const phaseMatches = byPhase[phase];
-          if (!phaseMatches || phaseMatches.length === 0) return null;
-          return (
+    const getChild = (venue, i = 0) => {
+      const content = (
+        <>
+          {["quarter", "semi", "thirdPlace", "final"].filter((phase) => venueMatchList[i]?.[phase]).map((phase, j) => (
             <Uu5Elements.Block
+              className={venue && j > 0 ? Config.Css.css({ marginBlockStart: 24 }) : undefined}
               key={phase}
-              headerType="title"
-              header={<Lsi lsi={PHASE_LABELS[phase] || { cs: phase }} />}
-              className={Config.Css.css({ marginBlockEnd: 16 })}
+              header={<b className={Config.Css.css({ display: "block", textAlign: "center" })}>{PHASE_LABELS[phase] ? <Lsi lsi={PHASE_LABELS[phase]} /> : phase}</b>}
+              card={venue ? undefined : "full"}
             >
-              <table className={Config.Css.css({ width: "100%", borderCollapse: "collapse", "& th, & td": { padding: "6px 10px", borderBottom: "1px solid #ddd", textAlign: "center" } })}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: "left" }}><Lsi lsi={{ cs: "Domácí" }} /></th>
-                    <th><Lsi lsi={{ cs: "Skóre" }} /></th>
-                    <th style={{ textAlign: "right" }}><Lsi lsi={{ cs: "Hosté" }} /></th>
-                    <th><Lsi lsi={{ cs: "Stav" }} /></th>
-                    {canSetResult && <th />}
-                  </tr>
-                </thead>
-                <tbody>
-                  {phaseMatches.map((m) => {
-                    return (
-                      <tr key={m.id}>
-                        <td style={{ textAlign: "left" }}>{getName(m.homeParticipantId)}</td>
-                        <td>
-                          {m.status === "played"
-                            ? `${m.score?.home ?? "-"}:${m.score?.away ?? "-"}`
-                            : "-:-"
-                          }
-                        </td>
-                        <td style={{ textAlign: "right" }}>{getName(m.awayParticipantId)}</td>
-                        <td>{m.status === "played" ? <Lsi lsi={{ cs: "Odehráno" }} /> : <Lsi lsi={{ cs: "Plánováno" }} />}</td>
-                        {canSetResult && (
-                          <td>
-                            <Uu5Elements.Button
-                              icon="uugds-pencil"
-                              size="s"
-                              onClick={() => setEditMatch(m)}
-                            />
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <MatchTable
+                isReferee={isReferee}
+                itemList={venueMatchList[i][phase]}
+                disableRowCounter
+                onResultChange={handleResultChange}
+              />
             </Uu5Elements.Block>
-          );
-        })}
+          )).filter(Boolean)}
+        </>
+      );
 
-        {editMatch && (
-          <Uu5Forms.Form.Provider
-            key={editMatch.id}
-            onSubmit={async (e) => {
-              const { home, away } = e.data.value;
-              await Call.cmdPost("caio-tournament/match/setResult", { id: editMatch.id, home: Number(home), away: Number(away) });
-              setEditMatch(null);
-              matchList.handlerMap.load();
-            }}
-          >
-            <Uu5Elements.Modal
-              open
-              onClose={() => setEditMatch(null)}
-              header={
-                <Lsi lsi={{ cs: `${getName(editMatch.homeParticipantId)} vs ${getName(editMatch.awayParticipantId)}` }} />
-              }
-              footer={
-                <Uu5Elements.Grid
-                  templateColumns={{ xs: "1fr 1fr", s: "auto auto" }}
-                  columnGap={8}
-                  justifyContent={{ s: "end" }}
-                >
-                  <Uu5Forms.CancelButton onClick={() => setEditMatch(null)} />
-                  <Uu5Forms.SubmitButton icon="uugds-check" />
-                </Uu5Elements.Grid>
-              }
-            >
-              <Uu5Forms.Form.View gridLayout={{ xs: "home, away", s: "home away" }}>
-                <Uu5Forms.FormNumber
-                  name="home"
-                  label={{ cs: getName(editMatch.homeParticipantId) }}
-                  min={0}
-                  required
-                  initialValue={editMatch.score?.home}
-                />
-                <Uu5Forms.FormNumber
-                  name="away"
-                  label={{ cs: getName(editMatch.awayParticipantId) }}
-                  min={0}
-                  required
-                  initialValue={editMatch.score?.away}
-                />
-              </Uu5Forms.Form.View>
-            </Uu5Elements.Modal>
-          </Uu5Forms.Form.Provider>
-        )}
-      </Uu5Elements.Block>
+      return venue ? (
+        <Uu5Elements.Block
+          key={venue}
+          header={<Lsi lsi={{ cs: "Hřiště %s" }} params={venue} />}
+          headerType="title"
+          card="full"
+        >
+          {content}
+        </Uu5Elements.Block>
+      ) : (
+        content
+      );
+    };
+
+    return venueList.length > 1 ? (
+      <Uu5Elements.Grid {...gridProps} templateColumns="repeat(auto-fit, minmax(344px, 1fr))" columnGap={24}>
+        {venueList.map(getChild)}
+      </Uu5Elements.Grid>
+    ) : (
+      <Uu5Elements.Grid {...gridProps} templateColumns="repeat(auto-fill, minmax(344px, 1fr))" columnGap={24}>
+        {getChild()}
+      </Uu5Elements.Grid>
     );
   },
 });
+
+PlayoffSection = withCollapsible(PlayoffSection);
 
 export { PlayoffSection };
 export default PlayoffSection;

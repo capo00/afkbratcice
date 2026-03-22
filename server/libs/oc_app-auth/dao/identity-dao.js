@@ -16,6 +16,14 @@ class IdentityDao extends Dao {
     const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
     return this.find({ $or: [{ name: regex }, { identity: regex }] }, { pageSize: 20 });
   }
+
+  async listbyIdentityList(identityList) {
+    return this.find({ identity: { $in: identityList } });
+  }
+
+  async getByIdentity(identity) {
+    return this.findOne({ identity });
+  }
 }
 
 module.exports = new IdentityDao();

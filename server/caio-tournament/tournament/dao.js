@@ -5,8 +5,14 @@ class TournamentDao extends Dao {
     super("caioTournament_tournament");
   }
 
+  createIndexes() {
+    super.createIndex({ tournamentId: 1 });
+    super.createIndex({ tournamentId: 1, group: 1 });
+    super.createIndex({ state: 1 });
+  }
+
   list(filter = {}, pageInfo) {
-    return this.find(filter, pageInfo, { "sys.cts": -1 });
+    return this.find(filter, pageInfo);
   }
 }
 

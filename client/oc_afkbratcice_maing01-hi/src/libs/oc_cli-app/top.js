@@ -79,7 +79,7 @@ const Top = createVisualComponent({
   //@@viewOff:defaultProps
 
   render(props) {
-    const { logoUri, logoHref, logoTooltip, menuList, ...restProps } = props;
+    const { logoUri, logoHref, logoTarget, logoTooltip, menuList, ...restProps } = props;
     let { children } = restProps;
 
     const [, setRoute] = useRoute();
@@ -91,7 +91,7 @@ const Top = createVisualComponent({
 
     const [menu, setMenu] = useState(null);
 
-    const logoHeight = screenSize === "xs" ? 80 : 136;
+    const logoHeight = screenSize === "xs" ? 80 : 128;
     let buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
     if (screenSize === "xs") buttonXlHeight /= 2;
 
@@ -193,17 +193,24 @@ const Top = createVisualComponent({
       }),
     );
 
+    let img = (
+      <img
+        alt={logoTooltip}
+        src={logoUri}
+        className={Config.Css.css(logoStyles)}
+        title={logoTooltip}
+      />
+    );
+
+    if (logoHref) {
+      img = <Uu5Elements.Link href={logoHref} target={logoTarget}>{img}</Uu5Elements.Link>;
+    }
+
     return (
       <>
         <div {...attrs} ref={ref}>
           <div className={Config.Css.css(coverStyles)}>
-            <img
-              alt={logoTooltip}
-              src={logoUri}
-              className={Config.Css.css(logoStyles)}
-              onClick={() => setRoute(logoHref)}
-              title={logoTooltip}
-            />
+            {img}
             {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
           </div>
         </div>

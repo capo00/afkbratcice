@@ -5,6 +5,32 @@ const tournamentDao = require("../tournament/dao");
 
 const idStr = (id) => id?.toString?.() || id;
 
+function getWinnerId(match) {
+  if (match.score?.home == null || match.score?.away == null) return null;
+  if (match.score.home > match.score.away) return idStr(match.homeParticipantId);
+  if (match.score.away > match.score.home) return idStr(match.awayParticipantId);
+  return null;
+}
+
+function isAuthorities(identity) {
+  return identity?.profileList?.includes("authorities");
+}
+
+function isReferee(tournament, identity) {
+  if (!identity) return false;
+  if (isAuthorities(identity)) return true;
+  return tournament.refereeList?.includes(identity.identity);
+}
+
+function assertReferee(tournament, identity) {
+  if (!isReferee(tournament, identity)) {
+    throw new OcAppCore.AppError.Failed("Only referees or authorities can perform this action.", {
+      code: "caio-tournament/match/forbidden",
+      status: 403,
+    });
+  }
+}
+
 class MatchAbl extends OcAppCore.Crud {
 
   constructor() {
@@ -12,17 +38,26 @@ class MatchAbl extends OcAppCore.Crud {
   }
 
   async list(tournamentId, dtoIn = {}) {
-    const filter = { tournamentId };
-    if (dtoIn.phase) filter.phase = dtoIn.phase;
-    if (dtoIn.group) filter.group = dtoIn.group;
-    return await dao.list(filter, dtoIn.pageInfo);
+    if (dtoIn.phase === "playoff") {
+      return await dao.listPlayoff(tournamentId, dtoIn.pageInfo);
+    } else if (dtoIn.phase === "group") {
+      return await dao.listGroup(tournamentId, dtoIn.group, dtoIn.pageInfo);
+    }
+    return await dao.list(tournamentId, dtoIn.pageInfo);
   }
 
   async setResult(matchId, dtoIn, identity) {
-    const match = await this._get(matchId);
+    let tournamentId = dtoIn.tournamentId;
+    let match;
+    if (!tournamentId) {
+      match = await this._get(matchId);
+      tournamentId = match.tournamentId;
+    }
 
-    const tournament = await tournamentDao.get(match.tournamentId);
+    const tournament = await tournamentDao.get(tournamentId);
     if (!tournament) throw new OcAppCore.Crud.Error.DoesNotExists("tournament");
+
+    assertReferee(tournament, identity);
 
     if (tournament.state === "final") {
       throw new OcAppCore.AppError.Failed("Tournament is closed. No modifications allowed.", {
@@ -37,33 +72,38 @@ class MatchAbl extends OcAppCore.Crud {
       throw new OcAppCore.AppError.Failed("Invalid score", { code: "caio-tournament/match/invalidScore" });
     }
 
+    if (!match) match = await this._get(matchId);
+
+    const oldWinnerId = match.state === "played" ? getWinnerId(match) : null;
+
     let winnerId = null;
     if (homeScore > awayScore) winnerId = match.homeParticipantId;
     else if (awayScore > homeScore) winnerId = match.awayParticipantId;
 
+    let allPlayoff = null;
+    if (match.phase === "playoff" && oldWinnerId && idStr(oldWinnerId) !== idStr(winnerId)) {
+      allPlayoff = await this.#assertDownstreamNotPlayed(match);
+    }
+
     await dao.update({
       id: matchId,
       score: { home: homeScore, away: awayScore },
-      winnerId,
-      status: "played",
+      state: "played",
       playedAt: new Date(),
     });
 
     if (match.phase === "group") {
       await this.#recalculateStandings(match.tournamentId, match.group);
     } else {
-      await this.#advancePlayoffWinner(match, winnerId);
+      await this.#advancePlayoffWinner(match, winnerId, oldWinnerId, allPlayoff);
     }
-
-    const TournamentAbl = require("../tournament/abl");
-    await TournamentAbl.checkCompletion(match.tournamentId);
 
     return await dao.get(matchId);
   }
 
   async #recalculateStandings(tournamentId, group) {
     const participants = await participantDao.list({ tournamentId, group });
-    const matches = await dao.list({ tournamentId, phase: "group", group });
+    const matches = await dao.listGroup(tournamentId, group);
 
     const statsMap = {};
     participants.forEach((p) => {
@@ -71,7 +111,7 @@ class MatchAbl extends OcAppCore.Crud {
     });
 
     matches.forEach((m) => {
-      if (m.status !== "played" || m.score?.home == null) return;
+      if (m.state !== "played" || m.score?.home == null) return;
       const homeId = idStr(m.homeParticipantId);
       const awayId = idStr(m.awayParticipantId);
       const homeStats = statsMap[homeId];
@@ -109,63 +149,110 @@ class MatchAbl extends OcAppCore.Crud {
     }
   }
 
-  async #advancePlayoffWinner(match, winnerId) {
+  async #assertDownstreamNotPlayed(match) {
+    const GROUP_ORDER = ["quarter", "semi", "final"];
+    const currentIdx = GROUP_ORDER.indexOf(match.group);
+    if (currentIdx < 0) return null;
+
+    const downstreamGroups = GROUP_ORDER.slice(currentIdx + 1);
+    downstreamGroups.push("thirdPlace");
+
+    const allPlayoff = await dao.listPlayoff(match.tournamentId);
+    const hasPlayedDownstream = allPlayoff.some(
+      (m) => downstreamGroups.includes(m.group) && m.state === "played",
+    );
+    if (hasPlayedDownstream) {
+      throw new OcAppCore.AppError.Failed("Cannot change result: downstream matches already played.", {
+        code: "caio-tournament/match/downstreamPlayed",
+        status: 400,
+      });
+    }
+    return allPlayoff;
+  }
+
+  async #advancePlayoffWinner(match, winnerId, oldWinnerId, allPlayoff) {
     if (!winnerId) return;
-    if (match.phase === "final" || match.phase === "thirdPlace") return;
+    if (match.group === "final" || match.group === "thirdPlace") return;
 
-    const PHASE_ORDER = ["quarter", "semi", "final"];
-    const currentIdx = PHASE_ORDER.indexOf(match.phase);
-    if (currentIdx < 0 || currentIdx >= PHASE_ORDER.length - 1) return;
+    const GROUP_ORDER = ["quarter", "semi", "final"];
+    const currentIdx = GROUP_ORDER.indexOf(match.group);
+    if (currentIdx < 0 || currentIdx >= GROUP_ORDER.length - 1) return;
 
-    const nextPhase = PHASE_ORDER[currentIdx + 1];
+    const nextGroup = GROUP_ORDER[currentIdx + 1];
 
-    const currentPhaseMatches = await dao.list({ tournamentId: match.tournamentId, phase: match.phase });
-    currentPhaseMatches.sort((a, b) => (a.round || 0) - (b.round || 0));
+    if (!allPlayoff) allPlayoff = await dao.listPlayoff(match.tournamentId);
+    let maxRound = allPlayoff.reduce((max, m) => Math.max(max, m.round || 0), 0);
 
-    const matchIndex = currentPhaseMatches.findIndex((m) => idStr(m.id) === idStr(match.id));
+    const currentGroupMatches = allPlayoff.filter((m) => m.group === match.group);
+    currentGroupMatches.sort((a, b) => (a.round || 0) - (b.round || 0));
+    const matchIndex = currentGroupMatches.findIndex((m) => idStr(m.id) === idStr(match.id));
     const pairIndex = Math.floor(matchIndex / 2);
-    const pairStart = pairIndex * 2;
-    const partner = currentPhaseMatches[pairStart + (matchIndex % 2 === 0 ? 1 : 0)];
 
-    if (!partner || partner.status !== "played" || !partner.winnerId) return;
+    const nextMatches = allPlayoff.filter((m) => m.group === nextGroup);
+    nextMatches.sort((a, b) => (a.round || 0) - (b.round || 0));
+    const nextMatch = nextMatches[pairIndex];
 
-    const homeWinner = matchIndex % 2 === 0 ? winnerId : partner.winnerId;
-    const awayWinner = matchIndex % 2 === 0 ? partner.winnerId : winnerId;
-
-    await super.create({
-      tournamentId: match.tournamentId,
-      phase: nextPhase,
-      group: null,
-      round: pairIndex,
-      homeParticipantId: homeWinner,
-      awayParticipantId: awayWinner,
-      score: { home: null, away: null },
-      winnerId: null,
-      status: "scheduled",
-      playedAt: null,
-    });
-
-    if (match.phase === "semi") {
-      const thisLoserId = idStr(winnerId) === idStr(match.homeParticipantId)
+    // third place match must be before final match (round should be lower)
+    if (match.group === "semi") {
+      const loserId = idStr(winnerId) === idStr(match.homeParticipantId)
         ? match.awayParticipantId
         : match.homeParticipantId;
-      const partnerLoserId = idStr(partner.winnerId) === idStr(partner.homeParticipantId)
-        ? partner.awayParticipantId
-        : partner.homeParticipantId;
+      const oldLoserId = oldWinnerId
+        ? (idStr(oldWinnerId) === idStr(match.homeParticipantId) ? match.awayParticipantId : match.homeParticipantId)
+        : null;
 
-      const homeLoser = matchIndex % 2 === 0 ? thisLoserId : partnerLoserId;
-      const awayLoser = matchIndex % 2 === 0 ? partnerLoserId : thisLoserId;
+      const thirdPlaceMatches = allPlayoff.filter((m) => m.group === "thirdPlace");
+      const thirdMatch = thirdPlaceMatches[0];
 
+      if (thirdMatch) {
+        if (!oldLoserId) {
+          await dao.update({ id: thirdMatch.id, awayParticipantId: loserId });
+        } else if (idStr(oldLoserId) !== idStr(loserId)) {
+          const update = { id: thirdMatch.id };
+          if (idStr(thirdMatch.homeParticipantId) === idStr(oldLoserId)) {
+            update.homeParticipantId = loserId;
+          } else {
+            update.awayParticipantId = loserId;
+          }
+          await dao.update(update);
+        }
+      } else {
+        await super.create({
+          tournamentId: match.tournamentId,
+          phase: "playoff",
+          group: "thirdPlace",
+          round: ++maxRound,
+          homeParticipantId: loserId,
+          awayParticipantId: null,
+          score: { home: null, away: null },
+          state: "scheduled",
+          playedAt: null,
+        });
+      }
+    }
+
+    if (nextMatch) {
+      if (!oldWinnerId) {
+        await dao.update({ id: nextMatch.id, awayParticipantId: winnerId });
+      } else if (idStr(oldWinnerId) !== idStr(winnerId)) {
+        const update = { id: nextMatch.id };
+        if (idStr(nextMatch.homeParticipantId) === idStr(oldWinnerId)) {
+          update.homeParticipantId = winnerId;
+        } else {
+          update.awayParticipantId = winnerId;
+        }
+        await dao.update(update);
+      }
+    } else {
       await super.create({
         tournamentId: match.tournamentId,
-        phase: "thirdPlace",
-        group: null,
-        round: pairIndex,
-        homeParticipantId: homeLoser,
-        awayParticipantId: awayLoser,
+        phase: "playoff",
+        group: nextGroup,
+        round: ++maxRound,
+        homeParticipantId: winnerId,
+        awayParticipantId: null,
         score: { home: null, away: null },
-        winnerId: null,
-        status: "scheduled",
+        state: "scheduled",
         playedAt: null,
       });
     }

@@ -21,8 +21,7 @@ module.exports = {
   "caio-tournament/tournament/list": {
     method: "get",
     validator: UuDataTypes.exact({
-      state: UuDataTypes.string,
-      excludeState: UuDataTypes.string,
+      closed: UuDataTypes.bool,
     }),
     fn: async ({ dtoIn }) => {
       const itemList = await Abl.list(dtoIn);
@@ -42,7 +41,7 @@ module.exports = {
 
   "caio-tournament/tournament/create": {
     method: "post",
-    auth: true,
+    auth: ["authorities"],
     validator: UuDataTypes.exact({
       type: UuDataTypes.string,
       name: UuDataTypes.string,
@@ -52,8 +51,8 @@ module.exports = {
       groupCount: UuDataTypes.number,
       advanceFromGroup: UuDataTypes.number,
     }),
-    fn: async ({ dtoIn, identity }) => {
-      return await Abl.create(dtoIn, identity);
+    fn: async ({ dtoIn }) => {
+      return await Abl.create(dtoIn);
     },
   },
 
@@ -79,24 +78,24 @@ module.exports = {
 
   "caio-tournament/tournament/delete": {
     method: "post",
-    auth: true,
+    auth: ["authorities"],
     validator: UuDataTypes.exact({
       id: UuDataTypes.string,
     }),
-    fn: async ({ dtoIn, identity }) => {
-      await Abl.delete(dtoIn.id, identity);
+    fn: async ({ dtoIn }) => {
+      await Abl.delete(dtoIn.id);
       return {};
     },
   },
 
   "caio-tournament/tournament/close": {
     method: "post",
-    auth: true,
+    auth: ["authorities"],
     validator: UuDataTypes.exact({
       tournamentId: UuDataTypes.string,
     }),
-    fn: async ({ dtoIn, identity }) => {
-      return await Abl.close(dtoIn.tournamentId, identity);
+    fn: async ({ dtoIn }) => {
+      return await Abl.close(dtoIn.tournamentId);
     },
   },
 
@@ -107,8 +106,7 @@ module.exports = {
       tournamentId: UuDataTypes.string,
     }),
     fn: async ({ dtoIn, identity }) => {
-      const itemList = await Abl.generateMatches(dtoIn.tournamentId, identity);
-      return { itemList };
+      return await Abl.generateMatches(dtoIn.tournamentId, identity);
     },
   },
 
@@ -119,8 +117,7 @@ module.exports = {
       tournamentId: UuDataTypes.string,
     }),
     fn: async ({ dtoIn, identity }) => {
-      const itemList = await Abl.generatePlayoff(dtoIn.tournamentId, identity);
-      return { itemList };
+      return await Abl.generatePlayoff(dtoIn.tournamentId, identity);
     },
   },
 
@@ -131,42 +128,41 @@ module.exports = {
       tournamentId: UuDataTypes.string,
     }),
     fn: async ({ dtoIn, identity }) => {
-      const itemList = await Abl.evaluate(dtoIn.tournamentId, identity);
-      return { itemList };
+      return await Abl.evaluate(dtoIn.tournamentId, identity);
     },
   },
 
-  "caio-tournament/tournament/finalStandings": {
-    method: "get",
-    validator: UuDataTypes.exact({
-      tournamentId: UuDataTypes.string,
-    }),
-    fn: async ({ dtoIn }) => {
-      const itemList = await Abl.getFinalStandings(dtoIn.tournamentId);
-      return { itemList };
-    },
-  },
+  // "caio-tournament/tournament/finalStandings": {
+  //   method: "get",
+  //   validator: UuDataTypes.exact({
+  //     tournamentId: UuDataTypes.string,
+  //   }),
+  //   fn: async ({ dtoIn }) => {
+  //     const itemList = await Abl.getFinalStandings(dtoIn.tournamentId);
+  //     return { itemList };
+  //   },
+  // },
 
-  "caio-tournament/tournament/listStandings": {
-    method: "get",
-    validator: UuDataTypes.exact({
-      tournamentId: UuDataTypes.string,
-      group: UuDataTypes.string,
-    }),
-    fn: async ({ dtoIn }) => {
-      const itemList = await Abl.listStandings(dtoIn.tournamentId, dtoIn.group);
-      return { itemList };
-    },
-  },
+  // "caio-tournament/tournament/listStandings": {
+  //   method: "get",
+  //   validator: UuDataTypes.exact({
+  //     tournamentId: UuDataTypes.string,
+  //     group: UuDataTypes.string,
+  //   }),
+  //   fn: async ({ dtoIn }) => {
+  //     const itemList = await Abl.listStandings(dtoIn.tournamentId, dtoIn.group);
+  //     return { itemList };
+  //   },
+  // },
 
-  "caio-tournament/tournament/playoff": {
-    method: "get",
-    validator: UuDataTypes.exact({
-      tournamentId: UuDataTypes.string,
-    }),
-    fn: async ({ dtoIn }) => {
-      const itemList = await Abl.playoff(dtoIn.tournamentId);
-      return { itemList };
-    },
-  },
+  // "caio-tournament/tournament/playoff": {
+  //   method: "get",
+  //   validator: UuDataTypes.exact({
+  //     tournamentId: UuDataTypes.string,
+  //   }),
+  //   fn: async ({ dtoIn }) => {
+  //     const itemList = await Abl.playoff(dtoIn.tournamentId);
+  //     return { itemList };
+  //   },
+  // },
 };

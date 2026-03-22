@@ -177,7 +177,7 @@ const BinaryCrud = createVisualComponent({
           >
             {({ type }) => (
               <Uu5Forms.Form.View gridLayout={{ xs: "name, file, tagList", s: "name file, tagList tagList" }}>
-                {OcElements.Crud.generateInputs(CONFIG, type)}
+                {OcElements.Crud.generateInputs(CONFIG, { operation: type })}
               </Uu5Forms.Form.View>
             )}
           </OcElements.Crud>

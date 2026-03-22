@@ -46,7 +46,7 @@ module.exports = {
       const { firstName, surname, email, password } = req.body;
 
       try {
-        let identity = await Identity.getByEmail(email);
+        let identity = await Identity.findByEmail(email);
 
         if (identity) {
           return res.status(400).json({ message: "Identity already exists" });
@@ -73,7 +73,7 @@ module.exports = {
       const { email, password } = req.body;
 
       try {
-        const identity = await Identity.getByEmail(email);
+        const identity = await Identity.findByEmail(email);
 
         if (!identity) {
           return res.status(400).json({ message: "Invalid credentials" });

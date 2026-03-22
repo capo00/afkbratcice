@@ -37,15 +37,18 @@ const CrudContext = {
       render(props) {
         const { children, calls = getCalls(entity), pageSize, dtoIn } = props;
 
+        const handlerMap = {
+          load: calls.list,
+          create: calls.createItem,
+          deleteMany: calls.deleteMany,
+        };
+
+        if (calls.createMany) handlerMap.createMany = calls.createMany;
+
         const dataList = useDataList({
           initialDtoIn: dtoIn,
           pageSize,
-          handlerMap: {
-            load: calls.list,
-            create: calls.createItem,
-            createMany: calls.createMany,
-            deleteMany: calls.deleteMany,
-          },
+          handlerMap,
           itemHandlerMap: {
             delete: calls.deleteItem,
             update: calls.updateItem,
