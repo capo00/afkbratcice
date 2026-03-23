@@ -1,5 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent } from "uu5g05";
+import { createVisualComponent, useScreenSize } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import Top from "./top";
@@ -21,12 +21,17 @@ const Page = createVisualComponent({
   render({ children, ...topProps }) {
     const spacing = Uu5Elements.useSpacing();
 
+    const [screenSize] = useScreenSize();
+    const isMobile = screenSize === "xs";
+
     //@@viewOn:render
     return (
       <Top {...topProps}>
         {({ topHeight = 0 } = {}) => (
           <main
-            className={Config.Css.css({
+            className={isMobile ? Config.Css.css({
+              padding: spacing.c,
+            }) : Config.Css.css({
               paddingInline: 40,
               paddingBlock: spacing.d + 8,
               minHeight: `calc(100vh - ${topHeight}px)`,
@@ -34,10 +39,9 @@ const Page = createVisualComponent({
               flexDirection: "column",
             })}
           >
-        {children}
-      </main>
-    )
-  }
+            {children}
+          </main>
+        )}
       </Top >
     );
     //@@viewOff:render

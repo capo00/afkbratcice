@@ -161,8 +161,12 @@ const Top = createVisualComponent({
       }
     }
 
-    // TODO necessary for TV device
-    itemList.unshift({ icon: "uugds-chevron-up", onClick: () => setHidden(true) });
+    if (screenSize === "l" || screenSize === "xl") {
+      // TODO necessary for TV device
+      itemList.unshift({ icon: "uugds-chevron-up", onClick: () => setHidden(true) });
+    }
+
+    children = typeof children === "function" ? children({ topHeight: hidden ? 0 : metrics.height }) : children;
 
     if (screenSize === "xs") {
       children = (
@@ -220,7 +224,7 @@ const Top = createVisualComponent({
             </div>
           </div>
         )}
-        {children({ topHeight: hidden ? 0 : metrics.height })}
+        {children}
       </>
     );
     //@@viewOff:render

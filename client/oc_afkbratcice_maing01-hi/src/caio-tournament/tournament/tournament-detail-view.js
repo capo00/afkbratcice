@@ -1,4 +1,4 @@
-import { createVisualComponent, Lsi, useScreenSize } from "uu5g05";
+import { createVisualComponent, Lsi, useScreenSize, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Extras from "uu5extrasg01";
 import Config from "./config/config.js";
@@ -58,13 +58,14 @@ const TournamentDetailView = createVisualComponent({
     const participantList = useParticipantList();
 
     if (dto.state === "pendingNoData") {
-      return <Uu5Elements.Pending size="xl" />;
+      return <Uu5Elements.Pending {...restProps} size="max" />;
     }
 
     if (dto.state === "errorNoData") {
       return (
         <Uu5Elements.PlaceholderBox
-          className={Config.Css.css({ marginBlockStart: 120 })}
+          {...restProps}
+          className={Utils.Css.joinClassName(Config.Css.css({ marginBlockStart: 120 }), restProps.className)}
           code="error"
           header={<Lsi lsi={{ cs: "Turnaj nenalezen" }} />}
           info={<Lsi lsi={{ cs: "Turnaj s ID %s nebyl nalezen." }} params={[id]} />}
@@ -89,28 +90,32 @@ const TournamentDetailView = createVisualComponent({
     const groupList = getGroupList(data.groupCount);
     const venueList = getVenueList(data.venueCount ?? 2);
 
-    let basicInfo = <DetailBasicInfo isAuth={isAuth} isOperator={isOperator} className={Config.Css.css({ marginBlockStart: 24 })} />;
-    let qrCode;
-    if (!isOperator && isMinM) {
-      qrCode = (
-        <Uu5Extras.QRCode
-          value={location.href}
-          size={screenSize === "m" ? "s" : "m"}
-        />
-      );
+    let qrCode, basicInfo;
+    if (isMinM) {
+      let basicInfoClassName;
+      if (!isOperator) {
+        qrCode = (
+          <Uu5Extras.QRCode
+            value={location.href}
+            size={screenSize === "m" ? "s" : "m"}
+          />
+        );
+        basicInfoClassName = Config.Css.css({ marginBlockStart: 24 });
+      }
+
+      basicInfo = <DetailBasicInfo isAuth={isAuth} isOperator={isOperator} className={basicInfoClassName} />;
     }
 
     return (
       <Uu5Elements.Grid
         {...restProps}
         templateColumns={{ xs: "1fr", m: "1fr 156px", l: "1fr 252px" }}
-        templateAreas={{ xs: "sidebar, main", m: "main sidebar" }}
+        templateAreas={{ xs: "main", m: "main sidebar" }}
         columnGap={24}
       >
         <DetailSection isAuth={isAuth} isOperator={isOperator} className={Config.Css.css({ gridArea: "main" })}>
-          {/* <div style={{textAlign: "center"}}>
-            {window.innerWidth} x {window.innerHeight}
-          </div> */}
+          {!basicInfo && <DetailBasicInfo isAuth={isAuth} isOperator={isOperator} />}
+          
           {(isCreated && (isOperator || participantList.data?.length > 0)) && (
             <ParticipantSection
               className={Config.Css.css({ marginBlockStart: 24 })}
@@ -164,10 +169,12 @@ const TournamentDetailView = createVisualComponent({
             />
           )}
         </DetailSection >
-        <div className={Config.Css.css({ gridArea: "sidebar" })}>
-          {qrCode}
-          {basicInfo}
-        </div>
+        {basicInfo && (
+          <div className={Config.Css.css({ gridArea: "sidebar" })}>
+            {qrCode}
+            {basicInfo}
+          </div>
+        )}
       </Uu5Elements.Grid>
     );
   },

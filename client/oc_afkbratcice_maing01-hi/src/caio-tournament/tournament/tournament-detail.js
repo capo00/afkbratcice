@@ -1,4 +1,4 @@
-import { createVisualComponent, useState, useEffect } from "uu5g05";
+import { createVisualComponent, useState } from "uu5g05";
 import Config from "./config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
 import OcAuth from "../../libs/oc_cli-auth";
@@ -6,6 +6,7 @@ import { ParticipantListProvider } from "../participant/participant-context.js";
 import { MatchListProvider } from "../match/match-context.js";
 import { TournamentProvider } from "./tournament-context.js";
 import TournamentDetailView from "./tournament-detail-view.js";
+import useReload from "../external/use-reload.js";
 
 function getCalls(tournamentId) {
   return {
@@ -26,14 +27,13 @@ const TournamentDetail = createVisualComponent({
     const session = OcAuth.useSession();
     const [refreshKey, setRefreshKey] = useState(0);
 
-    useEffect(() => {
-      if (session.state === "notAuthenticated") {
-        const interval = setInterval(() => {
-          setRefreshKey((prev) => prev + 1);
-        }, 60 * 1000); // 1 minute
-        return () => clearInterval(interval);
-      }
-    }, [session.state])
+    useReload(
+      () => {
+        return session.state === "notAuthenticated" ? 60 * 1000 : null
+      }, // 1 minute
+      () => setRefreshKey((prev) => prev + 1),
+      [session.state, refreshKey],
+    );
 
     return (
       <TournamentProvider id={id} refreshKey={refreshKey}>
