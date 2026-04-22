@@ -4,12 +4,14 @@ const AppServer = require("./libs/oc_app-server");
 const afkApi = require("./api");
 const theChaseApi = require("./the-chase/api");
 const caioTournamentApi = require("./caio-tournament/api");
+const caioLenaVisageApi = require("./caio-lenavisage/api");
 const identityApi = require("./libs/oc_app-auth/api/identity-api");
 
 const API = {
   ...theChaseApi,
   ...afkApi,
   ...caioTournamentApi,
+  ...caioLenaVisageApi,
   ...identityApi,
 };
 
@@ -18,4 +20,7 @@ const publicPath = process.env.NODE_ENV === "production" ? path.resolve(__dirnam
 const app = AppServer.App.init({
   publicPath,
   api: API,
+  authList: [
+    { prefixPath: "/caio-lenavisage/auth", collectionName: "caioLenaVisage_identity" },
+  ],
 });

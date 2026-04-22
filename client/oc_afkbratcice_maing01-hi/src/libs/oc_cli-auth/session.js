@@ -1,16 +1,16 @@
 import { Utils, useContext, useState, useMemo, useEffect } from "uu5g05";
 
-const CMD_PREFIX = "/auth";
+const DEFAULT_CMD_PREFIX = "/auth";
 
 const [SessionContext] = Utils.Context.create({});
 
-function SessionProvider(props) {
+function SessionProvider({ cmdPrefix = DEFAULT_CMD_PREFIX, ...props }) {
   const [identity, setIdentity] = useState();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch(CMD_PREFIX, {
+        const response = await fetch(cmdPrefix, {
           method: "GET",
           credentials: "include", // Important: This ensures cookies are sent with the request
         });
@@ -50,13 +50,13 @@ function SessionProvider(props) {
         const width = Math.min(window.innerWidth, 600);
         const height = Math.min(window.innerHeight, 870);
         window.open(
-          CMD_PREFIX + "/google",
+          cmdPrefix + "/google",
           null,
           `top=${window.innerHeight / 2 - height / 2},left=${window.innerWidth / 2 - width / 2},width=${width},height=${height}`,
         );
       },
       async logout() {
-        await fetch(CMD_PREFIX + "/logout", {
+        await fetch(cmdPrefix + "/logout", {
           method: "POST",
           credentials: "include", // This ensures cookies are sent with the request
         });

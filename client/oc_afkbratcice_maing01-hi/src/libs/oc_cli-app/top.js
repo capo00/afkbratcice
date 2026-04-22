@@ -62,7 +62,7 @@ function getLoginButton(session, screenSize, item) {
     });
   }
 
-  return { icon, onClick, itemList, children };
+  return { icon, onClick, itemList, children, iconOpen: null, iconClosed: null };
 }
 
 const Top = createVisualComponent({
@@ -75,11 +75,13 @@ const Top = createVisualComponent({
   //@@viewOff:propTypes
 
   //@@viewOn:defaultProps
-  defaultProps: {},
+  defaultProps: {
+    colorScheme: "building",
+  },
   //@@viewOff:defaultProps
 
   render(props) {
-    const { logoUri, logoHref, logoTarget, logoTooltip, menuList, ...restProps } = props;
+    const { logoUri, logoHref, logoTarget, logoTooltip, menuList, colorScheme, header, ...restProps } = props;
     let { children } = restProps;
 
     const [, setRoute] = useRoute();
@@ -89,43 +91,58 @@ const Top = createVisualComponent({
 
     const spacing = Uu5Elements.useSpacing();
 
-    const [menu, setMenu] = useState(null);
     const [hidden, setHidden] = useState(false);
 
-    const logoHeight = screenSize === "xs" ? 80 : 128;
-    let buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
-    if (screenSize === "xs") buttonXlHeight /= 2;
+    let img, logoStyles, coverStyles;
+    if (logoUri) {
+      const logoHeight = screenSize === "xs" ? 80 : 128;
+      let buttonXlHeight = Uu5Elements.UuGds.SizingPalette.getValue(["spot", "basic", "xl"]).h;
+      if (screenSize === "xs") buttonXlHeight /= 2;
 
-    const logoStyles = {
-      position: "absolute",
-      top: 0,
-      height: logoHeight,
-      cursor: logoHref ? "pointer" : undefined,
-      transition: "height 300ms ease, left 300ms ease",
-    };
+      logoStyles = {
+        position: "absolute",
+        top: 0,
+        height: logoHeight,
+        cursor: logoHref ? "pointer" : undefined,
+        transition: "height 300ms ease, left 300ms ease",
+      };
 
-    const coverStyles = {
-      position: "relative",
-      margin: "0 auto",
-      paddingLeft: logoStyles.height - (screenSize === "xs" ? 16 : 24),
-      transition: "padding 300ms ease",
-    };
+      coverStyles = {
+        position: "relative",
+        margin: "0 auto",
+        paddingLeft: logoStyles.height - (screenSize === "xs" ? 16 : 24),
+        transition: "padding 300ms ease",
+      };
 
-    if (metrics?.offsetToStickyBoundary < 0) {
-      logoStyles.height = buttonXlHeight;
-      logoStyles.left = (logoHeight - logoStyles.height) / 2;
-
-      if (visibilityMatches) {
-        // small
-        logoStyles.height = buttonXlHeight + 16;
+      if (metrics?.offsetToStickyBoundary < 0) {
+        logoStyles.height = buttonXlHeight;
         logoStyles.left = (logoHeight - logoStyles.height) / 2;
+
+        if (visibilityMatches) {
+          // small
+          logoStyles.height = buttonXlHeight + 16;
+          logoStyles.left = (logoHeight - logoStyles.height) / 2;
+        } else {
+          // hidden
+        }
       } else {
-        // hidden
+        // big
+        coverStyles.paddingTop = buttonXlHeight;
+        logoStyles.left = 0;
       }
-    } else {
-      // big
-      coverStyles.paddingTop = buttonXlHeight;
-      logoStyles.left = 0;
+
+      img = logoUri && (
+        <img
+          alt={logoTooltip}
+          src={logoUri}
+          className={Config.Css.css(logoStyles)}
+          title={logoTooltip}
+        />
+      );
+
+      if (logoHref) {
+        img = <Uu5Elements.Link href={logoHref} target={logoTarget}>{img}</Uu5Elements.Link>;
+      }
     }
 
     // adding loginButton, because ButtonGroup does not support { component: LoginButton }
@@ -145,20 +162,18 @@ const Top = createVisualComponent({
       itemList = updatedMenuList.map((item) =>
         updateHref(item, (...args) => {
           setRoute(...args);
-          setMenu(null);
         }),
       );
-      if (screenSize === "xs") {
-        const identityItem = itemList.splice(identityItemIndex > -1 ? identityItemIndex : itemList.length - 1, 1)[0];
-        const hiddenMenu = itemList;
-        const hiddenIdentity = identityItem.itemList;
-        delete identityItem.itemList;
+      // if (screenSize === "xs") {
+      //   const identityItem = itemList.splice(identityItemIndex > -1 ? identityItemIndex : itemList.length - 1, 1)[0];
+      //   const hiddenIdentity = identityItem.itemList;
+      //   delete identityItem.itemList;
 
-        itemList = [
-          { icon: "uugds-menu", onClick: () => setMenu(menu ? null : hiddenMenu) },
-          { ...identityItem, onClick: identityItem.onClick ?? (() => setMenu(menu ? null : hiddenIdentity)) },
-        ];
-      }
+      //   itemList = [
+      //     { icon: "uugds-menu", itemList: itemList.map(({ collapsedChildren, ...item }) => ({ ...item, children: item.children ?? collapsedChildren })) },
+      //     { ...identityItem, itemList: hiddenIdentity, iconOpen: null, iconClosed: null },
+      //   ];
+      // }
     }
 
     if (screenSize === "l" || screenSize === "xl") {
@@ -168,25 +183,24 @@ const Top = createVisualComponent({
 
     children = typeof children === "function" ? children({ topHeight: hidden ? 0 : metrics.height }) : children;
 
-    if (screenSize === "xs") {
-      children = (
-        <Uu5Elements.Drawer
-          open={!!menu}
-          onClose={() => setMenu(null)}
-          content={menu ? <Uu5Elements.MenuList itemBorderRadius="moderate" itemList={menu} /> : null}
-          position="right"
-        >
-          {children}
-        </Uu5Elements.Drawer>
-      );
-    }
+    // if (screenSize === "xs") {
+    //   children = (
+    //     <Uu5Elements.Drawer
+    //       open={!!menu}
+    //       onClose={() => setMenu(null)}
+    //       content={menu ? <Uu5Elements.MenuList itemBorderRadius="moderate" itemList={menu} /> : null}
+    //       position="right"
+    //     >
+    //       {children}
+    //     </Uu5Elements.Drawer>
+    //   );
+    // }
 
     //@@viewOn:render
-    const attrs = Utils.VisualComponent.getAttrs(
+    const { elementProps } = Utils.VisualComponent.splitProps(
       restProps,
       Config.Css.css({
         ...style,
-        background: "#0f0f0f",
         paddingInline: spacing.d,
         ...(screenSize === "xs"
           ? {
@@ -201,28 +215,28 @@ const Top = createVisualComponent({
       }),
     );
 
-    let img = (
-      <img
-        alt={logoTooltip}
-        src={logoUri}
-        className={Config.Css.css(logoStyles)}
-        title={logoTooltip}
-      />
-    );
-
-    if (logoHref) {
-      img = <Uu5Elements.Link href={logoHref} target={logoTarget}>{img}</Uu5Elements.Link>;
-    }
-
     return (
       <>
         {!hidden && (
-          <div {...attrs} ref={ref}>
-            <div className={Config.Css.css(coverStyles)}>
-              {img}
-              {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
-            </div>
-          </div>
+          <Uu5Elements.Box
+            {...elementProps}
+            shape="background"
+            colorScheme={colorScheme}
+            significance="highlighted"
+            elementRef={Utils.Component.combineRefs(elementProps.elementRef, ref)}
+          >
+            {logoUri ? (
+              <div className={Config.Css.css(coverStyles)}>
+                {img}
+                {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
+              </div>
+            ) : (
+              <div className={header ? Config.Css.css({ display: "flex", alignItems: "center", gap: 16 }) : undefined}>
+                {header}
+                {itemList && <Uu5Elements.ActionGroup itemList={itemList} size="xl" />}
+              </div>
+            )}
+          </Uu5Elements.Box>
         )}
         {children}
       </>

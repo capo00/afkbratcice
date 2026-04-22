@@ -1,25 +1,25 @@
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
-const Identity = require("../abl/identity");
+const DefaultIdentity = require("../abl/identity");
 const Config = require("../config/config");
 
 module.exports = {
-  init(prefixPath = "") {
+  init(prefixPath = "", identity = DefaultIdentity, strategyName = "google") {
     passport.use(
+      strategyName,
       new GoogleStrategy(
         {
           clientID: Config.google.clientId,
           clientSecret: Config.google.clientSecret,
-          // this is overridden in routes.js
           callbackURL: prefixPath + "/" + Config.google.callbackUc,
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            let identity = await Identity.findByGoogleId(profile.id);
-            if (identity) {
-              done(null, identity);
+            let found = await identity.findByGoogleId(profile.id);
+            if (found) {
+              done(null, found);
             } else {
-              identity = await Identity.create({
+              found = await identity.create({
                 email: profile.emails[0].value,
                 name: profile.displayName,
                 firstName: profile.name.givenName,
@@ -28,7 +28,7 @@ module.exports = {
                 registrationType: "google",
                 googleId: profile.id,
               });
-              done(null, identity);
+              done(null, found);
             }
           } catch (err) {
             console.error("Unexpected error during working with Identity.", err);
@@ -40,7 +40,7 @@ module.exports = {
 
     passport.serializeUser((user, done) => done(null, user.id));
     passport.deserializeUser((id, done) => {
-      Identity.get(id).then((user) => done(null, user)).catch((err) => done(err, null));
+      identity.get(id).then((user) => done(null, user)).catch((err) => done(err, null));
     });
   }
 }

@@ -18,7 +18,7 @@ const Page = createVisualComponent({
   defaultProps: {},
   //@@viewOff:defaultProps
 
-  render({ children, ...topProps }) {
+  render({ children, topColorScheme, ...topProps }) {
     const spacing = Uu5Elements.useSpacing();
 
     const [screenSize] = useScreenSize();
@@ -26,11 +26,11 @@ const Page = createVisualComponent({
 
     //@@viewOn:render
     return (
-      <Top {...topProps}>
+      <Top {...topProps} colorScheme={topColorScheme}>
         {({ topHeight = 0 } = {}) => (
           <main
             className={isMobile ? Config.Css.css({
-              padding: spacing.c,
+              padding: spacing.d,
             }) : Config.Css.css({
               paddingInline: 40,
               paddingBlock: spacing.d + 8,

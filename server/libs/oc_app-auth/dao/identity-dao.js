@@ -1,8 +1,8 @@
 const Dao = require("./dao");
 
 class IdentityDao extends Dao {
-  constructor() {
-    super("sys_identity");
+  constructor(collectionName = "sys_identity") {
+    super(collectionName);
   }
 
   createIndexes() {
@@ -27,3 +27,4 @@ class IdentityDao extends Dao {
 }
 
 module.exports = new IdentityDao();
+module.exports.IdentityDao = IdentityDao;

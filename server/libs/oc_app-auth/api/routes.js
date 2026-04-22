@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-const Identity = require("../abl/identity");
+const DefaultIdentity = require("../abl/identity");
 const Config = require("../config/config");
 const fs = require("fs");
 
@@ -16,46 +16,45 @@ function getCookieOptions() {
 }
 
 module.exports = {
-  init(prefixPath = "") {
+  init(prefixPath = "", identity = DefaultIdentity, strategyName = "google", cookieName = "token") {
     const router = express.Router();
 
     function setToken(res, token) {
-      res.cookie("token", token, getCookieOptions());
+      res.cookie(cookieName, token, getCookieOptions());
     }
 
     function removeToken(res) {
-      res.clearCookie("token", getCookieOptions());
+      res.clearCookie(cookieName, getCookieOptions());
     }
 
     router.get("/", async (req, res) => {
-      const token = req.cookies.token; // Retrieve the token from the cookie
+      const token = req.cookies[cookieName];
 
-      let identity = null;
+      let id = null;
       if (token) {
         try {
-          identity = jwt.verify(token, Config.token.jwtSecret);
+          id = jwt.verify(token, Config.token.jwtSecret);
         } catch (error) {
           //console.warn("/auth: Token is not valid", error);
         }
       }
-      return res.json({ identity });
+      return res.json({ identity: id });
     });
 
-    // Register
     router.post("/register", async (req, res) => {
       const { firstName, surname, email, password } = req.body;
 
       try {
-        let identity = await Identity.findByEmail(email);
+        let existing = await identity.findByEmail(email);
 
-        if (identity) {
+        if (existing) {
           return res.status(400).json({ message: "Identity already exists" });
         }
 
-        identity = await Identity.create({ name: [firstName, surname].join(" "), firstName, surname, email, password });
-        setToken(res, Identity.createToken(identity));
+        existing = await identity.create({ name: [firstName, surname].join(" "), firstName, surname, email, password });
+        setToken(res, identity.createToken(existing));
 
-        res.status(201).json({ identity });
+        res.status(201).json({ identity: existing });
       } catch (err) {
         console.error("/auth/register: Unexpected exception", err);
         res.status(500).json({
@@ -68,26 +67,25 @@ module.exports = {
       }
     });
 
-    // Login
     router.post("/login", async (req, res) => {
       const { email, password } = req.body;
 
       try {
-        const identity = await Identity.findByEmail(email);
+        const found = await identity.findByEmail(email);
 
-        if (!identity) {
+        if (!found) {
           return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        const isMatch = await Identity.matchPassword(password, identity.password);
+        const isMatch = await identity.matchPassword(password, found.password);
 
         if (!isMatch) {
           return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        setToken(res, Identity.createToken(identity));
+        setToken(res, identity.createToken(found));
 
-        res.json({ identity });
+        res.json({ identity: found });
       } catch (err) {
         console.error("/auth/login: Unexpected exception", err);
         res.status(500).json({
@@ -105,25 +103,22 @@ module.exports = {
       res.json({});
     });
 
-// Google Auth
     let callbackURL;
     router.get("/google", (req, res, next) => {
       const domain = req.headers.referer;
       const uc = prefixPath + "/" + Config.google.callbackUc;
-      // callbackURL must start with https if the server runs on https
       callbackURL = domain ? new URL(uc, domain).toString() : uc;
-      return passport.authenticate("google", { scope: ["profile", "email"], callbackURL })(req, res, next);
+      return passport.authenticate(strategyName, { scope: ["profile", "email"], callbackURL })(req, res, next);
     });
     router.get(
       "/" + Config.google.callbackUc,
       (req, res, next) => {
-        // callbackURL must be same as for login
-        return passport.authenticate("google", { session: false, callbackURL })(req, res, next);
+        return passport.authenticate(strategyName, { session: false, callbackURL })(req, res, next);
       },
       (req, res) => {
-        setToken(res, Identity.createToken(req.user));
+        setToken(res, identity.createToken(req.user));
         fs.readFile(__dirname + "/../assets/callback.html", "utf8", (err, text) => {
-          res.send(text.replace("%s", JSON.stringify(Identity.getBasicData(req.user))));
+          res.send(text.replace("%s", JSON.stringify(identity.getBasicData(req.user))));
         });
       }
     );

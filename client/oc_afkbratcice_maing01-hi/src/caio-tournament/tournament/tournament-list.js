@@ -121,7 +121,7 @@ const CRUD_CONFIG = {
 
 const { seriesList, columnList, sorterList, filterList } = OcElements.Crud.generate(CRUD_CONFIG);
 
-const TournamentList = createVisualComponent({
+let TournamentList = createVisualComponent({
   uu5Tag: Config.TAG + "TournamentList",
 
   render(props) {
@@ -197,5 +197,7 @@ const TournamentList = createVisualComponent({
   },
 });
 
+TournamentList = withRoute(TournamentList, { profileList: ["authorities"] });
+
 export { TournamentList };
-export default withRoute(TournamentList, { profileList: ["authorities"] });
+export default TournamentList;

@@ -20,7 +20,7 @@ const Config = require('../config/config');
 const Command = require("./command");
 
 const App = {
-  init({ api = {}, publicPath = path.resolve(__dirname, "../../../../public") } = {}) {
+  init({ api = {}, publicPath = path.resolve(__dirname, "../../../../public"), authList } = {}) {
     const app = express();
 
     // Middleware
@@ -33,6 +33,7 @@ const App = {
     app.use(express.static(publicPath));
 
     OcAuth.init(app);
+    if (authList) authList.forEach(cfg => OcAuth.init(app, cfg));
 
     // Define your api here
     Command.createCommands(app, api, { publicPath });

@@ -32,7 +32,7 @@ const SpaProvider = createVisualComponent({
   defaultProps: {},
   //@@viewOff:defaultProps
 
-  render({ children }) {
+  render({ children, cmdPrefix }) {
     //@@viewOn:private
     //@@viewOff:private
 
@@ -41,7 +41,7 @@ const SpaProvider = createVisualComponent({
       <AppBackgroundProvider>
         <LanguageListProvider languageList={["cs"]}>
           <LanguageProvider>
-            <OcAuth.SessionProvider>
+            <OcAuth.SessionProvider cmdPrefix={cmdPrefix}>
               <RouteProvider>{children}</RouteProvider>
             </OcAuth.SessionProvider>
           </LanguageProvider>

@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const Config = require("../config/config");
 const { AppError } = require("../../oc_app-core");
-const identityDao = require("../dao/identity-dao");
+const defaultIdentityDao = require("../dao/identity-dao");
 
 const CODE_PREFIX = "oc_app-auth/identity";
 
@@ -25,67 +25,72 @@ function generateNumId(text) {
 
 const generateId = (email, time) => [generateNumId(email), generateNumId(time), "1"].join("-");
 
-const Identity = {
-  async create(identity) {
-    if (identity.password) {
-      const salt = await bcrypt.genSalt(10);
-      identity.password = await bcrypt.hash(identity.password, salt);
+function createIdentity(identityDao, collectionName = "sys_identity") {
+  const Identity = {
+    async create(identity) {
+      if (identity.password) {
+        const salt = await bcrypt.genSalt(10);
+        identity.password = await bcrypt.hash(identity.password, salt);
+      }
+
+      const cts = new Date().toISOString();
+      const newUser = { identity: generateId(identity.email, cts), ...identity };
+      return await identityDao.create(newUser);
+    },
+
+    async get({id, identity}, sessionIdentity) {
+      const data = id ? await identityDao.getById(id) : await identityDao.getByIdentity(identity);
+      if (!data) {
+        throw new AppError.DoesNotExists("Identity not found", { codePrefix: CODE_PREFIX });
+      }
+      return sessionIdentity?.identity === data.identity ? data : Identity._getPublicData(data);
+    },
+
+    async search(query) {
+      const itemList = await identityDao.search(query);
+      return itemList.map(Identity._getPublicData);
+    },
+
+    async list(dtoIn = {}) {
+      let itemList;
+      if (dtoIn.identityList) {
+        itemList = await identityDao.listbyIdentityList(dtoIn.identityList);
+      } else if (dtoIn.idList) {
+        itemList = await identityDao.listByIdList(dtoIn.idList);
+      } else {
+        itemList = await identityDao.list(dtoIn.pageInfo);
+      }
+      return itemList.map(Identity._getPublicData);
+    },
+
+    findByEmail(email) {
+      return identityDao.findOne({ email });
+    },
+
+    findByGoogleId(googleId) {
+      return identityDao.findOne({ googleId });
+    },
+
+    matchPassword(inputPassword, storedPassword) {
+      return bcrypt.compare(inputPassword, storedPassword);
+    },
+
+    createToken(identity) {
+      return jwt.sign({ ...Identity.getBasicData(identity), authSchema: collectionName }, Config.token.jwtSecret, { expiresIn: Config.token.jwtLifetime })
+    },
+
+    getBasicData({ identity, firstName, surname, name, email, photo, profileList }) {
+      return { identity, firstName, surname, name, email, photo, profileList };
+    },
+
+    _getPublicData(data) {
+      const { identity, firstName, surname, name, photo } = Identity.getBasicData(data);
+      return { identity, firstName, surname, name, photo };
     }
+  };
 
-    const cts = new Date().toISOString();
-    const newUser = { identity: generateId(identity.email, cts), ...identity };
-    return await identityDao.create(newUser);
-  },
+  return Identity;
+}
 
-  async get({id, identity}, sessionIdentity) {
-    const data = id ? await identityDao.getById(id) : await identityDao.getByIdentity(identity);
-    if (!data) {
-      throw new AppError.DoesNotExists("Identity not found", { codePrefix: CODE_PREFIX });
-    }
-    return sessionIdentity?.identity === data.identity ? data : Identity._getPublicData(data);
-  },
-
-  async search(query) {
-    const itemList = await identityDao.search(query);
-    return itemList.map(Identity._getPublicData);
-  },
-
-  async list(dtoIn = {}) {
-    let itemList;
-    if (dtoIn.identityList) {
-      itemList = await identityDao.listbyIdentityList(dtoIn.identityList);
-    } else if (dtoIn.idList) {
-      itemList = await identityDao.listByIdList(dtoIn.idList);
-    } else {
-      itemList = await identityDao.list(dtoIn.pageInfo);
-    }
-    return itemList.map(Identity._getPublicData);
-  },
-
-  findByEmail(email) {
-    return identityDao.findOne({ email });
-  },
-
-  findByGoogleId(googleId) {
-    return identityDao.findOne({ googleId });
-  },
-
-  matchPassword(inputPassword, storedPassword) {
-    return bcrypt.compare(inputPassword, storedPassword);
-  },
-
-  createToken(identity) {
-    return jwt.sign(Identity.getBasicData(identity), Config.token.jwtSecret, { expiresIn: Config.token.jwtLifetime })
-  },
-
-  getBasicData({ identity, firstName, surname, name, email, photo, profileList }) {
-    return { identity, firstName, surname, name, email, photo, profileList };
-  },
-
-  _getPublicData(data) {
-    const { identity, firstName, surname, name, photo } = Identity.getBasicData(data);
-    return { identity, firstName, surname, name, photo };
-  }
-};
-
-module.exports = Identity;
+module.exports = createIdentity(defaultIdentityDao, "sys_identity");
+module.exports.createIdentity = createIdentity;
