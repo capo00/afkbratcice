@@ -90,7 +90,7 @@ Order
   hair?
     category: "woman" | "man" | "child"
     type?: "short" | "middle" | "long"
-    services: { <serviceKey>: <price> || { quantity, unit, materialSum, sum } }
+    services: { <serviceKey>: <price> || { quantity, unit, materialPrice, workPrice } }
 
   // product=wedding
   wedding?
