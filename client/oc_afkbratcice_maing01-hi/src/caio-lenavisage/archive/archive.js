@@ -3,6 +3,7 @@ import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
+import { withRoute } from "../../libs/oc_cli-app";
 
 const ICON_MAP = {
   "wedding": "mdi-heart-multiple-outline",
@@ -125,7 +126,7 @@ function groupByMonth(orderList) {
   return itemList;
 }
 
-const Archive = createVisualComponent({
+let Archive = createVisualComponent({
   uu5Tag: Config.TAG + "Archive",
 
   render() {
@@ -178,5 +179,7 @@ const Archive = createVisualComponent({
     );
   },
 });
+
+Archive = withRoute(Archive, { profileList: ["authorities", "operatives"] });
 
 export default Archive;

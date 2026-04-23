@@ -55,3 +55,12 @@
     transform: rotate(360deg);
   }
 }
+
+.caio-lenavisage .uu-app-loading {
+  color: #e91e63;
+}
+
+.caio-lenavisage .uu-app-loading-name {
+  color: #e91e63;
+  font-size: 36px;
+}
