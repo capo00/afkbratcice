@@ -74,13 +74,15 @@ const WeddingList = createVisualComponent({
           ))}
         </Uu5Elements.Grid>
 
-        <WeddingPayment
-          key={editItem?.data?.id + "-" + (modalState === "payment")}
-          open={modalState === "payment"}
-          order={editItem}
-          config={config}
-          onClose={handleClose}
-        />
+        {modalState === "payment" && (
+          <WeddingPayment
+            key={editItem?.data?.id + "-" + (modalState === "payment")}
+            open={modalState === "payment"}
+            order={editItem}
+            config={config}
+            onClose={handleClose}
+          />
+        )}
 
         <WeddingEdit
           open={modalState === "create" || modalState === "edit"}

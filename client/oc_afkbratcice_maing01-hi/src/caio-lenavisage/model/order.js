@@ -64,7 +64,6 @@ export default class Order {
     this.note = null;
     this.id = null;
     this.total = null;
-    this.paydate = null;
   }
 
   setProduct(product) { this.product = product; return this; }
@@ -209,7 +208,6 @@ export default class Order {
 
   setTotal(total) {
     this.total = total;
-    this.paydate = new Date().toISOString();
     return this;
   }
 
@@ -225,7 +223,6 @@ export default class Order {
       note: this.note ?? undefined,
       subtotal: this.getSubtotal(),
       total: this.getTotal(),
-      paydate: this.paydate,
     };
 
     if (this.product === "hair") {

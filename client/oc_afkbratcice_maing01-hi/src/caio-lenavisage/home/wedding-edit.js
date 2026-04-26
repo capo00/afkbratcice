@@ -12,7 +12,7 @@ function getGuestRow(i, value, config, setGuests) {
       label={i + 1 + ". host"}
       itemList={Object.keys(config.guest).map((key) => ({
         value: key,
-        label: config.guest[key].name,
+        children: config.guest[key].name,
       }))}
       value={value}
       onChange={(e) => {

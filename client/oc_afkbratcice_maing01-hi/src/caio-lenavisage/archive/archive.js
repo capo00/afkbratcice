@@ -135,9 +135,10 @@ let Archive = createVisualComponent({
     const dataList = useDataList({
       skipInitialLoad: true,
       handlerMap: {
-        load: () => {
-          return OcElements.Call.cmdGet("caio-lenavisage/order/list", { year });
-        },
+        load: () => OcElements.Call.cmdGet("caio-lenavisage/order/list", { year }),
+      },
+      itemHandlerMap: {
+        delete: (dtoIn) => OcElements.Call.cmdPost("caio-lenavisage/order/delete", dtoIn),
       },
     });
 

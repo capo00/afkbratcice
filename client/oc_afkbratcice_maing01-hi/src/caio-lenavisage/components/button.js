@@ -9,14 +9,12 @@ const Button = createComponent({
     const { active, info, children, pending, ...restProps } = props;
 
     return pending ? (
-      <Uu5Elements.Skeleton width={112} height={112} borderRadius="moderate" colorScheme="primary" />
+      <Uu5Elements.Skeleton borderRadius="moderate" className={Config.Css.css({ minWidth: 0, aspectRatio: 1 })} />
     ) : (
       <Uu5Elements.Box
         shape="interactiveElement"
         significance={active ? "highlighted" : "common"}
         {...restProps}
-        aspectRatio="1x1"
-        width={112}
         borderRadius="moderate"
         colorScheme="pink"
         className={Config.Css.css({
@@ -26,6 +24,8 @@ const Button = createComponent({
           justifyContent: "center",
           textAlign: "center",
           padding: 8,
+          minWidth: 0,
+          aspectRatio: 1,
         })}
       >
         {info && (

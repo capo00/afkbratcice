@@ -1,8 +1,9 @@
-import { createVisualComponent, useState } from "uu5g05";
+import { createVisualComponent, useState, useMemo } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import BillTable from "../components/bill-table.js";
+import QRCodeButton from "../components/q-r-code-button.js";
+import Number from "../components/number.js";
 
 function getWeddingServices(config, data) {
   const items = [];
@@ -31,13 +32,21 @@ function getWeddingServices(config, data) {
   return items;
 }
 
+const DEPOSIT_AMOUNT_LIST = [1000, 1500, 2000];
+
 const WeddingPayment = createVisualComponent({
   uu5Tag: Config.TAG + "WeddingPayment",
 
   render(props) {
     const { open, order, config, onClose } = props;
     const [deposit, setDeposit] = useState();
-    const [total, setTotal] = useState();
+    const [customTotal, setCustomTotal] = useState();
+    if (deposit && customTotal) setCustomTotal(undefined);
+
+    const isCustomDeposit = deposit && !DEPOSIT_AMOUNT_LIST.includes(deposit);
+    const total = order.data.subtotal - (order.data.wedding?.deposit || 0);
+
+    const itemList = useMemo(() => [total], [total]);
 
     return (
       <Uu5Elements.Modal
@@ -45,35 +54,33 @@ const WeddingPayment = createVisualComponent({
         onClose={onClose}
         header={order?.data?.customerName ?? "Platba"}
         footer={order && (
-          <Uu5Elements.Grid templateColumns="repeat(5, 1fr)" columnGap={4}>
-            {[500, 1000, 1500, 2000].map((price) => (
+          <Uu5Elements.Grid templateColumns="repeat(4, 1fr) auto" columnGap={4}>
+            {DEPOSIT_AMOUNT_LIST.map((price) => (
               <Uu5Elements.Button
                 key={price}
-                colorScheme="primary"
-                disabled={price === order.data.wedding?.deposit}
-                onClick={async () => {
-                  const dtoIn = {
-                    id: order.data.id,
-                    wedding: { ...order.data.wedding, deposit: price, depositTime: new Date().toISOString() },
-                  };
-                  await order.handlerMap.update(dtoIn);
-                  onClose();
-                }}
+                disabled={price === order.data.wedding.deposit}
+                onClick={() => setDeposit(price === deposit ? undefined : price)}
+                {...(price === deposit ? { colorScheme: "primary" } : null)}
               >
-                {price}
+                <Uu5Elements.Number value={price} />
               </Uu5Elements.Button>
             ))}
-            <Uu5Forms.Number.Input
-              colorScheme="primary"
+            <Number
+              value={isCustomDeposit ? deposit : undefined}
               significance="distinct"
               placeholder="Jiná"
-              alignment="right"
-              width="100%"
+              alignment="center"
+              onBlur={(e) => setDeposit(e.data.value)}
+              {...(isCustomDeposit ? { colorScheme: "primary" } : null)}
+            />
+            <QRCodeButton
+              itemList={DEPOSIT_AMOUNT_LIST}
               value={deposit}
-              onChange={(e) => setDeposit(e.data.value)}
+              onChange={(v) => setDeposit(v)}
+              disabled={!deposit}
             />
 
-            <Uu5Elements.Grid.Item colSpan={4}>
+            <Uu5Elements.Grid.Item colSpan={3}>
               {({ style }) => (
                 <Uu5Elements.Button
                   colorScheme="pink"
@@ -87,8 +94,8 @@ const WeddingPayment = createVisualComponent({
                     if (deposit) {
                       dtoIn.wedding.deposit = deposit;
                       dtoIn.wedding.depositTime = new Date().toISOString();
-                    } else if (total != null) {
-                      dtoIn.total = total + (order.data.wedding?.deposit || 0);
+                    } else if (customTotal != null) {
+                      dtoIn.total = customTotal + (order.data.wedding.deposit || 0);
                       dtoIn.paydate = new Date().toISOString();
                     } else {
                       dtoIn.total = order.data.subtotal;
@@ -98,20 +105,26 @@ const WeddingPayment = createVisualComponent({
                     onClose();
                   }}
                 >
-                  {deposit && total == null ?
-                    `Záloha ${deposit} Kč` :
-                    `Zaplatit (${total ?? order.data.subtotal - (order.data.wedding?.deposit || 0)})`}
+                  {deposit ?
+                    <>{order.data.wedding.deposit ? "Změna zálohy" : "Záloha"} <Uu5Elements.Number value={deposit} currency="CZK" minDecimalDigits={0} /></> :
+                    <>Zaplatit <Uu5Elements.Number value={customTotal ?? total} currency="CZK" minDecimalDigits={0} /></>}
                 </Uu5Elements.Button>
               )}
             </Uu5Elements.Grid.Item>
-            <Uu5Forms.Number.Input
-              colorScheme="primary"
-              significance="highlighted"
+            <Number
+              value={customTotal}
+              significance="distinct"
               placeholder="Jiná"
-              alignment="right"
-              width="100%"
-              value={total}
-              onChange={(e) => setTotal(e.data.value)}
+              alignment="center"
+              onBlur={(e) => setCustomTotal(e.data.value === order.data.subtotal ? undefined : e.data.value)}
+              {...(customTotal ? { colorScheme: "primary" } : null)}
+              disabled={!!deposit}
+            />
+            <QRCodeButton
+              itemList={itemList}
+              value={customTotal ?? total}
+              onChange={(v) => setCustomTotal(v === total ? undefined : v)}
+              disabled={!!deposit}
             />
           </Uu5Elements.Grid>
         )}
@@ -125,7 +138,7 @@ const WeddingPayment = createVisualComponent({
             )}
             <BillTable
               data={getWeddingServices(config, order.data)}
-              total={order.data.subtotal - (order.data.wedding?.deposit || 0)}
+              total={total}
             />
           </>
         )}

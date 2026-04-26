@@ -37,8 +37,8 @@ function CustomPage() {
   let menuList = MENU_LIST;
   if (session.state === "authenticated") {
     menuList = [
-      { href: "caio-lenavisage", collapsedChildren: "Home", icon: "uugdsstencil-layout-apps" },
-      { href: "caio-lenavisage/order", collapsedChildren: "Archive", icon: "uugdsstencil-time-arrow-history" },
+      { href: "caio-lenavisage", collapsedChildren: "Home", icon: "uugdsstencil-layout-apps", colorScheme: "primary" },
+      { href: "caio-lenavisage/order", collapsedChildren: "Archive", icon: "uugdsstencil-time-arrow-history", colorScheme: "primary" },
       ...menuList
     ];
   }
