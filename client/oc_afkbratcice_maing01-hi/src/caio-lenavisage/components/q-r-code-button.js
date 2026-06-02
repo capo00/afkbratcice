@@ -4,8 +4,8 @@ import Uu5Forms from "uu5g05-forms";
 import Uu5Extras from "uu5extrasg01";
 import Config from "../config/config.js";
 
-function getPaymentValue(amount, iban = "CZ5727000000001387441664") {
-  return `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK*`;
+function getPaymentValue(amount, {iban = "CZ4806000000000243179703", vs = "70343"} = {}) {
+  return `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK${vs ? `*X-VS:${vs}` : ""}*`;
 }
 
 function AmountInput({ itemList, value, onChange }) {
