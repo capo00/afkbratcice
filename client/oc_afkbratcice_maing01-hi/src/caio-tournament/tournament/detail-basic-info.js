@@ -8,7 +8,7 @@ const DetailBasicInfo = createVisualComponent({
   uu5Tag: Config.TAG + "Tournament.Detail.BasicInfo",
 
   render(props) {
-    const { isAuth, isOperator, direction = "vertical", ...restProps } = props;
+    const { isAuth, isOperator, direction = "vertical", nextReloadTime, ...restProps } = props;
 
     const [screenSize] = useScreenSize();
     const isSmall = screenSize === "xs";
@@ -29,7 +29,7 @@ const DetailBasicInfo = createVisualComponent({
       }
     ];
 
-    if (isSmall && false) {
+    if (isSmall) {
       if (data.date || data.place) {
         let icon = "uugds-calendar";
         let subtitle = data.place ?? <Lsi lsi={{ cs: "Datum" }} />;

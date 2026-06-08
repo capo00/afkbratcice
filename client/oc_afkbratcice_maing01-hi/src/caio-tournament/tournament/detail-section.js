@@ -182,7 +182,7 @@ const DetailSection = createVisualComponent({
               const { sys, ...submitData } = e.data.value;
               const update = {};
               for (const k in submitData) {
-                if (submitData[k] !== data[k] && data[k] != null) {
+                if (submitData[k] != data[k]) {
                   update[k] = submitData[k] ?? null;
                   if (k === "operativeList" || k === "refereeList") {
                     update[k] = submitData[k]?.map((item) => item.value) ?? null;

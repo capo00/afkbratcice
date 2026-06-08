@@ -147,6 +147,8 @@ const MatchNext = createVisualComponent({
     const isSmall = ["xs", "s"].includes(contentSize);
 
     //@@viewOn:render
+    if (data && Object.keys(data).length === 0) return <div />;
+    
     return (
       <Uu5Elements.Grid templateAreas="homeTeam countdown guestTeam, info info info" templateColumns="1fr auto 1fr">
         {({ style }) => (

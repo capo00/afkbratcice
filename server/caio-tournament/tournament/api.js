@@ -70,6 +70,7 @@ module.exports = {
       advanceFromGroup: UuDataTypes.number,
       operativeList: UuDataTypes.arrayOf(UuDataTypes.string),
       refereeList: UuDataTypes.arrayOf(UuDataTypes.string),
+      venueCount: UuDataTypes.number,
     }),
     fn: async ({ dtoIn, identity }) => {
       return await Abl.update(dtoIn, identity);

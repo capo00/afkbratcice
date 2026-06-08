@@ -32,15 +32,14 @@ const FinalStandings = createVisualComponent({
       participantMap[p.data?.id] = p.data;
     });
 
-    return tournamentDto.data?.finalStandingList?.length > 0 && (
-      <Uu5Elements.Block
-        {...restProps}
-        // header={<Lsi lsi={{ cs: "Celkové umístění" }} />}
-        // headerType="title"
-        card="full"
-      >
+    const tableDataList = tournamentDto.data.finalStandingList.length > 10 && screenSize === "xl" ?
+      [tournamentDto.data.finalStandingList.slice(0, 10), tournamentDto.data.finalStandingList.slice(10)] :
+      [tournamentDto.data.finalStandingList];
+
+    function getTable(data, visible = true) {
+      return (
         <Uu5TilesElements.Table
-          data={tournamentDto.data.finalStandingList}
+          data={data}
           columnList={[
             {
               value: "position",
@@ -56,17 +55,34 @@ const FinalStandings = createVisualComponent({
               cell: ({ data }) => data.position > 3 ? participantMap[data.participantId]?.name : <b>{participantMap[data.participantId]?.name}</b>,
               cellComponent: cellComponent(isSmall),
             },
-            {
+            visible ? {
               value: "playerList",
               header: <Lsi lsi={{ cs: "Hráči" }} />,
               cell: ({ data }) => participantMap[data.participantId]?.playerList?.map((p) => p.name).join(", "),
-            },
-          ]}
+            } : null,
+          ].filter(Boolean)}
           hideHeader
           spacing="loose"
           verticalAlignment="center"
           disableColumnResize
         />
+      );
+    }
+
+    return tournamentDto.data?.finalStandingList?.length > 0 && (
+      <Uu5Elements.Block
+        {...restProps}
+        // header={<Lsi lsi={{ cs: "Celkové umístění" }} />}
+        // headerType="title"
+        card="full"
+      >
+        {tableDataList.length > 1 ? (
+          <Uu5Elements.Grid templateColumns="1fr 1fr" columnGap={16}>
+            {tableDataList.map((data) => getTable(data, false))}
+          </Uu5Elements.Grid>
+        ) : (
+          getTable(tableDataList[0])
+        )}
       </Uu5Elements.Block>
     );
   },

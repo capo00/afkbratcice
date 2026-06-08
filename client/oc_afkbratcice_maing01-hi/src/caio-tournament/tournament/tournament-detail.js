@@ -1,4 +1,4 @@
-import { createVisualComponent, useState } from "uu5g05";
+import { createVisualComponent, useMemo, useState } from "uu5g05";
 import Config from "./config/config.js";
 import OcElements from "../../libs/oc_cli-elements";
 import OcAuth from "../../libs/oc_cli-auth";
@@ -35,11 +35,13 @@ const TournamentDetail = createVisualComponent({
       [session.state, refreshKey],
     );
 
+    const nextReloadTime = useMemo(() => session.state === "notAuthenticated" ? new Date().getTime() + 60 * 1000 : null, [session.state, refreshKey]);
+
     return (
       <TournamentProvider id={id} refreshKey={refreshKey}>
         <ParticipantListProvider dtoIn={{ tournamentId: id }} calls={getCalls(id)} refreshKey={refreshKey}>
           <MatchListProvider tournamentId={id} refreshKey={refreshKey}>
-            <TournamentDetailView id={id} />
+            <TournamentDetailView id={id} nextReloadTime={nextReloadTime} />
           </MatchListProvider>
         </ParticipantListProvider>
       </TournamentProvider>

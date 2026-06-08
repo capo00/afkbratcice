@@ -36,6 +36,8 @@ const MatchLast = createVisualComponent({
     const space = Uu5Elements.useSpacing();
 
     //@@viewOn:render
+    if (data && Object.keys(data).length === 0) return <div />;
+
     return (
       <Uu5Elements.Grid templateAreas="homeTeam result guestTeam, info info info" templateColumns="1fr auto 1fr">
         {({ style }) => (
