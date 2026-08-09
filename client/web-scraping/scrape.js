@@ -22,11 +22,12 @@ const TEAMS = {
   "TJ Sokol Vlkaneč": 46,
   "SK Zbraslavice": 60,
   "SK Malešov B": 64,
-  "SK  Spartak Žleby": 35,
+  "SK Spartak Žleby": 35,
   "FK Záboří nad Labem": 38,
   "TJ Slovan Horky": 39,
   "FK Miskovice": 61,
   "Sokol Potěhy": 4,
+  "TJ Sokol Paběnice B": 3,
 };
 
 // žáci
@@ -39,9 +40,24 @@ const TEAMS = {
 //   "TJ Sokol Malín": 68,
 //   "TJ Star Tupadly": 24,
 //   "TJ Sokol Paběnice": 70,
-//   "SK Církvice/SK 1933 ČUS Nové Dvory": 71,
+//   "TJ Sokol Malín/SK Církvice": 68,
 //   "Sparta Kutná Hora B": 67,
 //   "FK Uhlířské Janovice": 66,
+//   "FK Čáslav U15B": 72,
+//   "SK Ronov nad Doubravou": 73,
+// }
+
+// dorost
+// const TEAMS = {
+//   "TJ Star Tupadly": 52,
+//   "SK Ronov nad Doubravou": 79,
+//   "FK Chotusice 1932": 78,
+//   "TJ Sokol Družba Suchdol": 77,
+//   "FK Uhlířské Janovice": 75,
+//   "TJ Sokol Malín/Močovice": 74,
+//   "TJ Slavoj Vrdy": 80,
+//   "TJ Sokol Paběnice": 76,
+//   "TJ AFK Bratčice": 81,
 // }
 
 async function getHtml(source) {
