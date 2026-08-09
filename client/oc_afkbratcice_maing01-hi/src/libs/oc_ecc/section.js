@@ -1,7 +1,5 @@
 //@@viewOn:imports
-import { createVisualComponent, useState, Utils } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
-import Uu5RichTextElements from "uu5richtextg01-elements";
+import { createVisualComponent, Utils } from "uu5g05";
 import Config from "./config/config.js";
 import SectionEditable from "./section-editable";
 //@@viewOff:imports

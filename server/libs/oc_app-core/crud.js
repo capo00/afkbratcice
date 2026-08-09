@@ -1,5 +1,4 @@
 const AppError = require("./app-error");
-const dao = require("../../dao/team-dao");
 
 const ERROR_CODE_PREFIX = "oc_app-server";
 const CrudError = {

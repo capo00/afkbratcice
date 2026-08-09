@@ -1,7 +1,7 @@
 import { createVisualComponent, useLayoutEffect } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
 import OcElements from "../oc_cli-elements";
-import Config from "../../config/config.js";
+import Config from "./config/config.js";
 import IdentityItem from "./identity-item.js";
 
 const FormIdentitySelect = createVisualComponent({
