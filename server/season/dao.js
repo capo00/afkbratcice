@@ -1,4 +1,5 @@
 import { Dao } from "caio-server";
+import { ObjectId } from "mongodb";
 
 class SeasonDao extends Dao {
   constructor() {
@@ -14,11 +15,16 @@ class SeasonDao extends Dao {
     ]);
   }
 
-  listByFilter({ age, teamId, yearFrom } = {}, pageInfo) {
+  listByFilter({ age, teamId, yearFrom, idList } = {}, pageInfo) {
     const filter = {};
     if (age) filter.age = age;
     if (yearFrom) filter.yearFrom = yearFrom;
     if (teamId) filter.teamList = teamId;
+    // `idList` je pro dopojmenování sezón, na které odkazuje něco jiného: `stats/getPlayerStats`
+    // vrací `bySeasonList` jen se `seasonId`, takže bez tohohle by profil hráče musel načíst
+    // všechny sezóny klubu kvůli pěti řádkům. `Dao.find` `_id` z `id` nepřeloží u `$in`,
+    // proto ObjectId ručně.
+    if (idList?.length) filter._id = { $in: idList.map((id) => new ObjectId(id)) };
     return this.find(filter, pageInfo, { yearFrom: -1, age: 1 });
   }
 

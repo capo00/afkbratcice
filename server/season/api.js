@@ -7,6 +7,7 @@ const listDtoIn = shape({
   age: oneOf(Config.AGE_LIST),
   teamId: mongoId(),
   yearFrom: string(),
+  idList: array(mongoId()),
   pageInfo: pageInfo(),
 });
 

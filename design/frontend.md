@@ -741,9 +741,9 @@ neexistujícímu endpointu.
 | Odběr kalendáře | `GET /calendar/team-<id>.ics` | ✅ |
 | Tabulka soutěže | `stats/getTable` | ✅ **hotovo na klientu**; bodovací model říká `season.hasPenalties` |
 | Statistiky hráčů | `stats/listPlayerStats` | ✅ **hotovo na klientu** |
-| Profil hráče – karta a sezóny | `player/get`, `stats/getPlayerStats` | ⚠️ sezóny bez názvu – čeká na `season/list?idList` |
-| Profil hráče – poslední zápasy | `match/list?playerId` | ⏳ filtr `playerId` |
-| Fotogalerie | `gallery/list`, `gallery/listPhotos` | ✅ |
+| Profil hráče – karta a sezóny | `player/get`, `stats/getPlayerStats`, `season/list?idList` | ✅ **hotovo na klientu**; `idList` doplněn 2026-09-06 |
+| Profil hráče – poslední zápasy | `match/list?playerId` | ✅ **hotovo na klientu**; filtr `playerId` doplněn 2026-09-06 |
+| Fotogalerie (alba, filtr kategorií, lightbox) | `gallery/list`, `gallery/listPhotos` | ✅ **hotovo na klientu** |
 | Ke stažení | `file/list?category` | ⚠️ `category` nikdo nezapisuje, dokud nevznikne `admin/files` (6.1) |
 | Obsahové stránky | `page/get?code` | ⏳ entita `page` |
 | Novinky, detail článku, RSS | `article/*`, `GET /rss` | ⏳ entita `article` |

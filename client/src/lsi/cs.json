@@ -72,7 +72,8 @@
     "roundResultsEyebrow": "Kolo v soutěži",
     "h2h": "Vzájemné zápasy",
     "h2hEyebrow": "Historie dvojice",
-    "missing": "Zápas se nepodařilo najít."
+    "missing": "Zápas se nepodařilo najít.",
+    "wholeRound": "Celé kolo"
   },
   "footer": {
     "about": "Fotbalový klub AFK Bratčice, od roku ${founded}.",
@@ -176,6 +177,31 @@
     "starts": "V základu",
     "goals": "Góly",
     "yellowCards": "ŽK",
-    "redCards": "ČK"
+    "redCards": "ČK",
+    "total": "Celkem"
+  },
+  "gallery": {
+    "eyebrow": "Klub v obrazech",
+    "header": "Fotogalerie",
+    "all": "Vše",
+    "photoCount": {
+      "one": "${count} fotka",
+      "few": "${count} fotky",
+      "other": "${count} fotek"
+    },
+    "empty": "V téhle kategorii zatím není žádné album.",
+    "noPhotos": "Album je zatím prázdné.",
+    "missing": "Album se nepodařilo najít."
+  },
+  "player": {
+    "stats": "Statistiky po sezónách",
+    "matches": "Poslední zápasy",
+    "noStats": "Zatím žádné zapsané starty.",
+    "missing": "Hráče se nepodařilo najít."
+  },
+  "round": {
+    "eyebrow": "Kolo v soutěži",
+    "empty": "V tomhle kole nejsou žádné zápasy.",
+    "missing": "Chybí sezóna nebo číslo kola."
   }
 }

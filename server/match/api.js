@@ -10,6 +10,7 @@ const listDtoIn = shape({
   teamId: mongoId(),
   teamIdList: array(mongoId()),
   opponentId: mongoId(),
+  playerId: mongoId(),
   round: string(),
   state: oneOf(Config.MATCH_STATE),
   dateFrom: string(),

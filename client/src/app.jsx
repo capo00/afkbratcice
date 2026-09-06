@@ -47,6 +47,7 @@ function useTop() {
   const clubSince = useLsi(importLsi, ["club", "since"]);
   const identityItem = useIdentityItem();
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
+  const galleryLabel = useLsi(importLsi, ["header", "nav", "gallery"]);
 
   return {
     logo: { uri: Config.asset.logo, href: "" },
@@ -90,6 +91,12 @@ function useTop() {
             href: `team?id=${category.teamId}`,
             children: category.teamName ?? category.competition,
           })),
+        },
+        {
+          href: "gallery",
+          children: galleryLabel,
+          significance: "subdued",
+          colorScheme: "building",
         },
         identityItem,
       ],

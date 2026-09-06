@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useMemo, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useMemo, useRoute, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
@@ -28,10 +28,11 @@ function playerName(player, isNameHidden) {
 }
 
 function PlayerTile({ player, isNameHidden }) {
+  const [, setRoute] = useRoute();
   const name = playerName(player, isNameHidden);
 
   return (
-    <Card>
+    <Card onClick={() => setRoute("player", { id: player.id })}>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12 })}>
         {player.person?.photoUri ? (
           <UiElements.Image

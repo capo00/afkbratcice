@@ -203,7 +203,7 @@ function LineupColumn({ team, entryList }) {
   );
 }
 
-function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant }) {
+function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant, action }) {
   const dataObject = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/match/list", dtoIn) } }, [
     JSON.stringify(dtoIn),
   ]);
@@ -219,7 +219,18 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
 
   return (
     <Section variant={variant}>
-      <Heading eyebrow={eyebrowLsi} lsi={headerLsi} />
+      <div
+        className={Config.Css.css({
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+        })}
+      >
+        <Heading eyebrow={eyebrowLsi} lsi={headerLsi} />
+        {action}
+      </div>
       <div
         className={Config.Css.css({
           marginBlockStart: 24,
@@ -238,6 +249,7 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
 
 function MatchDetail({ matchId }) {
   const { categoryList } = useApp();
+  const [, setRoute] = useRoute();
   const dataObject = useDataObject(
     { handlerMap: { load: () => UiElements.Call.cmdGet("/match/get", { id: matchId }) } },
     [matchId],
@@ -328,6 +340,14 @@ function MatchDetail({ matchId }) {
           headerLsi={lsi("match", "roundResults")}
           excludeId={match.id}
           ownTeamId={ownTeamId}
+          action={
+            <Uu5Elements.Button
+              significance="subdued"
+              onClick={() => setRoute("round", { seasonId: match.seasonId, round: match.round })}
+            >
+              <Lsi import={importLsi} path={["match", "wholeRound"]} />
+            </Uu5Elements.Button>
+          }
         />
       ) : null}
 

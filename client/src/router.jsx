@@ -11,6 +11,10 @@ const TeamMatches = Utils.Component.lazy(() => import("./routes/team-matches.jsx
 const TeamTable = Utils.Component.lazy(() => import("./routes/team-table.jsx"));
 const TeamStats = Utils.Component.lazy(() => import("./routes/team-stats.jsx"));
 const Match = Utils.Component.lazy(() => import("./routes/match.jsx"));
+const Round = Utils.Component.lazy(() => import("./routes/round.jsx"));
+const Player = Utils.Component.lazy(() => import("./routes/player.jsx"));
+const Gallery = Utils.Component.lazy(() => import("./routes/gallery.jsx"));
+const GalleryDetail = Utils.Component.lazy(() => import("./routes/gallery-detail.jsx"));
 const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
 
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
@@ -31,6 +35,10 @@ const ROUTE_MAP = {
   "team/table": <TeamTable />,
   "team/stats": <TeamStats />,
   match: <Match />,
+  round: <Round />,
+  player: <Player />,
+  gallery: <Gallery />,
+  "gallery/detail": <GalleryDetail />,
   "*": <NotFound />,
 };
 

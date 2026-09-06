@@ -11,8 +11,8 @@ class SeasonCrud extends Crud {
     super("season", dao);
   }
 
-  async list({ age, teamId, yearFrom, pageInfo } = {}) {
-    return (await dao.listByFilter({ age, teamId, yearFrom }, pageInfo)).map((item) => this._getData(item));
+  async list({ age, teamId, yearFrom, idList, pageInfo } = {}) {
+    return (await dao.listByFilter({ age, teamId, yearFrom, idList }, pageInfo)).map((item) => this._getData(item));
   }
 
   async listYears() {
