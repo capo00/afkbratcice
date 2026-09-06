@@ -1,9 +1,108 @@
 {
-  "app": {
-    "header": "Vítejte",
-    "info": "Aplikace běží. Začněte úpravou client/src/app.jsx."
+  "club": {
+    "name": "AFK Bratčice",
+    "since": "od roku 1932"
+  },
+  "header": {
+    "login": "Přihlásit se",
+    "logout": "Odhlásit se",
+    "nav": {
+      "home": "Úvod",
+      "news": "Aktuality",
+      "teams": "Mužstva",
+      "gallery": "Fotogalerie",
+      "files": "Ke stažení",
+      "contact": "Kontakt",
+      "history": "Historie"
+    }
   },
   "home": {
-    "header": "Domů"
+    "hero": {
+      "perex": "Fotbalový klub z Bratčic. Muži, mládež i stará garda — soutěžní zápasy, tabulky a všechno kolem klubu na jednom místě.",
+      "teams": "Naše mužstva",
+      "program": "Program víkendu"
+    },
+    "stats": {
+      "founded": "Založeno",
+      "teams": "Mužstva",
+      "years": "Let tradice"
+    },
+    "program": {
+      "eyebrow": "Program",
+      "header": "Kdo kdy hraje",
+      "empty": "V nejbližším týdnu se nehraje. Rozpis dalších kol najdete u jednotlivých mužstev."
+    },
+    "results": {
+      "eyebrow": "Kolo za kolem",
+      "header": "Poslední výsledky",
+      "empty": "Zatím žádný odehraný zápas."
+    },
+    "cta": {
+      "header": "Chceš si zahrát za Bratčice?",
+      "perex": "Hledáme hráče do všech kategorií — od přípravky po starou gardu. Ozvi se nám.",
+      "button": "Kontaktujte nás"
+    }
+  },
+  "teams": {
+    "eyebrow": "Jeden klub, jedny barvy",
+    "header": "Naše mužstva",
+    "empty": "Pro aktuální ročník zatím není založená žádná sezóna."
+  },
+  "match": {
+    "round": "${round}. kolo",
+    "friendly": "Přátelský zápas",
+    "outcome": {
+      "win": "Výhra",
+      "draw": "Remíza",
+      "loss": "Prohra"
+    }
+  },
+  "footer": {
+    "about": "Fotbalový klub AFK Bratčice, od roku ${founded}.",
+    "navigation": "Navigace",
+    "contact": "Kontakt",
+    "copyright": "© ${year} ${clubName}",
+    "motto": "Srdcem za Bratčice"
+  },
+  "notFound": {
+    "header": "Stránka nenalezena",
+    "perex": "Odkaz nejspíš vedl na starý web. Zkuste to od začátku."
+  },
+  "enum": {
+    "age": {
+      "men": "Muži",
+      "u18": "Starší dorost",
+      "u16": "Mladší dorost",
+      "u14": "Starší žáci",
+      "u12": "Mladší žáci",
+      "u10": "Starší přípravka",
+      "u6": "Mladší přípravka",
+      "old": "Stará garda"
+    },
+    "position": {
+      "GK": "Brankář",
+      "DF": "Obránce",
+      "MF": "Záložník",
+      "FW": "Útočník"
+    },
+    "matchState": {
+      "planned": "Plánovaný",
+      "played": "Odehraný",
+      "postponed": "Odložený",
+      "canceled": "Zrušený"
+    },
+    "coachRole": {
+      "headCoach": "Hlavní trenér",
+      "assistant": "Asistent",
+      "manager": "Vedoucí mužstva",
+      "board": "Výbor"
+    },
+    "galleryCategory": {
+      "match": "Zápasy",
+      "training": "Trénink",
+      "fans": "Fanoušci",
+      "youth": "Mládež",
+      "club": "Klub"
+    }
   }
 }

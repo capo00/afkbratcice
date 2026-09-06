@@ -30,6 +30,17 @@ const importLsi = (lang) =>
   IMPORT_BY_LANGUAGE[lang]?.() ?? Promise.reject(new Error(`No LSI for language "${lang}".`));
 importLsi.libraryCode = libraryCode;
 
+/**
+ * Zkratka pro komponenty, které berou `lsi` prop (Heading, Eyebrow, Button, EmptyState)
+ * a pro `<Lsi lsi={...}>`. uu5g05 tvar `{ import, path }` zná všude, kde umí LSI objekt,
+ * takže se kvůli němu nemusí měnit signatura žádné z těch komponent.
+ *
+ *   <Heading lsi={lsi("home", "program", "header")} />
+ */
+export function lsi(...path) {
+  return { import: importLsi, path };
+}
+
 // Seeds the store synchronously so the first paint already has text. Point it at the language
 // the app is primarily written in -- seeding the other one would flash the wrong language while
 // the real file is still loading.
