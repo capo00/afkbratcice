@@ -660,9 +660,10 @@ Dvě věci, které se při implementaci rozhodly a stojí za zapamatování: `/p
 takže po nastavení hesla následuje normální přihlášení) a reset se nabízí **jen účtům,
 které heslo mají** — poslat odkaz Google účtu by mu přidalo heslo, o které nikdo nežádal.
 
-`server/legacy-redirect.js` posílá `/zapomenute-heslo` na `/login.html`; stránka ale režim
-`forgot` zapíná jen tlačítkem, takže **přesměrování skončí na běžném přihlášení**. Doplní
-se `?mode=forgot` do login stránky (`caio-ui`) a do přesměrování.
+`server/legacy-redirect.js` posílá `/zapomenute-heslo` na `/login.html` a **tam to končí**
+(rozhodnuto 2026-09-06). Odkaz na reset hesla nikde jinde než na přihlašovací stránce není
+a nebude, takže se nezavádí ani `?mode=forgot`: kdo přijde ze staré URL, vidí přihlášení
+s odkazem „Zapomenuté heslo?" a klikne.
 
 - **Jedna identita na e-mail.** Google, Facebook i heslo žijí na jednom dokumentu
   (`googleId`, `facebookId`, `password`); provider se spáruje jen na **ověřený** e-mail,

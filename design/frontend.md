@@ -117,7 +117,7 @@ Podrobně sekce 2.5.
 | `gallery` | Seznam alb | `pageIndex` |
 | `gallery/detail` | Album (lightbox) | `id` |
 | `files` | Ke stažení | `category` |
-| `page` | Obsahová ECC stránka | `code` (`history`, `hymn`, `contact`, `board`, `training`) |
+| `page` | Obsahová stránka | `code` (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) |
 | `profile` | Profil přihlášeného uživatele | – |
 | `notFound` | 404 s odkazy na hlavní sekce | – |
 
@@ -163,12 +163,19 @@ Ochranu řeší `UiApp.withRoute(Component, { profileList: [...] })` – nepřih
 bezpečnostní hranice**; rozhoduje server. Co uživatel nesmí, se nemá ukazovat zašedlé —
 nemá se ukazovat vůbec.
 
-**`withRoute` neumí `teamEditor:<teamId>`.** Porovnává profily na přesnou shodu
-(`profileList.some((p) => session.identity.profileList?.includes(p))`), takže „kdokoli, kdo
-spravuje nějaký tým" se jím vyjádřit nedá. Appka si proto přidá tenký `withTeamRoute`
-(`components/core/with-team-route.jsx`) s prefixovou shodou nad `teamEditor:`; do `caio-ui`
-se nesahá, dokud nebude jasné, že to potřebuje víc projektů než jeden. Obrazovky, které to
-používají: `admin/matches`, `admin/players`, `admin/coaches`, `admin/teams`.
+**Rozsahová role `teamEditor:<teamId>` se píše jako `"teamEditor:*"`.** `withRoute` původně
+porovnával profily na přesnou shodu, takže „kdokoli, kdo spravuje nějaký tým" se jím vyjádřit
+nedal; **doplněno do `caio-ui` 2026-09-06** — položka končící `:*` matchuje jakýkoli profil
+s tím prefixem a neprázdným rozsahem. Rozsahové role nejsou nic specifického pro fotbalový
+klub, „správce jednoho záznamu" potká každý projekt, takže to patří do knihovny, ne do appky.
+
+```jsx
+const AdminMatches = UiApp.withRoute(Matches, { profileList: ["authorities", "operatives", "matchEditor", "teamEditor:*"] });
+```
+
+*Které* týmy to jsou, si obrazovka zjistí až uvnitř přes `UiAuth.getScopeList(identity,
+"teamEditor")` — vrací pole `teamId`, stejně jako `myTeamIdList()` na serveru. Obrazovky,
+které to používají: `admin/matches`, `admin/players`, `admin/coaches`, `admin/teams`.
 
 ### 2.3 Pokrytí rout současného webu
 
@@ -193,7 +200,7 @@ Kontrola proti živému `afkbratcice.cz` (5. 9. 2026) — odtud se bere obsah.
 | `/treninky` | informace o trénincích | `page?code=training` | ✅ |
 | `/diskuze` | diskuzní fórum | – | ❌ **vyřazeno z rozsahu** |
 | `/prihlaseni` | přihlášení (formulář v hlavičce) | `/login.html` (devkit) | ✅ |
-| `/zapomenute-heslo` | reset hesla | `/login.html?mode=forgot` → mail → `?reset=<token>` | ✅ **hotovo 6. 9.** v `caio-server` i `caio-ui`; zbývá `?mode=forgot`, viz [api.md](./api.md), 2.14.1 |
+| `/zapomenute-heslo` | reset hesla | `/login.html` → odkaz na stránce → mail → `?reset=<token>` | ✅ **hotovo 6. 9.** v `caio-server` i `caio-ui`, viz [api.md](./api.md), 2.14.1 |
 | `/rss` | RSS kanál | `GET /rss` | ⏳ čeká na entitu `article` |
 | `/editace-*`, `/upravit-*`, `/novy-*`, `/smazat-*` | správa obsahu | `admin/*` | ✅ |
 | `/pokladna`, `/pokuty`, `/prijem`, `/vydaj` | klubová kasa | – | ❌ mimo rozsah (410 Gone) |

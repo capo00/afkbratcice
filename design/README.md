@@ -295,10 +295,10 @@ Pravidla:
 > profil `owner`; opraveno na **`authorities`**, a to napevno bez konfigurace — správa
 > identit vypadá stejně ve všech projektech na tomhle stacku.
 
-> **`teamEditor` a klientský guard.** `UiApp.withRoute` porovnává profily na přesnou shodu,
-> takže rozsahovou roli `teamEditor:<teamId>` jím vyjádřit nejde. Appka si přidá vlastní
-> `withTeamRoute` s prefixovou shodou; do `caio-ui` se nesahá, dokud to nepotřebuje víc
-> projektů než jeden. Viz [frontend.md](./frontend.md), sekce 2.2.
+> **`teamEditor` a klientský guard — vyřešeno 2026-09-06 v `caio-ui`.** `withRoute` bere
+> rozsahové profily jako `"teamEditor:*"` (prefix + neprázdný rozsah) a `UiAuth.getScopeList()`
+> vrátí obrazovce konkrétní `teamId`. Patří to do knihovny, ne do appky: „správce jednoho
+> záznamu" potká každý projekt na tomhle stacku. Viz [frontend.md](./frontend.md), sekce 2.2.
 
 ---
 
@@ -330,14 +330,13 @@ Pravidla:
 | 21 | **`match/list` nevrací týmy**, jen `homeTeamId`/`guestTeamId` (týmy dotahuje jen `match/get`). | Každá dlaždice a řádek zápasu potřebuje název a logo. | Mapa týmů v `app-contextu` (`team/list` jednou při startu SPA) — levnější než denormalizace názvů do každého zápasu. Viz [frontend.md](./frontend.md), sekce 4. |
 | 22 | **`match/list` nemá filtr `playerId`**, i když index `{ "playerList.playerId": 1 }` existuje. | Blok „poslední zápasy“ na profilu hráče nemá odkud brát. | Doplnit `playerId` do `match/dao.listByFilter` a do validátoru — pár řádků. |
 | 23 | **`season/list` nemá `idList`.** `stats/getPlayerStats` vrací `bySeasonList` jen se `seasonId`. | Statistiky po sezónách nejdou dopojmenovat bez načtení všech sezón klubu. | Doplnit `idList` do `season/list`. |
-| 24 | **`UiApp.withRoute` neumí rozsahovou roli.** Porovnává profily na přesnou shodu, takže `teamEditor:<teamId>` jím vyjádřit nejde. | Guard obrazovek vázaných na tým. | Vlastní `withTeamRoute` v appce (prefixová shoda). Do `caio-ui` sáhnout, až to bude chtít víc projektů. |
+| 24 | `UiApp.withRoute` neuměl rozsahovou roli | **Vyřešeno 2026-09-06 v `caio-ui`**: `profileList: ["teamEditor:*"]` matchuje prefix s neprázdným rozsahem, `UiAuth.getScopeList(identity, "teamEditor")` vrátí konkrétní id. |
 | 25 | **`file/list` filtruje podle `category`, kterou nikdo nezapisuje.** `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props. | Stránka „Ke stažení“ by byla jeden nesekcovaný seznam. | `admin/files` si složí vlastní `Crud` konfiguraci nad `BinaryProvider` s poli `category` a `date`. Viz [frontend.md](./frontend.md), 6.1. |
 | 11 | ~~`uu_appdatatypesg02` nefunguje~~ – **omyl, opraveno 2026-09-06.** Balíček (`0.2.1`) funguje, jen nemá default export a metody se jmenují `shape()` / `array()`, ne `.exact()` / `.arrayOf()`. Poznámka v `caio-server` je v tomhle zavádějící. | – | Validovat přes pojmenované importy a `dataType.validate()`; vzor v [api.md](./api.md), sekce 1.0. Pozor, že klíč navíc je jen `warning`, ne `error`. |
 | 13 | **`Top` nepřidává tlačítko identity.** README `caio-ui`: přidá se až s propem `displayIdentity`, který zatím není. | Přihlášení není v liště. | Položku *Přihlásit se* / `UiAuth.IdentityItem` si appka vloží do `top.menu.itemList` sama a zavolá `UiAuth.useSession().login()`. |
 | 14 | **`caio-ui` nemá `exports` mapu** a `config.js` čte `process.env.OUTPUT_NAME`, které `createViteConfig` nedefinuje. | `ReferenceError: process is not defined`, ošklivé submodulové importy. | Importovat z root barrelu (`import { UiApp } from "caio-ui"`); `OUTPUT_NAME` si appka dodefinuje ve `vite.config.js` (`define`). |
 | 15 | **GCS negeneruje náhledy.** | Fotogalerie by stahovala originály. | Dvě binárky na fotku (náhled `w400` + plná `w1600`), zmenšení na klientu přes `uu5imagingg01-tools`. Viz sekce 3.1 a [data-model.md](./data-model.md), sekce 9. |
 | 16 | **Lokální tarbally.** `caio-server`, `caio-ui` a `caio-devkit` nejsou v registry; appka je konzumuje jako `file:../caio-architecture/…/dist/*.tgz` a samotné `npm install` novou verzi nevezme (npm ji má v cache). | Změna v knihovně se do appky nedostane. | Po každém `npm pack` v knihovně: `rm -rf node_modules/caio-ui && npm install --no-save --force file:…tgz` (postup v README `caio-ui`). |
-| 18 | **`/zapomenute-heslo` skončí na běžném přihlášení.** `legacy-redirect` posílá na `/login.html`, ale ta zapíná režim `forgot` jen tlačítkem. | Kdo přijde ze staré URL, musí kliknout ještě jednou. | Doplnit `?mode=forgot` do login stránky (`caio-ui`) i do přesměrování. |
 | 20 | **`Uu5Bricks` a `uu5codekitg01` nejsou v závislostech.** Časová osa historie stojí na `Uu5Bricks.VerticalTimeline`, editace obsahu na `uu5codekitg01`; ani jeden není v `client/package.json`. | Bez nich se komponenta za běhu nenajde. | Přidat mezi závislosti klienta **a** do import mapy `uu5loaderg01` v `createViteConfig()` — uu5 knihovny se nebundlují. Ověřit při etapě obsahu. |
 | 26 | **`Dao.createMany` vrací `id` jako `ObjectId` a nechává v objektu i `_id`.** Oprava z 6. 9. (`convertToId` → string) se `createMany` netýkala. | `match/createMany` vrací dva klíče pro totéž; přes drát to není vidět, uvnitř procesu ano. | Srovnat `createMany` se zbytkem `Dao` v `caio-serveru`. |
 
@@ -361,8 +360,10 @@ Pravidla:
 
 1. ~~**Diskuze**~~ – **rozhodnuto: vyhazuje se.** Poslední příspěvek 2017, mezi příspěvky
    spam. Staré URL `/diskuze*` vedou 301 na `/home`, data se archivují exportem.
-2. **Klubová kasa** (pokladna, pokuty, příjmy/výdaje) – mimo rozsah; data z MySQL
-   doporučujeme archivovat exportem, ne migrovat.
+2. ~~**Klubová kasa**~~ – **rozhodnuto 2026-09-06: mimo rozsah a bez archivace.** Nedělá se
+   žádný export `prijem`/`pokuta`/`vydaj`; MySQL dump ze starého webu při migraci stejně
+   vznikne, takže data nikam nemizí a vytáhnou se z něj, kdyby je někdo hledal.
+   `/pokladna`, `/pokuty`, `/prijem`, `/vydaj` vrací **410 Gone**.
 3. ~~**Tréninky**~~ – **rozhodnuto 2026-09-06: obsahová stránka** `page?code=training`.
    Je to text, který trenér jednou za sezónu přepíše; entita s docházkou by byla nová
    kolekce, CRUD, admin obrazovka a role kvůli tomu, co dnes nikdo nesleduje.

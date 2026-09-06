@@ -486,9 +486,9 @@ podle `category` a řadí podle `date`, což jsou pole, která by tak nikdo neza
 „Ke stažení" by zůstala jedním nesekcovaným seznamem. Skládá se proto vlastní `Crud`
 konfigurace nad `BinaryProvider`, přesně tou cestou, kterou README `caio-ui` předepisuje.
 
-**Guard pro `teamEditor`.** `UiApp.withRoute` porovnává profily na přesnou shodu, takže
-`teamEditor:<teamId>` jím vyjádřit nejde; obrazovky vázané na tým používají vlastní
-`withTeamRoute` s prefixovou shodou (viz [frontend.md](./frontend.md), 2.2).
+**Guard pro `teamEditor`.** `UiApp.withRoute` bere rozsahové profily jako `"teamEditor:*"`
+(doplněno do `caio-ui` 2026-09-06); *které* týmy to jsou, si obrazovka zjistí přes
+`UiAuth.getScopeList(identity, "teamEditor")` (viz [frontend.md](./frontend.md), 2.2).
 
 ---
 
@@ -500,14 +500,14 @@ konfigurace nad `BinaryProvider`, přesně tou cestou, kterou README `caio-ui` p
 |---|---|---|
 | Rám, routing guard, session, CRUD UI, upload | 0 vlastních | `caio-ui` |
 | Primitivy designu (Section, Heading, Eyebrow, Card, Button, Badge, Photo, DateText, TeamLogo, EmptyState) | **10** | vlastní, tenké obálky nad uu5 |
-| Globální drobnosti (NoticeBar, Countdown, withTeamRoute) | **3** | vlastní |
+| Globální drobnosti (NoticeBar, Countdown) | **2** | vlastní |
 | Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, PhotoGrid, Lightbox, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect, Content, SectionList, ContentEditModal) | **24** | vlastní |
 | Veřejné obrazovky | **16** | vlastní, ale skládají se z výše uvedeného |
 | Správcovské obrazovky | **12** | 7 z nich je jen `CONFIG` objekt |
 
 Proti revizi 5. 9. přibylo: `EmptyState` (prázdné stavy jsou v návrhu povinné, ale komponenta
-pro ně chyběla), `withTeamRoute` (`withRoute` neumí rozsahovou roli) a trojice `Content`,
-`SectionList` a `ContentEditModal`, která nahradila `UiEcc`.
+pro ně chyběla) a trojice `Content`, `SectionList` a `ContentEditModal`, která nahradila
+`UiEcc`. Rozsahovou roli v guardu řeší `caio-ui`, ne appka.
 
 Časová osa historie je **`Uu5Bricks.VerticalTimeline`** zaregistrovaná do `uu5String`, aby ji
 redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
@@ -528,7 +528,7 @@ redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
 | Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je obsahem sekce stránky `contact`, ne kódu appky |
 | Lightbox | `Uu5Elements.Modal` ano, ale bez šipek a swipe | vlastní `Lightbox` nad `Modal` |
 | Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | článek `content`, stránka `sectionList: [{ content }]`; `Content` + `SectionList` + `ContentEditModal` nad `uu5codekitg01`, **zatím kód místo WYSIWYG** |
-| Rozsahová role v guardu | `UiApp.withRoute` porovnává profily na přesnou shodu | vlastní `withTeamRoute` s prefixem `teamEditor:` |
+| ~~Rozsahová role v guardu~~ | ~~`withRoute` porovnává profily na přesnou shodu~~ | **doplněno do `caio-ui` 2026-09-06**: `"teamEditor:*"` + `UiAuth.getScopeList()` |
 | Soubory ke stažení | `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props | vlastní `Crud` konfigurace nad `BinaryProvider` s `category` a `date` |
 | Prázdné stavy | uu5 nemá jednotný „žádná data" | vlastní `EmptyState` |
 
