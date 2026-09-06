@@ -359,15 +359,16 @@ flowchart TD
   ahead["ArticleHeader<br/>titulek, DateText, autor, Photo"]:::own
   mref["MatchRefPanel -- když je matchId"]:::own
   content["Content uu5String<br/>Utils.Uu5String.toChildren(content)"]:::own
+  seclist["SectionList<br/>page.sectionList -> Section + Content na položku<br/>sekce jsou vložené v dokumentu stránky"]:::own
 
   page["routes/page.jsx -- obsahová stránka<br/>history, hymn, contact, board, training, team-photos"]:::own
-  edit["ContentEditModal<br/>name, desc + uu5codekitg01 nad content<br/>ZATÍM KÓD, ne WYSIWYG"]:::own
+  edit["ContentEditModal<br/>name, desc + uu5codekitg01 na každou sekci<br/>ukládá celý sectionList; ZATÍM KÓD, ne WYSIWYG"]:::own
   ck["uu5codekitg01"]:::uu5
   tl["Uu5Bricks.VerticalTimeline + .Item<br/>registrované do uu5String -> redakce je píše do obsahu<br/>historie klubu 1932-2022"]:::uu5
 
   d1["article/list -- bez content"]:::data
   d2["article/get -- včetně content"]:::data
-  d3["page/get?code -- žádný překlad code -> id"]:::data
+  d3["page/get?code -- vrací i sectionList<br/>žádný překlad code -> id"]:::data
 
   news --> atile
   news --> pag
@@ -375,7 +376,7 @@ flowchart TD
   art --> ahead & mref & content
   art --> edit
   art -.-> d2
-  page --> content
+  page --> seclist --> content
   page --> edit
   page -.-> d3
   edit --> ck
@@ -388,19 +389,24 @@ flowchart TD
 ```
 
 **`UiEcc` se nepoužívá** (rozhodnuto 2026-09-06). ECC v `caio-server` není a jeho design se
-ladí samostatně; článek i obsahová stránka drží obsah jako **jeden `uu5String` v poli
-`content`**. Zobrazení je proto `Utils.Uu5String.toChildren()` a editace jeden modal
-s `uu5codekitg01` — **zatím se píše kód, ne WYSIWYG**.
+ladí samostatně, takže obsah drží entity samy: **článek jeden `uu5String` v `content`,
+stránka pole sekcí `sectionList: [{ content }]`**. Zobrazení je `Utils.Uu5String.toChildren()`,
+editace jeden modal s `uu5codekitg01` — **zatím se píše kód, ne WYSIWYG**.
+
+Sekce jsou **vložené v dokumentu stránky**, ne vlastní kolekce, a jsou to **objekty, ne holé
+stringy** — nadpis sekce, kotva nebo varianta podkladu se pak přidají bez migrace, a až
+vznikne ECC, každý objekt se stane dokumentem `ecc_section`. Ukládá se `sectionList` celý;
+`createSectionBefore/After` a `updateSectionOrder` z ECC kontraktu odpadají.
 
 Co tím padá: `eccPage/getByCode` a s ním riziko #12 (`UiEcc.Page` nebere `code`), zámky
 sekcí, `contentMap` po jazycích a autorizace sekce podle toho, čí je stránka — články
 a stránky jsou dvě entity se dvěma rolemi (`NEWS` / `PAGES`), takže se to řeší samo.
-Co tím naopak přibývá: `Content` a `ContentEditModal` jsou **dvě vlastní komponenty navíc**,
-zato sdílené mezi článkem i stránkou.
+Co tím naopak přibývá: `Content`, `SectionList` a `ContentEditModal` jsou **tři vlastní
+komponenty navíc**, zato `Content` a `ContentEditModal` sdílené mezi článkem i stránkou.
 
 Obsahové stránky: `history` (včetně časové osy milníků), `hymn`, `contact`, `board`
 (Výbor AFK), `training`, `team-photos`. Časová osa se pořád registruje do `uu5String`,
-jen ji redakce píše do `page.content` místo do ECC sekce.
+jen ji redakce píše do sekce stránky.
 
 ## D.5 Fotogalerie, soubory, profil hráče
 
@@ -495,13 +501,13 @@ konfigurace nad `BinaryProvider`, přesně tou cestou, kterou README `caio-ui` p
 | Rám, routing guard, session, CRUD UI, upload | 0 vlastních | `caio-ui` |
 | Primitivy designu (Section, Heading, Eyebrow, Card, Button, Badge, Photo, DateText, TeamLogo, EmptyState) | **10** | vlastní, tenké obálky nad uu5 |
 | Globální drobnosti (NoticeBar, Countdown, withTeamRoute) | **3** | vlastní |
-| Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, PhotoGrid, Lightbox, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect, Content, ContentEditModal) | **23** | vlastní |
+| Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, PhotoGrid, Lightbox, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect, Content, SectionList, ContentEditModal) | **24** | vlastní |
 | Veřejné obrazovky | **16** | vlastní, ale skládají se z výše uvedeného |
 | Správcovské obrazovky | **12** | 7 z nich je jen `CONFIG` objekt |
 
 Proti revizi 5. 9. přibylo: `EmptyState` (prázdné stavy jsou v návrhu povinné, ale komponenta
-pro ně chyběla), `withTeamRoute` (`withRoute` neumí rozsahovou roli) a dvojice `Content` +
-`ContentEditModal`, která nahradila `UiEcc`.
+pro ně chyběla), `withTeamRoute` (`withRoute` neumí rozsahovou roli) a trojice `Content`,
+`SectionList` a `ContentEditModal`, která nahradila `UiEcc`.
 
 Časová osa historie je **`Uu5Bricks.VerticalTimeline`** zaregistrovaná do `uu5String`, aby ji
 redakce mohla vkládat do `page.content` — vlastní komponenta se nepíše.
@@ -521,7 +527,7 @@ redakce mohla vkládat do `page.content` — vlastní komponenta se nepíše.
 | Odpočet do zápasu | uu5 nemá | vlastní `Countdown` (`useInterval` + `useVisibility`) |
 | Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je součástí `page.content`, ne kódu appky |
 | Lightbox | `Uu5Elements.Modal` ano, ale bez šipek a swipe | vlastní `Lightbox` nad `Modal` |
-| Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | `content` jako jeden `uu5String`; `Content` + `ContentEditModal` nad `uu5codekitg01`, **zatím kód místo WYSIWYG** |
+| Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | článek `content`, stránka `sectionList: [{ content }]`; `Content` + `SectionList` + `ContentEditModal` nad `uu5codekitg01`, **zatím kód místo WYSIWYG** |
 | Rozsahová role v guardu | `UiApp.withRoute` porovnává profily na přesnou shodu | vlastní `withTeamRoute` s prefixem `teamEditor:` |
 | Soubory ke stažení | `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props | vlastní `Crud` konfigurace nad `BinaryProvider` s `category` a `date` |
 | Prázdné stavy | uu5 nemá jednotný „žádná data" | vlastní `EmptyState` |

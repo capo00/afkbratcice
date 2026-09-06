@@ -181,8 +181,8 @@ rozsah a jeho úskalí jsou v [roles.md](./roles.md), sekce 3.
 |---|---|---|---|---|
 | `team/list` | get | – | `{ age, idList, own, pageInfo }` | `{ itemList }` |
 | `team/get` | get | – | `{ id }` | `team` |
-| `team/create` | post | CONTENT | `{ name, shortName, age, own, logo: File, photo: File, photoDesc }` | `team` |
-| `team/update` | post | CONTENT, **TE** | `{ id, name, shortName, age, own, logo: File \| null, photo: File \| null, photoDesc }` | `team` |
+| `team/create` | post | CONTENT | `{ name, shortName, age, own, desc, logo: File, photo: File, photoDesc }` | `team` |
+| `team/update` | post | CONTENT, **TE** | `{ id, name, shortName, age, own, desc, logo: File \| null, photo: File \| null, photoDesc }` | `team` |
 | `team/delete` | post | CONTENT | `{ id }` | `{}` |
 
 Práce s logem se přebírá z v1 `team-abl.js`: `create` nahraje binárku a uloží
@@ -192,6 +192,9 @@ Při selhání zápisu se nahraná binárka uklidí (kompenzace).
 **Týmová fotka** (`photo` / `photoUri` / `photoDesc`) jede úplně stejnou cestou, jen do
 `sys_binary` s `type: "photo"` místo `"logo"` — z toho se skládá karta v přehledu mužstev
 (viz [frontend.md](./frontend.md), 3.3). Doporučená šířka 1200 px. U soupeřů zůstává prázdná.
+
+`desc` je **perex mužstva**, `photoDesc` **popisek pod fotkou** — dvě různé věci, dvě pole.
+Perex se v celém modelu jmenuje `desc` (`page.desc`, `season.desc`), takže tady taky.
 
 ### 2.2 `season`
 
@@ -390,12 +393,34 @@ Implementace přes aggregation pipeline (`$unwind: "$playerList"`), ne v paměti
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `page/get` | get | – | `{ code }` nebo `{ id }` | `page` |
-| `page/list` | get | PAGES | `{ pageInfo }` | `{ itemList, pageInfo }` – bez `content` |
-| `page/create` | post | PAGES | `{ code, name, content, desc }` | `page` |
-| `page/update` | post | PAGES | `{ id, code, name, content, desc }` | `page` |
+| `page/get` | get | – | `{ code }` nebo `{ id }` | `page` včetně `sectionList` |
+| `page/list` | get | PAGES | `{ pageInfo }` | `{ itemList, pageInfo }` – **bez `sectionList`** |
+| `page/create` | post | PAGES | `{ code, name, desc, sectionList }` | `page` |
+| `page/update` | post | PAGES | `{ id, code, name, desc, sectionList }` | `page` |
 | `page/delete` | post | PAGES | `{ id }` | `{}` |
 
+**Tvar stránky:**
+
+```json
+{
+  "id": "…", "code": "history", "name": "Historie klubu",
+  "desc": "Od založení v roce 1932 po dnešek.",
+  "sectionList": [
+    { "content": "<uu5string/>Skupina nadšenců zakládá…" },
+    { "content": "<uu5string/><Uu5Bricks.VerticalTimeline>…</Uu5Bricks.VerticalTimeline>" }
+  ]
+}
+```
+
+- **`sectionList` je pole objektů, ne pole `id`.** Sekce jsou vložené v dokumentu stránky
+  a čtou i zapisují se s ní — žádné `eccSection/list`, žádné zámky. Objekt má zatím jediný
+  klíč `content`; je to objekt proto, aby k němu šlo přidat nadpis, kotvu nebo variantu
+  podkladu **bez migrace**. Pořadí v poli je pořadí vykreslení.
+- **`page/update` posílá `sectionList` celý**, ne po sekcích. Stránku edituje jeden člověk
+  v jednom modalu, takže se ukládá jako celek — přírůstkové `createSectionBefore/After`
+  a `updateSectionOrder` z ECC kontraktu odpadají.
+- **`desc` je perex**, samostatné pole, ne první sekce. Výpis stránek a meta tagy potřebují
+  text, který nechtějí parsovat z `uu5String`.
 - **`page/get` bere `code`**, ne jen `id` — routa je `/page?code=history` a klient nemá
   proč znát `id`. Odpadá tím i překlad `code → id`, kvůli kterému byl v původním návrhu
   `eccPage/getByCode` (riziko #12 padá i s ním).
@@ -406,9 +431,13 @@ Implementace přes aggregation pipeline (`$unwind: "$playerList"`), ne v paměti
 - Autorizace je **PAGES pro všechny zápisy**. Odpadá tím rozlišování „čí je stránka",
   kvůli kterému měly ECC sekce vlastní `auth` funkci (`newsEditor` nesměl přepsat hymnu):
   články a stránky jsou teď dvě různé entity se dvěma různými rolemi, takže se to řeší samo.
-- Editace je **v kódu, ne WYSIWYG** — `uu5codekitg01` nad polem `content`.
+- Editace je **v kódu, ne WYSIWYG** — `uu5codekitg01` nad `content` každé sekce.
 - Žádné zámky ani revize. Šest stránek a jeden kronikář; osmihodinový lock by tu neřešil
   nic, co se reálně děje.
+
+> **Cesta k ECC.** `sectionList` je přesně jednotka, se kterou ECC pracuje. Až modul vznikne,
+> každý objekt se stane dokumentem `ecc_section` a v `page` zbude pole `id` — migrace je
+> rozpad pole na dokumenty, ne změna tvaru obsahu.
 
 ### 2.10 `gallery`
 

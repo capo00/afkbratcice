@@ -209,11 +209,11 @@ erDiagram
         string[] tagList
     }
     PAGE {
-        string id PK
-        string code "history|hymn|contact|board|training|team-photos"
-        string name
-        string content "uu5String"
-        string desc "meta description"
+        string   id PK
+        string   code "history|hymn|contact|board|training|team-photos"
+        string   name
+        string   desc "perex + meta description"
+        object[] sectionList "zatím { content: uu5String }"
     }
 
     SYS_BINARY   ||--o{ GALLERY     : "coverBinaryId + refId fotek"
@@ -255,9 +255,10 @@ erDiagram
 | `logoId` | string | | `id` do `sys_binary` |
 | `logoUri` | string | | Denormalizované URI loga (kompatibilita s v1) |
 | `own` | boolean | | `true` = tým AFK Bratčice; usnadní filtrování a zvýraznění |
+| `desc` | string | | Perex mužstva pro kartu v přehledu |
 | `photoId` | string | | Týmová fotka – `id` do `sys_binary` (kolekce `team`, `type: "photo"`) |
 | `photoUri` | string | | Denormalizované URI týmové fotky |
-| `photoDesc` | string | | Popisek k fotce; slouží zároveň jako perex karty v přehledu mužstev |
+| `photoDesc` | string | | Popisek pod fotkou (kdo je na ní, kdy vznikla) |
 
 **Indexy**
 
@@ -271,9 +272,11 @@ Poznámky:
 - Soupeři jsou plnohodnotné `team` dokumenty – jinak by nešlo počítat tabulku.
 - Stejný klub ve dvou kategoriích = dva dokumenty (proto je `age` v unikátním indexu).
 - `logoUri` udržuje ABL při `create`/`update`/`delete` loga (převzato z v1 `team-abl.js`).
-- `photoUri`/`photoDesc` **má smysl jen u vlastních týmů** (`own: true`) – u soupeřů zůstává
-  prázdné. Fotka jde stejnou cestou jako logo (stejná kompenzace při selhání zápisu), jen
-  s `type: "photo"`, aby se dvě binárky téhož týmu daly rozlišit.
+- `desc`, `photoUri` a `photoDesc` **mají smysl jen u vlastních týmů** (`own: true`) –
+  u soupeřů zůstávají prázdné. Fotka jde stejnou cestou jako logo (stejná kompenzace při
+  selhání zápisu), jen s `type: "photo"`, aby se dvě binárky téhož týmu daly rozlišit.
+- **`desc` je perex, `photoDesc` popisek fotky** – dvě různé věci, dvě pole. Perex se jmenuje
+  `desc` všude v modelu (`page.desc`, `season.desc`), takže tady taky.
 
 ---
 
@@ -525,8 +528,14 @@ potřebují přesně jednu věc – kus `uu5String`, který umí redakce změnit
 | `id` | string | ✓ | |
 | `code` | string | ✓ | Stabilní kód pro routování (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) |
 | `name` | string | ✓ | Nadpis stránky |
-| `content` | string (uu5String) | | Obsah stránky |
-| `desc` | string | | Popis pro `<meta description>` a OG |
+| `desc` | string | | Perex stránky; zároveň `<meta description>` a OG |
+| `sectionList` | object[] | | Sekce stránky **vložené v dokumentu**, v pořadí vykreslení |
+
+**Sekce**
+
+| Pole | Typ | Povinné | Popis |
+|---|---|---|---|
+| `content` | string (uu5String) | ✓ | Obsah sekce |
 
 **Indexy**
 
@@ -536,18 +545,29 @@ potřebují přesně jednu věc – kus `uu5String`, který umí redakce změnit
 
 Poznámky:
 
-- **Jedna stránka = jeden dokument, ne seznam sekcí.** Skládání z sekcí, zamykání
-  a revize existují kvůli tomu, aby dva lidé mohli editovat dlouhou stránku vedle sebe.
-  Šest stránek, které mění jeden kronikář jednou za rok, tuhle mašinerii nepotřebuje.
-- **Obsah je plain `uu5String`, ne `contentMap` po jazycích.** Druhý jazyk by tedy byl
-  migrace jednoho pole (`content` → `contentMap.cs`), ne jen doplnění kódu — vědomá cena
-  za to, že se stránky rozjedou hned. Jazyk UI je zatím stejně jediný (`cs`).
-- Editace je **v kódu, ne WYSIWYG**: `uu5codekitg01` nad `content`. Komponenty jako
-  `Uu5Bricks.VerticalTimeline` (časová osa v historii) se do `uu5String` registrují
-  a redakce je píše ručně — stejně, jako by je psala do ECC sekce.
+- **Sekce jsou pole objektů, ne vlastní kolekce** (rozhodnuto 2026-09-06). Objekt má zatím
+  jediný klíč `content`, a je to schválně objekt, ne holý string: nadpis sekce, kotva,
+  varianta podkladu nebo příznak „skrytá" se pak přidávají **bez migrace** a bez toho, aby
+  se z každé sekce stal dokument se zámkem a revizí. Uspořádání drží pořadí v poli.
+- **Stránka je jeden dokument.** Sekce se čtou i zapisují spolu se stránkou (`page/get`
+  vrátí `sectionList` celý), takže není potřeba `eccSection/list` ani skládání z `idList`.
+  Zamykání a revize nejsou — šest stránek a jeden kronikář; osmihodinový lock by tu neřešil
+  nic, co se reálně děje.
+- **`desc` je perex, ne popisek.** Je to samostatné pole, ne první sekce — výpis stránek
+  a meta tagy potřebují text, který nechtějí parsovat z `uu5String`.
+- **Obsah není `contentMap` po jazycích.** Druhý jazyk bude migrace (`content` →
+  `contentMap.cs` uvnitř sekce), ne jen doplnění kódu — vědomá cena za to, že se stránky
+  rozjedou hned. Jazyk UI je zatím stejně jediný (`cs`).
+- Editace je **v kódu, ne WYSIWYG**: `uu5codekitg01` nad `content` každé sekce. Komponenty
+  jako `Uu5Bricks.VerticalTimeline` (časová osa v historii) se do `uu5String` registrují
+  a redakce je píše ručně.
 - Obrázky ve stránkách jdou přes `BinaryStore`, kolekce `page`.
 - Stránky se **seedují** (`tools/seed-pages.js`) s obsahem přepsaným z v0, aby web nešel
   do provozu s šesti prázdnými stránkami.
+
+> **Cesta k ECC.** Až ECC modul vznikne, `sectionList` je přesně jeho jednotka: každý objekt
+> se stane dokumentem `ecc_section` a v `page` zbude pole `id`. Proto jsou sekce polem
+> objektů už teď — migrace je rozpad pole na dokumenty, ne změna tvaru obsahu.
 
 ---
 
@@ -691,6 +711,6 @@ stringů, které `Identity.createToken` kopíruje do JWT beze změny. Model rol�
 | 11 | – | `Match.state`, `Article.state`, `Gallery.state` | rozlišení rozpracovaného a publikovaného obsahu, odložené zápasy |
 | 12 | – | `sys_binary.collection`, `type: "photoThumb"`, `thumbBinaryId`, `thumbUri`, `Gallery.coverThumbUri` | Google Cloud Storage negeneruje náhledy (na rozdíl od Drive) – každá velikost je vlastní objekt nahraný z klienta |
 | 13 | – | `Gallery.category` | předloha filtruje fotogalerii chipy (Zápasy / Trénink / Fanoušci / Mládež / Klub) |
-| 14 | – | `page` (jeden dokument na stránku) | obsahové stránky mění jeden člověk jednou za rok; sekce, zámky a revize by tu nic neřešily |
+| 14 | – | `page` se `sectionList` vloženým v dokumentu | obsahové stránky mění jeden člověk jednou za rok, takže zámky a revize by tu nic neřešily; sekce jako pole objektů ale zůstávají, aby k nim šlo přidat metadata bez migrace a aby byl přechod na ECC rozpad pole na dokumenty |
 | 15 | `app_config.teams`, `homeAge` (v1) | zrušeno, kategorie se odvozují ze `season` | složení mužstev se mění každou sezónu; statický výčet by se musel opravovat ručně |
-| 16 | – | `Team.photoUri`, `Team.photoDesc` | karta mužstva v přehledu chce týmovou fotku s popiskem; obojí má smysl jen u `own: true` |
+| 16 | – | `Team.desc`, `Team.photoUri`, `Team.photoDesc` | karta mužstva v přehledu chce perex, týmovou fotku a popisek pod ní; všechno má smysl jen u `own: true` |

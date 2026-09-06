@@ -110,15 +110,17 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 | **Implementace UI** | **Výhradně `uu5g05` + `caio-ui`.** Vzhled se ladí **propsy** komponent, ne přestylováním; `className` nad uu5 komponentou jen tam, kde prop neexistuje, a vždy se zápisem do `docs/decisions.md`. Žádný Tailwind, žádné kopírování kódu z předlohy. |
 | **uu5g04** | **Zakázané.** Nic se na g04 nenavrhuje ani neimplementuje — ani jako varianta. Chybí-li komponenta, hledá se v uu5g05 řadě (`uu5g05-elements`, `Uu5Bricks`, `uu5tilesg02`, `uu5g05-forms`), jinak se napíše vlastní nad uu5g05. |
 | Rozsah | Jádro dle ER diagramu + **fotogalerie** + **statické obsahové stránky** (historie, hymna, kontakt, výbor). Klubová kasa (pokladna, pokuty, příjmy/výdaje) a diskuze **nejsou** v rozsahu. |
-| **Obsah** | Článek i obsahová stránka drží obsah jako **jeden `uu5String` v poli `content`** (rozhodnuto 2026-09-06). Žádné ECC, žádné sekce, žádné zámky. |
-| **Editace obsahu** | Zatím **jako kód, ne WYSIWYG** – `uu5codekitg01` nad `content`. Rich-text přijde s ECC a bude to výměna jednoho formulářového vstupu. |
-| Design ECC | **Ladí se samostatně** (od 2026-09-06) a web na něj nečeká. Až vznikne, migrace je „vytvoř stránku s jednou sekcí z `content`“. |
+| **Obsah článku** | Jeden `uu5String` v poli `article.content` (rozhodnuto 2026-09-06). Žádné ECC. |
+| **Obsah stránky** | `page.sectionList` – **pole objektů sekcí vložené v dokumentu**, zatím s jediným klíčem `content` (`uu5String`). Objekt, ne holý string: nadpis, kotva nebo varianta podkladu se pak přidají bez migrace. Perex je samostatné pole `desc`. |
+| **Editace obsahu** | Zatím **jako kód, ne WYSIWYG** – `uu5codekitg01`. Rich-text přijde s ECC a bude to výměna jednoho formulářového vstupu. |
+| Design ECC | **Ladí se samostatně** (od 2026-09-06) a web na něj nečeká. Až vznikne, migrace je rozpad `sectionList` na dokumenty `ecc_section`. |
 | Obsahové stránky | Entita `page` s `code` (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) – **ne** natvrdo v kódu klienta, jinak by je redakce nemohla měnit a `legacy-redirect` by neměl kam ukazovat. Obsah se seeduje z v0. |
+| **Perex** | V celém modelu je to samostatné pole `desc` (`page.desc`, `team.desc`, `season.desc`), nikdy první sekce ani popisek fotky. |
 | Migrace | **Mimo rozsah této dávky.** Neimplementuje se; `migration.md` zůstává jako návrh na později. |
 | Pořadí kategorií | `["men","u18","u16","u14","u12","u10","u6","old"]` — od nejstarších, stará garda je výjimka na konci. |
 | Skrytí jmen | `hideNamesAgeList = ["u14","u12","u10","u6"]` — u dorostu (`u18`, `u16`) se jména ukazují. **Filtruje server, ne klient** (2026-09-06): klientský příznak by jména dětí nechal v odpovědi API. |
 | Loga týmů | `team.logoUri` drží URI z `sys_binary` (kolekce `team`); když chybí, klient sáhne po klubovém erbu. |
-| Týmová fotka | `team.photoUri` + `team.photoDesc` (2026-09-06) — karta mužstva v přehledu je bez nich neúplná. Jen u vlastních týmů. |
+| Týmová fotka a perex | `team.desc` (perex), `team.photoUri` + `team.photoDesc` (fotka a popisek pod ní) — 2026-09-06; karta mužstva v přehledu je bez nich neúplná. Jen u vlastních týmů. |
 | Stránkování | `dtoOut` seznamů vrací `pageInfo` včetně `total` — **doplní se do `caio-server`** (2026-09-06), protože bez něj `UiElements.Crud` neumí načíst další stránku. |
 | Správce | Identita **`1-1-1`** s profilem `authorities`; e-mail se plní z env při seedu. |
 | Jazyk UI | **Zatím jen čeština.** Texty povinně v `client/src/lsi/cs.json` přes `importLsi`; `en.json` se nezakládá. Zapnutí dalšího jazyka = nový `<lang>.json` + řádek v `IMPORT_BY_LANGUAGE` + kód v `languageList`, ne refaktor. |
@@ -378,9 +380,9 @@ Pravidla:
 9. ~~**Časová osa historie**~~ – **rozhodnuto: `Uu5Bricks.VerticalTimeline`**, registrovaná
    do `uu5String`, aby osa zůstala součástí `page.content`. Zbývá jen ji přidat mezi
    závislosti klienta a do import mapy loaderu (riziko #20).
-10. ~~**Články a ECC**~~ – **rozhodnuto 2026-09-06: obsah je plain `uu5String` v poli
-    `content`**, editovaný zatím jako kód. Platí pro článek i obsahovou stránku; `UiEcc`
-    se nepoužívá. Viz sekce 2 a [api.md](./api.md), 2.8 a 2.9.
+10. ~~**Články a ECC**~~ – **rozhodnuto 2026-09-06:** článek drží obsah jako plain
+    `uu5String` v `content`, stránka jako `sectionList` polí objektů `{ content }`.
+    Editace zatím jako kód, `UiEcc` se nepoužívá. Viz sekce 2 a [api.md](./api.md), 2.8 a 2.9.
 11. ~~**Skrytí jmen mládeže**~~ – **rozhodnuto 2026-09-06: filtruje server**, ne klient.
 12. ~~**Stránkování**~~ – **rozhodnuto 2026-09-06: `pageInfo` se doplní do `caio-serveru`**,
     ne obchází na klientu.

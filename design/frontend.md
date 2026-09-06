@@ -123,9 +123,10 @@ Podrobně sekce 2.5.
 
 Pro čitelné odkazy mají obsahové stránky i vlastní aliasy v `routeMap`
 (`history`, `hymn`, `contact`, `board`), které se interně přemapují na `page?code=...`.
-Obrazovka `page` volá `page/get?code=<code>` a vykreslí `content` přes
-`Utils.Uu5String.toChildren()`. Žádný překlad `code → id` — use case bere `code` přímo
-(viz [api.md](./api.md), 2.9), takže riziko #12 z README padá i s `UiEcc`.
+Obrazovka `page` volá `page/get?code=<code>` a vykreslí `sectionList` — jednu `Section`
+na položku, obsah přes `Utils.Uu5String.toChildren(section.content)`. Žádný překlad
+`code → id` — use case bere `code` přímo (viz [api.md](./api.md), 2.9), takže riziko #12
+z README padá i s `UiEcc`.
 
 **Na kódy stránek míří `server/legacy-redirect.js`** (`/historie` → `/page?code=history`,
 `/vybor` → `/page?code=board`, `/tymove_fotky` → `/page?code=team-photos`, …). Jsou tedy
@@ -329,14 +330,14 @@ Grid: `Uu5Elements.Grid` s `templateColumns={{ xs: "1fr", m: "repeat(3, 1fr)" }}
 
 ### 3.3 Přehled mužstev (`teams`)
 
-Karta na každou kategorii ze `season/listCurrent`: týmová fotka (`team.photoUri`), odznak
-kategorie, název, perex (`team.photoDesc`), řádky *soutěž* (přímo z `season/listCurrent`,
-kde `competition` už je), *trenér* (`coach/list?teamId&role=headCoach`), *tréninky*
-(`appConfig`), tlačítko na `team`.
+Karta na každou kategorii ze `season/listCurrent`: týmová fotka (`team.photoUri`) s popiskem
+(`team.photoDesc`), odznak kategorie, název, perex (`team.desc`), řádky *soutěž* (přímo
+z `season/listCurrent`, kde `competition` už je), *trenér*
+(`coach/list?teamId&role=headCoach`), *tréninky* (`appConfig`), tlačítko na `team`.
 
-`photoUri` a `photoDesc` jsou **doplněk do entity `team`** (rozhodnuto 2026-09-06) — do té
-doby karta dvě pole předlohy neměla odkud vzít. Chybí-li fotka, karta ji vynechá a nesahá
-po klubovém erbu; erb je fallback loga, ne fotky.
+`desc`, `photoUri` a `photoDesc` jsou **doplněk do entity `team`** (rozhodnuto 2026-09-06) —
+do té doby karta tahle pole předlohy neměla odkud vzít. Chybí-li fotka, karta ji vynechá
+a nesahá po klubovém erbu; erb je fallback loga, ne fotky.
 
 ### 3.4 Soupiska týmu (`team`)
 
@@ -395,8 +396,13 @@ Seznam z `file/list`, seskupený podle kategorie z `appConfig.fileCategoryList`;
 
 ### 3.11 Obsahové stránky
 
-`page/get?code=<code>` → `Utils.Uu5String.toChildren(page.content)`. Pro `contentEditor`
-a výš akce **Upravit** – modal s `name`, `desc` a `content` v `uu5codekitg01`.
+`page/get?code=<code>` → pro každou položku `sectionList` jedna `Section`
+s `Utils.Uu5String.toChildren(section.content)`. Členění na sekce je tedy zároveň
+vizuální rytmus stránky, ne jen datový detail — kronikář jím řídí, kde se obsah zalomí.
+
+Pro `contentEditor` a výš akce **Upravit** – jeden modal s `name`, `desc` a seznamem sekcí
+(`uu5codekitg01` na každou, přidat / odebrat / přesunout). Ukládá se **celý `sectionList`
+najednou** přes `page/update`; přírůstkové operace nad jednotlivou sekcí neexistují.
 **Zatím se edituje jako kód, ne WYSIWYG** (rozhodnuto 2026-09-06).
 
 Stránky: `history`, `hymn`, `contact`, `board`, `training`, `team-photos`. Kódy jsou pevné —
@@ -413,7 +419,7 @@ Historie je **svislá časová osa** s roky, jak ji ukazuje předloha (1932, 194
 se vlastní.
 
 Musí zůstat editovatelná redakcí, takže se komponenta **registruje do `uu5String`** a osa
-je součást `page.content`, ne natvrdo psaná stránka:
+je obsahem jedné sekce stránky `history`, ne natvrdo psaná komponenta:
 
 ```
 <Uu5Bricks.VerticalTimeline>
@@ -509,7 +515,8 @@ Upload souborů se **nedělá vlastní komponentou** – používá se `UiElemen
 - Jednotlivé objekty a nestandardní use casy: `useDataObject` +
   `UiElements.Call.cmdGet/cmdPost`.
 - Obsah (`article`, `page`): obyčejný `useDataObject` nad `article/get` / `page/get`.
-  `UiEcc` se **nepoužívá** – viz [api.md](./api.md), 2.9.
+  Stránka přijde i se `sectionList`, takže druhé volání na sekce není. `UiEcc` se
+  **nepoužívá** – viz [api.md](./api.md), 2.9.
 - Chyby: `ErrorBoundary` ve `Spa` + `AlertBus` pro nefatální chyby (`Uu5Elements.useAlertBus`).
 
 **Stránkování stojí na `pageInfo` v `dtoOut`**, který se doplňuje do `caio-server`

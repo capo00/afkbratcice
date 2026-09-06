@@ -79,11 +79,11 @@ zatím jako kód (`uu5codekitg01`). Důsledky pro plán:
 
 | | |
 |---|---|
-| Etapa 13 | Není to port modulu se sekcemi, zámky a revizemi, ale obyčejná entita `page` (`code`, `name`, `content`, `desc`) nad `Dao`/`Crud` — řádově méně práce. Součástí je **seed obsahu z v0**, aby web nešel do provozu se šesti prázdnými stránkami. |
+| Etapa 13 | Není to port modulu se zámky a revizemi, ale obyčejná entita `page` (`code`, `name`, `desc`, `sectionList`) nad `Dao`/`Crud` — řádově méně práce. Sekce jsou pole objektů vložené v dokumentu, ne vlastní kolekce. Součástí je **seed obsahu z v0**, aby web nešel do provozu se šesti prázdnými stránkami. |
 | Etapa 14 | `article.content` je pole, ne vazba na stránku; `article/create` nezakládá nic navíc a `article/delete` nemaže nic navíc. `/rss` má konečně co publikovat. |
 | Tělo článku | `content` je **nullable**; do etapy 14 se v detailu ukazuje jen titulek, foto a perex. Metadata i seznam novinek fungují od etapy 8. |
-| Migrace | Krok 9 a 11 v [migration.md](./migration.md) plní `content` jedním `uu5String` místo skládání sekcí — jednodušší, ale pořád až po etapě 13/14. |
-| Cena | Obsah je plochý řetězec, ne `contentMap` po jazycích. Druhý jazyk = migrace jednoho pole. Až vznikne ECC, převod je „stránka s jednou sekcí z `content`". |
+| Migrace | Krok 9 a 11 v [migration.md](./migration.md) plní `article.content` jedním `uu5String` a `page.sectionList` jednou sekcí na blok textu — jednodušší než ECC, ale pořád až po etapě 13/14. |
+| Cena | Obsah je plochý řetězec, ne `contentMap` po jazycích. Druhý jazyk = migrace jednoho pole uvnitř sekce. Až vznikne ECC, převod je rozpad `sectionList` na dokumenty `ecc_section`. |
 
 ---
 
@@ -504,24 +504,29 @@ Pozor na `PORT`: GAE si ho nastavuje sám, `8081` platí jen lokálně.
 
 ## Etapa 13 — entita `page`
 
-Obyčejná entita nad `Dao`/`Crud`: `code` (unikátní, z pevného číselníku), `name`, `content`
-(`uu5String`), `desc`. Use casy `page/get|list|create|update|delete`, zápisy na `PAGES`.
+Obyčejná entita nad `Dao`/`Crud`: `code` (unikátní, z pevného číselníku), `name`, `desc`
+(perex) a `sectionList` — **pole objektů sekcí vložené v dokumentu**, zatím s jediným klíčem
+`content` (`uu5String`). Use casy `page/get|list|create|update|delete`, zápisy na `PAGES`.
 Kontrakt: [api.md](./api.md), sekce 2.9.
 
-Tři věci, na kterých záleží:
+Čtyři věci, na kterých záleží:
 
 - **`page/get` bere `code`**, ne jen `id` — routa je `/page?code=history` a na ty kódy míří
   `server/legacy-redirect.js`. Neznámý `code` je 404 `afkbratcice/page/notFound`.
 - **`code` je součást veřejného kontraktu.** Překlep v administraci = rozbité přesměrování
   ze starého webu, ne jen chybějící stránka.
+- **`sectionList` se ukládá celý.** `page/update` bere pole, ne přírůstkové operace nad
+  jednotlivou sekcí — stránku edituje jeden člověk v jednom modalu.
 - **Seed obsahu z v0** (`tools/seed-pages.js`): historie, hymna, kontakt (včetně `<iframe>`
   mapy), výbor, tréninky, týmové fotky. Bez něj by web šel do provozu se šesti prázdnými
   stránkami.
 
-Žádné zámky, revize ani sekce — šest stránek a jeden kronikář; osmihodinový lock by tu
-neřešil nic, co se reálně děje.
+Žádné zámky ani revize — šest stránek a jeden kronikář; osmihodinový lock by tu neřešil nic,
+co se reálně děje. Sekce ale zůstávají jako objekty, aby k nim šlo přidat metadata bez
+migrace a aby byl pozdější přechod na ECC rozpad pole na dokumenty `ecc_section`.
 
-**Hotovo, když:** `page/get?code=history` vrátí naseedovaný obsah a `page/update` ho změní.
+**Hotovo, když:** `page/get?code=history` vrátí naseedovaný `sectionList` a `page/update` ho
+změní.
 
 ---
 
