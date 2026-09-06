@@ -19,8 +19,8 @@ function emptyRow(team) {
     goalsAgainst: 0,
     goalDifference: 0,
     points: 0,
-    // Posledních pár výsledků jako W/D/L, nejnovější první. Padá ze stejného průchodu
-    // daty, takže je zadarmo.
+    // Posledních pár výsledků jako W/D/L, **chronologicky** -- nejstarší z nich první,
+    // poslední odehraný zápas na konci. Padá ze stejného průchodu daty, takže je zadarmo.
     form: [],
   };
 }
@@ -108,8 +108,10 @@ function computeTable(matchList, teamList, hasPenalties = false) {
   const rowList = [...rowMap.values()];
   for (const row of rowList) {
     row.goalDifference = row.goalsFor - row.goalsAgainst;
-    // Nejnovější první, jen posledních pár.
-    row.form = row.form.slice(-FORM_LENGTH).reverse();
+    // Jen posledních pár, a **v pořadí, jak se odehrály**. Fotbalové weby čtou formu jako
+    // časovou osu zleva doprava, takže poslední zápas patří na konec, ne na začátek;
+    // opačné pořadí by si čtenář zvyklý na tabulky přečetl obráceně.
+    row.form = row.form.slice(-FORM_LENGTH);
   }
 
   rowList.sort((a, b) => {

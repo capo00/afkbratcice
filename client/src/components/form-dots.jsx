@@ -6,7 +6,11 @@ const { theme } = Config;
 
 // Posledních pár výsledků jako kolečka V-R-P. Standard na moderních fotbalových webech
 // a na serveru to nic nestojí — `computeTable` pole `form` naplní ze stejného průchodu
-// daty, ze kterého počítá body (nejnovější první).
+// daty, ze kterého počítá body.
+//
+// Pořadí je **chronologické**: vlevo nejstarší z nich, vpravo poslední odehraný zápas.
+// Řadí ho server, klient pole jen vykreslí tak, jak přišlo — jinak by API tvrdilo jedno
+// a tabulka ukazovala druhé.
 //
 // Barvy: výhra klubovou červenou, remíza tlumeně, prohra jen obrys. Písmeno uvnitř je tam
 // schválně — samotná barva by pro barvoslepé nesla nulovou informaci a tabulka je hustá,

@@ -337,8 +337,10 @@ vyplněným `round`** (vylučuje přátelské) — shodně s v0 `getTable.php`.
 
 Řazení: `points` → vzájemné zápasy → `goalDifference` → `goalsFor` → název týmu.
 
-Řádek nese navíc **formu** — posledních 5 výsledků jako `["W","D","L","W","W"]`; klient
-z toho udělá kolečka ve sloupci tabulky. Je to zadarmo ze stejného průchodu daty.
+Řádek nese navíc **formu** — posledních 5 výsledků jako `["W","D","L","W","W"]`
+**chronologicky**, tedy poslední odehraný zápas je v poli poslední; klient z toho udělá
+kolečka ve sloupci tabulky a čtou se zleva doprava jako časová osa, stejně jako na
+ostatních fotbalových webech. Je to zadarmo ze stejného průchodu daty.
 
 > **Regresní test je součást etapy, ne dodatek.** Tabulka spočítaná z migrovaných dat se pro
 > poslední tři sezóny musí shodovat s výstupem v0 `/api/getTable`. Bez toho se etapa
