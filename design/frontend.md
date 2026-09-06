@@ -737,10 +737,10 @@ neexistujícímu endpointu.
 | Home – tabulky | `stats/getTable` | ✅ vč. bodování na penalty a sloupce `form` |
 | Home – aktuality | `article/list` | ⏳ entita `article` |
 | Mužstva, soupiska, realizační tým | `season/listCurrent`, `player/list`, `coach/list` | ✅ (fotka a perex až s `team.photoUri`/`photoDesc`) |
-| Zápasy týmu, kolo, detail zápasu | `match/list`, `match/get` | ✅ |
+| Zápasy týmu, detail zápasu (sestavy, střelci, ostatní výsledky kola, H2H) | `match/list`, `match/get` | ✅ **hotovo na klientu** |
 | Odběr kalendáře | `GET /calendar/team-<id>.ics` | ✅ |
-| Tabulka soutěže | `stats/getTable` | ✅ |
-| Statistiky hráčů | `stats/listPlayerStats` | ✅ |
+| Tabulka soutěže | `stats/getTable` | ✅ **hotovo na klientu**; bodovací model říká `season.hasPenalties` |
+| Statistiky hráčů | `stats/listPlayerStats` | ✅ **hotovo na klientu** |
 | Profil hráče – karta a sezóny | `player/get`, `stats/getPlayerStats` | ⚠️ sezóny bez názvu – čeká na `season/list?idList` |
 | Profil hráče – poslední zápasy | `match/list?playerId` | ⏳ filtr `playerId` |
 | Fotogalerie | `gallery/list`, `gallery/listPhotos` | ✅ |

@@ -77,9 +77,9 @@ function TeamCard({ category, coach }) {
       ) : null}
 
       <div className={Config.Css.css({ display: "grid", gap: 8 })}>
-        {category.competition ? <InfoRow icon="uugds-trophy">{category.competition}</InfoRow> : null}
+        {category.competition ? <InfoRow icon="uugds-favorites">{category.competition}</InfoRow> : null}
         {coach ? (
-          <InfoRow icon="uugds-user">
+          <InfoRow icon="uugds-account">
             {[coach.person?.name, coach.person?.surname].filter(Boolean).join(" ")}
           </InfoRow>
         ) : null}
@@ -125,7 +125,7 @@ const Teams = createVisualComponent({
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
           {categoryList.length === 0 ? (
-            <EmptyState lsi={lsi("teams", "empty")} icon="uugds-users" />
+            <EmptyState lsi={lsi("teams", "empty")} icon="uugds-account-multi" />
           ) : (
             <div
               className={Config.Css.css({

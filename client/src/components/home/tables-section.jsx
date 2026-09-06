@@ -77,11 +77,11 @@ const TablesSection = createVisualComponent({
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
           {!active ? (
-            <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-list" />
+            <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-view-list" />
           ) : state === "pendingNoData" ? (
             <Uu5Elements.Skeleton height={240} />
           ) : (data?.table ?? []).length === 0 ? (
-            <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-list" />
+            <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-view-list" />
           ) : (
             <>
               {active.competition ? (

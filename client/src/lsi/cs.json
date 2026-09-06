@@ -61,7 +61,18 @@
       "win": "Výhra",
       "draw": "Remíza",
       "loss": "Prohra"
-    }
+    },
+    "penaltyWinner": "Vyhrál na penalty",
+    "departure": "Odjezd",
+    "lineups": "Sestavy",
+    "substitutes": "Střídali",
+    "scorers": "Střelci",
+    "noLineup": "Sestava nebyla zapsaná.",
+    "roundResults": "Ostatní výsledky kola",
+    "roundResultsEyebrow": "Kolo v soutěži",
+    "h2h": "Vzájemné zápasy",
+    "h2hEyebrow": "Historie dvojice",
+    "missing": "Zápas se nepodařilo najít."
   },
   "footer": {
     "about": "Fotbalový klub AFK Bratčice, od roku ${founded}.",
@@ -134,7 +145,8 @@
     "tab": {
       "roster": "Soupiska",
       "matches": "Zápasy",
-      "table": "Tabulka"
+      "table": "Tabulka",
+      "stats": "Statistiky"
     },
     "players": "Hráči",
     "staff": "Realizační tým",
@@ -155,6 +167,15 @@
       },
       "noUpcoming": "Žádný nadcházející zápas.",
       "noPlayed": "V téhle sezóně se zatím nehrálo."
-    }
+    },
+    "noStats": "Statistiky zatím nejsou — nebyla zapsaná žádná sestava."
+  },
+  "stats": {
+    "player": "Hráč",
+    "appearances": "Zápasy",
+    "starts": "V základu",
+    "goals": "Góly",
+    "yellowCards": "ŽK",
+    "redCards": "ČK"
   }
 }

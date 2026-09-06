@@ -1,4 +1,4 @@
-import { createVisualComponent, Lsi } from "uu5g05";
+import { createVisualComponent, useRoute, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
@@ -70,8 +70,12 @@ const MatchTile = createVisualComponent({
   uu5Tag: Config.TAG + "MatchTile",
 
   render({ match, ownTeamId, category, onClick }) {
+    const [, setRoute] = useRoute();
     const played = match.state === "played" || Number.isFinite(match.homeGoals);
     const result = outcome(match, ownTeamId);
+    // Dlaždice je vstup na detail zápasu, pokud volající nechce jinak. Bez `match.id`
+    // (třeba prázdná odpověď `getLast`) zůstane needitovatelná, ne rozklikávací do prázdna.
+    const handleClick = onClick ?? (match.id ? () => setRoute("match", { id: match.id }) : undefined);
 
     const header = (
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" })}>
@@ -96,7 +100,7 @@ const MatchTile = createVisualComponent({
     );
 
     return (
-      <Card topStripe header={header} onClick={onClick}>
+      <Card topStripe header={header} onClick={handleClick}>
         <div className={Config.Css.css({ display: "grid", gap: 6 })}>
           <TeamRow teamId={match.homeTeamId} goals={match.homeGoals} ownTeamId={ownTeamId} showGoals={played} />
           <TeamRow teamId={match.guestTeamId} goals={match.guestGoals} ownTeamId={ownTeamId} showGoals={played} />
@@ -119,7 +123,7 @@ const MatchTile = createVisualComponent({
             <DateText value={match.time} type={played ? "date" : "dayMonth"} />
             {!played && match.time ? (
               <>
-                <Uu5Elements.Icon icon="uugds-time" className={Config.Css.css({ marginInlineStart: 6 })} />
+                <Uu5Elements.Icon icon="uugds-clock" className={Config.Css.css({ marginInlineStart: 6 })} />
                 <DateText value={match.time} type="time" />
               </>
             ) : null}
@@ -133,7 +137,7 @@ const MatchTile = createVisualComponent({
 
           {match.place && !played ? (
             <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 6 })}>
-              <Uu5Elements.Icon icon="uugds-location" />
+              <Uu5Elements.Icon icon="uugds-mapmarker" />
               {match.place}
             </span>
           ) : null}

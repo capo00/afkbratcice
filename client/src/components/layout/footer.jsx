@@ -23,8 +23,8 @@ const NAV = [
 ];
 
 const CONTACT_ICON = {
-  address: "uugds-location",
-  email: "uugds-mail",
+  address: "uugds-mapmarker",
+  email: "uugds-email",
   phone: "uugds-phone",
 };
 

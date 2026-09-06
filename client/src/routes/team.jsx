@@ -134,7 +134,7 @@ function Roster({ teamId, category }) {
         <Heading level={2} lsi={lsi("team", "players")} />
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
           {groups.length === 0 ? (
-            <EmptyState lsi={lsi("team", "noPlayers")} icon="uugds-users" />
+            <EmptyState lsi={lsi("team", "noPlayers")} icon="uugds-account-multi" />
           ) : (
             groups.map((group) => (
               <div key={group.code ?? "other"} className={Config.Css.css({ marginBlockEnd: 24 })}>

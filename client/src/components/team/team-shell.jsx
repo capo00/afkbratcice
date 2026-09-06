@@ -21,6 +21,7 @@ const TAB_LIST = [
   { route: "team", code: "roster" },
   { route: "team/matches", code: "matches" },
   { route: "team/table", code: "table", needsTable: true },
+  { route: "team/stats", code: "stats" },
 ];
 
 const TeamShell = createVisualComponent({

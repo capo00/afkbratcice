@@ -531,6 +531,7 @@ redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
 | ~~Rozsahová role v guardu~~ | ~~`withRoute` porovnává profily na přesnou shodu~~ | **doplněno do `caio-ui` 2026-09-06**: `"teamEditor:*"` + `UiAuth.getScopeList()` |
 | Soubory ke stažení | `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props | vlastní `Crud` konfigurace nad `BinaryProvider` s `category` a `date` |
 | Prázdné stavy | uu5 nemá jednotný „žádná data" | vlastní `EmptyState` |
+| Ikony | GDS sada má 192 ikon a **nemá** `location`, `mail`, `time`, `trophy`, `user`, `users`, `list`, `chart` | správné názvy jsou `mapmarker`, `email`, `clock`, `favorites`, `account`, `account-multi`, `view-list`. Neexistující ikona se **tiše vykreslí jako prázdné místo**, takže si jí nikdo nevšimne — ověřovat v prohlížeči, ne odhadem. |
 
 ## F.3 Co je vědomě holé HTML
 

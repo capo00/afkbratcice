@@ -36,7 +36,7 @@ function Table({ teamId, seasonId }) {
       ) : table.length === 0 ? (
         // Soutěž bez tabulky (stará garda) i sezóna, ve které se ještě nehrálo, končí tady.
         // Rozlišovat je nemá cenu — pro čtenáře je to v obou případech „zatím nic".
-        <EmptyState lsi={lsi("team", "noTable")} icon="uugds-list" />
+        <EmptyState lsi={lsi("team", "noTable")} icon="uugds-view-list" />
       ) : (
         <>
           {data?.season?.competition ? (
