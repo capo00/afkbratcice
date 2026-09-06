@@ -398,11 +398,14 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
 
 ### 2.8 `article`
 
+> **Hotovo 6. 9. 2026** — `server/article/{dao,crud,api}.js`, `GET /rss`, klientské routy
+> `novinky` / `novinka` a blok aktualit na home.
+
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
 | `article/list` | get | – | `{ state, matchId, tag, pageInfo }` | `{ itemList, pageInfo }` – **bez `sectionList`** |
 | `article/get` | get | – | `{ id }` | `article` včetně `sectionList` (+ `match`, pokud je navázán) |
-| `article/create` | post | NEWS | `{ name, perex, sectionList, author, matchId, priority, publishTime, photograph: File }` | `article` |
+| `article/create` | post | NEWS | `{ name, desc, sectionList, author, matchId, priority, publishTime, tagList, photograph: File }` | `article` |
 | `article/update` | post | NEWS | `{ id, ... , photograph: File \| null }` | `article` |
 | `article/setState` | post | NEWS | `{ id, state }` | `article` |
 | `article/delete` | post | NEWS | `{ id }` | `{}` |
@@ -415,10 +418,18 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
   se přes **`Uu5.Content`**.
 - `article/list` `sectionList` **nevrací** — výpis novinek potřebuje perex, ne celé texty;
   u dvaceti článků by to byl řádově větší přenos zadarmo.
+- **Perex se jmenuje `desc`**, ne `perex` — stejně jako u `team`, `season` a stránek
+  (viz [README.md](./README.md), tabulka rozhodnutí).
 - `article/delete` maže i titulní fotku.
 - `article/list` bez `state` vrací pro nepřihlášené jen `state: "published"`
-  a `publishTime <= nyní`.
-- Řazení: `priority` DESC, `publishTime` DESC (shodně s v0 `index.php`).
+  a `publishTime <= nyní`. Pro roli `NEWS` se ani jeden z těch filtrů nenasazuje — redakce
+  musí svůj rozpracovaný i naplánovaný článek ve výpisu najít.
+- `article/get` na nepublikovaný článek odpovídá **404, ne 403**: existence rozpracované
+  novinky je sama o sobě informace.
+- Řazení: `priority` DESC, `publishTime` DESC (shodně s v0 `index.php`). **`GET /rss` řadí
+  jen podle `publishTime`** — připínání je vlastnost webu, ne kanálu.
+- `article/list` je **jediný list use case appky, který vrací `pageInfo`** (`Dao.findPage()`
+  v `caio-server`, viz 1.0.1). Bez `total` nejde poznat, kolik stránek novinek vůbec je.
 
 ### 2.9 `page` (obsahové stránky)
 
@@ -774,7 +785,7 @@ Legacy přesměrování (`server/legacy-redirect.js`) musí být namountované *
 fallbackem – zařizuje to `middlewareList` v `App.init`, viz [migration.md](./migration.md),
 sekce 5.
 
-**Stav po dávce ze 6. 9.:** `sitemap.xml` a `calendar/team` běží, `/rss` ne — publikuje
-články a ty zatím nejsou. Přidá se s entitou `article`. Přesměrování s číselným `id`
+**Stav po dávce ze 6. 9.:** `sitemap.xml`, `calendar/team` i `/rss` běží. Sitemapa vypisuje
+i české adresy obsahových stránek a publikované články. Přesměrování s číselným `id`
 (`/novinka-<n>`, `/informace-o-zapase-<n>`, `/fotogalerie-<n>`) čekají na mapovací kolekci
 `migration_map`, tedy na migraci; statická přesměrování fungují.

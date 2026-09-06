@@ -30,9 +30,9 @@ const MATCH_STATE_LIST = ["planned", "played", "postponed", "canceled"];
 const COACH_ROLE_LIST = ["headCoach", "assistant", "manager", "board"];
 const GALLERY_CATEGORY_LIST = ["match", "training", "fans", "youth", "club"];
 
-// Kódy obsahových stránek. Míří na ně `server/legacy-redirect.js` (/historie →
-// /page?code=history), takže jsou součástí veřejného kontraktu, ne interním detailem.
-const PAGE_CODE_LIST = ["history", "hymn", "contact", "board", "training", "team-photos"];
+// Kódy obsahových stránek tu **nejsou**: stránky jsou natvrdo v `content/pages.js`
+// a jeho `PAGE_CODE_LIST` je zdroj pravdy pro routu i pro menu. Dvojí seznam by se
+// rozešel hned, jak by někdo přidal stránku.
 
 // Role. Rozsahová `teamEditor:<teamId>` se v guardu píše jako "teamEditor:*" —
 // `UiApp.withRoute` prefix umí, konkrétní id vytáhne `UiAuth.getScopeList()`.
@@ -68,7 +68,6 @@ const Config = {
   MATCH_STATE_LIST,
   COACH_ROLE_LIST,
   GALLERY_CATEGORY_LIST,
-  PAGE_CODE_LIST,
 
   ROLE,
   ADMIN,

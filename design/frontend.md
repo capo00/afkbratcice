@@ -182,27 +182,31 @@ které to používají: `admin/matches`, `admin/players`, `admin/coaches`, `admi
 
 Kontrola proti živému `afkbratcice.cz` (5. 9. 2026) — odtud se bere obsah.
 
+**Adresy nové appky jsou české** (rozhodnuto 2026-09-06) — je to web českého klubu a hlavně
+tím většina rout sedí s v0 **bez jediného přesměrování**, takže co je naindexované ve
+vyhledávači, zůstává platné.
+
 | URL v0 | Obsah | Nová routa | Stav |
 |---|---|---|---|
-| `/`, `/home`, `/home-<n>` | novinky se stránkováním | `home`, `news?pageIndex` | ✅ |
-| `/novinka-<n>` | detail novinky | `article?id` | ✅ |
-| `/historie` | historie klubu (text) | `page?code=history` | ✅ |
-| `/hymna` | text hymny „Traverza“ | `page?code=hymn` | ✅ |
-| `/kontakt` | kontakty + GPS + mapa | `page?code=contact` | ✅ |
-| `/vybor` | Výbor AFK (7 lidí, telefony, e-maily) | `page?code=board` nebo `coach/list?role=board` | ✅ |
-| `/muzi`, `/zaci`, `/stara-garda` | soupiska + týmová fotka | `team?id` | ✅ |
-| `/zapasy`, `/zapasy-15`, `/zapasy-25` | zápasy kategorie | `team/matches?id` | ✅ |
-| `/vsechny-zapasy-<kat>#<n>kolo` | všechny zápasy, kotva na kolo | `team/matches?id&round` | ✅ (doplněn parametr `round`) |
-| `/tabulka-muzi`, `/tabulka-zaci`, `/tabulka-dorost` | tabulka soutěže | `team/table?id` | ✅ |
-| `/informace-o-zapase-<n>` | detail zápasu + **ostatní výsledky kola** | `match?id` | ✅ (doplněno, viz 3.7) |
-| `/fotogalerie`, `/fotogalerie-<n>` | 19 alb, detail alba | `gallery`, `gallery/detail?id` | ✅ |
-| `/tymove_fotky` | historické týmové fotky po ročnících se jmennými popisky | `page?code=team-photos` | ✅ ECC stránka, viz 3.11.2 |
-| `/ke-stazeni` | rozpisy zápasů po sezónách (~40 PDF) | `files?category` | ✅ |
-| `/treninky` | informace o trénincích | `page?code=training` | ✅ |
+| `/`, `/home`, `/home-<n>` | novinky se stránkováním | `/` (home), `novinky?pageIndex` | ✅ |
+| `/novinka-<n>` | detail novinky | `novinka?id` | ✅ (adresa s `id`; číselné přesměrování čeká na `migration_map`) |
+| `/historie` | historie klubu (text) | `historie` | ✅ |
+| `/hymna` | text hymny „Traverza“ | `hymna` | ✅ |
+| `/kontakt` | kontakty + GPS + mapa | `kontakt` | ✅ (data z `appConfig.contact`, ne obsahová stránka) |
+| `/vybor` | Výbor AFK (7 lidí, telefony, e-maily) | `vybor` (časem `coach/list?role=board`) | ✅ |
+| `/muzi`, `/zaci`, `/stara-garda` | soupiska + týmová fotka | `muzstvo?id` | ✅ |
+| `/zapasy`, `/zapasy-15`, `/zapasy-25` | zápasy kategorie | `muzstvo/zapasy?id` | ✅ |
+| `/vsechny-zapasy-<kat>#<n>kolo` | všechny zápasy, kotva na kolo | `muzstvo/zapasy?id&round` | ✅ (doplněn parametr `round`) |
+| `/tabulka-muzi`, `/tabulka-zaci`, `/tabulka-dorost` | tabulka soutěže | `muzstvo/tabulka?id` | ✅ |
+| `/informace-o-zapase-<n>` | detail zápasu + **ostatní výsledky kola** | `zapas?id` | ✅ (doplněno, viz 3.7) |
+| `/fotogalerie`, `/fotogalerie-<n>` | 19 alb, detail alba | `fotogalerie`, `fotogalerie/album?id` | ✅ |
+| `/tymove_fotky` | historické týmové fotky po ročnících se jmennými popisky | `tymove-fotky` | ✅ obsahová stránka v kódu, viz 3.11.2 |
+| `/ke-stazeni` | rozpisy zápasů po sezónách (~40 PDF) | `ke-stazeni?category` | ⏳ obrazovka zatím není |
+| `/treninky` | informace o trénincích | `treninky` | ✅ |
 | `/diskuze` | diskuzní fórum | – | ❌ **vyřazeno z rozsahu** |
 | `/prihlaseni` | přihlášení (formulář v hlavičce) | `/login.html` (devkit) | ✅ |
 | `/zapomenute-heslo` | reset hesla | `/login.html` → odkaz na stránce → mail → `?reset=<token>` | ✅ **hotovo 6. 9.** v `caio-server` i `caio-ui`, viz [api.md](./api.md), 2.14.1 |
-| `/rss` | RSS kanál | `GET /rss` | ⏳ čeká na entitu `article` |
+| `/rss` | RSS kanál | `GET /rss` | ✅ RSS 2.0, posledních 20 publikovaných, čistě chronologicky |
 | `/editace-*`, `/upravit-*`, `/novy-*`, `/smazat-*` | správa obsahu | `admin/*` | ✅ |
 | `/pokladna`, `/pokuty`, `/prijem`, `/vydaj` | klubová kasa | – | ❌ mimo rozsah (410 Gone) |
 | `/api/<uc>` | staré JSON API | – | ❌ 410 Gone (nový kontrakt) |
@@ -327,10 +331,15 @@ Grid: `Uu5Elements.Grid` s `templateColumns={{ xs: "1fr", m: "repeat(3, 1fr)" }}
 
 ### 3.2 Novinky a detail článku
 
-- Seznam: dlaždice s `photograph`, kategorií, titulkem, datem a `perex`; stránkování po 10
-  (`article/list` `content` nevrací — výpis ho nepotřebuje).
-- Detail: hlavička (titulek, datum, autor, foto) + obsah z `article.content`, vykreslený
-  přes `Utils.Uu5String.toChildren()`.
+- Seznam: dlaždice s `photographUri`, štítky, titulkem, datem a `perex`; stránkování po 10
+  (`article/list` `sectionList` nevrací — výpis ho nepotřebuje). **Stránka je v adrese**
+  (`novinky?pageIndex`), ne ve stavu obrazovky: `/home-<n>` z v0 sem přesměrovává, takže na
+  konkrétní stránku musí jít odkázat zvenčí.
+- Detail: hlavička (titulek, datum, autor, foto) + obsah z `article.sectionList`, vykreslený
+  přes **`Uu5.Content`** — sekce za sebou bez oddělovače (je to jeden text rozdělený kvůli
+  editaci, ne kapitoly).
+- Připnutá novinka (`priority > 0`) má červený proužek nahoře a drží špičku výpisu; **do RSS
+  se ale řadí chronologicky** — připínání je vlastnost webu, čtečka čeká nahoře to nejnovější.
 - Je-li vyplněn `matchId`, nad obsahem se zobrazí panel s výsledkem a odkazem na zápas.
 - Pro `newsEditor` a výš je v hlavičce akce **Upravit** – jeden modal s formulářem článku,
   kde je `content` textové pole s `uu5codekitg01`. **Zatím se edituje jako kód, ne WYSIWYG**
@@ -736,7 +745,7 @@ neexistujícímu endpointu.
 | Home – program víkendu | `match/list?teamIdList&dateFrom&dateTo` | ✅ (potřebuje mapu týmů) |
 | Home – poslední výsledky | `match/getLast` per kategorie | ✅ |
 | Home – tabulky | `stats/getTable` | ✅ vč. bodování na penalty a sloupce `form` |
-| Home – aktuality | `article/list` | ⏳ entita `article` |
+| Home – aktuality | `article/list` | ✅ **hotovo na klientu** (3 nejnovější; blok se bez článků nevykreslí) |
 | Mužstva, soupiska, realizační tým | `season/listCurrent`, `player/list`, `coach/list` | ✅ (fotka a perex až s `team.photoUri`/`photoDesc`) |
 | Zápasy týmu, detail zápasu (sestavy, střelci, ostatní výsledky kola, H2H) | `match/list`, `match/get` | ✅ **hotovo na klientu** |
 | Odběr kalendáře | `GET /calendar/team-<id>.ics` | ✅ |
@@ -746,11 +755,11 @@ neexistujícímu endpointu.
 | Profil hráče – poslední zápasy | `match/list?playerId` | ✅ **hotovo na klientu**; filtr `playerId` doplněn 2026-09-06 |
 | Fotogalerie (alba, filtr kategorií, lightbox) | `gallery/list`, `gallery/listPhotos` | ✅ **hotovo na klientu** |
 | Ke stažení | `file/list?category` | ⚠️ `category` nikdo nezapisuje, dokud nevznikne `admin/files` (6.1) |
-| Obsahové stránky | `page/get?code` | ⏳ entita `page` |
-| Novinky, detail článku, RSS | `article/*`, `GET /rss` | ⏳ entita `article` |
+| Obsahové stránky | – | ✅ **natvrdo v klientu**, entita `page` čeká na ECC |
+| Novinky, detail článku, RSS | `article/*`, `GET /rss` | ✅ **hotovo na klientu i serveru** |
 | `admin/*` CRUD | `*/create|update|delete` | ✅ pro existující entity |
 | `admin/identities` | `identity/adminList`, `identity/update` | ✅ na profilu `authorities` |
 | Přihlášení, registrace, reset hesla | `caio-server-auth` + `/login.html` | ✅ |
-| Stránkování čehokoli | `pageInfo` v `dtoOut` | ⏳ změna v `caio-server` ([api.md](./api.md), 1.0.1) |
+| Stránkování čehokoli | `pageInfo` v `dtoOut` | ✅ `Dao.findPage()` v `caio-server`; v appce ho zatím používá `article/list` |
 
 Legenda: ✅ server to umí · ⚠️ jde postavit, ale s omezením · ⏳ čeká na doplnění.

@@ -47,6 +47,7 @@ function useTop() {
   const clubName = useLsi(importLsi, ["club", "name"]);
   const clubSince = useLsi(importLsi, ["club", "since"]);
   const identityItem = useIdentityItem();
+  const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
   const galleryLabel = useLsi(importLsi, ["header", "nav", "gallery"]);
   const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
@@ -84,6 +85,12 @@ function useTop() {
     cssColor: theme.color.fg,
     menu: {
       itemList: [
+        {
+          href: "novinky",
+          children: newsLabel,
+          significance: "subdued",
+          colorScheme: "building",
+        },
         {
           href: "muzstva",
           children: teamsLabel,

@@ -198,8 +198,8 @@ erDiagram
     ARTICLE {
         string   id PK
         string   name
-        string   perex
-        string   content "uu5String"
+        string   desc "perex"
+        object[] sectionList "[{ content: uu5String }]"
         string   author
         string   authorIdentity FK
         string   photographId FK
@@ -223,10 +223,12 @@ erDiagram
     SYS_IDENTITY ||--o{ ARTICLE     : "authorIdentity"
 ```
 
-> **`ARTICLE` a `PAGE` v dávce ze 6. 9. 2026 nevznikly** — server má zatím jen sportovní
-> jádro, galerii, soubory a konfiguraci. Obsah je ale odblokovaný: nečeká se na ECC modul,
-> obojí drží obsah jako jeden `uu5String` (rozhodnuto 2026-09-06, viz
-> [README.md](./README.md), sekce 2).
+> **`ARTICLE` existuje, `PAGE` ne** (stav k 6. 9. 2026). Článek drží obsah jako
+> `sectionList` — pole objektů sekcí s `uu5String` v `content`. Obsahové stránky entitu
+> nemají vůbec: jsou **natvrdo v klientu** (`client/src/content/pages.js`) a počkají na ECC,
+> protože obsahová stránka je přesně to, co ECC řeší (rozhodnuto 2026-09-06, viz
+> [README.md](./README.md), sekce 2). Diagram `PAGE` níž tedy popisuje **cílový**, ne dnešní
+> stav.
 
 | Kolekce | Původ | Popis |
 |---|---|---|
@@ -236,9 +238,9 @@ erDiagram
 | `person` | nová | Osoba (jméno, kontakt) – sdílená pro hráče i trenéry |
 | `player` | nová | Hráčská role osoby, členství v týmech v čase |
 | `coach` | nová | Trenérská/funkcionářská role osoby |
-| `article` | nová | Novinka; obsah je `uu5String` v `content` |
+| `article` | nová | Novinka; obsah je `sectionList[].content` (`uu5String`) |
 | `gallery` | nová | Fotoalbum |
-| `page` | nová | Obsahová stránka (historie, hymna, kontakt, výbor, tréninky, týmové fotky) |
+| `page` | **nevzniká** | Obsahová stránka — zatím natvrdo v klientu, čeká na ECC |
 | `app_config` | v1 (`app`) | Singleton konfigurace aplikace |
 | `sys_binary` | `caio-server` | Metadata souboru v Google Cloud Storage |
 | `sys_identity` | `caio-server` | Přihlašovací identita |
@@ -458,8 +460,8 @@ Role `board` (výbor klubu) pokrývá stránku „Výbor AFK“ z v0 bez nutnost
 |---|---|---|---|
 | `id` | string | ✓ | |
 | `name` | string | ✓ | Titulek |
-| `perex` | string | ✓ | Text do výpisu, RSS a OG description (max ~300 znaků) |
-| `content` | string (uu5String) | | Obsah článku jako jeden `uu5String` – **ne** vazba na ECC |
+| `desc` | string | ✓ | Perex – text do výpisu, RSS a OG description (max ~300 znaků). Jmenuje se `desc` jako všude jinde v modelu, ne `perex` |
+| `sectionList` | object[] | | Obsah článku – pole sekcí, zatím s jediným klíčem `content` (`uu5String`). **Ne** vazba na ECC. `article/list` ho nevrací. |
 | `author` | string | | Podpis autora (volný text; výchozí = jméno z identity) |
 | `authorIdentity` | string | | Kód identity autora |
 | `photographId` | string | | Titulní foto – `id` do `sys_binary` |
@@ -474,17 +476,27 @@ Role `board` (výbor klubu) pokrývá stránku „Výbor AFK“ z v0 bez nutnost
 ```
 { state: 1, priority: -1, publishTime: -1 }
 { publishTime: -1 }
-{ matchId: 1 }  sparse
+{ matchId: 1 }   sparse
+{ tagList: 1 }   sparse
 ```
 
 Poznámky:
 
-- **Obsah je jedno pole `content` typu `uu5String`** (rozhodnuto 2026-09-06). Dřívější
-  návrh ho měl jako vazbu `pageId` na ECC stránku; ECC ale v `caio-server` není a jeho
-  design se ladí zvlášť, takže by článek na něj čekal. Jedno pole je zpětně slučitelné:
-  až ECC vznikne, migrace je „vytvoř stránku s jednou sekcí z `content`".
+- **Obsah je `sectionList` – pole objektů sekcí s `uu5String` v `content`** (rozhodnuto
+  2026-09-06). Dřívější návrh ho měl jako vazbu `pageId` na ECC stránku; ECC ale
+  v `caio-server` není a jeho design se ladí zvlášť, takže by článek na něj čekal. Objekt
+  místo holého stringu proto, aby k sekci šel přidat nadpis nebo kotva bez migrace — a
+  `sectionList` je přesně jednotka, se kterou ECC pracuje, takže pozdější přechod je rozpad
+  pole na dokumenty.
 - Editace obsahu je zatím **v kódu, ne WYSIWYG** – redakce píše `uu5String` do textového
-  pole (`uu5codekitg01`). Rich-text editor přijde s ECC.
+  pole (`uu5codekitg01`, dnes 2.8.3). Rich-text editor přijde s ECC.
+- Vykresluje se přes **`Uu5.Content`** – proti `Utils.Uu5String.toChildren()` řeší nesting
+  level a `fallback`, takže překlep ve značce zobrazí chybu na svém místě místo shození
+  celé stránky.
+- **Publikace je dvojí podmínka**: `state: "published"` **a** `publishTime <= teď`. Novinka
+  naplánovaná dopředu se zveřejní sama tím, že čas dojde; redakce svoje naplánované
+  a rozpracované ve výpisu vidí, veřejnost ne (a `article/get` na ně odpoví 404, ne 403 —
+  existence rozpracované novinky je sama o sobě informace).
 - Diagramové `time: sys.cts` je rozděleno: `sys.cts` = vznik záznamu, `publishTime` =
   redakční datum (v0 umožňovalo zadat datum ručně a web podle něj řadil).
 - Mapování legacy `clanek.priorita`: `NULL` → `priority: 0, state: published`;

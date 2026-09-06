@@ -16,9 +16,10 @@ const { theme } = Config;
 // jediné místo, kde se klubová červená používá jako text, ne jako plocha.
 
 // Jen hotové obrazovky. Odkaz na routu, která ještě neexistuje, by skončil na 404 —
-// to je horší než kratší patička. „Ke stažení" a „Aktuality" sem přibudou s nimi.
+// to je horší než kratší patička. „Ke stažení" sem přibude s ní.
 const NAV = [
   { code: "home", href: "" },
+  { code: "news", href: "novinky" },
   { code: "teams", href: "muzstva" },
   { code: "gallery", href: "fotogalerie" },
   { code: "history", href: "historie" },

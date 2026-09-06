@@ -8,6 +8,7 @@ import Eyebrow from "../components/layout/eyebrow.jsx";
 import Button from "../components/layout/button.jsx";
 import WeekendProgram from "../components/home/weekend-program.jsx";
 import LastResults from "../components/home/last-results.jsx";
+import NewsSection from "../components/home/news-section.jsx";
 import TablesSection from "../components/home/tables-section.jsx";
 import { useApp } from "../core/app-context.jsx";
 
@@ -16,8 +17,8 @@ const { theme } = Config;
 // Úvodní stránka. Pořadí bloků drží předloha (design/frontend.md, 3.1):
 // hero → statistiky → program víkendu → poslední výsledky → aktuality → tabulky → CTA.
 //
-// Aktuality tu zatím **nejsou**: čekají na entitu `article`. Blok se nepředstírá prázdným
-// rámečkem — dokud nemá co ukázat, na stránce prostě není.
+// Blok aktualit se sám nevykreslí, dokud není co ukázat — prázdný rámeček s hláškou patří
+// do výpisu novinek, kam čtenář přišel schválně, ne na home mezi program a tabulky.
 
 function Hero() {
   const [, setRoute] = useRoute();
@@ -143,6 +144,7 @@ function Home() {
       <Stats />
       <WeekendProgram />
       <LastResults />
+      <NewsSection />
       <TablesSection />
       <CtaBand />
     </>

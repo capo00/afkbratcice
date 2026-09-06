@@ -187,6 +187,69 @@ ok("detail zápasu vloží týmy a sestavu",
   matchDetail.body?.homeTeam?.id === teamIds[0] && matchDetail.body?.playerList?.[0]?.person?.surname === "Smoke",
   { home: matchDetail.body?.homeTeam?.name, lineup: matchDetail.body?.playerList?.length });
 
+console.log("\n== novinky ==");
+const past = new Date(Date.now() - 3600e3).toISOString();
+const future = new Date(Date.now() + 7 * 24 * 3600e3).toISOString();
+
+const draftArticle = await post("article/create", {
+  name: "SMOKE rozpracovaná novinka",
+  desc: "Draft nemá být venku.",
+  sectionList: [{ content: "<uu5string/><p>Draft.</p>" }],
+}, cookie);
+ok("založení novinky", draftArticle.status === 200 && draftArticle.body?.id, draftArticle.body);
+ok("nová novinka je rozpracovaná", draftArticle.body?.state === "draft", draftArticle.body?.state);
+
+const publicDraft = await get("article/get", { id: draftArticle.body.id });
+ok("nepřihlášený nedostane rozpracovanou novinku (404)", publicDraft.status === 404, publicDraft.status);
+
+const published = await post("article/create", {
+  name: "SMOKE publikovaná novinka",
+  desc: "Tahle venku být má.",
+  sectionList: [{ content: "<uu5string/><p>První sekce.</p>" }, { content: "<uu5string/><p>Druhá.</p>" }],
+  matchId: m1.body.id,
+  state: "published",
+  publishTime: past,
+}, cookie);
+ok("publikovaná novinka se založí", published.status === 200, published.body);
+
+const scheduled = await post("article/create", {
+  name: "SMOKE naplánovaná novinka", desc: "Až za týden.", state: "published", publishTime: future,
+}, cookie);
+ok("naplánovaná novinka se založí", scheduled.status === 200, scheduled.body);
+
+const publicNews = await get("article/list", { pageInfo: { pageIndex: 0, pageSize: 50 } });
+const publicNames = (publicNews.body?.itemList ?? []).map((a) => a.name);
+ok("veřejný výpis vrací pageInfo s total",
+  Number.isInteger(publicNews.body?.pageInfo?.total), publicNews.body?.pageInfo);
+ok("veřejný výpis nevrací rozpracované ani naplánované",
+  publicNames.includes("SMOKE publikovaná novinka")
+  && !publicNames.includes("SMOKE rozpracovaná novinka")
+  && !publicNames.includes("SMOKE naplánovaná novinka"), publicNames);
+ok("výpis nevozí obsah sekcí",
+  publicNews.body?.itemList?.every((a) => a.sectionList === undefined), publicNews.body?.itemList?.[0]);
+
+const editorNews = await get("article/list", { pageInfo: { pageIndex: 0, pageSize: 50 } }, cookie);
+ok("redakce vidí i rozpracované a naplánované",
+  (editorNews.body?.itemList ?? []).some((a) => a.name === "SMOKE rozpracovaná novinka")
+  && (editorNews.body?.itemList ?? []).some((a) => a.name === "SMOKE naplánovaná novinka"),
+  (editorNews.body?.itemList ?? []).map((a) => a.name));
+
+const detail = await get("article/get", { id: published.body.id });
+ok("detail vrací sekce i navázaný zápas",
+  detail.body?.sectionList?.length === 2 && detail.body?.match?.id === m1.body.id,
+  { sections: detail.body?.sectionList?.length, match: detail.body?.match?.id });
+
+const setState = await post("article/setState", { id: draftArticle.body.id, state: "published" }, cookie);
+ok("setState publikuje", setState.status === 200 && setState.body?.state === "published", setState.body?.state);
+
+const rss = await fetch(`${BASE}/rss`);
+const rssBody = await rss.text();
+ok("RSS je kanál s publikovanou novinkou",
+  rss.headers.get("content-type")?.includes("application/rss+xml")
+  && rssBody.includes("<rss") && rssBody.includes("SMOKE publikovaná novinka"),
+  rss.headers.get("content-type"));
+ok("RSS nepouští naplánovanou novinku ven", !rssBody.includes("SMOKE naplánovaná novinka"));
+
 console.log("\n== teamEditor (role s rozsahem) ==");
 await db.collection("sys_identity").updateOne(
   { email: ADMIN.email }, { $set: { profileList: ["teamEditor:" + teamIds[0]] } },
@@ -209,6 +272,8 @@ ok("teamEditor nepřepíše soupeře, ale poznámku ano",
   { guest: afterSwap.body?.guestTeamId, note: afterSwap.body?.note });
 const teIdentity = await get("identity/adminList", {}, teCookie);
 ok("teamEditor nevidí identity", teIdentity.status === 401, teIdentity.status);
+const teArticle = await post("article/create", { name: "SMOKE cizí novinka", desc: "x" }, teCookie);
+ok("teamEditor nepíše novinky", teArticle.status === 401, teArticle.status);
 
 console.log("\n== legacy přesměrování ==");
 // Adresy nové appky jsou české a shodné s v0, takže `/historie` se **nepřesměrovává** --
@@ -233,7 +298,7 @@ ok("sitemap je XML", (await sitemap.text()).startsWith("<?xml"), sitemap.status)
 
 // --- úklid --------------------------------------------------------------------
 console.log("\n== úklid ==");
-for (const c of ["team", "season", "match", "person", "player"]) {
+for (const c of ["team", "season", "match", "person", "player", "article"]) {
   await db.collection(c).deleteMany({ $or: [{ name: /SMOKE/ }, { competition: /SMOKE/ }, { surname: "Smoke" }, { seasonId: season.body.id }] });
 }
 await db.collection("sys_identity").deleteMany({ email: ADMIN.email });

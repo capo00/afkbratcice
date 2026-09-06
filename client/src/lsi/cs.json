@@ -50,6 +50,13 @@
       "note": "${categoryList} hraje soutěž bez tabulky."
     }
   },
+  "news": {
+    "eyebrow": "Co je nového",
+    "header": "Aktuality",
+    "all": "Všechny novinky",
+    "empty": "Zatím tu není žádná novinka.",
+    "missing": "Novinku se nepodařilo najít."
+  },
   "teams": {
     "eyebrow": "Jeden klub, jedny barvy",
     "header": "Naše mužstva",

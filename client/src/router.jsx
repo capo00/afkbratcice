@@ -6,6 +6,8 @@ import { PAGE_CODE_LIST } from "./content/pages.js";
 // Routy se načítají **lazy**: kdo přijde na home, nemá stahovat kód fotogalerie ani
 // administrace. `Utils.Component.lazy` je uu5 obálka nad `React.lazy`.
 const Home = Utils.Component.lazy(() => import("./routes/home.jsx"));
+const Novinky = Utils.Component.lazy(() => import("./routes/novinky.jsx"));
+const Novinka = Utils.Component.lazy(() => import("./routes/novinka.jsx"));
 const Teams = Utils.Component.lazy(() => import("./routes/teams.jsx"));
 const Team = Utils.Component.lazy(() => import("./routes/team.jsx"));
 const TeamMatches = Utils.Component.lazy(() => import("./routes/team-matches.jsx"));
@@ -36,6 +38,11 @@ const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
 const ROUTE_MAP = {
   "": <Home />,
   home: { redirect: "" },
+
+  // `/home-<n>` ze starého webu přesměrovává server sem s `pageIndex`, takže stránkování
+  // novinek musí být v adrese, ne ve stavu obrazovky.
+  novinky: <Novinky />,
+  novinka: <Novinka />,
 
   muzstva: <Teams />,
   muzstvo: <Team />,

@@ -9,6 +9,7 @@ import statsApi from "./stats/api.js";
 import personApi from "./person/api.js";
 import playerApi from "./player/api.js";
 import coachApi from "./coach/api.js";
+import articleApi from "./article/api.js";
 import galleryApi from "./gallery/api.js";
 import fileApi from "./file/api.js";
 import appConfigApi from "./app-config/api.js";
@@ -60,6 +61,7 @@ export default {
   ...personApi,
   ...playerApi,
   ...coachApi,
+  ...articleApi,
   ...galleryApi,
   ...fileApi,
   ...appConfigApi,

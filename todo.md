@@ -11,8 +11,8 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
-| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, přihlášení z knihovny | `article`, `/rss`, ID-based přesměrování |
-| Klient — veřejná část | rám, 10 primitivů, self-hostovaná písma, **české adresy**, home, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky, kontakt, 404 | aktuality, ke stažení, profil uživatele |
+| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny | ID-based přesměrování (čeká na migraci) |
+| Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky, kontakt, 404 | ke stažení, profil uživatele |
 | Klient — administrace | – | **všech 12 obrazovek** |
 | Provoz | dev proti lokálnímu Mongu | GCS, OAuth, SMTP, migrace, deploy |
 
@@ -22,20 +22,7 @@ Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 
 
 ## 1. Obsah
 
-### 1.1 Entita `article` (aktuality)
-
-Poslední velká díra ve veřejné části — a jediné místo, které dnes **vede z odkazu do
-prázdna**: `legacy-redirect` posílá `/home-<n>` na `/novinky?pageIndex=…`, takže
-stránkování novinek ze starého webu končí na 404.
-
-- `server/article/{dao,crud,api}.js` — obsah je **`sectionList[].content`** (`uu5String`),
-  `list` ho nevrací. Kontrakt: [`api.md`](./design/api.md), 2.8.
-- Klient: routy `novinky?pageIndex` a `novinka?id`, blok **Aktuality na home** (dnes na
-  stránce chybí úplně), `admin/articles`. Vykreslení přes `Uu5.Content`, editace
-  `uu5codekitg01` nad každou sekcí.
-- `GET /rss` — má co publikovat teprve s články.
-
-### 1.2 Text obsahových stránek
+### 1.1 Text obsahových stránek
 
 Stránky **fungují** (`/historie`, `/hymna`, `/vybor`, `/treninky`, `/tymove-fotky`), ale
 mají v `client/src/content/pages.js` jen kostry — **text se má přepsat z běžícího
@@ -56,7 +43,10 @@ závislost z bodu 5.2.
 - **Odběr kalendáře** — `GET /calendar/team-<id>.ics` server umí, klient na něj zatím
   nikde neodkazuje (patří k zápasům mužstva).
 - **SEO za běhu** — `document.title` a OG tagy na detailu zápasu, článku a alba
-  ([`frontend.md`](./design/frontend.md), 10).
+  ([`frontend.md`](./design/frontend.md), 10). Sitemapa i RSS už české adresy vypisují
+  správně, tohle je poslední kus SEO, který chybí.
+- **Titulní foto článku** — `article/create|update` binárku uloží, ale nahrát ji jde teprve
+  z `admin/articles`, a GCS zatím není nastavené (5.1).
 
 ---
 
@@ -73,7 +63,7 @@ Nic z toho zatím není. Sedm z nich je podle návrhu jen konfigurační objekt 
 | `admin/persons` | – |
 | `admin/players` | členství v týmech (`addTeam` / `endTeam`) |
 | `admin/coaches` | – |
-| `admin/articles` | `ContentEditModal` nad `content` |
+| `admin/articles` | `ContentEditModal` nad `sectionList`; `setState` jako tlačítko, ne pole formuláře. **Bez ní se novinka nedá založit jinak než přímo v Mongu** — entita i veřejné obrazovky hotové jsou |
 | `admin/galleries` | hromadný upload fotek (sekvenčně, dvě binárky na fotku) |
 | `admin/files` | **vlastní `Crud` nad `BinaryProvider`** — `BinaryCrud` je nerozšiřitelná a chybí jí `category`/`date` |
 | `admin/pages` | `ContentEditModal` nad `sectionList` |
@@ -99,10 +89,9 @@ Tohle je odsouhlasené a zapsané v návrhu, jen to ještě nikdo nenapsal.
 `Crud.listPage()` a `binary/list`, který ho už vrací. Není to změna `find()` — ta by
 rozbila každý dao v každé appce kvůli číslu, které potřebují jen list use case.
 
-Zbývá **přepnout list use case afkbratcice** tam, kde se bude reálně stránkovat:
-`article/list` (novinky), `gallery/listPhotos` (album po migraci ~2 600 fotek) a seznamy
-v administraci. Dokud se nepřepnou, jedou na jednu dávku `pageSize: 1000` — což pro dnešní
-objem stačí.
+**`article/list` už na tom jede** — je to první a zatím jediný stránkovaný seznam appky.
+Zbývá `gallery/listPhotos` (album po migraci ~2 600 fotek) a seznamy v administraci.
+Dokud se nepřepnou, jedou na jednu dávku `pageSize: 1000` — což pro dnešní objem stačí.
 
 ### 4.2 `team.desc`, `photoUri`, `photoDesc`
 
@@ -137,9 +126,12 @@ po přihlášení z `app-contextu`. Pravidla a pojistky: [`api.md`](./design/api
 
 ### 5.2 Chybějící klientské závislosti
 
-`Uu5Bricks` (časová osa historie) a `uu5codekitg01` (editace obsahu) nejsou
-v `client/package.json`. Nestačí je přidat do závislostí — musí i **do import mapy
-`uu5loaderg01`** v `createViteConfig()`, protože uu5 knihovny se nebundlují (riziko #20).
+`uu5codekitg01` **je v pořádku**: v `client/package.json` sice není, ale do import mapy
+`uu5loaderg01` se dostane přes tranzitivní závislosti `caio-ui` a v prohlížeči se načítá
+(ověřeno v konzoli, verze 2.8.3 — víc registr `repo.plus4u.net` nenabízí).
+
+Chybí `Uu5Bricks` (časová osa historie). Nestačí ho přidat do závislostí — musí i **do
+import mapy** v `createViteConfig()`, protože uu5 knihovny se nebundlují (riziko #20).
 
 ### 5.3 Hero bez fotky
 
@@ -161,7 +153,8 @@ Zapsáno, ať se to znovu neotvírá.
   [`migration.md`](./design/migration.md), MySQL dump zatím není k dispozici.
   Vzniká při ní `migration_map`, bez které nejdou dodělat **ID-based přesměrování**
   (`/novinka-<n>`, `/informace-o-zapase-<n>`, `/fotogalerie-<n>`) — statická fungují.
-  Kroky 9 a 11 (články, stránky) jdou až po entitách z kapitoly 1.
+  Krok 9 (články) už má kam migrovat; krok 11 (stránky) počká na ECC — do té doby je to
+  přepis do `client/src/content/pages.js`, ne migrace.
 - **Etapa 12 — deploy na GAE.** GCP projekty existují (prod + dev), env se doplní později.
 - **Regresní test tabulky** proti v0 `/api/getTable` za poslední tři sezóny — podle plánu
   je to součást etapy, ne dodatek. Jde udělat teprve s migrovanými daty.
@@ -172,19 +165,17 @@ Zapsáno, ať se to znovu neotvírá.
 
 Server nemá **žádné automatické testy**; `npm run smoke` je smoke test proti běžícímu
 serveru a reálnému Mongu (bodování tabulky, autorizace včetně rozsahové role, pohledy na
-zápasy, ochrana osobních údajů, přesměrování, iCal, sitemap). Je to náhrada za integrační
-testy, ne za ně.
+zápasy, ochrana osobních údajů, novinky vč. publikačního okna a RSS, přesměrování, iCal,
+sitemap). Je to náhrada za integrační testy, ne za ně.
 
 Co by mělo přibýt, až se ustálí rozsah:
 
 - jednotkové testy `services/table.js` (bodování 3/2/1/0, `hasPenalties`, pořadí formy,
   vzájemné zápasy jako druhé kritérium) — je to nejcitlivější kus serveru,
 - jednotkové testy `services/stats.js` a `services/season.js` (`yearFrom` přes přelom roku),
-- rozšířit `smoke.js` o galerii, statistiky hráčů a nové filtry (`playerId`, `idList`).
+- rozšířit `smoke.js` o galerii a statistiky hráčů.
 
-Smoke test je srovnaný s rozhodnutími (50 ok / 0 fail): sezóna v něm má `hasPenalties`,
-přesměrování testuje `/tymove_fotky` místo `/historie` (ta se už nepřesměrovává) a routa
-novinek je česky.
+Stav: **64 ok / 0 fail**.
 
 Klient testy nemá a zatím se neověřuje jinak než spuštěním. **Ikony a texty se ověřují
 v prohlížeči** — neexistující GDS ikona se vykreslí jako prázdné místo se správnou šířkou
@@ -194,10 +185,9 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 
 ## Doporučené pořadí
 
-1. **`article` + aktuality + `/rss`** — nejsledovanější obsah po zápasech a poslední
-   odkaz, který dnes vede do prázdna.
-2. **Administrace** — bez ní redakce nemá jak cokoli naplnit; `admin/files` odblokuje
-   „Ke stažení", `admin/seasons` `hasPenalties`.
-3. **Text obsahových stránek** z v0 — je to přepis, ne vývoj, takže může běžet vedle.
-4. **Hero fotka a GCS** — vizuál a média do provozuschopného stavu.
-5. **Migrace + deploy.**
+1. **Administrace** — teď je to jediná věc, která drží obsah: novinky, alba i soupisky jdou
+   dnes naplnit jen zápisem přímo do Monga. `admin/articles` odblokuje redakci,
+   `admin/files` „Ke stažení", `admin/seasons` `hasPenalties`.
+2. **Text obsahových stránek** z v0 — je to přepis, ne vývoj, takže může běžet vedle.
+3. **Hero fotka a GCS** — vizuál a média do provozuschopného stavu.
+4. **Migrace + deploy.**
