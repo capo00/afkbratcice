@@ -400,18 +400,20 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `article/list` | get | – | `{ state, matchId, tag, pageInfo }` | `{ itemList, pageInfo }` – **bez `content`** |
-| `article/get` | get | – | `{ id }` | `article` včetně `content` (+ `match`, pokud je navázán) |
-| `article/create` | post | NEWS | `{ name, perex, content, author, matchId, priority, publishTime, photograph: File }` | `article` |
+| `article/list` | get | – | `{ state, matchId, tag, pageInfo }` | `{ itemList, pageInfo }` – **bez `sectionList`** |
+| `article/get` | get | – | `{ id }` | `article` včetně `sectionList` (+ `match`, pokud je navázán) |
+| `article/create` | post | NEWS | `{ name, perex, sectionList, author, matchId, priority, publishTime, photograph: File }` | `article` |
 | `article/update` | post | NEWS | `{ id, ... , photograph: File \| null }` | `article` |
 | `article/setState` | post | NEWS | `{ id, state }` | `article` |
 | `article/delete` | post | NEWS | `{ id }` | `{}` |
 
-- **Obsah je pole `content` typu `uu5String`** (rozhodnuto 2026-09-06), ne vazba na ECC
-  stránku. Edituje se zatím **jako kód**, ne WYSIWYG — `uu5codekitg01` nad textovým polem
-  ve formuláři článku. Rich-text přijde s ECC; datový model se kvůli tomu měnit nebude,
-  migrace je „vytvoř stránku s jednou sekcí z `content`".
-- `article/list` `content` **nevrací** — výpis novinek potřebuje perex, ne celé texty;
+- **Obsah je `sectionList`** — pole objektů sekcí, zatím s jediným klíčem `content`
+  (`uu5String`) —, ne vazba na ECC stránku. Objekt, ne holý string: nadpis sekce, kotva
+  nebo varianta podkladu se pak přidají bez migrace, a `sectionList` je přesně jednotka,
+  se kterou ECC pracuje, takže pozdější přechod je rozpad pole na dokumenty.
+- Edituje se zatím **jako kód**, ne WYSIWYG — `uu5codekitg01` nad každou sekcí. Vykresluje
+  se přes **`Uu5.Content`**.
+- `article/list` `sectionList` **nevrací** — výpis novinek potřebuje perex, ne celé texty;
   u dvaceti článků by to byl řádově větší přenos zadarmo.
 - `article/delete` maže i titulní fotku.
 - `article/list` bez `state` vrací pro nepřihlášené jen `state: "published"`
@@ -581,7 +583,7 @@ verzi. Interní `objectName` se z `dtoOut` odstraňuje.
 > což `BinaryStore` neumí.
 
 **Soubory ke stažení nejsou holá `BinaryCrud`.** `UiElements.BinaryCrud` už kolekci umí
-(`collection="file"`, doplněno v `caio-ui` 6. 9.), ale je záměrně **nerozšiřitelná přes
+(`collection="download"`, doplněno v `caio-ui` 6. 9.), ale je záměrně **nerozšiřitelná přes
 props** — a `file/list` filtruje podle `category` a řadí podle `date`, což jsou pole, která
 by tak nikdo nezapsal a veřejná stránka „Ke stažení" by zůstala nesekcovaná. `admin/files`
 si proto skládá **vlastní `Crud` konfiguraci nad `UiElements.BinaryProvider`** se dvěma poli

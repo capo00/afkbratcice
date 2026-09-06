@@ -62,7 +62,7 @@ function Hero() {
           flexWrap: "wrap",
         })}
       >
-        <Button size="xl" onClick={() => setRoute("teams")} lsi={lsi("home", "hero", "teams")} />
+        <Button size="xl" onClick={() => setRoute("muzstva")} lsi={lsi("home", "hero", "teams")} />
         <Button size="xl" variant="outline" href="#program" lsi={lsi("home", "hero", "program")} />
       </div>
     </Section>
@@ -119,11 +119,7 @@ function Stats() {
 }
 
 function CtaBand() {
-  const { appConfig } = useApp();
-  // Kontaktní stránka (`page?code=contact`) čeká na entitu `page`, takže výzva míří rovnou
-  // na klubový e-mail z konfigurace. Bez e-mailu se tlačítko **neukáže** — pruh s výzvou
-  // a mrtvým tlačítkem je horší než pruh se samotnou výzvou.
-  const email = appConfig?.contact?.email;
+  const [, setRoute] = useRoute();
 
   return (
     <Section variant="red">
@@ -134,7 +130,7 @@ function CtaBand() {
             <Lsi import={importLsi} path={["home", "cta", "perex"]} />
           </Uu5Elements.Text>
         </div>
-        {email ? <Button onRed size="xl" href={`mailto:${email}`} lsi={lsi("home", "cta", "button")} /> : null}
+        <Button onRed size="xl" onClick={() => setRoute("kontakt")} lsi={lsi("home", "cta", "button")} />
       </div>
     </Section>
   );

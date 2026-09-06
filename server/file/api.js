@@ -13,7 +13,7 @@ export default {
     validator: validate(shape({ category: string(), pageInfo: pageInfo() })),
     fn: async ({ dtoIn }) => {
       const itemList = await BinaryStore.Binary.list({
-        collection: Config.BINARY_COLLECTION.FILE,
+        collection: Config.BINARY_COLLECTION.DOWNLOAD,
         pageInfo: dtoIn.pageInfo,
       });
       const filtered = dtoIn.category ? itemList.filter((item) => item.category === dtoIn.category) : itemList;

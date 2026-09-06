@@ -47,7 +47,8 @@ const binaryCollectionMap = {
   [Config.BINARY_COLLECTION.ARTICLE]: { write: { profileList: Config.NEWS } },
   [Config.BINARY_COLLECTION.GALLERY]: { write: { profileList: Config.GALLERY } },
   [Config.BINARY_COLLECTION.PAGE]: { write: { profileList: Config.PAGES } },
-  [Config.BINARY_COLLECTION.FILE]: { write: { profileList: Config.PAGES } },
+  // `read` se schválně nevyplňuje = veřejné čtení, stejně jako u ostatních kolekcí.
+  [Config.BINARY_COLLECTION.DOWNLOAD]: { write: { profileList: Config.PAGES } },
 };
 
 export default {

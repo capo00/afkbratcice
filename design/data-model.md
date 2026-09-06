@@ -158,7 +158,7 @@ erDiagram
     }
     SYS_BINARY {
         string   id PK
-        enum     collection "sys|team|person|article|gallery|page|file"
+        enum     collection "sys|team|person|article|gallery|page|download"
         string   refId FK "vlastník záznamu"
         string   name "vč. přípony z mimeType"
         string   objectName "GCS, unique, mimo dtoOut"
@@ -624,7 +624,7 @@ takže aplikace může přidat vlastní atributy bez zásahu do knihovny.
 
 | Pole | Typ | Původ | Popis |
 |---|---|---|---|
-| `collection` | string | knihovna | **Jmenný prostor s vlastní autorizací** – `sys`, `team`, `person`, `article`, `gallery`, `page`, `file`. Povinné. |
+| `collection` | string | knihovna | **Jmenný prostor s vlastní autorizací** – `sys`, `team`, `person`, `article`, `gallery`, `page`, `download`. Povinné. |
 | `refId` | string | knihovna | Vazba na vlastníka (`galleryId`, `articleId`, `teamId`, `personId`) |
 | `name` | string | knihovna | Název souboru včetně přípony odvozené z `mimeType`; zapisuje se i do `Content-Disposition` objektu |
 | `objectName` | string | knihovna | Interní jméno objektu v bucketu (unikátní index) – **z `dtoOut` se odstraňuje** |

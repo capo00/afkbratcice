@@ -18,10 +18,10 @@ const { theme } = Config;
 // (`hasTable: false`, typicky stará garda) — prázdná záložka by jen mátla.
 
 const TAB_LIST = [
-  { route: "team", code: "roster" },
-  { route: "team/matches", code: "matches" },
-  { route: "team/table", code: "table", needsTable: true },
-  { route: "team/stats", code: "stats" },
+  { route: "muzstvo", code: "roster" },
+  { route: "muzstvo/zapasy", code: "matches" },
+  { route: "muzstvo/tabulka", code: "table", needsTable: true },
+  { route: "muzstvo/statistiky", code: "stats" },
 ];
 
 const TeamShell = createVisualComponent({

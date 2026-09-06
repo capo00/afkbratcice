@@ -101,37 +101,38 @@ Podrobně sekce 2.5.
 
 ### 2.1 Veřejné
 
+**Adresy jsou české** (rozhodnuto 2026-09-06) — je to web českého klubu a hlavně jsou tím
+shodné s v0, takže osm starých URL sedí **bez jediného přesměrování**.
+
 | Routa | Obrazovka | Parametry |
 |---|---|---|
-| `home` | Úvodní stránka | – |
-| `news` | Seznam novinek | `pageIndex` |
-| `article` | Detail článku | `id` |
-| `teams` | Přehled mužstev | – |
-| `team` | Soupiska týmu | `id`, `seasonId` |
-| `team/matches` | Zápasy týmu | `id`, `seasonId`, `round` (doskrolování na kolo) |
-| `team/table` | Tabulka soutěže | `id`, `seasonId` |
-| `team/stats` | Statistiky hráčů | `id`, `seasonId` |
-| `round` | Kolo v soutěži – všechny zápasy | `seasonId`, `round` |
-| `match` | Detail zápasu | `id` |
-| `player` | Profil hráče | `id` |
-| `gallery` | Seznam alb | `pageIndex` |
-| `gallery/detail` | Album (lightbox) | `id` |
-| `files` | Ke stažení | `category` |
-| `page` | Obsahová stránka | `code` (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) |
-| `profile` | Profil přihlášeného uživatele | – |
-| `notFound` | 404 s odkazy na hlavní sekce | – |
+| `` (kořen) | Úvodní stránka | – |
+| `novinky` | Seznam novinek | `pageIndex` |
+| `novinka` | Detail článku | `id` |
+| `muzstva` | Přehled mužstev | – |
+| `muzstvo` | Soupiska týmu | `id`, `seasonId` |
+| `muzstvo/zapasy` | Zápasy týmu | `id`, `seasonId`, `round` (doskrolování na kolo) |
+| `muzstvo/tabulka` | Tabulka soutěže | `id`, `seasonId` |
+| `muzstvo/statistiky` | Statistiky hráčů | `id`, `seasonId` |
+| `kolo` | Kolo v soutěži – všechny zápasy | `seasonId`, `round` |
+| `zapas` | Detail zápasu | `id` |
+| `hrac` | Profil hráče | `id` |
+| `fotogalerie` | Seznam alb | `pageIndex` |
+| `fotogalerie/album` | Album (lightbox) | `id` |
+| `ke-stazeni` | Ke stažení | `category` |
+| `historie`, `hymna`, `vybor`, `treninky`, `tymove-fotky` | Obsahové stránky | – |
+| `kontakt` | Kontakt (data z `appConfig`) | – |
+| `profil` | Profil přihlášeného uživatele | – |
+| `*` | 404 s odkazy na hlavní sekce | – |
 
-Pro čitelné odkazy mají obsahové stránky i vlastní aliasy v `routeMap`
-(`history`, `hymn`, `contact`, `board`), které se interně přemapují na `page?code=...`.
-Obrazovka `page` volá `page/get?code=<code>` a vykreslí `sectionList` — jednu `Section`
-na položku, obsah přes `Utils.Uu5String.toChildren(section.content)`. Žádný překlad
-`code → id` — use case bere `code` přímo (viz [api.md](./api.md), 2.9), takže riziko #12
-z README padá i s `UiEcc`.
+**Obsahové stránky jsou natvrdo v kódu** (`client/src/content/pages.js`) jako `uu5String`
+a entita `page` **se zatím nedělá** — počká na ECC (viz [README.md](./README.md), sekce 2).
+Jedna obrazovka `routes/page.jsx` je vykresluje všechny; kterou, říká routa, ne parametr.
+Obsah renderuje **`Uu5.Content`**.
 
-**Na kódy stránek míří `server/legacy-redirect.js`** (`/historie` → `/page?code=history`,
-`/vybor` → `/page?code=board`, `/tymove_fotky` → `/page?code=team-photos`, …). Jsou tedy
-součástí veřejného kontraktu, ne interním detailem: přejmenovat `code` znamená rozbít
-přesměrování ze starého webu.
+Kód stránky **je zároveň její adresa**, takže je součástí veřejného kontraktu:
+přejmenovat `historie` znamená rozbít odkaz, který na webu žije od roku 2011. Jediná
+výjimka je `/tymove_fotky` z v0 — podtržítko se přesměrovává na `tymove-fotky`.
 
 **Poznámka k předloze:** prototyp má jen `/`, `/historie`, `/muzstva`, `/fotogalerie`
 a `/kontakt`. Routa `teams` odpovídá jeho `/muzstva`, `page?code=history` jeho `/historie`
@@ -591,7 +592,7 @@ Bez `children` je `Crud` read-only tabulka. Výběr řádků odemkne hromadné m
 ale je záměrně nerozšiřitelná přes props — a veřejná stránka „Ke stažení" seskupuje podle
 `category` a řadí podle `date`, což jsou pole, která by tak nikdo nezapsal. `admin/files`
 si proto skládá **vlastní `Crud` konfiguraci nad `UiElements.BinaryProvider`** (kolekce
-`file`) se dvěma poli navíc: `category` jako `Uu5Forms.Select` z `appConfig.fileCategoryList`
+`download`) se dvěma poli navíc: `category` jako `Uu5Forms.Select` z `appConfig.fileCategoryList`
 a `date`. Zbytek sloupců (název, velikost, typ, odkaz) se opíše z `BinaryCrud` —
 je to přesně ta cesta, kterou README `caio-ui` pro tenhle případ předepisuje.
 

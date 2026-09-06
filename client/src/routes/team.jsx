@@ -32,7 +32,7 @@ function PlayerTile({ player, isNameHidden }) {
   const name = playerName(player, isNameHidden);
 
   return (
-    <Card onClick={() => setRoute("player", { id: player.id })}>
+    <Card onClick={() => setRoute("hrac", { id: player.id })}>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12 })}>
         {player.person?.photoUri ? (
           <UiElements.Image

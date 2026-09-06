@@ -149,7 +149,7 @@ const Gallery = createVisualComponent({
                 <GalleryTile
                   key={gallery.id}
                   gallery={gallery}
-                  onClick={() => setRoute("gallery/detail", { id: gallery.id })}
+                  onClick={() => setRoute("fotogalerie/album", { id: gallery.id })}
                 />
               ))}
             </div>

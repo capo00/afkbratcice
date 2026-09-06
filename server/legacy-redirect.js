@@ -6,17 +6,14 @@
 // `migration_map`, která vznikne až s migrací -- do té doby by vedla nikam, takže se
 // neregistrují vůbec (design/impl-plan-server.md, rozsah dávky).
 
+// Routy nové appky jsou **české a shodné s v0** (`/historie`, `/hymna`, `/vybor`,
+// `/treninky`, `/muzstva`, `/fotogalerie`, `/ke-stazeni`), takže se pro ně žádné pravidlo
+// nepíše — adresa zůstává platná a SPA fallback ji obslouží sám. Zbývá jen to, kde se
+// adresa opravdu liší.
 const STATIC_REDIRECT = {
   "/home": "/",
-  "/historie": "/page?code=history",
-  "/hymna": "/page?code=hymn",
-  "/kontakt": "/page?code=contact",
-  "/vybor": "/page?code=board",
-  "/treninky": "/page?code=training",
-  "/tymove_fotky": "/page?code=team-photos",
-  "/muzstva": "/teams",
-  "/fotogalerie": "/gallery",
-  "/ke-stazeni": "/files",
+  // v0 má podtržítko, nová routa pomlčku.
+  "/tymove_fotky": "/tymove-fotky",
   "/prihlaseni": "/login.html",
   "/zapomenute-heslo": "/login.html",
 };
@@ -40,7 +37,7 @@ function legacyRedirect(req, res, next) {
   if (target) return res.redirect(301, target);
 
   const homePage = path.match(HOME_PAGE);
-  if (homePage) return res.redirect(301, `/news?pageIndex=${Math.max(0, Number(homePage[1]) - 1)}`);
+  if (homePage) return res.redirect(301, `/novinky?pageIndex=${Math.max(0, Number(homePage[1]) - 1)}`);
 
   if (DISCUSSION.test(path)) return res.redirect(301, "/");
   if (GONE.some((re) => re.test(path))) return res.status(410).send("410 Gone");

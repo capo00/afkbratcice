@@ -66,7 +66,9 @@ const BINARY_COLLECTION = {
   ARTICLE: "article",
   GALLERY: "gallery",
   PAGE: "page",
-  FILE: "file",
+  // Soubory ke stažení (rozpisy zápasů, formuláře). Čte se veřejně -- co se sem nahraje,
+  // je určené ke stažení komukoli.
+  DOWNLOAD: "download",
 };
 
 // Rozlišení uvnitř kolekce.

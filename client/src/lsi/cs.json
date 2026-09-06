@@ -13,7 +13,8 @@
       "gallery": "Fotogalerie",
       "files": "Ke stažení",
       "contact": "Kontakt",
-      "history": "Historie"
+      "history": "Historie",
+      "club": "Klub"
     }
   },
   "home": {
@@ -203,5 +204,25 @@
     "eyebrow": "Kolo v soutěži",
     "empty": "V tomhle kole nejsou žádné zápasy.",
     "missing": "Chybí sezóna nebo číslo kola."
+  },
+  "page": {
+    "missing": "Stránka neexistuje.",
+    "name": {
+      "historie": "Historie",
+      "hymna": "Hymna",
+      "vybor": "Výbor AFK",
+      "treninky": "Tréninky",
+      "tymove-fotky": "Týmové fotky"
+    }
+  },
+  "contact": {
+    "eyebrow": "Spojte se s námi",
+    "header": "Kontakt",
+    "address": "Adresa",
+    "email": "E-mail",
+    "phone": "Telefon",
+    "empty": "Kontaktní údaje zatím nejsou vyplněné.",
+    "noMap": "Mapa se ukáže, jakmile budou v konfiguraci vyplněné souřadnice hřiště.",
+    "showOnMap": "Zobrazit na mapě"
   }
 }

@@ -7,6 +7,7 @@ import Router from "./router.jsx";
 import Footer from "./components/layout/footer.jsx";
 import NoticeBar from "./components/layout/notice-bar.jsx";
 import { AppProvider, useApp } from "./core/app-context.jsx";
+import { PAGE_CODE_LIST } from "./content/pages.js";
 
 const { theme } = Config;
 
@@ -48,6 +49,9 @@ function useTop() {
   const identityItem = useIdentityItem();
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
   const galleryLabel = useLsi(importLsi, ["header", "nav", "gallery"]);
+  const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
+  const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
+  const pageLsi = useLsi(importLsi, ["page", "name"]);
 
   return {
     logo: { uri: Config.asset.logo, href: "" },
@@ -81,20 +85,34 @@ function useTop() {
     menu: {
       itemList: [
         {
-          href: "teams",
+          href: "muzstva",
           children: teamsLabel,
           significance: "subdued",
           colorScheme: "building",
           // Podpoložky = kategorie z aktuálního ročníku, každá rovnou na soupisku svého
           // mužstva. Routa je klíčovaná `teamId`, ne kategorií.
           itemList: categoryList.map((category) => ({
-            href: `team?id=${category.teamId}`,
+            href: `muzstvo?id=${category.teamId}`,
             children: category.teamName ?? category.competition,
           })),
         },
         {
-          href: "gallery",
+          href: "fotogalerie",
           children: galleryLabel,
+          significance: "subdued",
+          colorScheme: "building",
+        },
+        {
+          // Obsahové stránky pod jednou položkou — samostatně by jich v liště bylo pět
+          // a Mužstva by se vytlačila do hamburgeru i na desktopu.
+          children: clubLabel,
+          significance: "subdued",
+          colorScheme: "building",
+          itemList: PAGE_CODE_LIST.map((code) => ({ href: code, children: pageLsi[code] })),
+        },
+        {
+          href: "kontakt",
+          children: contactLabel,
           significance: "subdued",
           colorScheme: "building",
         },

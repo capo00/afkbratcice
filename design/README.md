@@ -110,11 +110,14 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 | **Implementace UI** | **Výhradně `uu5g05` + `caio-ui`.** Vzhled se ladí **propsy** komponent, ne přestylováním; `className` nad uu5 komponentou jen tam, kde prop neexistuje, a vždy se zápisem do `docs/decisions.md`. Žádný Tailwind, žádné kopírování kódu z předlohy. |
 | **uu5g04** | **Zakázané.** Nic se na g04 nenavrhuje ani neimplementuje — ani jako varianta. Chybí-li komponenta, hledá se v uu5g05 řadě (`uu5g05-elements`, `Uu5Bricks`, `uu5tilesg02`, `uu5g05-forms`), jinak se napíše vlastní nad uu5g05. |
 | Rozsah | Jádro dle ER diagramu + **fotogalerie** + **statické obsahové stránky** (historie, hymna, kontakt, výbor). Klubová kasa (pokladna, pokuty, příjmy/výdaje) a diskuze **nejsou** v rozsahu. |
-| **Obsah článku** | Jeden `uu5String` v poli `article.content` (rozhodnuto 2026-09-06). Žádné ECC. |
-| **Obsah stránky** | `page.sectionList` – **pole objektů sekcí vložené v dokumentu**, zatím s jediným klíčem `content` (`uu5String`). Objekt, ne holý string: nadpis, kotva nebo varianta podkladu se pak přidají bez migrace. Perex je samostatné pole `desc`. |
+| **Obsah článku** | `article.sectionList` – pole objektů sekcí, zatím s jediným klíčem `content` (`uu5String`). Objekt, ne holý string: nadpis, kotva nebo varianta podkladu se pak přidají bez migrace. Perex je samostatné pole `desc`. |
+| **Obsah stránky** | **Natvrdo v kódu** (`client/src/content/pages.js`) jako `uu5String`; entita `page` **se nedělá** a počká na ECC (rozhodnuto 2026-09-06). Obsahová stránka je přesně to, co ECC řeší — stavět kvůli mezidobí druhou polovinu téhož by znamenalo napsat editaci dvakrát. Text se do té doby mění v kódu a nasazuje s buildem. |
+| **Vykreslení obsahu** | `Uu5.Content` z `uu5g05` — na rozdíl od `Utils.Uu5String.toChildren()` řeší nesting level a `fallback`, takže nezmapovaná značka nezhodí celou stránku. |
+| **Adresy rout** | **České** (`/historie`, `/muzstva`, `/fotogalerie`, `/zapas`, …). Je to web českého klubu a hlavně jsou tím shodné s v0, takže osm starých URL sedí **bez jediného přesměrování**. |
 | **Editace obsahu** | Zatím **jako kód, ne WYSIWYG** – `uu5codekitg01`. Rich-text přijde s ECC a bude to výměna jednoho formulářového vstupu. |
-| Design ECC | **Ladí se samostatně** (od 2026-09-06) a web na něj nečeká. Až vznikne, migrace je rozpad `sectionList` na dokumenty `ecc_section`. |
-| Obsahové stránky | Entita `page` s `code` (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) – **ne** natvrdo v kódu klienta, jinak by je redakce nemohla měnit a `legacy-redirect` by neměl kam ukazovat. Obsah se seeduje z v0. |
+| Design ECC | **Ladí se samostatně** (od 2026-09-06). Články na něj nečekají; obsahové stránky ano. Až vznikne, migrace je rozpad `sectionList` na dokumenty `ecc_section` a přesun textu z `content/pages.js` do databáze — obojí beze změny tvaru obsahu. |
+| Kontakt | **Není obsahová stránka, ale data** — routa `/kontakt` skládá adresu, e-mail a telefon z `appConfig.contact` a mapu z `gps`. Mít je natvrdo a zároveň v konfiguraci by znamenalo dvě pravdy. |
+| Soubory ke stažení | Binární kolekce **`download`**, čtení veřejné. |
 | **Perex** | V celém modelu je to samostatné pole `desc` (`page.desc`, `team.desc`, `season.desc`), nikdy první sekce ani popisek fotky. |
 | Migrace | **Mimo rozsah této dávky.** Neimplementuje se; `migration.md` zůstává jako návrh na později. |
 | Pořadí kategorií | `["men","u18","u16","u14","u12","u10","u6","old"]` — od nejstarších, stará garda je výjimka na konci. |

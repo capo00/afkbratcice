@@ -1,6 +1,7 @@
 import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
+import { PAGE_CODE_LIST } from "./content/pages.js";
 
 // Routy se načítají **lazy**: kdo přijde na home, nemá stahovat kód fotogalerie ani
 // administrace. `Utils.Component.lazy` je uu5 obálka nad `React.lazy`.
@@ -15,30 +16,45 @@ const Round = Utils.Component.lazy(() => import("./routes/round.jsx"));
 const Player = Utils.Component.lazy(() => import("./routes/player.jsx"));
 const Gallery = Utils.Component.lazy(() => import("./routes/gallery.jsx"));
 const GalleryDetail = Utils.Component.lazy(() => import("./routes/gallery-detail.jsx"));
+const Page = Utils.Component.lazy(() => import("./routes/page.jsx"));
+const Kontakt = Utils.Component.lazy(() => import("./routes/kontakt.jsx"));
 const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
 
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
 //
-// Routy mužstva jsou **klíčované `teamId` v parametru**, ne kategorií: `team?id=<teamId>`
-// přežije i to, že kategorie letos není — jen se dostane do archivního režimu. Menu je
-// skládá za běhu ze `season/listCurrent`.
+// **Adresy jsou české** (rozhodnuto 2026-09-06). Je to web českého klubu — a hlavně jsou
+// tím shodné s v0, takže `/muzstva`, `/fotogalerie`, `/historie`, `/hymna`, `/vybor`,
+// `/treninky` i `/ke-stazeni` sedí bez jediného přesměrování a co je naindexované ve
+// vyhledávači, zůstane platné.
+//
 // Kanonická adresa úvodní stránky je **`/`, ne `/home`**: `server/legacy-redirect.js` posílá
 // `/home` (adresa z v0) natrvalo na `/`, takže kdyby klient renderoval home na `home`, každé
-// obnovení stránky by prošlo přesměrováním tam a zpátky. `home` proto zůstává jen jako alias
-// pro odkazy, které ho ještě používají.
+// obnovení stránky by prošlo přesměrováním tam a zpátky.
+//
+// Routy mužstva jsou **klíčované `teamId` v parametru**, ne kategorií: `muzstvo?id=<teamId>`
+// přežije i to, že kategorie letos není — jen se dostane do archivního režimu.
 const ROUTE_MAP = {
   "": <Home />,
   home: { redirect: "" },
-  teams: <Teams />,
-  team: <Team />,
-  "team/matches": <TeamMatches />,
-  "team/table": <TeamTable />,
-  "team/stats": <TeamStats />,
-  match: <Match />,
-  round: <Round />,
-  player: <Player />,
-  gallery: <Gallery />,
-  "gallery/detail": <GalleryDetail />,
+
+  muzstva: <Teams />,
+  muzstvo: <Team />,
+  "muzstvo/zapasy": <TeamMatches />,
+  "muzstvo/tabulka": <TeamTable />,
+  "muzstvo/statistiky": <TeamStats />,
+
+  zapas: <Match />,
+  kolo: <Round />,
+  hrac: <Player />,
+
+  fotogalerie: <Gallery />,
+  "fotogalerie/album": <GalleryDetail />,
+
+  kontakt: <Kontakt />,
+  // Obsahové stránky sdílí jednu obrazovku a rozlišuje je routa; seznam je zdroj pravdy
+  // v `content/pages.js`, aby se nová stránka přidávala na jednom místě.
+  ...Object.fromEntries(PAGE_CODE_LIST.map((code) => [code, <Page />])),
+
   "*": <NotFound />,
 };
 

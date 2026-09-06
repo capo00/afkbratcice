@@ -343,7 +343,7 @@ function MatchDetail({ matchId }) {
           action={
             <Uu5Elements.Button
               significance="subdued"
-              onClick={() => setRoute("round", { seasonId: match.seasonId, round: match.round })}
+              onClick={() => setRoute("kolo", { seasonId: match.seasonId, round: match.round })}
             >
               <Lsi import={importLsi} path={["match", "wholeRound"]} />
             </Uu5Elements.Button>

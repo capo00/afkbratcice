@@ -58,7 +58,7 @@ const Round = createVisualComponent({
             <Uu5Elements.Button
               icon="uugds-chevron-left"
               significance="subdued"
-              onClick={() => setRoute("team/matches", { id: category.teamId, seasonId })}
+              onClick={() => setRoute("muzstvo/zapasy", { id: category.teamId, seasonId })}
               tooltip="Zpět na zápasy mužstva"
             />
           ) : null}

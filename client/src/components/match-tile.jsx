@@ -75,7 +75,7 @@ const MatchTile = createVisualComponent({
     const result = outcome(match, ownTeamId);
     // Dlaždice je vstup na detail zápasu, pokud volající nechce jinak. Bez `match.id`
     // (třeba prázdná odpověď `getLast`) zůstane needitovatelná, ne rozklikávací do prázdna.
-    const handleClick = onClick ?? (match.id ? () => setRoute("match", { id: match.id }) : undefined);
+    const handleClick = onClick ?? (match.id ? () => setRoute("zapas", { id: match.id }) : undefined);
 
     const header = (
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" })}>

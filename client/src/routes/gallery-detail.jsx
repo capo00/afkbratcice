@@ -123,7 +123,7 @@ const GalleryDetail = createVisualComponent({
           <Uu5Elements.Button
             icon="uugds-chevron-left"
             significance="subdued"
-            onClick={() => setRoute("gallery")}
+            onClick={() => setRoute("fotogalerie")}
             tooltip="Zpět na alba"
           />
           <Heading bar={false}>{gallery?.name ?? "—"}</Heading>

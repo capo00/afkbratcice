@@ -14,7 +14,7 @@ import Button from "../components/layout/button.jsx";
 
 const LINKS = [
   { route: "", lsi: lsi("header", "nav", "home") },
-  { route: "teams", lsi: lsi("header", "nav", "teams") },
+  { route: "muzstva", lsi: lsi("header", "nav", "teams") },
 ];
 
 const NotFound = createVisualComponent({

@@ -462,7 +462,7 @@ flowchart TD
   gencol["Crud.generate(cfg) -> seriesList, columnList, sorterList, filterList"]:::caio
   geninp["Crud.generateInputs(cfg) -> pole Uu5Forms inputů"]:::caio
   ff["UiElements.FormFile -> Uu5Imaging.ImageInput | Uu5Forms.File"]:::caio
-  bprov["UiElements.BinaryProvider collection=file"]:::caio
+  bprov["UiElements.BinaryProvider collection=download"]:::caio
 
   spec1["admin/matches -- navíc modály<br/>Zapsat výsledek / Zapsat sestavu / Hromadně (JSON)"]:::own
   spec2["admin/articles + admin/pages<br/>navíc ContentEditModal (uu5codekitg01)"]:::own
