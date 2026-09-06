@@ -20,20 +20,23 @@ const PAGES = {
   historie: {
     name: "Historie klubu",
     desc: "Fotbal v Bratčicích od roku 1932 po dnešek.",
+    // Časová osa je `Uu5Bricks.VerticalTimeline` — hotová komponenta, nepíše se vlastní
+    // (design/frontend.md, 3.11.1). Je **lazy**, takže se její kód stáhne teprve na téhle
+    // stránce; do `client/package.json` přibyl `uu5bricksg01` a tím i do import mapy.
     content: `<uu5string/>
 <p>Doplnit úvodní odstavec o historii klubu — text z afkbratcice.cz, sekce Historie.</p>
 <h3>Milníky</h3>
-<ul>
-  <li><strong>1932</strong> — založení klubu</li>
-  <li><strong>1948</strong> — doplnit</li>
-  <li><strong>1972</strong> — doplnit</li>
-  <li><strong>1992</strong> — doplnit</li>
-  <li><strong>2005</strong> — doplnit</li>
-  <li><strong>2012</strong> — doplnit</li>
-  <li><strong>2022</strong> — doplnit</li>
-</ul>
-<p>Časová osa se z tohohle seznamu stane, jakmile budou v závislostech
-<code>Uu5Bricks</code> a jeho <code>VerticalTimeline</code> (todo.md, 5.2).</p>`,
+<Uu5Bricks.VerticalTimeline>
+  <Uu5Bricks.VerticalTimeline.Item label="1932 · Založení klubu" icon="uugds-favorites" colorScheme="primary" significance="highlighted">
+    Doplnit text k založení z afkbratcice.cz.
+  </Uu5Bricks.VerticalTimeline.Item>
+  <Uu5Bricks.VerticalTimeline.Item label="1948">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
+  <Uu5Bricks.VerticalTimeline.Item label="1972">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
+  <Uu5Bricks.VerticalTimeline.Item label="1992">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
+  <Uu5Bricks.VerticalTimeline.Item label="2005">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
+  <Uu5Bricks.VerticalTimeline.Item label="2012">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
+  <Uu5Bricks.VerticalTimeline.Item label="2022">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
+</Uu5Bricks.VerticalTimeline>`,
   },
 
   hymna: {

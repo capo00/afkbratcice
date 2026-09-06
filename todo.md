@@ -29,8 +29,7 @@ mají v `client/src/content/pages.js` jen kostry — **text se má přepsat z b�
 `afkbratcice.cz`**. Historii klubu, jména výboru ani slova hymny si nevymýšlíme.
 
 Entita `page` se **nedělá** a počká na ECC (viz [`README.md`](./design/README.md), sekce 2).
-Časová osa v historii je zatím obyčejný seznam — `Uu5Bricks.VerticalTimeline` chce
-závislost z bodu 5.2.
+Časová osa historie už je `Uu5Bricks.VerticalTimeline` a jede — jen s roky bez textu.
 
 ---
 
@@ -124,14 +123,17 @@ po přihlášení z `app-contextu`. Pravidla a pojistky: [`api.md`](./design/api
 | `GOOGLE_CLIENT_ID` / `SECRET`, `FACEBOOK_*` | přihlášení jen e-mailem a heslem |
 | `SMTP_HOST`, `MAIL_FROM`, `APP_URL` | reset hesla se nenabízí (`passwordResetEnabled: false`) |
 
-### 5.2 Chybějící klientské závislosti
+### 5.2 Velikost `public/libs` po přidání Uu5Bricks
 
-`uu5codekitg01` **je v pořádku**: v `client/package.json` sice není, ale do import mapy
-`uu5loaderg01` se dostane přes tranzitivní závislosti `caio-ui` a v prohlížeči se načítá
-(ověřeno v konzoli, verze 2.8.3 — víc registr `repo.plus4u.net` nenabízí).
+Závislosti jsou **hotové**: `uu5bricksg01` (časová osa historie) i `uu5codekitg01-forms@3.4.1`
+(editace obsahu) jsou v `client/package.json` a do import mapy se dostanou samy. Časová osa
+je ověřená v prohlížeči na `/historie`.
 
-Chybí `Uu5Bricks` (časová osa historie). Nestačí ho přidat do závislostí — musí i **do
-import mapy** v `createViteConfig()`, protože uu5 knihovny se nebundlují (riziko #20).
+Zbývá rozhodnout o velikosti: `uu5bricksg01` přitáhl dalších 28 `uu*` balíčků a `public/libs`
+narostlo na **~120 MB**. Největší kusy tenhle web nikdy nezobrazí —
+`uu_uubmldraw_iconsg04` (51 MB, ikony BML diagramů) a starý `uu5codekitg01` (18 MB, kterému
+se `caio-ui` už vyhnul). Vyřadit je jde přes `client/uu5-imports.json`, ale je to sázka:
+když si o ně za běhu někdo řekne, spadne to až na té obrazovce. Řešit až u deploye.
 
 ### 5.3 Hero bez fotky
 

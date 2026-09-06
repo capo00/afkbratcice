@@ -114,7 +114,7 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 | **Obsah stránky** | **Natvrdo v kódu** (`client/src/content/pages.js`) jako `uu5String`; entita `page` **se nedělá** a počká na ECC (rozhodnuto 2026-09-06). Obsahová stránka je přesně to, co ECC řeší — stavět kvůli mezidobí druhou polovinu téhož by znamenalo napsat editaci dvakrát. Text se do té doby mění v kódu a nasazuje s buildem. |
 | **Vykreslení obsahu** | `Uu5.Content` z `uu5g05` — na rozdíl od `Utils.Uu5String.toChildren()` řeší nesting level a `fallback`, takže nezmapovaná značka nezhodí celou stránku. |
 | **Adresy rout** | **České** (`/historie`, `/muzstva`, `/fotogalerie`, `/zapas`, …). Je to web českého klubu a hlavně jsou tím shodné s v0, takže osm starých URL sedí **bez jediného přesměrování**. |
-| **Editace obsahu** | Zatím **jako kód, ne WYSIWYG** – `uu5codekitg01`. Rich-text přijde s ECC a bude to výměna jednoho formulářového vstupu. |
+| **Editace obsahu** | Zatím **jako kód, ne WYSIWYG** – `uu5codekitg01-forms` (řada 3.x, editor Monaco). Rich-text přijde s ECC a bude to výměna jednoho formulářového vstupu. |
 | Design ECC | **Ladí se samostatně** (od 2026-09-06). Články na něj nečekají; obsahové stránky ano. Až vznikne, migrace je rozpad `sectionList` na dokumenty `ecc_section` a přesun textu z `content/pages.js` do databáze — obojí beze změny tvaru obsahu. |
 | Kontakt | **Není obsahová stránka, ale data** — routa `/kontakt` skládá adresu, e-mail a telefon z `appConfig.contact` a mapu z `gps`. Mít je natvrdo a zároveň v konfiguraci by znamenalo dvě pravdy. |
 | Soubory ke stažení | Binární kolekce **`download`**, čtení veřejné. |
@@ -156,7 +156,7 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 - `caio-ui` – `UiApp` (SpaProvider, Spa, Page, useTop, withRoute), `UiAuth` (SessionProvider,
   useSession, Unauthenticated, Unauthorized, IdentityItem), `UiElements` (Call, CrudContext,
   Crud, BinaryProvider, BinaryCrud, FormFile, Image). `UiEcc` **se nepoužívá** — viz sekce 2
-- `uu5richtextg01-elements` + `uu5codekitg01` (editor ECC sekcí), `uu5imagingg01-tools`
+- `uu5richtextg01-elements` + `uu5codekitg01-forms` (editor ECC sekcí), `uu5imagingg01-tools`
   (zmenšení a konverze obrázků na klientu před uploadem)
 
 **Provoz**
@@ -340,7 +340,7 @@ Pravidla:
 | 14 | **`caio-ui` nemá `exports` mapu** a `config.js` čte `process.env.OUTPUT_NAME`, které `createViteConfig` nedefinuje. | `ReferenceError: process is not defined`, ošklivé submodulové importy. | Importovat z root barrelu (`import { UiApp } from "caio-ui"`); `OUTPUT_NAME` si appka dodefinuje ve `vite.config.js` (`define`). |
 | 15 | **GCS negeneruje náhledy.** | Fotogalerie by stahovala originály. | Dvě binárky na fotku (náhled `w400` + plná `w1600`), zmenšení na klientu přes `uu5imagingg01-tools`. Viz sekce 3.1 a [data-model.md](./data-model.md), sekce 9. |
 | 16 | **Lokální tarbally.** `caio-server`, `caio-ui` a `caio-devkit` nejsou v registry; appka je konzumuje jako `file:../caio-architecture/…/dist/*.tgz` a samotné `npm install` novou verzi nevezme (npm ji má v cache). | Změna v knihovně se do appky nedostane. | Po každém `npm pack` v knihovně: `rm -rf node_modules/caio-ui && npm install --no-save --force file:…tgz` (postup v README `caio-ui`). |
-| 20 | **`Uu5Bricks` a `uu5codekitg01` nejsou v závislostech.** Časová osa historie stojí na `Uu5Bricks.VerticalTimeline`, editace obsahu na `uu5codekitg01`; ani jeden není v `client/package.json`. | Bez nich se komponenta za běhu nenajde. | Přidat mezi závislosti klienta **a** do import mapy `uu5loaderg01` v `createViteConfig()` — uu5 knihovny se nebundlují. Ověřit při etapě obsahu. |
+| 20 | ~~`Uu5Bricks` a `uu5codekitg01-forms` nejsou v závislostech~~ | – | **Vyřešeno 2026-09-07.** `uu5bricksg01` a `uu5codekitg01-forms@3.4.1` jsou v `client/package.json`; do import mapy je `createViteConfig()` dá sám (uzávěr `uu*` závislostí). Časová osa ověřená na `/historie`. Zbývá jen velikost: `public/libs` narostlo na ~120 MB, viz `todo.md` 5.2. |
 | 26 | ~~`Dao.createMany` vrací `ObjectId` a nechává v objektu `_id`~~ | – | **Vyřešeno 2026-09-06** v `caio-server` (`d2cc1d5`) — `createMany` vrací stejný tvar jako `create`; tarball přeinstalovaný. |
 
 ---

@@ -148,10 +148,10 @@ a `page?code=contact` jeho `/kontakt`; zbytek předloha nemá.
 | `admin/persons` | CRUD osob |
 | `admin/players` | CRUD hráčů, členství v týmech |
 | `admin/coaches` | CRUD trenérů a výboru |
-| `admin/articles` | CRUD článků; obsah `uu5String` v `uu5codekitg01` |
+| `admin/articles` | CRUD článků; obsah `uu5String` v `uu5codekitg01-forms` |
 | `admin/galleries` | CRUD alb, hromadný upload fotek |
 | `admin/files` | Soubory ke stažení – vlastní `Crud` nad `BinaryProvider` (viz 6.1) |
-| `admin/pages` | CRUD obsahových stránek; obsah `uu5String` v `uu5codekitg01` |
+| `admin/pages` | CRUD obsahových stránek; obsah `uu5String` v `uu5codekitg01-forms` |
 | `admin/identities` | Správa identit a `profileList` (jen ADMIN) |
 | `admin/config` | Konfigurace aplikace (jen ADMIN) |
 
@@ -342,7 +342,7 @@ Grid: `Uu5Elements.Grid` s `templateColumns={{ xs: "1fr", m: "repeat(3, 1fr)" }}
   se ale řadí chronologicky** — připínání je vlastnost webu, čtečka čeká nahoře to nejnovější.
 - Je-li vyplněn `matchId`, nad obsahem se zobrazí panel s výsledkem a odkazem na zápas.
 - Pro `newsEditor` a výš je v hlavičce akce **Upravit** – jeden modal s formulářem článku,
-  kde je `content` textové pole s `uu5codekitg01`. **Zatím se edituje jako kód, ne WYSIWYG**
+  kde je `content` textové pole s `uu5codekitg01-forms`. **Zatím se edituje jako kód, ne WYSIWYG**
   (rozhodnuto 2026-09-06); rich-text přijde s ECC a bude to výměna jednoho vstupu.
 
 ### 3.3 Přehled mužstev (`teams`)
@@ -418,7 +418,7 @@ s `Utils.Uu5String.toChildren(section.content)`. Členění na sekce je tedy zá
 vizuální rytmus stránky, ne jen datový detail — kronikář jím řídí, kde se obsah zalomí.
 
 Pro `contentEditor` a výš akce **Upravit** – jeden modal s `name`, `desc` a seznamem sekcí
-(`uu5codekitg01` na každou, přidat / odebrat / přesunout). Ukládá se **celý `sectionList`
+(`uu5codekitg01-forms` na každou, přidat / odebrat / přesunout). Ukládá se **celý `sectionList`
 najednou** přes `page/update`; přírůstkové operace nad jednotlivou sekcí neexistují.
 **Zatím se edituje jako kód, ne WYSIWYG** (rozhodnuto 2026-09-06).
 
@@ -438,19 +438,26 @@ se vlastní.
 Musí zůstat editovatelná redakcí, takže se komponenta **registruje do `uu5String`** a osa
 je obsahem jedné sekce stránky `history`, ne natvrdo psaná komponenta:
 
+Popisek položky je **`label`**, ne `header` (ověřeno proti `uu5bricksg01@1.25.1`); dál umí
+`icon`, `colorScheme`, `significance` a `position`:
+
 ```
 <Uu5Bricks.VerticalTimeline>
-  <Uu5Bricks.VerticalTimeline.Item header="1932 · Založení klubu">
+  <Uu5Bricks.VerticalTimeline.Item label="1932 · Založení klubu" icon="uugds-favorites" colorScheme="primary" significance="highlighted">
     Skupina nadšenců zakládá v Bratčicích Athletický fotbalový klub…
   </Uu5Bricks.VerticalTimeline.Item>
 </Uu5Bricks.VerticalTimeline>
 ```
 
-Dvě věci k dořešení při implementaci:
+**Hotovo 7. 9. 2026:** balíček je `uu5bricksg01` a je v `client/package.json`; do import mapy
+se dostane sám, protože `createViteConfig()` staví mapu z tranzitivního uzávěru `uu*`
+závislostí klienta. Ověřeno v prohlížeči na `/historie`.
 
-- **Balíček není v `client/package.json`** ani v referenční appce — přidat mezi závislosti.
-- uu5 knihovny se **nebundlují**, resolvuje je `uu5loaderg01`, takže musí přibýt i do import
-  mapy v `createViteConfig()` (`caio-devkit`). Jinak se za běhu nenajde.
+Cena je ale citelná: `uu5bricksg01` s sebou přitáhne dalších **28 `uu*` balíčků** a výstup
+`public/libs` naroste z ~30 MB na **~120 MB** — sama komponenta je líná, ale do nasazení jde
+všechno, co je v mapě. Největší kusy jsou `uu_uubmldraw_iconsg04` (51 MB) a starý
+`uu5codekitg01-forms` (18 MB), které tenhle web nikdy nezobrazí. Až to začne vadit u deploye, jde
+je vyřadit přes `client/uu5-imports.json`.
 
 > **uu5g04 je zakázané.** Ani jako varianta, ani jako „hotové řešení, které by šlo
 > přitáhnout“. Chybí-li komponenta, hledá se v uu5g05 řadě, nebo se napíše vlastní nad
@@ -624,7 +631,7 @@ se nahrávají obě.
 ### 6.3 Hromadné vytvoření zápasů
 
 `UiElements.Crud` nabízí u akce „Vytvořit“ položku **Hromadně** – modal s JSON editorem
-(`uu5codekitg01`), který volá `match/createMany`. Slouží k naimportování rozlosování
+(`uu5codekitg01-forms`), který volá `match/createMany`. Slouží k naimportování rozlosování
 staženého ze stránek OFS.
 
 ### 6.4 Zápis výsledku a sestavy

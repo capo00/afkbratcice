@@ -14,6 +14,7 @@
     "uu5tilesg02-elements": "*",
     "uu5imagingg01": "^2.0.0",
     "uu5imagingg01-tools": "^2.0.0",
+    "uu5bricksg01": "^1.25.0",
     "caio-ui": "file:../../caio-architecture/caio-ui/dist/caio-ui-0.1.0.tgz"
   },
   "devDependencies": {

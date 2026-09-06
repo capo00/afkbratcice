@@ -54,13 +54,21 @@ hex je bezpečný fallback pro místa, kde `uu5g05` `oklch` nezvládne.
 | `input` | `oklch(31% .012 25)` | `#362E2D` | rámeček vstupu |
 | `foreground` | `oklch(95.5% .005 60)` | `#F3EFED` | základní text |
 | `mutedForeground` | `oklch(66% .012 30)` | `#99908E` | sekundární text, perex, popisky |
-| **`primary` / `clubRed`** | `oklch(54.5% .215 27.5)` | **`#D01319`** | klubová červená: CTA, eyebrow, aktivní nav, skóre |
-| `clubRedBright` | `oklch(63% .24 28)` | `#F92725` | světlejší varianta (hover, CTA pruh) |
+| **`primary` / `clubRed`** | `oklch(40% .164 29.23)` | **`#8b0000`** | klubová červená (rudá): CTA, eyebrow, aktivní nav, skóre |
+| `clubRedBright` | `oklch(63% .24 28)` | `#F92725` | světlejší varianta (hover, CTA pruh) — zatím se nikde nepoužívá |
 | `primaryForeground` | `oklch(98% .01 60)` | `#FEF7F2` | text na červené |
 | `destructive` | `oklch(57.7% .245 27.325)` | `#E7000B` | chyby |
 
 **Pravidlo, které drží celý vzhled:** nikde není čistá černá ani čistá bílá. Všechno je posunuté
 do teplé (hue 25–30). Když se v implementaci objeví `#000000` nebo `#FFFFFF`, je to chyba.
+
+> **Změna 7. 9. 2026: klubová barva je tmavší rudá `#8b0000`** (dřív `#D01319`). Je to
+> rozhodnutí o značce a platí. Má ale jeden důsledek, se kterým se musí počítat: na
+> podkladu `bg` (`#070404`) dává rudá kontrast **2,0 : 1** (dřív 3,6 : 1), takže **jako text
+> na tmavém pozadí je pod hranicí čitelnosti** — týká se skóre, eyebrow, ikon a zvýrazněného
+> vlastního týmu v tabulce. Jako **plocha** (CTA pruh, proužek karty, forma W) je v pořádku:
+> `onRed` na ní má 9,6 : 1. Až se to začne řešit, cesta je světlejší odstín pro text
+> (`clubRedBright` už v tokenech je a nikde se nepoužívá), ne návrat značky.
 
 Rytmus stránky: sekce se střídají `background` → `background` s **diagonálním šrafováním**
 (velmi jemný opakovaný pruh v `card`/`secondary`) a jednou za stránku to přeruší **plný červený
@@ -261,7 +269,7 @@ const color = {
   input: "#362E2D",
   fg: "#F3EFED",
   mutedFg: "#99908E",
-  clubRed: "#D01319",
+  clubRed: "#8b0000",
   clubRedBright: "#F92725",
   onRed: "#FEF7F2",
 };
@@ -317,7 +325,7 @@ Klubovou červenou je navíc potřeba nastavit jako GDS význam, aby ji `Uu5Elem
 braly bez explicitních barev:
 
 ```js
-Uu5Elements.UuGds.setMeaningColor("primary", "#D01319");
+Uu5Elements.UuGds.setMeaningColor("primary", "#8b0000");
 ```
 
 (v1 to dělá se svým `#8b0000`; nová hodnota je z předlohy.)

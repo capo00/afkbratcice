@@ -414,7 +414,7 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
   (`uu5String`) —, ne vazba na ECC stránku. Objekt, ne holý string: nadpis sekce, kotva
   nebo varianta podkladu se pak přidají bez migrace, a `sectionList` je přesně jednotka,
   se kterou ECC pracuje, takže pozdější přechod je rozpad pole na dokumenty.
-- Edituje se zatím **jako kód**, ne WYSIWYG — `uu5codekitg01` nad každou sekcí. Vykresluje
+- Edituje se zatím **jako kód**, ne WYSIWYG — `uu5codekitg01-forms` nad každou sekcí. Vykresluje
   se přes **`Uu5.Content`**.
 - `article/list` `sectionList` **nevrací** — výpis novinek potřebuje perex, ne celé texty;
   u dvaceti článků by to byl řádově větší přenos zadarmo.
@@ -477,7 +477,7 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
 - Autorizace je **PAGES pro všechny zápisy**. Odpadá tím rozlišování „čí je stránka",
   kvůli kterému měly ECC sekce vlastní `auth` funkci (`newsEditor` nesměl přepsat hymnu):
   články a stránky jsou teď dvě různé entity se dvěma různými rolemi, takže se to řeší samo.
-- Editace je **v kódu, ne WYSIWYG** — `uu5codekitg01` nad `content` každé sekce.
+- Editace je **v kódu, ne WYSIWYG** — `uu5codekitg01-forms` nad `content` každé sekce.
 - Žádné zámky ani revize. Šest stránek a jeden kronikář; osmihodinový lock by tu neřešil
   nic, co se reálně děje.
 

@@ -75,7 +75,7 @@ napevno a bez konfigurace (`caio-server/src/caio-server-auth/api/identity-api.js
 
 Etapy 13 a 14 byly původně „port ECC modulu z v1" a „obsah nad ECC". **ECC se nepoužívá** —
 článek i obsahová stránka drží obsah jako jeden `uu5String` v poli `content`, editovaný
-zatím jako kód (`uu5codekitg01`). Důsledky pro plán:
+zatím jako kód (`uu5codekitg01-forms`). Důsledky pro plán:
 
 | | |
 |---|---|

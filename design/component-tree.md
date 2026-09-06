@@ -362,8 +362,8 @@ flowchart TD
   seclist["SectionList<br/>page.sectionList -> Section + Content na položku<br/>sekce jsou vložené v dokumentu stránky"]:::own
 
   page["routes/page.jsx -- obsahová stránka<br/>history, hymn, contact, board, training, team-photos"]:::own
-  edit["ContentEditModal<br/>name, desc + uu5codekitg01 na každou sekci<br/>ukládá celý sectionList; ZATÍM KÓD, ne WYSIWYG"]:::own
-  ck["uu5codekitg01"]:::uu5
+  edit["ContentEditModal<br/>name, desc + uu5codekitg01-forms na každou sekci<br/>ukládá celý sectionList; ZATÍM KÓD, ne WYSIWYG"]:::own
+  ck["uu5codekitg01-forms"]:::uu5
   tl["Uu5Bricks.VerticalTimeline + .Item<br/>registrované do uu5String -> redakce je píše do obsahu<br/>historie klubu 1932-2022"]:::uu5
 
   d1["article/list -- bez content"]:::data
@@ -391,7 +391,7 @@ flowchart TD
 **`UiEcc` se nepoužívá** (rozhodnuto 2026-09-06). ECC v `caio-server` není a jeho design se
 ladí samostatně, takže obsah drží entity samy: **článek jeden `uu5String` v `content`,
 stránka pole sekcí `sectionList: [{ content }]`**. Zobrazení je `Utils.Uu5String.toChildren()`,
-editace jeden modal s `uu5codekitg01` — **zatím se píše kód, ne WYSIWYG**.
+editace jeden modal s `uu5codekitg01-forms` — **zatím se píše kód, ne WYSIWYG**.
 
 Sekce jsou **vložené v dokumentu stránky**, ne vlastní kolekce, a jsou to **objekty, ne holé
 stringy** — nadpis sekce, kotva nebo varianta podkladu se pak přidají bez migrace, a až
@@ -465,7 +465,7 @@ flowchart TD
   bprov["UiElements.BinaryProvider collection=download"]:::caio
 
   spec1["admin/matches -- navíc modály<br/>Zapsat výsledek / Zapsat sestavu / Hromadně (JSON)"]:::own
-  spec2["admin/articles + admin/pages<br/>navíc ContentEditModal (uu5codekitg01)"]:::own
+  spec2["admin/articles + admin/pages<br/>navíc ContentEditModal (uu5codekitg01-forms)"]:::own
   spec3["admin/identities -- identity/adminList + update<br/>teamEditor:id se zobrazuje jako název týmu"]:::own
   spec4["admin/files -- VLASTNÍ Crud konfigurace<br/>category + date; BinaryCrud je nerozšiřitelná"]:::own
 
@@ -527,7 +527,7 @@ redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
 | Odpočet do zápasu | uu5 nemá | vlastní `Countdown` (`useInterval` + `useVisibility`) |
 | Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je obsahem sekce stránky `contact`, ne kódu appky |
 | Lightbox | `Uu5Elements.Modal` ano, ale bez šipek a swipe | vlastní `Lightbox` nad `Modal` |
-| Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | článek `content`, stránka `sectionList: [{ content }]`; `Content` + `SectionList` + `ContentEditModal` nad `uu5codekitg01`, **zatím kód místo WYSIWYG** |
+| Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | článek `content`, stránka `sectionList: [{ content }]`; `Content` + `SectionList` + `ContentEditModal` nad `uu5codekitg01-forms`, **zatím kód místo WYSIWYG** |
 | ~~Rozsahová role v guardu~~ | ~~`withRoute` porovnává profily na přesnou shodu~~ | **doplněno do `caio-ui` 2026-09-06**: `"teamEditor:*"` + `UiAuth.getScopeList()` |
 | Soubory ke stažení | `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props | vlastní `Crud` konfigurace nad `BinaryProvider` s `category` a `date` |
 | Prázdné stavy | uu5 nemá jednotný „žádná data" | vlastní `EmptyState` |

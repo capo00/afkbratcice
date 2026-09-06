@@ -489,7 +489,7 @@ Poznámky:
   `sectionList` je přesně jednotka, se kterou ECC pracuje, takže pozdější přechod je rozpad
   pole na dokumenty.
 - Editace obsahu je zatím **v kódu, ne WYSIWYG** – redakce píše `uu5String` do textového
-  pole (`uu5codekitg01`, dnes 2.8.3). Rich-text editor přijde s ECC.
+  pole (`uu5codekitg01-forms`, dnes 2.8.3). Rich-text editor přijde s ECC.
 - Vykresluje se přes **`Uu5.Content`** – proti `Utils.Uu5String.toChildren()` řeší nesting
   level a `fallback`, takže překlep ve značce zobrazí chybu na svém místě místo shození
   celé stránky.
@@ -586,7 +586,7 @@ Poznámky:
 - **Obsah není `contentMap` po jazycích.** Druhý jazyk bude migrace (`content` →
   `contentMap.cs` uvnitř sekce), ne jen doplnění kódu — vědomá cena za to, že se stránky
   rozjedou hned. Jazyk UI je zatím stejně jediný (`cs`).
-- Editace je **v kódu, ne WYSIWYG**: `uu5codekitg01` nad `content` každé sekce. Komponenty
+- Editace je **v kódu, ne WYSIWYG**: `uu5codekitg01-forms` nad `content` každé sekce. Komponenty
   jako `Uu5Bricks.VerticalTimeline` (časová osa v historii) se do `uu5String` registrují
   a redakce je píše ručně.
 - Obrázky ve stránkách jdou přes `BinaryStore`, kolekce `page`.

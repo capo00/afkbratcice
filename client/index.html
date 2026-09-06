@@ -18,7 +18,30 @@
       k assetům), `data-uu-app-base` je to, co uu5 opravdu čte.
     -->
     <base href="/" data-uu-app-base="/" />
-    <title>afkbratcice</title>
+    <!--
+      Vypnutí obnovy uuOIDC session při načtení stránky.
+
+      `uu5bricksg01` (časová osa v historii) táhne `uu_appg01` a s ním `uu_appg01_oidc`,
+      který se po načtení sám pokusí obnovit session na `uuidentity.plus4u.net` — na
+      veřejném webu fotbalového klubu, který se přihlašuje vlastní identitou přes
+      `caio-server-auth`, ne přes Plus4U. Bez tohohle meta tagu tedy každý návštěvník
+      historie mlčky posílá požadavek na cizí identity server (a v konzoli skončí chyba,
+      protože `client_id` je undefined).
+
+      Hodnota je **"disabled"**, ne "false": z meta tagu se čte doslovně a porovnává se
+      s konstantou `RESTORE_SESSION_DISABLED = "disabled"`. Řetězec "false" je pravdivý,
+      takže by se obnova session pustila dál (na "false" reaguje jen globální konfigurace,
+      ne tenhle tag).
+    -->
+    <meta uuAppOidcRestoreSessionOnLoad="disabled" />
+    <!--
+      POZOR: `uu5g05_libraryLoadDisabled` v `window.uu5Environment` se nastavit NEDÁ.
+      Vypne dotaz do uuAppLibraryRegistry (`uuapp.plus4u.net`), kterým si uu5g05 překládá
+      jmenný prostor z uu5String (u nás `Uu5Bricks`) na knihovnu — a appka pak skončí na
+      „Unexpected error". Ověřeno 7. 9. 2026. Ten jeden požadavek na cizí server je cena
+      za `Uu5Bricks.VerticalTimeline` v obsahu; padne s ním, ne dřív.
+    -->
+    <title>AFK Bratčice</title>
   </head>
   <body>
     <div id="root"></div>
