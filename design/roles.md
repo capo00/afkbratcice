@@ -245,7 +245,7 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 > (rozhodnuto 2026-09-06). Dřívější návrh držel obojí v ECC sekcích, a proto potřeboval
 > `authorize` funkci, která dohledala, čí je stránka — jinak by `newsEditor` mohl přepsat
 > historii klubu i hymnu. Když je obsah pole entity, řeší se to samo: `article.content`
-> spadá pod NEWS, `page.content` pod PAGES.
+> spadá pod NEWS, `page.sectionList` pod PAGES.
 
 ### Média a soubory
 

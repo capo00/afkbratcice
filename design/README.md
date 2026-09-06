@@ -378,7 +378,7 @@ Pravidla:
    má 96/96. Hero tím ztratí část důrazu. Potvrdit, že je to tak v pořádku — nebo schválit
    jedno přebití nad GDS hodnotou a zapsat ho do `decisions.md`.
 9. ~~**Časová osa historie**~~ – **rozhodnuto: `Uu5Bricks.VerticalTimeline`**, registrovaná
-   do `uu5String`, aby osa zůstala součástí `page.content`. Zbývá jen ji přidat mezi
+   do `uu5String`, aby osa zůstala obsahem sekce stránky. Zbývá jen ji přidat mezi
    závislosti klienta a do import mapy loaderu (riziko #20).
 10. ~~**Články a ECC**~~ – **rozhodnuto 2026-09-06:** článek drží obsah jako plain
     `uu5String` v `content`, stránka jako `sectionList` polí objektů `{ content }`.

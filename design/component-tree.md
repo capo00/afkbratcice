@@ -510,7 +510,7 @@ pro ně chyběla), `withTeamRoute` (`withRoute` neumí rozsahovou roli) a trojic
 `SectionList` a `ContentEditModal`, která nahradila `UiEcc`.
 
 Časová osa historie je **`Uu5Bricks.VerticalTimeline`** zaregistrovaná do `uu5String`, aby ji
-redakce mohla vkládat do `page.content` — vlastní komponenta se nepíše.
+redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
 
 `WeekendProgram` je sekce na home, ne routa: program víkendu napříč kategoriemi.
 
@@ -525,7 +525,7 @@ redakce mohla vkládat do `page.content` — vlastní komponenta se nepíše.
 | GDS paleta | `building` je bílá, tmavé schéma se nepřenastaví | barvy lišty a ploch z `theme.js` přes `cssBackground`/`cssColor` |
 | Tabulka soutěže | `Uu5Tiles.Table` neumí zvýraznit řádek klubovou barvou ani skrývat sloupce po breakpointech | vlastní `StandingsTable` nad `<table>` |
 | Odpočet do zápasu | uu5 nemá | vlastní `Countdown` (`useInterval` + `useVisibility`) |
-| Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je součástí `page.content`, ne kódu appky |
+| Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je obsahem sekce stránky `contact`, ne kódu appky |
 | Lightbox | `Uu5Elements.Modal` ano, ale bez šipek a swipe | vlastní `Lightbox` nad `Modal` |
 | Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | článek `content`, stránka `sectionList: [{ content }]`; `Content` + `SectionList` + `ContentEditModal` nad `uu5codekitg01`, **zatím kód místo WYSIWYG** |
 | Rozsahová role v guardu | `UiApp.withRoute` porovnává profily na přesnou shodu | vlastní `withTeamRoute` s prefixem `teamEditor:` |

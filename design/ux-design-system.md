@@ -236,7 +236,7 @@ i s důvodem (stejná konvence jako v `caio_propertyman`, `docs/component-tree.m
 | Tlačítka | `Uu5Elements.Button` (`significance` `highlighted`/`common`, `colorScheme`) |
 | Přepínač `MUŽI`/`ŽÁCI`, filtr galerie | `Uu5Elements.Tabs` nebo `Uu5Forms.SwitchSelect` |
 | Tabulka soutěže | `uu5tilesg02` `Table` přes `UiElements.Crud` v `readOnly` režimu, nebo přímo `Uu5Tiles.Table` |
-| Časová osa historie | obsahová stránka `page?code=history` — osa je `Uu5Bricks.VerticalTimeline` uvnitř `page.content` (`uu5String`), ne natvrdo psaná komponenta |
+| Časová osa historie | obsahová stránka `page?code=history` — osa je `Uu5Bricks.VerticalTimeline` uvnitř `content` jedné sekce (`uu5String`), ne natvrdo psaná komponenta |
 | Lightbox fotogalerie | `Uu5Elements.Modal` + `UiElements.Image` |
 | Mapa | `<iframe>` OpenStreetMap uvnitř `Uu5Elements.Block` (uu5 vlastní mapovou komponentu nemá) |
 | Ikony | `Uu5Elements.Icon` s `uugds-*` / `uugdsstencil-*` sadou |
