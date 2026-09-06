@@ -336,8 +336,37 @@ Implementace přes aggregation pipeline (`$unwind: "$playerList"`), ne v paměti
 | `person/update` | post | CONTENT | `{ id, ... }` | `person` |
 | `person/delete` | post | CONTENT | `{ id }` | `{}` |
 | `person/linkIdentity` | post | ADMIN | `{ id, identity }` | `person` |
+| `person/linkSelf` | post | A | `{}` | `{ linked, personId? }` |
 
 `person/delete` odmítne smazání, pokud existuje navázaný `player` nebo `coach`.
+
+#### 2.5.1 Automatické spárování osoby s identitou
+
+**Rozhodnuto 2026-09-06:** hráč se po přihlášení spáruje se svým `person` záznamem
+**automaticky podle ověřeného e-mailu**, bez potvrzování správcem. Odemyká to vlastní
+kontaktní údaje a profil, takže na tom záleží — pravidla jsou proto úzká.
+
+`person/linkSelf` (`auth: true`) spáruje, a jen když platí **všechno**:
+
+1. `identity.email` je vyplněný,
+2. **e-mail někdo ověřil** — `identity.authMethodList` obsahuje jiný způsob než `password`,
+   tedy účet má `googleId` nebo `facebookId` a provider za adresu ručí. Samotná registrace
+   heslem nestačí: kdokoli by se zaregistroval na hráčův e-mail a dostal jeho záznam,
+3. právě jedna `person` má ten e-mail a **ještě nemá `identity`**.
+
+Nesplněná podmínka **není chyba** — vrací se `{ linked: false }` a nic se neděje. Je to
+vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
+
+- **„Právě jedna" řeší rodinnou schránku.** U mládeže mívá víc sourozenců e-mail rodiče;
+  při dvou shodách se nepáruje nic a zbývá ruční `person/linkIdentity`.
+- **Volá to klient jednou po přihlášení** (z `core/app-context.jsx`, který stejně běží při
+  startu SPA), ne middleware u každého requestu — párovací dotaz nemá smysl dělat pořád.
+  Je idempotentní, takže na opakovaném volání nezáleží.
+- **`authMethodList` je v JWT** (`Identity.getBasicData`), takže si appka nemusí sahat do
+  `sys_identity`. Knihovna ho ale popisuje jako údaj „pro UI, ne pro autorizaci" — tady
+  se používá k rozhodnutí, na kterém záleží. Je odvozený přímo z `googleId`/`facebookId`,
+  takže je to bezpečné, ale kdyby `caio-server-auth` někdy začal seznam plnit jinak, tohle
+  místo se musí zkontrolovat. Čistší by bylo, aby knihovna appce zpřístupnila `Identity.get`.
 
 ### 2.6 `player`
 

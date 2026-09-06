@@ -363,20 +363,23 @@ Pravidla:
    spam. Staré URL `/diskuze*` vedou 301 na `/home`, data se archivují exportem.
 2. **Klubová kasa** (pokladna, pokuty, příjmy/výdaje) – mimo rozsah; data z MySQL
    doporučujeme archivovat exportem, ne migrovat.
-3. **Tréninky** (`treninky.php`) – řešit jako obsahovou stránku (`page?code=training`), nebo
-   jako entitu s docházkou? Návrh počítá s obsahovou stránkou.
-4. **Vazba osoba ↔ identita** – zda se hráč po přihlášení přes Google automaticky spáruje
-   s `person` podle e-mailu (návrh: spárování navrhne systém, potvrdí správce).
-5. **Sloučení `player` a `coach`** – ER diagram je drží odděleně, obě entity mají shodnou
-   strukturu `teamList`. Návrh je ponechává oddělené, viz [data-model.md](./data-model.md), sekce 10.
+3. ~~**Tréninky**~~ – **rozhodnuto 2026-09-06: obsahová stránka** `page?code=training`.
+   Je to text, který trenér jednou za sezónu přepíše; entita s docházkou by byla nová
+   kolekce, CRUD, admin obrazovka a role kvůli tomu, co dnes nikdo nesleduje.
+4. ~~**Vazba osoba ↔ identita**~~ – **rozhodnuto 2026-09-06: páruje se automaticky podle
+   ověřeného e-mailu.** Detail a jeho pojistky: [api.md](./api.md), sekce 2.5.
+5. ~~**Sloučení `player` a `coach`**~~ – **rozhodnuto 2026-09-06: zůstávají oddělené.**
+   Atributy se liší (post a číslo dresu vs. role `headCoach`/`assistant`/`manager`/`board`),
+   sloučení by udělalo polovinu polí prázdných. Viz [data-model.md](./data-model.md), sekce 14.
 6. ~~**Struktura mužstev**~~ – **rozhodnuto: kategorie jsou dynamické.** Odvozují se ze sezón
    (`season/listCurrent`), nikde se nevyjmenovávají. `appConfig.teams` a `homeAge` z v1
    zanikají. Viz [frontend.md](./frontend.md), sekce 2.5.
 7. ~~**Týmové fotky**~~ – **rozhodnuto: obsahová stránka** `page?code=team-photos`,
    chronologicky, odkazovaná z historie.
-8. **Velikost hero nadpisu.** Pravidlo „velikosti vždy z uuGds“ dává strop 44/52 px, předloha
-   má 96/96. Hero tím ztratí část důrazu. Potvrdit, že je to tak v pořádku — nebo schválit
-   jedno přebití nad GDS hodnotou a zapsat ho do `decisions.md`.
+8. ~~**Velikost hero nadpisu**~~ – **rozhodnuto 2026-09-06: drží se GDS strop 44/52.**
+   Hero bude menší než na mockupech; důraz se bere odjinud (fotka přes celou šířku, červený
+   eyebrow, prostrkání). **V `theme.js` tedy nezůstává jediné `fontSize`** a pravidlo
+   „velikosti vždy z uuGds“ platí bez výjimky — nemá smysl ho lámat hned na první obrazovce.
 9. ~~**Časová osa historie**~~ – **rozhodnuto: `Uu5Bricks.VerticalTimeline`**, registrovaná
    do `uu5String`, aby osa zůstala obsahem sekce stránky. Zbývá jen ji přidat mezi
    závislosti klienta a do import mapy loaderu (riziko #20).

@@ -132,11 +132,14 @@ Předloha má hero **96/96** a nadpis sekce **48/48**; strop GDS je **44/52**, r
 Nadpisy tedy budou o poznání menší, než jsou na mockupech — a protože Bebas Neue je úzký
 display font, 44 px Bebas působí opticky menší než 44 px Barlow. Hero ztratí část důrazu.
 
-Je to **vědomá cena za jednotnou sazbu**: `theme.js` nemá žádné číslo velikosti, takže se
-web nemůže rozejít s uu5 komponentami. Kdyby se ukázalo, že hero potřebuje víc, je to
-jediné místo, kde by se sáhlo na `scale` nad GDS hodnotou — a je to změna, která patří
-do `decisions.md` se zdůvodněním, ne tichý přepis v komponentě.
-Viz otevřená otázka č. 9 v [README.md](./README.md).
+Je to **vědomá cena za jednotnou sazbu**, a **potvrzená** (rozhodnuto 2026-09-06,
+[README.md](./README.md), §9.8): `theme.js` nemá žádné číslo velikosti a pravidlo platí
+bez výjimky, včetně hero. Lámat ho hned na první obrazovce by z něj udělalo doporučení.
+
+Důraz hero tedy musí přijít odjinud než z velikosti písma: fotka přes celou šířku
+s tmavým překryvem, erb, červený eyebrow nad nadpisem, prostrkání a dvě CTA tlačítka.
+Jestli se po implementaci ukáže, že to nestačí, je přebití `scale` nad GDS hodnotou
+změna, která patří do `decisions.md` se zdůvodněním — ne tichý přepis v komponentě.
 
 Prostrkání zůstává **kladné** (+4 %), na rozdíl od propertymanu, kde je záporné.
 Bebas Neue bez prostrkání „slepí“.

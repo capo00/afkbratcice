@@ -389,6 +389,12 @@ Poznámky:
 Osobní údaje (`birthdate`, `email`, `phone`) se **nevrací ve veřejném API** – ABL je
 odstraňuje pro nepřihlášené a pro role mimo množinu `CONTENT` (viz [roles.md](./roles.md), sekce 7).
 
+**`identity` se plní automaticky** (rozhodnuto 2026-09-06): po přihlášení se osoba spáruje
+podle e-mailu, ale jen když ho ověřil provider (účet má `googleId`/`facebookId`) a shoduje
+se **právě jedna** osoba bez `identity`. Index `{ identity: 1 } unique, sparse` to jistí
+i na úrovni databáze — dvě osoby nemůžou skončit na téže identitě, ani kdyby párování
+selhalo. Pravidla a proč jsou takhle úzká: [api.md](./api.md), sekce 2.5.1.
+
 ---
 
 ## 6. `player`

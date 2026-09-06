@@ -223,7 +223,8 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 | `person/list`, `get` | – | kontakty jen CONTENT nebo self, viz sekce 7 |
 | `person/create` | CONTENT, **TE** | TE zakládá osobu kvůli soupisce |
 | `person/update`, `delete` | CONTENT | osoba je sdílená napříč týmy |
-| `person/linkIdentity` | ADMIN | spojení osoby s přihlášením |
+| `person/linkIdentity` | ADMIN | ruční spojení osoby s přihlášením |
+| `person/linkSelf` | přihlášený | spáruje volajícího s jeho `person` podle **ověřeného** e-mailu; jinak nedělá nic (viz [api.md](./api.md), 2.5.1) |
 | `player/list`, `get` | – | |
 | `player/create`, `update` | CONTENT, **TE** (`all`) | |
 | `player/addTeam`, `endTeam` | CONTENT, **TE** (`all`) | jen do/z vlastního týmu |

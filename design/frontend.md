@@ -474,7 +474,7 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 | `layout/footer.jsx` | Třísloupcová patička + spodní řádek |
 | `layout/notice-bar.jsx` | Proužek `appConfig.notice` pod lištou (`Uu5Elements.Alert`) |
 | `countdown.jsx` | Odpočet do výkopu v kartě nejbližšího zápasu |
-| `core/app-context.jsx` | `appConfig/get`, `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů** |
+| `core/app-context.jsx` | `appConfig/get`, `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů**; po přihlášení jednou zavolá `person/linkSelf` |
 | `core/with-team-route.jsx` | Guard s prefixovou shodou nad `teamEditor:<teamId>` (`withRoute` to neumí) |
 | `empty-state.jsx` | Jednotný prázdný stav seznamu – ikona, text z LSI, volitelná akce |
 | `team-logo.jsx` | Logo z `binary.uri` + fallback na erb klubu |

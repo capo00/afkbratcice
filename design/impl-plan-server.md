@@ -405,6 +405,9 @@ Tři nové entity, ve v1 neexistují (`player-dao.js` je prázdný soubor).
 
 `person/delete` odmítne smazání, když existuje navázaný `player` nebo `coach`.
 
+`person/linkSelf` (automatické spárování osoby s přihlášením podle ověřeného e-mailu,
+[api.md](./api.md), 2.5.1) se přidává **až v etapě 8** — dřív se nemá kdo přihlásit.
+
 **Hotovo, když:** `player/list?teamId&active=true` vrátí soupisku s vloženými osobami
 a nepřihlášenému v ní chybí kontakty.
 
@@ -446,6 +449,10 @@ Obsah je v [config.md](./config.md), sekce 6 — `categoryOrder`, `hideNamesAgeL
 Tady je poprvé potřeba **přihlašování**: dotáhnout Google credentials, vyplnit SMTP a přiřadit
 si profil `authorities` ručním zápisem do `sys_identity`. **Vyžaduje hotovou etapu 0b** — bez
 resetu hesla by se šlo přihlásit, ale ne se z něj vyhrabat.
+
+S přihlašováním přichází i **`person/linkSelf`** ([api.md](./api.md), 2.5.1): páruje osobu
+s identitou podle e-mailu, ale jen když ho ověřil provider a shoduje se právě jedna osoba
+bez `identity`. Nesplněná podmínka není chyba, vrací `{ linked: false }`.
 
 ---
 
