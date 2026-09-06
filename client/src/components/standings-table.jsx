@@ -16,8 +16,9 @@ const { theme } = Config;
 //
 // **Sloupce VP/PP se ukazují jen tam, kde dávají smysl.** Okresní soutěže se dělí na ty
 // s penaltovým rozstřelem (výhra 3 / na penalty 2 / prohra na penalty 1) a bez něj (remíza
-// za bod). Místo konfigurace se to pozná z dat: když ani jeden řádek nemá penaltový zápis,
-// sloupce se nekreslí a místo nich je R jako v každé jiné tabulce.
+// za bod). Říká to `season.hasPenalties`, ne data: soutěž s rozstřelem, ve které zatím
+// žádná remíza nebyla, vypadá v zápasech stejně jako soutěž bez něj — tabulka by tedy po
+// první remíze sama přeskočila na jiné sloupce i jiné bodování.
 
 const COMPACT_HIDDEN = ["penaltyWins", "penaltyLosses", "form"];
 
@@ -56,13 +57,9 @@ function cellValue(row, code) {
 const StandingsTable = createVisualComponent({
   uu5Tag: Config.TAG + "StandingsTable",
 
-  render({ table = [], ownTeamId }) {
+  render({ table = [], ownTeamId, hasPenalties = false }) {
     const [screenSize] = useScreenSize();
     const isCompact = screenSize === "xs" || screenSize === "s";
-    const hasPenalties = useMemo(
-      () => table.some((row) => row.penaltyWins || row.penaltyLosses),
-      [table],
-    );
     const columns = useColumns({ hasPenalties, isCompact });
 
     const cell = Config.Css.css({

@@ -34,11 +34,16 @@ function countsTowardsTable(match) {
 }
 
 /**
- * @param matchList  zápasy jedné sezóny
- * @param teamList   účastníci soutěže (aby v tabulce byl i tým, který ještě nehrál)
+ * @param matchList     zápasy jedné sezóny
+ * @param teamList      účastníci soutěže (aby v tabulce byl i tým, který ještě nehrál)
+ * @param hasPenalties  hraje se soutěž na penaltový rozstřel? Je to **vlastnost sezóny**
+ *                      (`season.hasPenalties`), ne něco, co by se dalo poznat ze zápasů:
+ *                      soutěž s rozstřelem, ve které zatím žádná remíza nebyla, vypadá
+ *                      v datech úplně stejně jako soutěž bez něj -- a tabulka by se pak
+ *                      po první remíze sama přepnula na jiné bodování.
  * @returns pole řádků seřazené podle pravidel v0
  */
-function computeTable(matchList, teamList) {
+function computeTable(matchList, teamList, hasPenalties = false) {
   const rowMap = new Map();
   for (const team of teamList) rowMap.set(team.id, emptyRow(team));
 
@@ -78,7 +83,7 @@ function computeTable(matchList, teamList) {
       guest.wins++; home.losses++;
       homePoints = Config.POINTS.loss; guestPoints = Config.POINTS.win;
       home.form.push("L"); guest.form.push("W");
-    } else if (match.penaltyWinnerTeamId) {
+    } else if (hasPenalties && match.penaltyWinnerTeamId) {
       // Remíza rozhodnutá penaltami: 2 body vítězi rozstřelu, 1 poraženému.
       const homeWon = match.penaltyWinnerTeamId === match.homeTeamId;
       if (homeWon) { home.penaltyWins++; guest.penaltyLosses++; } else { guest.penaltyWins++; home.penaltyLosses++; }
@@ -86,7 +91,9 @@ function computeTable(matchList, teamList) {
       guestPoints = homeWon ? Config.POINTS.penaltyLoss : Config.POINTS.penaltyWin;
       home.form.push(homeWon ? "W" : "L"); guest.form.push(homeWon ? "L" : "W");
     } else {
-      // Soutěž bez rozstřelu -- remíza po bodu.
+      // Soutěž bez rozstřelu -- remíza po bodu. Sem spadne i remíza se zapsaným vítězem
+      // rozstřelu v soutěži, která ho nemá: rozhoduje nastavení sezóny, ne zápis
+      // u zápasu, aby jeden překlep v administraci nezměnil bodování celé tabulky.
       home.draws++; guest.draws++;
       homePoints = Config.POINTS.draw; guestPoints = Config.POINTS.draw;
       home.form.push("D"); guest.form.push("D");

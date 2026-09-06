@@ -64,6 +64,7 @@ erDiagram
         enum     age "AGE_MAP"
         string   desc
         string[] teamList FK "účastníci soutěže"
+        bool     hasPenalties "soutěž s rozstřelem = bodování 3/2/1/0"
     }
     MATCH {
         string   id PK
@@ -290,6 +291,7 @@ Poznámky:
 | `age` | enum | ✓ | Kategorie soutěže |
 | `desc` | string | | Poznámka (změny v rozlosování apod.) |
 | `teamList` | string[] | ✓ | `id` účastnických týmů |
+| `hasPenalties` | boolean | | Hraje se na penaltový rozstřel? Rozhoduje o bodování tabulky |
 
 **Indexy**
 
@@ -306,6 +308,14 @@ yearFrom = (měsíc < 8) ? rok - 1 : rok        // sezóna začíná v srpnu
 ```
 
 Dotaz na aktuální sezónu týmu: `{ yearFrom, teamList: teamId }`.
+
+**`hasPenalties` je nastavení soutěže, ne odvození z dat** (rozhodnuto 2026-09-06). Okresní
+soutěže se dělí na ty s penaltovým rozstřelem (výhra 3 / na penalty 2 / prohra na penalty 1)
+a bez něj (remíza za bod). Poznat to ze zápasů nejde: soutěž s rozstřelem, ve které zatím
+žádná remíza nebyla, vypadá v datech úplně stejně jako soutěž bez něj — a tabulka by se pak
+po první remíze sama přepnula na jiné bodování. Zapsaný `penaltyWinnerTeamId` u zápasu se
+proto v soutěži bez rozstřelu ignoruje: rozhoduje sezóna, aby jeden překlep v administraci
+nezměnil bodování celé tabulky.
 
 ---
 
@@ -719,4 +729,5 @@ stringů, které `Identity.createToken` kopíruje do JWT beze změny. Model rol�
 | 13 | – | `Gallery.category` | předloha filtruje fotogalerii chipy (Zápasy / Trénink / Fanoušci / Mládež / Klub) |
 | 14 | – | `page` se `sectionList` vloženým v dokumentu | obsahové stránky mění jeden člověk jednou za rok, takže zámky a revize by tu nic neřešily; sekce jako pole objektů ale zůstávají, aby k nim šlo přidat metadata bez migrace a aby byl přechod na ECC rozpad pole na dokumenty |
 | 15 | `app_config.teams`, `homeAge` (v1) | zrušeno, kategorie se odvozují ze `season` | složení mužstev se mění každou sezónu; statický výčet by se musel opravovat ručně |
+| 17 | – | `Season.hasPenalties` | bodování tabulky je vlastnost soutěže; ze zápasů se poznat nedá, dokud v ní nepadne první remíza |
 | 16 | – | `Team.desc`, `Team.photoUri`, `Team.photoDesc` | karta mužstva v přehledu chce perex, týmovou fotku a popisek pod ní; všechno má smysl jen u `own: true` |

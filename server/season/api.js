@@ -1,6 +1,6 @@
 import Config from "../config.js";
 import crud from "./crud.js";
-import { validate, shape, string, mongoId, oneOf, array, pageInfo } from "../services/validators.js";
+import { validate, shape, string, mongoId, oneOf, array, boolean, pageInfo } from "../services/validators.js";
 import { roleAuth } from "../services/authorize.js";
 
 const listDtoIn = shape({
@@ -19,6 +19,8 @@ const writeDtoIn = shape({
   age: oneOf(Config.AGE_LIST),
   desc: string(),
   teamList: array(mongoId()),
+  // Hraje se na penaltový rozstřel? Rozhoduje o bodování tabulky (3/2/1/0 vs. 3/1/0).
+  hasPenalties: boolean(),
 });
 
 export default {

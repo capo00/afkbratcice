@@ -94,7 +94,7 @@ const TablesSection = createVisualComponent({
                   {active.competition}
                 </Uu5Elements.Text>
               ) : null}
-              <StandingsTable table={data.table} ownTeamId={active.teamId} />
+              <StandingsTable table={data.table} ownTeamId={active.teamId} hasPenalties={active.hasPenalties} />
             </>
           )}
         </div>

@@ -26,7 +26,7 @@ export default {
         season.teamList?.length ? teamDao.listByIdList(season.teamList) : Promise.resolve([]),
       ]);
 
-      return { season, table: computeTable(matchList, teamList) };
+      return { season, table: computeTable(matchList, teamList, Boolean(season.hasPenalties)) };
     },
   },
 

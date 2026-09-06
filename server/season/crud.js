@@ -56,6 +56,9 @@ class SeasonCrud extends Crud {
         // Soutěž s jediným účastníkem z klubu a bez dalších týmů tabulku nedává smysl
         // počítat -- stará garda hraje bez tabulky.
         hasTable: (season.teamList?.length ?? 0) > 1,
+        // Bodování tabulky (3/2/1/0 vs. 3/1/0). Klient podle toho kreslí sloupce VP/PP,
+        // nebo R -- odvozovat to z dat nejde, viz services/table.js.
+        hasPenalties: Boolean(season.hasPenalties),
       };
     });
 

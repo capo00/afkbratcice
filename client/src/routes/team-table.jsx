@@ -49,7 +49,7 @@ function Table({ teamId, seasonId }) {
               {data.season.competition}
             </Uu5Elements.Text>
           ) : null}
-          <StandingsTable table={table} ownTeamId={teamId} />
+          <StandingsTable table={table} ownTeamId={teamId} hasPenalties={Boolean(data?.season?.hasPenalties)} />
         </>
       )}
     </Section>

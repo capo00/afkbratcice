@@ -205,7 +205,7 @@ Perex se v celém modelu jmenuje `desc` (`page.desc`, `season.desc`), takže tad
 | `season/getCurrent` | get | – | `{ age }` nebo `{ teamId }` | `season \| {}` |
 | `season/listCurrent` | get | – | `{ yearFrom }` (výchozí aktuální ročník) | `{ itemList }` – **kategorie klubu pro daný ročník** |
 | `season/listYears` | get | – | `{}` | `{ itemList }` – ročníky, pro které existují data (přepínač sezóny) |
-| `season/create` | post | CONTENT | `{ competition, yearFrom, age, desc, teamList }` | `season` |
+| `season/create` | post | CONTENT | `{ competition, yearFrom, age, desc, teamList, hasPenalties }` | `season` |
 | `season/update` | post | CONTENT | `{ id, ... }` | `season` |
 | `season/delete` | post | CONTENT | `{ id }` | `{}` |
 
@@ -223,13 +223,17 @@ daného ročníku, v jejímž `teamList` je tým s `own: true`:
 ```json
 { "itemList": [
   { "seasonId": "…", "age": "men", "competition": "III. třída sk. A",
-    "teamId": "…", "teamName": "AFK Bratčice", "hasTable": true }
+    "teamId": "…", "teamName": "AFK Bratčice", "hasTable": true, "hasPenalties": true }
 ]}
 ```
 
 Z toho si klient staví menu i routy (viz [frontend.md](./frontend.md), sekce 2.5).
 `hasTable` je `false` u soutěží bez tabulky (stará garda), aby se položka *Tabulka*
 v menu vůbec neobjevila. Řazení podle `appConfig.categoryOrder`, neznámé kódy na konec.
+
+`hasPenalties` říká, jak se v té soutěži boduje — klient podle toho kreslí buď sloupce
+VP/PP, nebo R. Je to **nastavení sezóny**, ne odvození z dat; proč, viz
+[data-model.md](./data-model.md), sekce 3.
 
 ### 2.3 `match`
 
