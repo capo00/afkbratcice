@@ -1,4 +1,4 @@
-// Every text in the app belongs in cs.json / en.json and is read through this function --
+// Every text in the app belongs in cs.json and is read through this function --
 // the same lazy-LSI shape uu5g05 and caio-ui use, so there is one way to do it across the stack.
 //
 //   import importLsi from "../lsi/import-lsi";
@@ -17,11 +17,13 @@ const libraryCode = process.env.NAME;
 
 // Jazyky jsou vyjmenované, ne globované: uu5g05 si píše `import(`./${lang}.json`)`, protože
 // ho staví webpack, ale Vite to odmítne s "variable imports cannot import their own
-// directory". Tohle je cena za to, že cs.json a en.json leží vedle tohohle souboru --
-// přidání jazyka je pak i jeden řádek sem, ne jen nový JSON.
+// directory". Tohle je cena za to, že jazykové JSONy leží vedle tohohle souboru --
+// přidání jazyka je pak i jeden řádek sem, ne jen nový soubor.
+//
+// Zatím jen čeština (design/README.md, sekce 2): prázdný en.json by jen předstíral, že
+// druhý jazyk umíme.
 const IMPORT_BY_LANGUAGE = {
   cs: () => import("./cs.json"),
-  en: () => import("./en.json"),
 };
 
 const importLsi = (lang) =>
