@@ -12,7 +12,7 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
 | Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, přihlášení z knihovny | `article`, `page`, `/rss`, `pageInfo` v seznamech, ID-based přesměrování |
-| Klient — veřejná část | rám, 10 primitivů, home (hero, statistiky, program víkendu, poslední výsledky, tabulky, CTA), mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, 404 | aktuality, obsahové stránky, ke stažení, profil uživatele |
+| Klient — veřejná část | rám, 10 primitivů, self-hostovaná písma, home (hero, statistiky, program víkendu, poslední výsledky, tabulky, CTA), mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, 404 | aktuality, obsahové stránky, ke stažení, profil uživatele |
 | Klient — administrace | – | **všech 12 obrazovek** |
 | Provoz | dev proti lokálnímu Mongu | GCS, OAuth, SMTP, migrace, deploy |
 
@@ -36,7 +36,7 @@ Bez těchhle dvou entit nejde spustit web s obsahem — jsou to jediné dvě vě
 - **`server/legacy-redirect.js` na tyhle kódy míří už teď** (`/historie` →
   `/page?code=history`, `/vybor`, `/tymove_fotky`, `/treninky`, `/hymna`, `/kontakt`) —
   do té doby končí šest starých URL na 404.
-- Časová osa historie: `Uu5Bricks.VerticalTimeline` registrovaná do `uu5String` (viz 5.3).
+- Časová osa historie: `Uu5Bricks.VerticalTimeline` registrovaná do `uu5String` (viz 5.2).
 
 ### 1.2 Entita `article` (aktuality)
 
@@ -127,14 +127,7 @@ po přihlášení z `app-contextu`. Pravidla a pojistky: [`api.md`](./design/api
 
 ## 5. Provozní a drobné
 
-### 5.1 Chybí soubory písem
-
-`client/public/assets/fonts/` **neexistuje**. Web jede na fallbacích (Impact místo Bebas
-Neue, system-ui místo Barlow), takže sazba je blízko předloze, ale není to ono. Potřeba
-`BebasNeue-Regular.woff2` a `Barlow-{400,600,700}.woff2` + `client/src/fonts.css`
-s `@font-face` (vzor: `caio_propertyman/client/src/fonts.css`, latin i **latin-ext**).
-
-### 5.2 Nenakonfigurované prostředí
+### 5.1 Nenakonfigurované prostředí
 
 | Co | Důsledek, dokud chybí |
 |---|---|
@@ -142,19 +135,19 @@ s `@font-face` (vzor: `caio_propertyman/client/src/fonts.css`, latin i **latin-e
 | `GOOGLE_CLIENT_ID` / `SECRET`, `FACEBOOK_*` | přihlášení jen e-mailem a heslem |
 | `SMTP_HOST`, `MAIL_FROM`, `APP_URL` | reset hesla se nenabízí (`passwordResetEnabled: false`) |
 
-### 5.3 Chybějící klientské závislosti
+### 5.2 Chybějící klientské závislosti
 
 `Uu5Bricks` (časová osa historie) a `uu5codekitg01` (editace obsahu) nejsou
 v `client/package.json`. Nestačí je přidat do závislostí — musí i **do import mapy
 `uu5loaderg01`** v `createViteConfig()`, protože uu5 knihovny se nebundlují (riziko #20).
 
-### 5.4 Hero bez fotky
+### 5.3 Hero bez fotky
 
 Hero na home má zatím radiální přechod místo fullbleed fotky s tmavým překryvem. Souvisí
 s tím i potvrzené rozhodnutí, že **nadpis drží GDS strop 44/52 px** — důraz musí přijít
 z fotky, erbu, eyebrow a prostrkání, ne z velikosti písma.
 
-### 5.5 `?mode=forgot`
+### 5.4 `?mode=forgot`
 
 Rozhodnuto, že se **neřeší**: odkaz na reset hesla nebude nikde jinde než na přihlašovací
 stránce, takže `/zapomenute-heslo` končí na `/login.html` a uživatel klikne ještě jednou.
@@ -202,5 +195,5 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 3. **`pageInfo` v `caio-serveru`** — dřív, než ho začne potřebovat administrace i galerie.
 4. **Administrace** — bez ní redakce nemá jak cokoli naplnit; `admin/files` odblokuje
    „Ke stažení", `admin/seasons` `hasPenalties`.
-5. **Fonty, hero fotka, GCS** — vizuál a média do provozuschopného stavu.
+5. **Hero fotka a GCS** — vizuál a média do provozuschopného stavu.
 6. **Migrace + deploy.**

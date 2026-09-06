@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import Uu5Elements from "uu5g05-elements";
 import Config from "./config/config.js";
 import App from "./app.jsx";
+import "./fonts.css";
 
 const { theme } = Config;
 

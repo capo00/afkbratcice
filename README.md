@@ -16,9 +16,8 @@ a fotogalerie s lightboxem.
 **Co chybí:** obsah (`page`, `article`, `/rss`), „Ke stažení", celá administrace, migrace
 a nasazení. Kompletní seznam i s pořadím je v **[todo.md](./todo.md)**.
 
-Dvě věci, které je dobré vědět hned: `client/public/assets/fonts/` je prázdný, takže web
-jede na náhradních písmech, a `GCS_BUCKET_NAME` není vyplněné, takže **upload souborů
-nebyl nikdy otestovaný**.
+Jedna věc, kterou je dobré vědět hned: `GCS_BUCKET_NAME` není vyplněné, takže se
+`binary/*` nezaregistrují a **upload souborů nebyl nikdy otestovaný**.
 
 ## Rozjezd
 

@@ -22,7 +22,7 @@ client/
   public/
     favicon.ico
     assets/meta/        manifest.json, icon-192/512, icon-maskable, apple-touch-icon, og-image
-    assets/fonts/       BebasNeue-Regular.woff2, Barlow-{400,600,700}.woff2
+    assets/fonts/       bebas-neue-400-{latin,latin-ext}.woff2, barlow-{400,600,700}-{latin,latin-ext}.woff2
   src/
     main.jsx            createRoot(...).render(<App />)
     app.jsx             UiApp.SpaProvider > UiApp.Spa(top, footer, main) > Router
