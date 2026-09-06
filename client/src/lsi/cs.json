@@ -14,7 +14,127 @@
       "files": "Ke stažení",
       "contact": "Kontakt",
       "history": "Historie",
-      "club": "Klub"
+      "club": "Klub",
+      "admin": "Administrace"
+    }
+  },
+  "admin": {
+    "eyebrow": "Správa obsahu",
+    "header": "Administrace",
+    "empty": "Na žádnou obrazovku administrace nemáte oprávnění.",
+    "menu": {
+      "teams": { "header": "Mužstva a soupeři", "desc": "Týmy, loga a kategorie" },
+      "seasons": { "header": "Sezóny", "desc": "Ročníky soutěží a jejich účastníci" },
+      "matches": { "header": "Zápasy", "desc": "Rozpis, výsledky a sestavy" },
+      "persons": { "header": "Osoby", "desc": "Lidé klubu a jejich kontakty" },
+      "players": { "header": "Hráči", "desc": "Soupisky, čísla dresů a posty" },
+      "coaches": { "header": "Trenéři a výbor", "desc": "Realizační týmy a funkcionáři" },
+      "articles": { "header": "Novinky", "desc": "Články, perexy a publikace" },
+      "galleries": { "header": "Fotogalerie", "desc": "Alba a nahrávání fotek" },
+      "files": { "header": "Ke stažení", "desc": "Rozpisy a formuláře v PDF" },
+      "identities": { "header": "Identity", "desc": "Přihlášení uživatelé a jejich role" },
+      "config": { "header": "Konfigurace", "desc": "Kontakty, kategorie a proužek s upozorněním" }
+    },
+    "field": {
+      "name": "Název",
+      "shortName": "Zkráceně",
+      "firstName": "Jméno",
+      "surname": "Příjmení",
+      "age": "Kategorie",
+      "own": "Naše",
+      "logo": "Logo",
+      "photo": "Foto",
+      "note": "Poznámka",
+      "birthdate": "Narození",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "person": "Osoba",
+      "number": "Číslo",
+      "position": "Post",
+      "role": "Funkce",
+      "teamList": "Týmů",
+      "competition": "Soutěž",
+      "yearFrom": "Ročník",
+      "hasPenalties": "Rozstřel",
+      "participants": "Účastníků",
+      "desc": "Popis",
+      "title": "Titulek",
+      "state": "Stav",
+      "publishTime": "Publikováno",
+      "perex": "Perex",
+      "content": "Sekcí",
+      "photograph": "Titulní foto",
+      "author": "Autor",
+      "priority": "Připnuto",
+      "date": "Datum",
+      "category": "Kategorie",
+      "author2": "Autor fotek",
+      "photoCount": "Fotek",
+      "file": "Soubor",
+      "size": "Velikost",
+      "profileList": "Role",
+      "identity": "Identita",
+      "notice": "Upozornění",
+      "founded": "Založeno",
+      "address": "Adresa",
+      "gps": "GPS",
+      "ico": "IČO",
+      "time": "Termín",
+      "homeTeam": "Domácí",
+      "guestTeam": "Hosté",
+      "score": "Skóre",
+      "season": "Sezóna",
+      "round": "Kolo",
+      "place": "Hřiště",
+      "departureTime": "Odjezd"
+    },
+    "membership": {
+      "add": "Přidat tým",
+      "hint": "Prázdné datum konce znamená aktivní členství."
+    },
+    "sectionList": {
+      "section": "Sekce ${index}",
+      "add": "Přidat sekci"
+    },
+    "photoUpload": {
+      "action": "Nahrát fotky",
+      "header": "Fotky do alba ${name}",
+      "progress": "Nahrávám ${index} z ${total} — ${name}",
+      "failed": "Nepodařilo se nahrát: ${list}",
+      "upload": "Nahrát",
+      "close": "Zavřít"
+    },
+    "matches": {
+      "setResult": "Zapsat výsledek",
+      "setLineup": "Zapsat sestavu",
+      "resultHeader": "Výsledek zápasu",
+      "lineupHeader": "Sestava",
+      "homeGoals": "Domácí",
+      "guestGoals": "Hosté",
+      "homeGoalsHalf": "Poločas domácí",
+      "guestGoalsHalf": "Poločas hosté",
+      "penaltyWinner": "Vítěz rozstřelu",
+      "player": "Hráč",
+      "position": "Post",
+      "goals": "Góly",
+      "played": "Hrál",
+      "substitute": "Střídal",
+      "cards": "ŽK / ČK",
+      "noPlayers": "Ani jeden z týmů nemá aktivní hráče na soupisce.",
+      "save": "Uložit",
+      "cancel": "Zrušit"
+    },
+    "identities": {
+      "roleHeader": "Role pro ${name}",
+      "teamEditor": "Správce mužstev",
+      "hint": "Změna rolí se projeví až po novém přihlášení — role jsou zapečené v přihlašovacím tokenu.",
+      "save": "Uložit",
+      "cancel": "Zrušit"
+    },
+    "config": {
+      "categoryOrder": "Pořadí kategorií v menu",
+      "hideNames": "Skrýt jména u kategorií",
+      "saved": "Uloženo."
     }
   },
   "home": {
@@ -123,12 +243,31 @@
       "manager": "Vedoucí mužstva",
       "board": "Výbor"
     },
+    "articleState": {
+      "draft": "Rozpracováno",
+      "published": "Publikováno",
+      "archived": "Archiv"
+    },
+    "galleryState": {
+      "draft": "Rozpracováno",
+      "published": "Publikováno"
+    },
     "galleryCategory": {
       "match": "Zápasy",
       "training": "Trénink",
       "fans": "Fanoušci",
       "youth": "Mládež",
       "club": "Klub"
+    },
+    "role": {
+      "teamEditor": "Správce mužstva",
+      "authorities": "Správce webu",
+      "operatives": "Redakce",
+      "matchEditor": "Zápasy",
+      "newsEditor": "Novinky",
+      "galleryEditor": "Fotogalerie",
+      "contentEditor": "Obsah stránek",
+      "members": "Člen klubu"
     },
     "positionGroup": {
       "GK": "Brankáři",

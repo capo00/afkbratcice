@@ -298,8 +298,20 @@ ok("sitemap je XML", (await sitemap.text()).startsWith("<?xml"), sitemap.status)
 
 // --- úklid --------------------------------------------------------------------
 console.log("\n== úklid ==");
-for (const c of ["team", "season", "match", "person", "player", "article"]) {
-  await db.collection(c).deleteMany({ $or: [{ name: /SMOKE/ }, { competition: /SMOKE/ }, { surname: "Smoke" }, { seasonId: season.body.id }] });
+// `personId` je v seznamu schválně: hráč ani trenér nemá `name`, takže je předchozí verze
+// úklidu nechávala v databázi jako osiřelé záznamy bez osoby (a v administraci pak svítily
+// jako řádek s holým id).
+const cleanupFilter = {
+  $or: [
+    { name: /SMOKE/ },
+    { competition: /SMOKE/ },
+    { surname: "Smoke" },
+    { seasonId: season.body.id },
+    { personId: person.body.id },
+  ],
+};
+for (const c of ["team", "season", "match", "person", "player", "coach", "article"]) {
+  await db.collection(c).deleteMany(cleanupFilter);
 }
 await db.collection("sys_identity").deleteMany({ email: ADMIN.email });
 await mongo.close();

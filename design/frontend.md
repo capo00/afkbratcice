@@ -140,18 +140,22 @@ a `page?code=contact` jeho `/kontakt`; zbytek předloha nemá.
 
 ### 2.2 Správcovské
 
+**Hotovo 7. 9. 2026** — všech jedenáct obrazovek. Rozcestník je `admin`; seznam obrazovek,
+jejich ikony a role drží `client/src/admin/menu.js`, aby se rozcestník, položka v liště
+a `withRoute` guard nemohly rozejít.
+
 | Routa | Obsah |
 |---|---|
 | `admin/teams` | CRUD týmů (vč. loga) |
-| `admin/seasons` | CRUD sezón, přiřazení týmů |
+| `admin/seasons` | CRUD sezón, přiřazení týmů, `hasPenalties` |
 | `admin/matches` | CRUD zápasů, hromadné vytvoření, zápis výsledku a sestavy |
 | `admin/persons` | CRUD osob |
 | `admin/players` | CRUD hráčů, členství v týmech |
 | `admin/coaches` | CRUD trenérů a výboru |
-| `admin/articles` | CRUD článků; obsah `uu5String` v `uu5codekitg01-forms` |
+| `admin/articles` | CRUD článků; `sectionList` v `uu5codekitg01-forms` |
 | `admin/galleries` | CRUD alb, hromadný upload fotek |
 | `admin/files` | Soubory ke stažení – vlastní `Crud` nad `BinaryProvider` (viz 6.1) |
-| `admin/pages` | CRUD obsahových stránek; obsah `uu5String` v `uu5codekitg01-forms` |
+| ~~`admin/pages`~~ | **nevzniká** — obsahové stránky jsou natvrdo v `client/src/content/pages.js` a čekají na ECC |
 | `admin/identities` | Správa identit a `profileList` (jen ADMIN) |
 | `admin/config` | Konfigurace aplikace (jen ADMIN) |
 
@@ -614,6 +618,17 @@ je to přesně ta cesta, kterou README `caio-ui` pro tenhle případ předepisuj
 
 Popisky tlačítek a dialogů `Crud`u jsou z LSI `caio-ui` (`src/lsi/cs.json`) – aplikace do nich
 nesahá; potřebuje-li jiné znění, skládá si vlastní konfiguraci.
+
+**Vlastní akce řádku** (nahrát fotky do alba, zapsat výsledek zápasu) jdou přes
+`getItemActionList={({ data }) => [...]}` — **doplněno do `caio-ui` 7. 9. 2026**, protože
+`Crud` si předtím ten prop přepisoval a appka se k němu nedostala. Položky se přidají do
+„…" menu vedle *Zobrazit data*, ne vedle ikon update/delete: řádek je úzký a dvě akce navíc
+by mazání vytlačily za okraj.
+
+`admin/players` a `admin/coaches` neřeší členství přes `player/addTeam` / `endTeam`, ale
+**jedním vstupem nad celým `teamList`** (`admin/form-membership.jsx`). `update` bere celé pole
+a formulář ho stejně celé odesílá, takže dvě úzké operace navíc by znamenaly druhou cestu
+k témuž — a `coach` je na serveru ani nemá.
 
 ### 6.2 Obrázky před uploadem
 

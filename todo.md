@@ -13,7 +13,7 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 |---|---|---|
 | Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny | ID-based přesměrování (čeká na migraci) |
 | Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky, kontakt, 404 | ke stažení, profil uživatele |
-| Klient — administrace | – | **všech 12 obrazovek** |
+| Klient — administrace | rozcestník + **11 obrazovek** (týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace) | filtrování dat podle `teamEditor:*`, ověření uploadu (čeká na GCS) |
 | Provoz | dev proti lokálnímu Mongu | GCS, OAuth, SMTP, migrace, deploy |
 
 Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 12.
@@ -49,32 +49,25 @@ Entita `page` se **nedělá** a počká na ECC (viz [`README.md`](./design/READM
 
 ---
 
-## 3. Administrace (12 obrazovek)
+## 3. Administrace — hotová (11 obrazovek)
 
-Nic z toho zatím není. Sedm z nich je podle návrhu jen konfigurační objekt nad
-`UiElements.Crud`, zbytek má něco navíc.
+Rozcestník `/admin` + jedenáct obrazovek; `admin/pages` **nevzniká**, protože obsahové
+stránky jsou natvrdo v kódu a čekají na ECC. Seznam obrazovek, ikon a rolí drží
+`client/src/admin/menu.js` — rozcestník, položka v liště i `withRoute` guard čtou totéž.
 
-| Obrazovka | Navíc oproti `CONFIG` objektu |
-|---|---|
-| `admin/teams` | logo, nově i týmová fotka a perex (viz 4.2) |
-| `admin/seasons` | přiřazení týmů, **`hasPenalties`** |
-| `admin/matches` | modály *Zapsat výsledek*, *Zapsat sestavu*, *Hromadně* (JSON import rozlosování z OFS) |
-| `admin/persons` | – |
-| `admin/players` | členství v týmech (`addTeam` / `endTeam`) |
-| `admin/coaches` | – |
-| `admin/articles` | `ContentEditModal` nad `sectionList`; `setState` jako tlačítko, ne pole formuláře. **Bez ní se novinka nedá založit jinak než přímo v Mongu** — entita i veřejné obrazovky hotové jsou |
-| `admin/galleries` | hromadný upload fotek (sekvenčně, dvě binárky na fotku) |
-| `admin/files` | **vlastní `Crud` nad `BinaryProvider`** — `BinaryCrud` je nerozšiřitelná a chybí jí `category`/`date` |
-| `admin/pages` | `ContentEditModal` nad `sectionList` |
-| `admin/identities` | `identity/adminList` + `update`; `teamEditor:<id>` ukazovat jako **název týmu**, ne holé id |
-| `admin/config` | `appConfig/update` |
+Ověřeno v prohlížeči včetně **založení článku proklikáním formuláře** (ne přes API).
 
-K tomu:
+Co zbývá dodělat uvnitř administrace:
 
-- Guard obrazovek vázaných na mužstvo přes `withRoute(..., { profileList: ["teamEditor:*"] })`
-  a `UiAuth.getScopeList()` — v `caio-ui` je to hotové, v appce se to zatím nepoužívá.
-- Zmenšování obrázků před uploadem (`uu5imagingg01-tools`): logo 400 px, portrét 600 px,
-  týmová fotka a titulní foto článku 1200 px, fotka v galerii 1600 + 400 px.
+- **`admin/files` se nedá vyzkoušet**, dokud není GCS: `binary/*` use case sice odpovídá,
+  ale nahrát soubor bez bucketu nejde (5.1). Obrazovka je napsaná a tabulka se vykreslí
+  prázdná.
+- **Rozsahová role `teamEditor:*`** je v guardu (`admin/menu.js`), ale obrazovky ještě
+  **nefiltrují data podle `UiAuth.getScopeList()`** — editor jednoho mužstva tak vidí
+  v tabulce i cizí týmy. Server ho k zápisu nepustí (ověřeno smoke testem), takže je to
+  UX, ne díra.
+- **Týmová fotka a perex** (`team.desc`, `photoUri`, `photoDesc`) v `admin/teams` chybí,
+  protože je nemá server (4.2).
 
 ---
 
@@ -187,9 +180,10 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 
 ## Doporučené pořadí
 
-1. **Administrace** — teď je to jediná věc, která drží obsah: novinky, alba i soupisky jdou
-   dnes naplnit jen zápisem přímo do Monga. `admin/articles` odblokuje redakci,
-   `admin/files` „Ke stažení", `admin/seasons` `hasPenalties`.
+1. **GCS** — je to teď největší jednotlivá blokace: bez bucketu se nedá nahrát logo, portrét,
+   fotka do galerie ani soubor ke stažení, takže polovina administrace je napsaná a
+   nevyzkoušená. Postup: `caio-devkit/docs/how-to-set-gcs.md`.
 2. **Text obsahových stránek** z v0 — je to přepis, ne vývoj, takže může běžet vedle.
-3. **Hero fotka a GCS** — vizuál a média do provozuschopného stavu.
-4. **Migrace + deploy.**
+3. **Zbytek veřejné části** — „Ke stažení", profil uživatele, SEO za běhu (kapitola 2).
+4. **Hero fotka** — poslední kus vizuálu.
+5. **Migrace + deploy.**

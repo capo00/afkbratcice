@@ -8,6 +8,7 @@ import Footer from "./components/layout/footer.jsx";
 import NoticeBar from "./components/layout/notice-bar.jsx";
 import { AppProvider, useApp } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
+import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "./admin/menu.js";
 
 const { theme } = Config;
 
@@ -39,6 +40,30 @@ function useIdentityItem() {
   };
 }
 
+// Administrace v liště. Nabídne se **jen tomu, kdo na ni má** — a s podpoložkami jen na ty
+// obrazovky, které smí otevřít; zašedlé položky se v tomhle webu nepoužívají (frontend.md, 2.2).
+// Nepřihlášenému nebo běžnému členovi se položka nevykreslí vůbec (`undefined` v `itemList`
+// uu5 přeskočí).
+function useAdminItem() {
+  const session = UiAuth.useSession();
+  const adminLabel = useLsi(importLsi, ["header", "nav", "admin"]);
+  const menuLsi = useLsi(importLsi, ["admin", "menu"]);
+
+  if (!UiAuth.hasProfile(session.identity, ANY_ADMIN_PROFILE)) return undefined;
+
+  return {
+    href: "admin",
+    children: adminLabel,
+    significance: "subdued",
+    colorScheme: "building",
+    itemList: ADMIN_MENU.filter((item) => UiAuth.hasProfile(session.identity, item.profileList)).map((item) => ({
+      href: item.route,
+      icon: item.icon,
+      children: menuLsi[item.code]?.header ?? item.code,
+    })),
+  };
+}
+
 // Menu se staví **z dat, ne z konfigurace**: pro každou kategorii, kterou klub v aktuálním
 // ročníku má, přibude položka s podpoložkami. Přidání mužstva je pak založení sezóny
 // v administraci, ne nasazení (design/frontend.md, 2.5).
@@ -53,6 +78,7 @@ function useTop() {
   const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
   const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
   const pageLsi = useLsi(importLsi, ["page", "name"]);
+  const adminItem = useAdminItem();
 
   return {
     logo: { uri: Config.asset.logo, href: "" },
@@ -84,6 +110,8 @@ function useTop() {
     cssBackground: theme.color.bg,
     cssColor: theme.color.fg,
     menu: {
+      // `.filter(Boolean)`: položka administrace je `undefined`, dokud se nepřihlásí někdo,
+      // kdo na ni má.
       itemList: [
         {
           href: "novinky",
@@ -123,8 +151,9 @@ function useTop() {
           significance: "subdued",
           colorScheme: "building",
         },
+        adminItem,
         identityItem,
-      ],
+      ].filter(Boolean),
     },
   };
 }

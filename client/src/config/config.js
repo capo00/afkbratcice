@@ -30,6 +30,10 @@ const MATCH_STATE_LIST = ["planned", "played", "postponed", "canceled"];
 const COACH_ROLE_LIST = ["headCoach", "assistant", "manager", "board"];
 const GALLERY_CATEGORY_LIST = ["match", "training", "fans", "youth", "club"];
 
+// Binární kolekce, do které patří soubory ke stažení. Musí sedět se `server/config.js`
+// (`BINARY_COLLECTION.DOWNLOAD`) — podle ní `binary/*` autorizuje zápis.
+const BINARY_COLLECTION_DOWNLOAD = "download";
+
 // Kódy obsahových stránek tu **nejsou**: stránky jsou natvrdo v `content/pages.js`
 // a jeho `PAGE_CODE_LIST` je zdroj pravdy pro routu i pro menu. Dvojí seznam by se
 // rozešel hned, jak by někdo přidal stránku.
@@ -68,6 +72,7 @@ const Config = {
   MATCH_STATE_LIST,
   COACH_ROLE_LIST,
   GALLERY_CATEGORY_LIST,
+  BINARY_COLLECTION_DOWNLOAD,
 
   ROLE,
   ADMIN,
