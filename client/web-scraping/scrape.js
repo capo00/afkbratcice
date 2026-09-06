@@ -28,6 +28,7 @@ const TEAMS = {
   "FK Miskovice": 61,
   "Sokol Potěhy": 4,
   "TJ Sokol Paběnice B": 3,
+  "TJ Sokol Malín": 63,
 };
 
 // žáci
