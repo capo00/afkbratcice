@@ -329,7 +329,7 @@ Pravidla:
 
 | # | Problém | Dopad | Navržené řešení |
 |---|---|---|---|
-| 9 | **Seznamy nevrací `pageInfo`.** `Dao.find` vrací holé pole, `Crud.list` z něj dělá `{ itemList }` — nikde v `caio-serveru` `pageInfo` zpátky nechodí. `UiElements.Crud` přitom volá `handlerMap.loadNext({ pageInfo: { pageIndex } })` a `useDataList` bez `total` neví, kdy přestat. | Nejde stránkovat nic — ani novinky, ani fotky v albu, ani administrace. Do té doby jedou seznamy na jednu dávku `pageSize: 1000`. | **Změna v `caio-server`** (rozhodnuto 2026-09-06): `Dao.find` vrátí `{ itemList, pageInfo: { pageIndex, pageSize, total } }` a `Crud.list` i use casy tvar propustí. Ověřit i na `caio_propertyman`. Detail: [api.md](./api.md), 1.0.1. |
+| 9 | ~~Seznamy nevrací `pageInfo`~~ | – | **Vyřešeno 2026-09-06** v `caio-server`: přibyly `Dao.findPage()`, `Dao.listPage()` a `Crud.listPage()`; `binary/list` je vrací. Není to změna `find()` — ta by rozbila každý dao v každé appce kvůli číslu, které potřebují jen list use case. Zbývá adopce v use casech appky. |
 | 21 | ~~`match/list` nevrací týmy~~ | – | **Vyřešeno 2026-09-06**: mapa týmů v `app-contextu` (`team/list` jednou při startu SPA) — levnější než denormalizace názvů do každého zápasu. Viz [frontend.md](./frontend.md), sekce 4. |
 | 22 | ~~`match/list` nemá filtr `playerId`~~ | – | **Vyřešeno 2026-09-06**: filtr je v `match/dao.listByFilter` i ve validátoru, index tam byl od začátku. |
 | 23 | ~~`season/list` nemá `idList`~~ | – | **Vyřešeno 2026-09-06**: profil hráče podle něj dopojmenovává sezóny ze statistik. |

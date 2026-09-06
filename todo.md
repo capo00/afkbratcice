@@ -11,8 +11,8 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
-| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, přihlášení z knihovny | `article`, `page`, `/rss`, `pageInfo` v seznamech, ID-based přesměrování |
-| Klient — veřejná část | rám, 10 primitivů, self-hostovaná písma, home (hero, statistiky, program víkendu, poslední výsledky, tabulky, CTA), mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, 404 | aktuality, obsahové stránky, ke stažení, profil uživatele |
+| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, přihlášení z knihovny | `article`, `/rss`, ID-based přesměrování |
+| Klient — veřejná část | rám, 10 primitivů, self-hostovaná písma, **české adresy**, home, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky, kontakt, 404 | aktuality, ke stažení, profil uživatele |
 | Klient — administrace | – | **všech 12 obrazovek** |
 | Provoz | dev proti lokálnímu Mongu | GCS, OAuth, SMTP, migrace, deploy |
 
@@ -20,40 +20,38 @@ Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 
 
 ---
 
-## 1. Blokátory obsahu
+## 1. Obsah
 
-Bez těchhle dvou entit nejde spustit web s obsahem — jsou to jediné dvě věci, které dnes
-**vedou z odkazů do prázdna**.
+### 1.1 Entita `article` (aktuality)
 
-### 1.1 Entita `page` (obsahové stránky)
+Poslední velká díra ve veřejné části — a jediné místo, které dnes **vede z odkazu do
+prázdna**: `legacy-redirect` posílá `/home-<n>` na `/novinky?pageIndex=…`, takže
+stránkování novinek ze starého webu končí na 404.
 
-- `server/page/{dao,crud,api}.js` — `code`, `name`, `desc`, `sectionList: [{ content }]`.
-  Kontrakt: [`api.md`](./design/api.md), 2.9.
-- `tools/seed-pages.js` — obsah přepsaný z v0 (historie, hymna, kontakt s mapou, výbor,
-  tréninky, týmové fotky). Bez seedu jde web do provozu se šesti prázdnými stránkami.
-- Klient: routa `page?code=…` + aliasy `history`, `hymn`, `contact`, `board`; komponenty
-  `SectionList`, `Content` (`Utils.Uu5String.toChildren`) a `ContentEditModal`.
-- **`server/legacy-redirect.js` na tyhle kódy míří už teď** (`/historie` →
-  `/page?code=history`, `/vybor`, `/tymove_fotky`, `/treninky`, `/hymna`, `/kontakt`) —
-  do té doby končí šest starých URL na 404.
-- Časová osa historie: `Uu5Bricks.VerticalTimeline` registrovaná do `uu5String` (viz 5.2).
-
-### 1.2 Entita `article` (aktuality)
-
-- `server/article/{dao,crud,api}.js` — obsah je `content` (`uu5String`), `list` ho nevrací.
-- Klient: routy `news?pageIndex` a `article?id`, blok **Aktuality na home** (dnes na
-  stránce chybí úplně), `admin/articles`.
+- `server/article/{dao,crud,api}.js` — obsah je **`sectionList[].content`** (`uu5String`),
+  `list` ho nevrací. Kontrakt: [`api.md`](./design/api.md), 2.8.
+- Klient: routy `novinky?pageIndex` a `novinka?id`, blok **Aktuality na home** (dnes na
+  stránce chybí úplně), `admin/articles`. Vykreslení přes `Uu5.Content`, editace
+  `uu5codekitg01` nad každou sekcí.
 - `GET /rss` — má co publikovat teprve s články.
-- `legacy-redirect` posílá `/home-<n>` na `/news?pageIndex=…`, takže stránkování novinek
-  ze starého webu dnes taky končí na 404.
+
+### 1.2 Text obsahových stránek
+
+Stránky **fungují** (`/historie`, `/hymna`, `/vybor`, `/treninky`, `/tymove-fotky`), ale
+mají v `client/src/content/pages.js` jen kostry — **text se má přepsat z běžícího
+`afkbratcice.cz`**. Historii klubu, jména výboru ani slova hymny si nevymýšlíme.
+
+Entita `page` se **nedělá** a počká na ECC (viz [`README.md`](./design/README.md), sekce 2).
+Časová osa v historii je zatím obyčejný seznam — `Uu5Bricks.VerticalTimeline` chce
+závislost z bodu 5.2.
 
 ---
 
 ## 2. Zbytek veřejné části
 
-- **Ke stažení** (`files?category`) — `file/list` na serveru je, ale `category` a `date`
-  **nikdo nezapisuje**, dokud nevznikne `admin/files` (riziko #25). Stránka by dnes byla
-  jeden nesekcovaný seznam.
+- **Ke stažení** (`ke-stazeni?category`) — `file/list` nad kolekcí `download` na serveru
+  je, ale `category` a `date` **nikdo nezapisuje**, dokud nevznikne `admin/files`
+  (riziko #25). Stránka by dnes byla jeden nesekcovaný seznam.
 - **Profil přihlášeného uživatele** (`profile`) — vlastní údaje, spárovaná osoba, role.
 - **Odběr kalendáře** — `GET /calendar/team-<id>.ics` server umí, klient na něj zatím
   nikde neodkazuje (patří k zápasům mužstva).
@@ -95,14 +93,16 @@ K tomu:
 
 Tohle je odsouhlasené a zapsané v návrhu, jen to ještě nikdo nenapsal.
 
-### 4.1 `pageInfo` v `caio-serveru` (riziko #9)
+### 4.1 Adopce `pageInfo` v use casech appky
 
-`Dao.find` vrací holé pole, takže **žádný seznam na stacku nevrací `pageInfo`**.
-`UiElements.Crud` volá `handlerMap.loadNext({ pageInfo: { pageIndex } })` a `useDataList`
-bez `total` neví, kdy přestat — nejde tedy stránkovat novinky, dotahovat fotky v albu ani
-listovat administrací. Seznamy dnes jedou na jednu dávku `pageSize: 1000`, což pro dnešní
-objem stačí, ale **po migraci ~2 600 fotek už ne**. Detail: [`api.md`](./design/api.md), 1.0.1.
-Mění tvar odpovědi každého seznamu → **ověřit i na `caio_propertyman`**.
+**V knihovně je to hotové** (`caio-server@cb3d8c0`): `Dao.findPage()`, `Dao.listPage()`,
+`Crud.listPage()` a `binary/list`, který ho už vrací. Není to změna `find()` — ta by
+rozbila každý dao v každé appce kvůli číslu, které potřebují jen list use case.
+
+Zbývá **přepnout list use case afkbratcice** tam, kde se bude reálně stránkovat:
+`article/list` (novinky), `gallery/listPhotos` (album po migraci ~2 600 fotek) a seznamy
+v administraci. Dokud se nepřepnou, jedou na jednu dávku `pageSize: 1000` — což pro dnešní
+objem stačí.
 
 ### 4.2 `team.desc`, `photoUri`, `photoDesc`
 
@@ -182,6 +182,10 @@ Co by mělo přibýt, až se ustálí rozsah:
 - jednotkové testy `services/stats.js` a `services/season.js` (`yearFrom` přes přelom roku),
 - rozšířit `smoke.js` o galerii, statistiky hráčů a nové filtry (`playerId`, `idList`).
 
+Smoke test je srovnaný s rozhodnutími (50 ok / 0 fail): sezóna v něm má `hasPenalties`,
+přesměrování testuje `/tymove_fotky` místo `/historie` (ta se už nepřesměrovává) a routa
+novinek je česky.
+
 Klient testy nemá a zatím se neověřuje jinak než spuštěním. **Ikony a texty se ověřují
 v prohlížeči** — neexistující GDS ikona se vykreslí jako prázdné místo se správnou šířkou
 a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/component-tree.md), F.2).
@@ -190,10 +194,10 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 
 ## Doporučené pořadí
 
-1. **`page` + seed obsahu** — odblokuje šest starých URL a dá webu obsahové stránky.
-2. **`article` + aktuality + `/rss`** — nejsledovanější obsah po zápasech.
-3. **`pageInfo` v `caio-serveru`** — dřív, než ho začne potřebovat administrace i galerie.
-4. **Administrace** — bez ní redakce nemá jak cokoli naplnit; `admin/files` odblokuje
+1. **`article` + aktuality + `/rss`** — nejsledovanější obsah po zápasech a poslední
+   odkaz, který dnes vede do prázdna.
+2. **Administrace** — bez ní redakce nemá jak cokoli naplnit; `admin/files` odblokuje
    „Ke stažení", `admin/seasons` `hasPenalties`.
-5. **Hero fotka a GCS** — vizuál a média do provozuschopného stavu.
-6. **Migrace + deploy.**
+3. **Text obsahových stránek** z v0 — je to přepis, ne vývoj, takže může běžet vedle.
+4. **Hero fotka a GCS** — vizuál a média do provozuschopného stavu.
+5. **Migrace + deploy.**

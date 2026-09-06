@@ -81,8 +81,11 @@ const badTeam = await post("team/create", { name: "AFK Bratčice SMOKE", age: "m
 ok("duplicitní tým v kategorii neprojde", badTeam.status >= 400, badTeam.status);
 
 const year = String(new Date().getMonth() + 1 < 8 ? new Date().getFullYear() - 1 : new Date().getFullYear());
+// `hasPenalties` je povinné, aby dávalo smysl testovat bodování 3/2/1/0: bez něj se
+// remíza s vyplněným vítězem rozstřelu počítá po bodu, protože o modelu rozhoduje
+// sezóna, ne zápis u zápasu (design/data-model.md, sekce 3).
 const season = await post("season/create", {
-  competition: "SMOKE III. třída", yearFrom: year, age: "men", teamList: teamIds,
+  competition: "SMOKE III. třída", yearFrom: year, age: "men", teamList: teamIds, hasPenalties: true,
 }, cookie);
 ok("založení sezóny", season.status === 200 && season.body?.id, season.body);
 
@@ -90,6 +93,7 @@ console.log("\n== dynamické kategorie ==");
 const current = await get("season/listCurrent");
 const mine = current.body?.itemList?.find((i) => i.seasonId === season.body.id);
 ok("season/listCurrent najde kategorii klubu", Boolean(mine), current.body);
+ok("season/listCurrent hlásí hasPenalties", mine?.hasPenalties === true, mine);
 ok("kategorie nese teamId a hasTable", mine?.teamId === own.body.id && mine?.hasTable === true, mine);
 const emptyYear = await get("season/listCurrent", { yearFrom: "1990" });
 ok("ročník bez sezón vrací prázdno", emptyYear.body?.itemList?.length === 0, emptyYear.body);
@@ -207,13 +211,15 @@ const teIdentity = await get("identity/adminList", {}, teCookie);
 ok("teamEditor nevidí identity", teIdentity.status === 401, teIdentity.status);
 
 console.log("\n== legacy přesměrování ==");
-const redir = await fetch(`${BASE}/historie`, { redirect: "manual" });
-ok("/historie -> ECC stránka", redir.status === 301 && redir.headers.get("location") === "/page?code=history",
+// Adresy nové appky jsou české a shodné s v0, takže `/historie` se **nepřesměrovává** --
+// SPA fallback ji obslouží rovnou. Přesměrování zbylo jen tam, kde se adresa liší.
+const redir = await fetch(`${BASE}/tymove_fotky`, { redirect: "manual" });
+ok("/tymove_fotky -> /tymove-fotky", redir.status === 301 && redir.headers.get("location") === "/tymove-fotky",
   { status: redir.status, loc: redir.headers.get("location") });
 const gone = await fetch(`${BASE}/pokladna`, { redirect: "manual" });
 ok("/pokladna je 410 Gone", gone.status === 410, gone.status);
 const news = await fetch(`${BASE}/home-3`, { redirect: "manual" });
-ok("/home-3 -> stránkování novinek", news.headers.get("location") === "/news?pageIndex=2", news.headers.get("location"));
+ok("/home-3 -> stránkování novinek", news.headers.get("location") === "/novinky?pageIndex=2", news.headers.get("location"));
 
 console.log("\n== iCal a sitemap ==");
 const ics = await fetch(`${BASE}/calendar/team?teamId=${teamIds[0]}`);
