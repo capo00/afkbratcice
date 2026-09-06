@@ -40,6 +40,41 @@ function useIdentityItem() {
   };
 }
 
+/** Název klubu vedle erbu — dva řádky sázené GDS tokeny, ale klubovým písmem. */
+function ClubName({ name, since }) {
+  return (
+    <div className={Config.Css.css({ display: "grid", alignContent: "center" })}>
+      <Uu5Elements.Text category="interface" segment="title" type="minor">
+        {({ style }) => (
+          <span
+            className={Config.Css.css({
+              ...style,
+              ...theme.typography.display,
+              letterSpacing: "0.04em",
+              lineHeight: 1.1,
+            })}
+          >
+            {name}
+          </span>
+        )}
+      </Uu5Elements.Text>
+      <Uu5Elements.Text category="interface" segment="highlight" type="small">
+        {({ style }) => (
+          <span
+            className={Config.Css.css({
+              ...style,
+              ...theme.typography.eyebrow,
+              color: theme.color.mutedFg,
+            })}
+          >
+            {since}
+          </span>
+        )}
+      </Uu5Elements.Text>
+    </div>
+  );
+}
+
 // Administrace v liště. Nabídne se **jen tomu, kdo na ni má** — a s podpoložkami jen na ty
 // obrazovky, které smí otevřít; zašedlé položky se v tomhle webu nepoužívají (frontend.md, 2.2).
 // Nepřihlášenému nebo běžnému členovi se položka nevykreslí vůbec (`undefined` v `itemList`
@@ -84,27 +119,17 @@ function useTop() {
     logo: { uri: Config.asset.logo, href: "" },
     // Dvouřádkový název vedle erbu. `children` Topu je jeho volný obsah.
     //
-    // PŘEBITÍ (design/component-tree.md, A.1): `Uu5Elements.Header` nemá token pro
-    // font — title i subtitle renderuje jako `Uu5Elements.Text` s vlastní explicitní
-    // `font-family`, takže zdědění z rodiče nestačí. Třída cílí na
-    // `[data-name="Uu5Elements.Text"]` uvnitř; ta vyšší specificita (třída + atribut)
-    // přebije uu5 třídu bez ohledu na pořadí stylesheetů.
-    children: (
-      <Uu5Elements.Header
-        className={Config.Css.css({
-          '& [data-name="Uu5Elements.Text"]': {
-            fontFamily: theme.font.display,
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-          },
-        })}
-        title={clubName}
-        subtitle={clubSince}
-        paddingTop={false}
-        paddingBottom={false}
-        paddingHorizontal={false}
-      />
-    ),
+    // Skládá se **z vlastních elementů, ne z `Uu5Elements.Header`**. Header nemá token pro
+    // font a title i subtitle si renderuje jako `Uu5Elements.Text` s explicitní
+    // `font-family`, takže zdědění z rodiče nestačí — jediná cesta k němu vedla přes
+    // selektor `[data-name="Uu5Elements.Text"]`. A ten **v produkčním buildu neexistuje**:
+    // `data-name` je vývojová pomůcka, kterou uu5 v produkci nevypisuje, takže erb měl
+    // v ostrém provozu vedle sebe Barlow místo Bebasu (nalezeno 7. 9. 2026).
+    //
+    // Velikost dál počítá GDS přes `Uu5Elements.Text` a jeho `children` jako funkci —
+    // stejný postup jako `components/layout/heading.jsx`. Přebíjí se jen to, co token nemá:
+    // rodina písma, prostrkání a verzálky.
+    children: <ClubName name={clubName} since={clubSince} />,
     // GDS paleta `building` je bílá a nepřenastaví se, takže tmavá lišta jde přes
     // cssBackground/cssColor.
     cssBackground: theme.color.bg,

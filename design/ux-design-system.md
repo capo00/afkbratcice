@@ -348,11 +348,10 @@ Uu5Elements.UuGds.setMeaningColor("primary", "#8b0000");
   volby fontu, ne odchylka od pravidla ze sekce 2.1.
 - **`textTransform: uppercase` a kladné prostrkání** se snadno zapomenou, protože nadpis se
   často bere přes hotovou uu5 komponentu s vlastní sazbou. Zkontrolovat.
-- **`Uu5Elements.Header` nemá token pro font.** Title i subtitle renderuje jako
-  `Uu5Elements.Text` s vlastní explicitní `font-family`, takže zdědění nestačí — propertyman to
-  řeší cílenou třídou na `[data-name="Uu5Elements.Text"]`
-  (`caio_propertyman/client/src/app.jsx`). Stejný postup, stejný důvod, a patří to do
-  `decisions.md`.
+- **`Uu5Elements.Header` nemá token pro font** — a **selektor na `[data-name=…]` to neřeší**:
+  `data-name` v produkčním buildu neexistuje, takže styl platí jen v devu (nalezeno
+  7. 9. 2026 v obou appkách). Název v liště se skládá z vlastních elementů; velikost dál
+  počítá GDS přes `Uu5Elements.Text`.
 - **GDS paleta je světlá.** Předloha je dark-only; barvy lišty a ploch se drží tokenů z
   `theme.js` přes `cssBackground`/`cssColor`, ne přes `colorScheme` (paleta `building` je bílá
   a přenastavit se nedá).

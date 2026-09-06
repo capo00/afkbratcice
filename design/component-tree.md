@@ -108,10 +108,19 @@ flowchart TD
   classDef data fill:#D8D2D0,color:#120D0C,stroke:#99908E,stroke-dasharray:3 3
 ```
 
-**Past:** `Uu5Elements.Header` nemá token pro font — title i subtitle renderuje jako
-`Uu5Elements.Text` s vlastní explicitní `font-family`. Bebas Neue se do něj dostane jen
-cílenou třídou na `[data-name="Uu5Elements.Text"]`; je to **schválené přebití**, patří do
-`decisions.md` (stejně to řeší propertyman).
+**Past (a jak dopadla):** `Uu5Elements.Header` nemá token pro font — title i subtitle
+renderuje jako `Uu5Elements.Text` s vlastní explicitní `font-family`. Cesta přes cílenou
+třídu na `[data-name="Uu5Elements.Text"]` **v produkci nefunguje**: `data-name` je vývojová
+pomůcka, kterou uu5 v produkčním buildu nevypisuje, takže název klubu byl v devu Bebas
+a v ostrém provozu Barlow — rozdíl, který v devu nejde uvidět (nalezeno 7. 9. 2026, stejná
+chyba byla i v propertymanu).
+
+Řešení: název klubu se **skládá z vlastních elementů**, ne z `Uu5Elements.Header`. Velikost
+dál počítá GDS (`Uu5Elements.Text` s `children` jako funkcí, stejně jako `Heading`), přebíjí
+se jen rodina písma, prostrkání a verzálky.
+
+> **Pravidlo:** `data-name` se nesmí objevit v selektoru. Když se komponenta nedá nastavit
+> propsy, skládá se vlastní obal — ne selektor do jejího vnitřku.
 
 ---
 
