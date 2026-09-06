@@ -1,39 +1,22 @@
 {
-  "name": "server",
-  "version": "0.5.5",
-  "description": "",
+  "name": "afkbratcice",
+  "version": "0.1.0",
+  "type": "module",
   "main": "server/index.js",
   "scripts": {
-    "start": "nodemon server/index.js",
-    "dev": "node tools/start.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "myBuild": "cd client/oc_afkbratcice_maing01-hi && npm run build && cd.. && cd.. && node tools/build.js",
-    "deploy": "npm run myBuild && gcloud app deploy"
+    "start": "node server/index.js",
+    "dev": "caio-devkit start",
+    "build": "caio-devkit build",
+    "deploy": "caio-devkit deploy",
+    "seed:admin": "node tools/seed-admin.js",
+    "smoke": "node tools/smoke.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.21.0",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "nodemon": "^3.0.1",
-    "mongodb": "^6.8.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "googleapis": "^144.0.0",
-    "multer": "^1.4.5-lts.1",
-    "uu_datatypesg01": "^0.1.0",
-    "puppeteer": "23.6.0"
+    "caio-server": "file:../caio-architecture/caio-server/dist/caio-server-0.1.0.tgz",
+    "uu_appdatatypesg02": "~0.2.1"
   },
-  "nodemonConfig": {
-    "ignore": [
-      "client/**",
-      "node_modules/**"
-    ],
-    "ext": "js"
+  "devDependencies": {
+    "caio-devkit": "file:../caio-architecture/caio-devkit/dist/caio-devkit-0.1.0.tgz",
+    "nodemon": "^3.1.14"
   }
 }

@@ -1,0 +1,23 @@
+{
+  "name": "afkbratcice-client",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "uu5loaderg01": "^1.10.0",
+    "uu5g05": "*",
+    "uu5g05-elements": "*",
+    "uu5g05-forms": "*",
+    "uu5tilesg02": "*",
+    "uu5tilesg02-elements": "*",
+    "uu5imagingg01": "^2.0.0",
+    "uu5imagingg01-tools": "^2.0.0",
+    "caio-ui": "file:../../caio-architecture/caio-ui/dist/caio-ui-0.1.0.tgz"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5",
+    "caio-devkit": "file:../../caio-architecture/caio-devkit/dist/caio-devkit-0.1.0.tgz"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "app": {
+    "header": "Welcome",
+    "info": "Your app is running. Edit client/src/app.jsx to get started."
+  },
+  "home": {
+    "header": "Home"
+  }
+}

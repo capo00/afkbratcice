@@ -1,0 +1,9 @@
+{
+  "app": {
+    "header": "Vítejte",
+    "info": "Aplikace běží. Začněte úpravou client/src/app.jsx."
+  },
+  "home": {
+    "header": "Domů"
+  }
+}
