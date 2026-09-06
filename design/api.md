@@ -19,11 +19,11 @@ v objektu `api` a hodnota `{ method, fn, auth, validator }`
 | Metody | pouze `get` (čtení) a `post` (zápis) |
 | `dtoIn` pro GET | query parametry; hodnota začínající `{` nebo `[` se automaticky projede `JSON.parse` |
 | `dtoIn` pro POST | JSON tělo, u souborů `multipart/form-data` (na klientu to řeší `UiElements.Call.post` automaticky, když `dtoIn` obsahuje `File`) |
-| `dtoOut` | vždy objekt; seznamy vrací `{ itemList }`. `fn` vracející `false` znamená „odpověď jsem poslal sám“ |
+| `dtoOut` | vždy objekt; seznamy vrací `{ itemList, pageInfo }`. `fn` vracející `false` znamená „odpověď jsem poslal sám“ |
 | Autorizace | `auth: true` = přihlášený, `auth: ["operatives", "authorities"]` = profily (stačí jeden), `auth: async ({ dtoIn, identity, req }) => boolean` = vlastní logika (jediná cesta k rozhodnutí podle `dtoIn`); bez `auth` je use case veřejný. Role a množiny: [roles.md](./roles.md) |
 | Validace | `uu_appdatatypesg02@0.2.1` – `shape()` / `array()` a `validate()`, zabalené do funkce `({ dtoIn }) => dtoIn`; viz 1.0 |
 | `sys` | API před zápisem odstraňuje `dtoIn.sys` (rezervovaný klíč v `Dao`) |
-| Stránkování | `pageInfo: { pageSize, pageIndex }`, výchozí `pageSize` 1000 |
+| Stránkování | `dtoIn.pageInfo = { pageSize, pageIndex }`, výchozí `pageSize` 1000; **`dtoOut` vrací `pageInfo` zpátky včetně `total`** |
 | Health | `sys/health` registruje knihovna automaticky (`{ version }`); aplikace ho **přebíjí vlastním** klíčem – viz sekce 3 |
 
 ### 1.0 Validátory — `uu_appdatatypesg02`
@@ -93,6 +93,21 @@ jako `dtoIn` — smí tedy i normalizovat. Wrapper i jednotlivé `DataType` defi
 > exportu a `.exact()`/`.arrayOf()`; správná jména jsou `shape()` a `array()`. Knihovní use
 > casy zůstávají na ručních funkcích, aplikace je psát tak nemusí.
 
+#### 1.0.1 `pageInfo` v `dtoOut` je změna v `caio-server`
+
+`Dao.find` vrací holé pole a `Crud.list` z něj dělá `{ itemList }` — **nikde v knihovně
+`pageInfo` zpátky nechodí**. Klient ho přitom potřebuje: `UiElements.Crud` volá
+`handlerMap.loadNext({ pageInfo: { pageIndex } })` a `useDataList` bez `total` neví, kdy
+přestat. Bez toho nejde stránkovat novinky ani dotahovat fotky v albu.
+
+Doplní se **v `caio-server`**, ne v aplikaci (rozhodnuto 2026-09-06) — je to vlastnost
+každého seznamu na tomhle stacku, ne afkbratcice:
+
+- `Dao.find` vrátí `{ itemList, pageInfo: { pageIndex, pageSize, total } }`; `total`
+  z `countDocuments` nad stejným filtrem,
+- `Crud.list` a všechny `*/list` use casy tvar jen propouštějí dál,
+- týká se i `caio_propertyman` — tam se to musí ověřit, ne jen nasadit.
+
 ### 1.1 Chyby
 
 Chyby vychází z `Error` (`caio-server`). Tvar odpovědi:
@@ -130,6 +145,14 @@ pouze volajícímu s rolí z množiny `CONTENT`, nebo osobě samotné
 (`person.identity === identity.identity`). Pro ostatní je ABL z `dtoOut` odstraňuje –
 stejným způsobem, jako to dělá `Identity._getPublicData` v `caio-server-auth`.
 
+**Jména mládeže odstraňuje server, ne klient** (rozhodnuto 2026-09-06). `appConfig.hideNamesAgeList`
+původně jen říkalo klientovi, aby jméno nevykreslil — jenže pak jsou jména dětí pořád
+v odpovědi API a stačí otevřít network tab. Filtr proto patří do stejné vrstvy jako
+kontakty a `departureTime`: `player`/`coach` u týmu, jehož `age` je v `hideNamesAgeList`,
+vrací `person` bez `name` a `surname` každému bez role z `CONTENT` (a mimo `self`).
+Týká se to i sestavy v `match/get` a řádků ve `stats/listPlayerStats` — jinak by filtr
+šlo obejít druhým endpointem. Klient místo jména ukazuje číslo dresu a post.
+
 ---
 
 ## 2. Přehled use casů
@@ -158,19 +181,23 @@ rozsah a jeho úskalí jsou v [roles.md](./roles.md), sekce 3.
 |---|---|---|---|---|
 | `team/list` | get | – | `{ age, idList, own, pageInfo }` | `{ itemList }` |
 | `team/get` | get | – | `{ id }` | `team` |
-| `team/create` | post | CONTENT | `{ name, shortName, age, own, logo: File }` | `team` |
-| `team/update` | post | CONTENT, **TE** | `{ id, name, shortName, age, own, logo: File \| null }` | `team` |
+| `team/create` | post | CONTENT | `{ name, shortName, age, own, logo: File, photo: File, photoDesc }` | `team` |
+| `team/update` | post | CONTENT, **TE** | `{ id, name, shortName, age, own, logo: File \| null, photo: File \| null, photoDesc }` | `team` |
 | `team/delete` | post | CONTENT | `{ id }` | `{}` |
 
 Práce s logem se přebírá z v1 `team-abl.js`: `create` nahraje binárku a uloží
 `logoId` + `logoUri`, `update` s `logo: null` binárku smaže, `delete` smaže i logo.
 Při selhání zápisu se nahraná binárka uklidí (kompenzace).
 
+**Týmová fotka** (`photo` / `photoUri` / `photoDesc`) jede úplně stejnou cestou, jen do
+`sys_binary` s `type: "photo"` místo `"logo"` — z toho se skládá karta v přehledu mužstev
+(viz [frontend.md](./frontend.md), 3.3). Doporučená šířka 1200 px. U soupeřů zůstává prázdná.
+
 ### 2.2 `season`
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `season/list` | get | – | `{ age, teamId, yearFrom, pageInfo }` | `{ itemList }` |
+| `season/list` | get | – | `{ age, teamId, yearFrom, idList, pageInfo }` | `{ itemList }` |
 | `season/get` | get | – | `{ id }` | `season` |
 | `season/getCurrent` | get | – | `{ age }` nebo `{ teamId }` | `season \| {}` |
 | `season/listCurrent` | get | – | `{ yearFrom }` (výchozí aktuální ročník) | `{ itemList }` – **kategorie klubu pro daný ročník** |
@@ -181,6 +208,10 @@ Při selhání zápisu se nahraná binárka uklidí (kompenzace).
 
 `season/delete` odmítne smazání, pokud na sezónu existují zápasy
 (`afkbratcice/season/hasMatches`, HTTP 400) – ochrana proti osiřelým `match`.
+
+`idList` je **doplněk proti dávce ze 6. 9.**: `stats/getPlayerStats` vrací `bySeasonList`
+jen se `seasonId`, takže profil hráče potřebuje sezóny dopojmenovat. Bez `idList` by musel
+načíst všechny sezóny klubu jen kvůli pěti řádkům.
 
 **`season/listCurrent` je zdroj kategorií.** Kategorie mužstev se mění sezónu od sezóny,
 takže nikde nejsou vyjmenované – odvozují se z dat. Vrací jednu položku na každou sezónu
@@ -201,7 +232,7 @@ v menu vůbec neobjevila. Řazení podle `appConfig.categoryOrder`, neznámé k�
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `match/list` | get | – | `{ seasonId, teamId, teamIdList, opponentId, round, state, dateFrom, dateTo, order, pageInfo }` | `{ itemList }` |
+| `match/list` | get | – | `{ seasonId, teamId, teamIdList, opponentId, playerId, round, state, dateFrom, dateTo, order, pageInfo }` | `{ itemList }` |
 | `match/get` | get | – | `{ id }` | `match` + `homeTeam`, `guestTeam`, `season`, `playerList` s osobami |
 | `match/getLast` | get | – | `{ teamId }` | `match \| {}` |
 | `match/getNext` | get | – | `{ teamId }` | `match \| {}` |
@@ -235,6 +266,7 @@ takže se skládají z parametrů `match/list`:
 | Program víkendu napříč kategoriemi | `{ teamIdList: [...], dateFrom, dateTo }` |
 | Vzájemné zápasy (H2H) | `{ teamId, opponentId, state: "played", order: "desc", pageInfo }` |
 | Rozpis / výsledky | `{ teamId, seasonId, state }` + `order` |
+| Zápasy hráče (profil) | `{ playerId, order: "desc", pageInfo }` |
 
 Sémantika filtrů:
 
@@ -244,6 +276,9 @@ Sémantika filtrů:
   o tom, co je „naše“.
 - `opponentId` – **jen spolu s `teamId`**; zúží na dvojici, tedy H2H. Sám o sobě se chová
   jako `teamId`.
+- `playerId` – zápasy, v jejichž sestavě hráč je (`playerList.playerId`). **Doplněk proti
+  dávce ze 6. 9.**: index `{ "playerList.playerId": 1 }` v `match/dao.js` existuje, ale
+  filtr v `listByFilter` ne, takže blok „poslední zápasy" na profilu hráče neměl odkud brát.
 - `dateFrom` / `dateTo` – rozsah nad `time`, včetně hranic. Prázdný `time` (termín neurčen)
   do rozsahu nespadá.
 - `order` – `"asc"` (výchozí, rozpis) nebo `"desc"` (výsledky).
@@ -329,74 +364,51 @@ Implementace přes aggregation pipeline (`$unwind: "$playerList"`), ne v paměti
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `article/list` | get | – | `{ state, matchId, tag, pageInfo }` | `{ itemList }` |
-| `article/get` | get | – | `{ id }` | `article` (+ `match`, pokud je navázán) |
-| `article/create` | post | NEWS | `{ name, perex, author, matchId, priority, publishTime, photograph: File }` | `article` (včetně nové `pageId`) |
+| `article/list` | get | – | `{ state, matchId, tag, pageInfo }` | `{ itemList, pageInfo }` – **bez `content`** |
+| `article/get` | get | – | `{ id }` | `article` včetně `content` (+ `match`, pokud je navázán) |
+| `article/create` | post | NEWS | `{ name, perex, content, author, matchId, priority, publishTime, photograph: File }` | `article` |
 | `article/update` | post | NEWS | `{ id, ... , photograph: File \| null }` | `article` |
 | `article/setState` | post | NEWS | `{ id, state }` | `article` |
 | `article/delete` | post | NEWS | `{ id }` | `{}` |
 
-- `article/create` **atomicky** založí i `ecc_page` s jednou prázdnou sekcí
-  (stejný postup jako v1 `ecc-page-abl.create`) a uloží její `id` do `article.pageId`.
-  Při selhání se stránka uklidí.
-- `article/delete` maže i navázanou `ecc_page`, její sekce a titulní fotku.
+- **Obsah je pole `content` typu `uu5String`** (rozhodnuto 2026-09-06), ne vazba na ECC
+  stránku. Edituje se zatím **jako kód**, ne WYSIWYG — `uu5codekitg01` nad textovým polem
+  ve formuláři článku. Rich-text přijde s ECC; datový model se kvůli tomu měnit nebude,
+  migrace je „vytvoř stránku s jednou sekcí z `content`".
+- `article/list` `content` **nevrací** — výpis novinek potřebuje perex, ne celé texty;
+  u dvaceti článků by to byl řádově větší přenos zadarmo.
+- `article/delete` maže i titulní fotku.
 - `article/list` bez `state` vrací pro nepřihlášené jen `state: "published"`
   a `publishTime <= nyní`.
 - Řazení: `priority` DESC, `publishTime` DESC (shodně s v0 `index.php`).
 
-### 2.9 `eccPage` / `eccSection`
+### 2.9 `page` (obsahové stránky)
 
-> **Design ECC se ladí zvlášť (2026-09-06).** Co je o ECC napsané v tomhle návrhu — kontrakt use casů, `contentMap` po jazycích, autorizace sekcí podle vlastníka stránky — je zatím **pracovní**. Než se do ECC pustí implementace, vyhrává výsledek toho samostatného kola.
+> **Nahrazuje `eccPage` / `eccSection` (rozhodnuto 2026-09-06).** ECC v `caio-server` není
+> a jeho design se ladí samostatně. Obsahové stránky na něj čekat nemusí — potřebují jednu
+> věc: kus `uu5String`, který jde uložit a změnit. `UiEcc` se tedy zatím **nepoužívá vůbec**.
 
-**`caio-server` tenhle modul nemá** – `UiEcc` z `caio-ui` ho ale volá, takže si ho aplikace
-musí doimplementovat sama (`server/ecc/`, port z v1 nad `Dao`/`Crud`).
-Je to jediný zbylý blokátor z původního seznamu rizik, viz [README.md](./README.md), #2.
-
-Názvy use casů a tvar `dtoIn` diktuje klient (`UiEcc.Page`, `UiEcc.Section`) –
-**nelze je měnit**. Tučně jsou označené ty, které `caio-ui` skutečně volá; zbytek si
-přidává aplikace pro správcovskou obrazovku `admin/pages`.
-
-| Use case | Metoda | Auth | dtoIn | Volá |
+| Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| **`eccPage/load`** | get | – | `{ id }` (aplikace navíc přijímá `{ code }` a `{ language }`) | `UiEcc.Page` |
-| **`eccPage/create`** | post | PAGES | `{ name }` | `UiEcc.CreatePageButton` |
-| **`eccPage/createSectionBefore`** | post | PAGES / NEWS ¹ | `{ id, sectionId, uu5String }` | `UiEcc.Section` |
-| **`eccPage/createSectionAfter`** | post | PAGES / NEWS ¹ | `{ id, sectionId, uu5String }` | `UiEcc.Section` |
-| **`eccPage/updateSectionOrder`** | post | PAGES / NEWS ¹ | `{ id, sectionList }` (pole `id`) | `UiEcc.Section` |
-| **`eccPage/deleteSection`** | post | PAGES / NEWS ¹ | `{ id, sectionId }` | `UiEcc.Section` |
-| **`eccSection/list`** | get | – | `{ idList, pageInfo }` | `UiEcc.Page` |
-| **`eccSection/lock`** | post | PAGES / NEWS ¹ | `{ id }` | `UiEcc.SectionEditable` |
-| **`eccSection/unlock`** | post | PAGES / NEWS ¹ | `{ id, uu5String?, language? }` – s `uu5String` uloží obsah | `UiEcc.SectionEditable` |
-| `eccPage/list` | get | PAGES | `{ pageInfo }` | aplikace |
-| `eccPage/get` | get | – | `{ id }` | aplikace |
-| `eccPage/getByCode` | get | – | `{ code }` → `{ id }` | aplikace (routování `/page?code=`) |
-| `eccPage/update` | post | PAGES | `{ id, name, code }` | aplikace |
-| `eccPage/delete` | post | PAGES | `{ id }` | aplikace |
+| `page/get` | get | – | `{ code }` nebo `{ id }` | `page` |
+| `page/list` | get | PAGES | `{ pageInfo }` | `{ itemList, pageInfo }` – bez `content` |
+| `page/create` | post | PAGES | `{ code, name, content, desc }` | `page` |
+| `page/update` | post | PAGES | `{ id, code, name, content, desc }` | `page` |
+| `page/delete` | post | PAGES | `{ id }` | `{}` |
 
-¹ **Sekce se autorizují podle toho, čí je stránka.** `newsEditor` má editovat obsah
-**článků**, ne historii klubu — proto je u nich `auth` funkce, která stránku dohledá:
-ukazuje-li na ni nějaký `article.pageId`, projde NEWS, jinak se vyžaduje PAGES.
-Bez toho by novinář mohl přepsat kontakty i hymnu. Viz [roles.md](./roles.md), sekce 5.
-
-`eccPage/load` vrací stránku s rozbaleným `sectionList` (pole objektů sekcí).
-
-**`UiEcc.Page` bere jen `{ id, name, onCreate }`, ne `code`** – obrazovka `page` si proto
-`code → id` přeloží přes `eccPage/getByCode` a do komponenty předá `id`
-(viz [README.md](./README.md), riziko #12). Serverový `eccPage/load` přijímá i `code`
-kvůli přímým voláním a SSR-like scénářům (RSS, sitemap).
-
-`lock`/`unlock` vyhodnocují 8hodinovou expiraci zámku a vrací
-`afkbratcice/eccSection/locked` s `paramMap.lockedBy = { identity, name }`.
-
-**Vícejazyčný obsah bez změny klientského kontraktu.** Sekce ukládá
-`contentMap = { cs: uu5String }`, ale `UiEcc` posílá i čte ploché `uu5String`. Server proto:
-
-- `unlock` zapíše do `contentMap[dtoIn.language ?? "cs"]`,
-- `load` vrátí `uu5String = contentMap[language] ?? contentMap.cs`.
-
-`UiEcc` dnes `language` neposílá, takže se vždy uplatní `cs` — což je zatím jediný plněný
-jazyk. Datový model se kvůli druhému jazyku měnit nebude, chybět bude jen předání jazyka
-z komponenty (riziko #19 v [README.md](./README.md)).
+- **`page/get` bere `code`**, ne jen `id` — routa je `/page?code=history` a klient nemá
+  proč znát `id`. Odpadá tím i překlad `code → id`, kvůli kterému byl v původním návrhu
+  `eccPage/getByCode` (riziko #12 padá i s ním).
+- `code` je unikátní a **z pevného číselníku** (`history`, `hymn`, `contact`, `board`,
+  `training`, `team-photos`) — na ty kódy míří `server/legacy-redirect.js`, takže překlep
+  v administraci = rozbité přesměrování ze starého webu. Neznámý `code` je 404
+  `afkbratcice/page/notFound`.
+- Autorizace je **PAGES pro všechny zápisy**. Odpadá tím rozlišování „čí je stránka",
+  kvůli kterému měly ECC sekce vlastní `auth` funkci (`newsEditor` nesměl přepsat hymnu):
+  články a stránky jsou teď dvě různé entity se dvěma různými rolemi, takže se to řeší samo.
+- Editace je **v kódu, ne WYSIWYG** — `uu5codekitg01` nad polem `content`.
+- Žádné zámky ani revize. Šest stránek a jeden kronikář; osmihodinový lock by tu neřešil
+  nic, co se reálně děje.
 
 ### 2.10 `gallery`
 
@@ -506,9 +518,13 @@ verzi. Interní `objectName` se z `dtoOut` odstraňuje.
 > veřejné. Skutečně neveřejná kolekce by potřebovala privátní objekty a podepsané URL,
 > což `BinaryStore` neumí.
 
-Soubory ke stažení (`collection: "file"`) míří do `admin/files`, kde se použije hotová
-`UiElements.BinaryCrud` z `caio-ui` — ta ale musí umět kolekci předat, což je součást
-téže změny.
+**Soubory ke stažení nejsou holá `BinaryCrud`.** `UiElements.BinaryCrud` už kolekci umí
+(`collection="file"`, doplněno v `caio-ui` 6. 9.), ale je záměrně **nerozšiřitelná přes
+props** — a `file/list` filtruje podle `category` a řadí podle `date`, což jsou pole, která
+by tak nikdo nezapsal a veřejná stránka „Ke stažení" by zůstala nesekcovaná. `admin/files`
+si proto skládá **vlastní `Crud` konfiguraci nad `UiElements.BinaryProvider`** se dvěma poli
+navíc (`category` ze `appConfig.fileCategoryList`, `date`) — přesně tou cestou, kterou
+README `caio-ui` pro tenhle případ předepisuje. Viz [frontend.md](./frontend.md), 6.1.
 
 ### 2.12 `appConfig`
 
@@ -532,13 +548,13 @@ Původní návrh počítal s vlastním `identity/updateProfileList`; ten **odpad
 | `identity/search` | get | A | vyhledání identit podle `query` (jen zobrazovací data) |
 | `identity/list` | get | A | seznam podle `idList` / `identityList` (jen zobrazovací data) |
 | `identity/get` | get | – | identita podle `id` nebo kódu `identity` |
-| `identity/adminList` | get | **OW** | plný seznam vč. `email`, `profileList`, `registrationType`, `sys` – bez hashe hesla |
-| `identity/update` | post | **OW** | zápis libovolných polí identity (typicky `profileList`); `password` se zahazuje |
+| `identity/adminList` | get | ADMIN | plný seznam vč. `email`, `profileList`, `registrationType`, `sys` – bez hashe hesla a reset tokenu |
+| `identity/update` | post | ADMIN | zápis libovolných polí identity (typicky `profileList`); `password` se zahazuje |
 
-`adminList` a `update` mají profil **`owner` natvrdo v knihovně**, ale nejvyšší role aplikace
-se jmenuje `authorities`. Řešení (doplnit konfigurovatelný `profileList` do
-`Authentication.createApi()`, stejně jako to má `BinaryStore.createApi()`) a přechodná
-varianta jsou v [roles.md](./roles.md), sekce 6.
+**Vyřešeno 2026-09-06.** `adminList` a `update` měly v knihovně natvrdo profil `owner`,
+který si nedefinuje žádná appka; opraveno na **`authorities`** — a záměrně **napevno, bez
+konfigurace**: práce s identitami a přidělování rolí vypadá stejně ve všech projektech na
+tomhle stacku. Nejvyšší role aplikace se jmenuje stejně, takže sedí bez dalšího zařizování.
 `update` nevaliduje po polích; obrazovka `admin/identities` posílá jen to, co reálně změnila.
 
 Pozor: `profileList` je zapečený v JWT (`Identity.createToken`), změna se projeví až
@@ -558,28 +574,37 @@ Aplikace je nemůže vypnout a nic neregistruje.
 | `/auth/logout` | POST | smaže cookie |
 | `/auth/google`, `/auth/google/callback` | GET | Google OAuth |
 | `/auth/facebook`, `/auth/facebook/callback` | GET | Facebook OAuth |
-| `/auth/password/reset-request` | POST | **doplní se do `caio-server`** – `{ email }`, pošle odkaz s tokenem |
-| `/auth/password/reset` | POST | **doplní se do `caio-server`** – `{ token, password }`, přepíše heslo |
+| `/auth/password/reset-request` | POST | `{ email }`, pošle odkaz s tokenem |
+| `/auth/password/reset` | POST | `{ token, password }`, přepíše heslo |
 
-### 2.14.1 Reset hesla (změna v `caio-server` a `caio-ui`)
+### 2.14.1 Reset hesla — **hotovo 2026-09-06**
 
-v0 má `/zapomenute-heslo` a nová verze o to nesmí přijít. **Patří to do knihovny, ne do
-aplikace** – přihlašovací stránka je `caio-ui/static/login/`, kterou do buildu kopíruje
+v0 má `/zapomenute-heslo` a nová verze o to nesmí přijít. Patřilo to do knihovny, ne do
+aplikace – přihlašovací stránka je `caio-ui/static/login/`, kterou do buildu kopíruje
 `caio-devkit`, takže vlastní řešení v appce by znamenalo vlastní `login.html` a rozchod
 s celým stackem.
 
-Návrh, který je potřeba odsouhlasit a implementovat v `caio-architecture`:
+**Implementováno v `caio-server` i `caio-ui`** přesně v tomhle tvaru; pro aplikaci z toho
+zbývá jediné: vyplnit `SMTP_HOST`, `MAIL_FROM` a `APP_URL` v `.env`. Bez nich se reset
+prostě nenabídne (`/auth/config` hlásí `passwordResetEnabled: false` a login stránka odkaz
+schová). Riziko #17 v [README.md](./README.md) padá.
 
 | Vrstva | Co přibude |
 |---|---|
 | `caio-server-auth` | `POST /auth/password/reset-request { email }` – vygeneruje jednorázový token s expirací (30 min), uloží jeho hash k identitě a pošle e-mail. **Odpovídá vždy `200`**, ať e-mail existuje nebo ne – jinak se z endpointu stane nástroj na zjišťování registrovaných adres. |
 | | `POST /auth/password/reset { token, password }` – ověří token a expiraci, přepíše bcrypt hash, token zneplatní, odhlásí ostatní relace. Chyby `caio-server-auth/{invalidToken, tokenExpired}` + stávající pravidla na sílu hesla. |
 | | `/auth/config` doplní `passwordResetEnabled` podle toho, jestli je nakonfigurované SMTP – stejná logika jako u OAuth providerů. |
-| | nová závislost **nodemailer** + env `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`. Precedens je v `caio_propertyman/server/services/email.js`. |
+| | nová závislost **nodemailer** + env `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`, `APP_URL`. |
 | `caio-ui` `static/login/` | odkaz **Zapomenuté heslo** pod polem s heslem (jen když `passwordResetEnabled`), panel se zadáním e-mailu a potvrzením; režim `?reset=<token>` se dvěma poli na nové heslo. Pořád vanilla JS, žádný React. |
 
-Pro aplikaci to znamená jen vyplnit SMTP v `.env`. **Blokuje etapu 8** implementačního
-plánu (tam se poprvé přihlašuje) – viz [impl-plan-server.md](./impl-plan-server.md).
+Dvě věci, které se při implementaci rozhodly a stojí za zapamatování: `/password/reset`
+**nenastaví cookie** (přístup do schránky není totéž co sezení u důvěryhodného zařízení,
+takže po nastavení hesla následuje normální přihlášení) a reset se nabízí **jen účtům,
+které heslo mají** — poslat odkaz Google účtu by mu přidalo heslo, o které nikdo nežádal.
+
+`server/legacy-redirect.js` posílá `/zapomenute-heslo` na `/login.html`; stránka ale režim
+`forgot` zapíná jen tlačítkem, takže **přesměrování skončí na běžném přihlášení**. Doplní
+se `?mode=forgot` do login stránky (`caio-ui`) a do přesměrování.
 
 - **Jedna identita na e-mail.** Google, Facebook i heslo žijí na jednom dokumentu
   (`googleId`, `facebookId`, `password`); provider se spáruje jen na **ověřený** e-mail,
@@ -613,9 +638,9 @@ import coachApi from "./coach/api.js";
 import articleApi from "./article/api.js";
 import galleryApi from "./gallery/api.js";
 import fileApi from "./file/api.js";
-import eccPageApi from "./ecc/page/api.js";
-import eccSectionApi from "./ecc/section/api.js";
+import pageApi from "./page/api.js";
 import appConfigApi from "./app-config/api.js";
+import seoApi from "./seo/api.js";
 
 // Verzi čteme z package.json, ne z process.env.npm_package_version -- ta existuje jen
 // při startu přes npm skript, takže `node server/index.js` by hlásil undefined.
@@ -641,8 +666,8 @@ export default {
   ...sysApi,
   ...teamApi, ...seasonApi, ...matchApi, ...statsApi,
   ...personApi, ...playerApi, ...coachApi,
-  ...articleApi, ...galleryApi, ...fileApi,
-  ...eccPageApi, ...eccSectionApi, ...appConfigApi,
+  ...articleApi, ...galleryApi, ...fileApi, ...pageApi,
+  ...appConfigApi, ...seoApi,
   ...Authentication.createApi(),
   ...(BinaryStore.isConfigured()
     ? BinaryStore.createApi({ collectionMap: Config.BINARY_COLLECTION_MAP })   // viz 2.11
@@ -656,9 +681,14 @@ export default {
 ```js
 import { App } from "caio-server";
 import api from "./api.js";
+import legacyRedirect from "./legacy-redirect.js";
 
-App.init({ api });
+App.init({ api, middlewareList: [legacyRedirect] });
 ```
+
+`middlewareList` je **doplněk v `caio-server` ze 6. 9.** Legacy přesměrování musí odpovědět
+na cesty jako `/historie`, které by jinak spolkl SPA fallback, a appka si na tohle místo
+v pořadí sama nic zaregistrovat nemůže — pořadí drží `init()`.
 
 ---
 
@@ -676,4 +706,10 @@ Netypové trasy se registrují jako use case s `method: "get"`, který si odpov�
 `res` a vrátí `false` – `App.init` pak nic dalšího neodesílá.
 
 Legacy přesměrování (`server/legacy-redirect.js`) musí být namountované **před** SPA
-fallbackem – viz [migration.md](./migration.md), sekce 5.
+fallbackem – zařizuje to `middlewareList` v `App.init`, viz [migration.md](./migration.md),
+sekce 5.
+
+**Stav po dávce ze 6. 9.:** `sitemap.xml` a `calendar/team` běží, `/rss` ne — publikuje
+články a ty zatím nejsou. Přidá se s entitou `article`. Přesměrování s číselným `id`
+(`/novinka-<n>`, `/informace-o-zapase-<n>`, `/fotogalerie-<n>`) čekají na mapovací kolekci
+`migration_map`, tedy na migraci; statická přesměrování fungují.

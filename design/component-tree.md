@@ -1,6 +1,6 @@
 # Strom komponent — z čeho se web složí
 
-Datum: 2026-09-05
+Datum: 2026-09-05 · revize proti hotovému serveru 2026-09-06
 
 **Co tenhle dokument je:** rozpad každé obrazovky na komponenty, s vyznačením, co dodává
 `uu5g05`, co `caio-ui` a co si musí appka napsat sama. Slouží k odhadu práce a k tomu, aby se
@@ -23,7 +23,7 @@ zatím neexistuje, není co odečítat ze zdrojáků.
 | Barva | Význam |
 | --- | --- |
 | červená | naše komponenta (`client/src/components/**`, `routes/**`) |
-| tmavě hnědá | komponenta z `caio-ui` (`UiApp`, `UiAuth`, `UiElements`, `UiEcc`) |
+| tmavě hnědá | komponenta z `caio-ui` (`UiApp`, `UiAuth`, `UiElements`) — `UiEcc` se nepoužívá, viz D.4 |
 | šedá | komponenta z uu5 (`Uu5Elements`, `Uu5Forms`, `Uu5Tiles`, `Uu5Imaging`) |
 | světlá | sémantické HTML + `Config.Css.css()` |
 | přerušovaná | data: use case API, `content/*.js` nebo klíč v `lsi/cs.json` |
@@ -50,15 +50,16 @@ flowchart TD
   spacing["Uu5Elements.SpacingProvider type=loose<br/>web, ne aplikace"]:::uu5
   provider["UiApp.SpaProvider<br/>languageList=[cs], cmdPrefix=/auth<br/>-> AppBackground + LanguageList + Language<br/>+ UiAuth.SessionProvider + Route"]:::caio
   spa["UiApp.Spa<br/>top, footer, main<br/>-> ErrorBoundary + ModalBus + AlertBus"]:::caio
-  cpage["UiApp.Page<br/>TopProvider + Top + main + footer"]:::caio
+  cpage["UiApp.Page<br/>TopProvider + Top + main + footer<br/>sticky=always JE PROP PAGE, ne lišty"]:::caio
   ctop["Top (neexportovaný)<br/>logo, Header, ActionGroup menu"]:::caio
   cmain["main<br/>padding=false -- sekce si ho řeší samy"]:::caio
-  appctx["core/app-context.jsx<br/>appConfig/get + season/listCurrent<br/>kategorie NEJSOU v konfiguraci -- odvozují se ze sezón"]:::own
+  appctx["core/app-context.jsx<br/>appConfig/get + season/listCurrent + team/list<br/>kategorie NEJSOU v konfiguraci -- odvozují se ze sezón"]:::own
   router["router.jsx<br/>useRouter(routeMap) + Suspense + ErrorBoundary"]:::own
   routes["routes/** (lazy)"]:::own
   notice["components/layout/notice-bar.jsx"]:::own
   footer["components/layout/footer.jsx"]:::own
   cfg["appConfig/get + season/listCurrent<br/>-> kategorie, menu, routy"]:::data
+  teams["team/list -> mapa teamId => { name, shortName, logoUri }<br/>match/list vrací JEN id týmů"]:::data
 
   main0 --> spacing --> provider --> spa --> cpage
   cpage --> ctop
@@ -68,6 +69,7 @@ flowchart TD
   cmain --> notice
   cmain --> appctx --> router --> routes
   appctx -.-> cfg
+  appctx -.-> teams
 
   classDef own fill:#D01319,color:#FEF7F2,stroke:#D01319
   classDef caio fill:#2A1B19,color:#F3EFED,stroke:#2A1B19
@@ -75,6 +77,10 @@ flowchart TD
   classDef html fill:#F3EFED,color:#120D0C,stroke:#99908E
   classDef data fill:#D8D2D0,color:#120D0C,stroke:#99908E,stroke-dasharray:3 3
 ```
+
+**Mapa týmů patří do rámu, ne do obrazovek.** `match/list` vrací jen `homeTeamId`
+a `guestTeamId` — týmy dotahuje pouze `match/get`. Bez sdílené mapy by si ji každá obrazovka
+se seznamem zápasů (home, zápasy týmu, kolo, detail zápasu, profil hráče) skládala zvlášť.
 
 ## A.1 Horní lišta
 
@@ -112,7 +118,7 @@ cílenou třídou na `[data-name="Uu5Elements.Text"]`; je to **schválené přeb
 # Část B — sdílené primitivy
 
 Na tyhle uzly se odkazují všechny diagramy níž. Je to celý „design systém“ appky —
-devět komponent, každá tenká obálka nad uu5.
+deset komponent, každá tenká obálka nad uu5.
 
 ```mermaid
 flowchart TD
@@ -143,7 +149,11 @@ flowchart TD
   dt["DateText value, format<br/>jednotné cs-CZ formátování, Intl"]:::own
   logo2["TeamLogo uri, size<br/>fallback na klubový erb"]:::own
 
+  empty["EmptyState icon, lsi, action?<br/>kategorie bez sezóny, sezóna bez zápasů,<br/>soutěž bez tabulky, album bez fotek"]:::own
+  uuempty["Uu5Elements.Text + Uu5Elements.Icon<br/>uvnitř Card"]:::uu5
+
   section --> bgp --> sectionEl
+  empty --> uuempty
   heading --> eyebrow
   heading --> text --> headingEl
   card --> tile
@@ -348,29 +358,28 @@ flowchart TD
   art["routes/article.jsx -- detail"]:::own
   ahead["ArticleHeader<br/>titulek, DateText, autor, Photo"]:::own
   mref["MatchRefPanel -- když je matchId"]:::own
-  ecc["UiEcc.Page id=article.pageId"]:::caio
-  esec["UiEcc.Section / SectionEditable<br/>uu5String -> Utils.Uu5String; edit = lock + richtext + unlock"]:::caio
-  rte["uu5richtextg01-elements Editor"]:::uu5
-  ck["uu5codekitg01 -- fallback na uu5String"]:::uu5
+  content["Content uu5String<br/>Utils.Uu5String.toChildren(content)"]:::own
 
-  page["routes/page.jsx -- ECC stránka<br/>history, hymn, contact, board, training, team-photos"]:::own
-  resolve["code -> id přes eccPage/getByCode<br/>UiEcc.Page prop code NEMÁ"]:::own
-  tl["Uu5Bricks.VerticalTimeline + .Item<br/>registrované do uu5String -> redakce je píše do sekce<br/>historie klubu 1932-2022"]:::uu5
+  page["routes/page.jsx -- obsahová stránka<br/>history, hymn, contact, board, training, team-photos"]:::own
+  edit["ContentEditModal<br/>name, desc + uu5codekitg01 nad content<br/>ZATÍM KÓD, ne WYSIWYG"]:::own
+  ck["uu5codekitg01"]:::uu5
+  tl["Uu5Bricks.VerticalTimeline + .Item<br/>registrované do uu5String -> redakce je píše do obsahu<br/>historie klubu 1932-2022"]:::uu5
 
-  d1["article/list"]:::data
-  d2["article/get"]:::data
-  d3["eccPage/load, eccSection/list|lock|unlock"]:::data
+  d1["article/list -- bez content"]:::data
+  d2["article/get -- včetně content"]:::data
+  d3["page/get?code -- žádný překlad code -> id"]:::data
 
   news --> atile
   news --> pag
   news -.-> d1
-  art --> ahead & mref & ecc
+  art --> ahead & mref & content
+  art --> edit
   art -.-> d2
-  ecc --> esec --> rte
-  esec --> ck
-  ecc -.-> d3
-  page --> resolve --> ecc
-  esec --> tl
+  page --> content
+  page --> edit
+  page -.-> d3
+  edit --> ck
+  content --> tl
 
   classDef own fill:#D01319,color:#FEF7F2,stroke:#D01319
   classDef caio fill:#2A1B19,color:#F3EFED,stroke:#2A1B19
@@ -378,8 +387,20 @@ flowchart TD
   classDef data fill:#D8D2D0,color:#120D0C,stroke:#99908E,stroke-dasharray:3 3
 ```
 
-Obsahové stránky přes ECC: `history` (včetně časové osy milníků), `hymn`, `contact`, `board`
-(Výbor AFK), `training`. Redakce je edituje in-place, appka pro ně nemá žádný kód navíc.
+**`UiEcc` se nepoužívá** (rozhodnuto 2026-09-06). ECC v `caio-server` není a jeho design se
+ladí samostatně; článek i obsahová stránka drží obsah jako **jeden `uu5String` v poli
+`content`**. Zobrazení je proto `Utils.Uu5String.toChildren()` a editace jeden modal
+s `uu5codekitg01` — **zatím se píše kód, ne WYSIWYG**.
+
+Co tím padá: `eccPage/getByCode` a s ním riziko #12 (`UiEcc.Page` nebere `code`), zámky
+sekcí, `contentMap` po jazycích a autorizace sekce podle toho, čí je stránka — články
+a stránky jsou dvě entity se dvěma rolemi (`NEWS` / `PAGES`), takže se to řeší samo.
+Co tím naopak přibývá: `Content` a `ContentEditModal` jsou **dvě vlastní komponenty navíc**,
+zato sdílené mezi článkem i stránkou.
+
+Obsahové stránky: `history` (včetně časové osy milníků), `hymn`, `contact`, `board`
+(Výbor AFK), `training`, `team-photos`. Časová osa se pořád registruje do `uu5String`,
+jen ji redakce píše do `page.content` místo do ECC sekce.
 
 ## D.5 Fotogalerie, soubory, profil hráče
 
@@ -425,7 +446,7 @@ flowchart TD
 
 # Část E — správcovské obrazovky
 
-Deset z dvanácti admin obrazovek je **jen konfigurační objekt** — žádná vlastní komponenta.
+Sedm z dvanácti admin obrazovek je **jen konfigurační objekt** — žádná vlastní komponenta.
 
 ```mermaid
 flowchart TD
@@ -435,20 +456,33 @@ flowchart TD
   gencol["Crud.generate(cfg) -> seriesList, columnList, sorterList, filterList"]:::caio
   geninp["Crud.generateInputs(cfg) -> pole Uu5Forms inputů"]:::caio
   ff["UiElements.FormFile -> Uu5Imaging.ImageInput | Uu5Forms.File"]:::caio
-  bcrud["UiElements.BinaryCrud -- admin/files, nula konfigurace"]:::caio
+  bprov["UiElements.BinaryProvider collection=file"]:::caio
 
   spec1["admin/matches -- navíc modály<br/>Zapsat výsledek / Zapsat sestavu / Hromadně (JSON)"]:::own
-  spec2["admin/articles -- navíc přepnutí UiEcc do editace"]:::own
+  spec2["admin/articles + admin/pages<br/>navíc ContentEditModal (uu5codekitg01)"]:::own
   spec3["admin/identities -- identity/adminList + update<br/>teamEditor:id se zobrazuje jako název týmu"]:::own
+  spec4["admin/files -- VLASTNÍ Crud konfigurace<br/>category + date; BinaryCrud je nerozšiřitelná"]:::own
 
   gen --> ctx --> crud
   crud --> gencol & geninp
   geninp --> ff
-  gen -.-> spec1 & spec2 & spec3
+  spec4 --> bprov
+  spec4 --> crud
+  gen -.-> spec1 & spec2 & spec3 & spec4
 
   classDef own fill:#D01319,color:#FEF7F2,stroke:#D01319
   classDef caio fill:#2A1B19,color:#F3EFED,stroke:#2A1B19
 ```
+
+**`admin/files` už není nulová konfigurace.** `UiElements.BinaryCrud` kolekci umí
+(`collection="file"`), ale je záměrně nerozšiřitelná přes props — a `file/list` filtruje
+podle `category` a řadí podle `date`, což jsou pole, která by tak nikdo nezapsal a stránka
+„Ke stažení" by zůstala jedním nesekcovaným seznamem. Skládá se proto vlastní `Crud`
+konfigurace nad `BinaryProvider`, přesně tou cestou, kterou README `caio-ui` předepisuje.
+
+**Guard pro `teamEditor`.** `UiApp.withRoute` porovnává profily na přesnou shodu, takže
+`teamEditor:<teamId>` jím vyjádřit nejde; obrazovky vázané na tým používají vlastní
+`withTeamRoute` s prefixovou shodou (viz [frontend.md](./frontend.md), 2.2).
 
 ---
 
@@ -458,15 +492,19 @@ flowchart TD
 
 | Vrstva | Počet | Odkud |
 |---|---|---|
-| Rám, routing guard, session, CRUD UI, ECC, upload | 0 vlastních | `caio-ui` |
-| Primitivy designu (Section, Heading, Eyebrow, Card, Button, Badge, Photo, DateText, TeamLogo) | **9** | vlastní, tenké obálky nad uu5 |
-| Globální drobnosti (NoticeBar, Countdown) | **2** | vlastní |
-| Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, PhotoGrid, Lightbox, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect) | **21** | vlastní |
+| Rám, routing guard, session, CRUD UI, upload | 0 vlastních | `caio-ui` |
+| Primitivy designu (Section, Heading, Eyebrow, Card, Button, Badge, Photo, DateText, TeamLogo, EmptyState) | **10** | vlastní, tenké obálky nad uu5 |
+| Globální drobnosti (NoticeBar, Countdown, withTeamRoute) | **3** | vlastní |
+| Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, PhotoGrid, Lightbox, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect, Content, ContentEditModal) | **23** | vlastní |
 | Veřejné obrazovky | **16** | vlastní, ale skládají se z výše uvedeného |
-| Správcovské obrazovky | **12** | 9 z nich je jen `CONFIG` objekt |
+| Správcovské obrazovky | **12** | 7 z nich je jen `CONFIG` objekt |
+
+Proti revizi 5. 9. přibylo: `EmptyState` (prázdné stavy jsou v návrhu povinné, ale komponenta
+pro ně chyběla), `withTeamRoute` (`withRoute` neumí rozsahovou roli) a dvojice `Content` +
+`ContentEditModal`, která nahradila `UiEcc`.
 
 Časová osa historie je **`Uu5Bricks.VerticalTimeline`** zaregistrovaná do `uu5String`, aby ji
-redakce mohla vkládat do ECC sekcí — vlastní komponenta se nepíše.
+redakce mohla vkládat do `page.content` — vlastní komponenta se nepíše.
 
 `WeekendProgram` je sekce na home, ne routa: program víkendu napříč kategoriemi.
 
@@ -481,9 +519,12 @@ redakce mohla vkládat do ECC sekcí — vlastní komponenta se nepíše.
 | GDS paleta | `building` je bílá, tmavé schéma se nepřenastaví | barvy lišty a ploch z `theme.js` přes `cssBackground`/`cssColor` |
 | Tabulka soutěže | `Uu5Tiles.Table` neumí zvýraznit řádek klubovou barvou ani skrývat sloupce po breakpointech | vlastní `StandingsTable` nad `<table>` |
 | Odpočet do zápasu | uu5 nemá | vlastní `Countdown` (`useInterval` + `useVisibility`) |
-| Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap uvnitř `Uu5Elements.Block` |
+| Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je součástí `page.content`, ne kódu appky |
 | Lightbox | `Uu5Elements.Modal` ano, ale bez šipek a swipe | vlastní `Lightbox` nad `Modal` |
-| ECC backend | `caio-server` modul nemá | portovat z v1 do `server/ecc/` |
+| Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | `content` jako jeden `uu5String`; `Content` + `ContentEditModal` nad `uu5codekitg01`, **zatím kód místo WYSIWYG** |
+| Rozsahová role v guardu | `UiApp.withRoute` porovnává profily na přesnou shodu | vlastní `withTeamRoute` s prefixem `teamEditor:` |
+| Soubory ke stažení | `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props | vlastní `Crud` konfigurace nad `BinaryProvider` s `category` a `date` |
+| Prázdné stavy | uu5 nemá jednotný „žádná data" | vlastní `EmptyState` |
 
 ## F.3 Co je vědomě holé HTML
 

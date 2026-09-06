@@ -237,17 +237,15 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 |---|---|---|
 | `article/list`, `get` | – | nepřihlášený vidí jen `published` |
 | `article/create`, `update`, `setState`, `delete` | NEWS | |
-| `eccPage/load`, `get`, `getByCode` | – | |
-| `eccPage/create`, `update`, `delete` | PAGES | zakládání obsahových stránek |
-| `eccPage/createSectionBefore`, `createSectionAfter`, `updateSectionOrder`, `deleteSection` | PAGES **nebo** NEWS | podle stránky, viz níž |
-| `eccSection/list` | – | |
-| `eccSection/lock`, `unlock` | PAGES **nebo** NEWS | podle stránky, viz níž |
-| `eccPage/list` | PAGES | správcovský výpis |
+| `page/get` | – | bere `code`, ne jen `id` |
+| `page/list` | PAGES | správcovský výpis |
+| `page/create`, `update`, `delete` | PAGES | obsahové stránky |
 
-> **Sekce se autorizují podle toho, čí je stránka.** `newsEditor` má editovat obsah
-> **článků**, ne historii klubu. Autorizace je proto `authorize` funkce: dohledá stránku
-> a pustí NEWS, když na ni ukazuje nějaký `article.pageId`, jinak vyžaduje PAGES.
-> Bez toho by novinář mohl přepsat kontakty a hymnu.
+> **Obsah článku a obsah stránky jsou dvě různé entity se dvěma různými rolemi**
+> (rozhodnuto 2026-09-06). Dřívější návrh držel obojí v ECC sekcích, a proto potřeboval
+> `authorize` funkci, která dohledala, čí je stránka — jinak by `newsEditor` mohl přepsat
+> historii klubu i hymnu. Když je obsah pole entity, řeší se to samo: `article.content`
+> spadá pod NEWS, `page.content` pod PAGES.
 
 ### Média a soubory
 

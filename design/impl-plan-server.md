@@ -42,8 +42,8 @@ Důsledky, se kterými se počítá:
 | Etapa | Co vznikne | Hotovo, když |
 |---|---|---|
 | **0** | prostředí, tarbally, Mongo, GCS bucket | `npm run dev` nastartuje, `/sys/health` odpoví |
-| **0b** | **reset hesla v `caio-architecture`** | `/auth/password/reset-request` pošle e-mail, `/auth/password/reset` přepíše heslo |
-| **0c** | **kolekce binárek v `caio-architecture`** | `binary/create` odmítne neznámou kolekci, `binary/list?collection` filtruje, každá kolekce má vlastní auth |
+| **0b** ✅ | **reset hesla v `caio-architecture`** — hotovo 2026-09-06 | `/auth/password/reset-request` pošle e-mail, `/auth/password/reset` přepíše heslo |
+| **0c** ✅ | **kolekce binárek v `caio-architecture`** — hotovo 2026-09-06 | `binary/create` odmítne neznámou kolekci, `binary/list?collection` filtruje, každá kolekce má vlastní auth |
 | **1** | scaffold do existujícího repa | appka běží na `:8081`, build projde |
 | **2** | kostra serveru, vlastní `sys/health` | `/sys/health` vrací `mongoConfigured: true, gcsConfigured: true` |
 | **3** | `team`, `season` + binary API + **dynamické kategorie** | `season/listCurrent` vrátí kategorie klubu pro ročník |
@@ -56,8 +56,9 @@ Důsledky, se kterými se počítá:
 | **10** | `rss`, `sitemap.xml`, legacy redirecty | staré URL vedou na nové |
 | **11** | migrace dat | data z MySQL i Mongo v1 v nové DB |
 | **12** | deploy na GAE | běží na produkční doméně |
-| **13** | **`ecc` modul** (port z v1) | `eccPage/load` vrátí stránku se sekcemi, `lock`/`unlock` funguje, obsah je v `contentMap` |
-| **14** | obsah nad ECC: články, stránky, historie, týmové fotky | redakce edituje obsah in-place |
+| **13** | **`page`** (obsahové stránky) + seed obsahu z v0 | `page/get?code=history` vrátí obsah, redakce ho změní |
+| **14** | tělo článku (`article.content`), historie, týmové fotky, `/rss` | redakce publikuje novinku i s textem |
+| **15** | **`pageInfo` v `caio-serveru`** | `*/list` vrací `{ itemList, pageInfo }` s `total`; `UiElements.Crud` dotáhne druhou stránku |
 
 Kritická cesta: **0 → 1 → 2 → 3 → 4**. Etapy 5–9 jsou z větší části nezávislé a dají se
 dělat paralelně.
@@ -70,20 +71,19 @@ Jedna knihovní změna je už **hotová**: `identity/adminList` a `identity/upda
 napevno a bez konfigurace (`caio-server/src/caio-server-auth/api/identity-api.js`,
 2026-09-06). Zbývá `caio-server` přebalit a přeinstalovat.
 
-### Co znamená ECC až na konci
+### Obsah bez ECC (změna 2026-09-06)
 
-ECC bylo původně vpředu jako blokátor. Posunutím na konec se dřív dostaneme k tomu, co je
-na webu vidět nejvíc (zápasy, tabulky, soupisky), ale **něco se tím odkládá**:
+Etapy 13 a 14 byly původně „port ECC modulu z v1" a „obsah nad ECC". **ECC se nepoužívá** —
+článek i obsahová stránka drží obsah jako jeden `uu5String` v poli `content`, editovaný
+zatím jako kód (`uu5codekitg01`). Důsledky pro plán:
 
-| Odkládá se | Do té doby |
+| | |
 |---|---|
-| Tělo článku | `article` má `pageId` **nullable**; do etapy 14 se v detailu ukazuje jen titulek, foto a perex. Metadata i seznam novinek fungují od etapy 8. |
-| Obsahové stránky (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) | Routa `page` vrací prázdný stav. Kontakt se dá dočasně vzít z `appConfig.contact`, výbor z `coach/list?role=board` — obojí existuje od etapy 6. |
-| Časová osa historie a týmové fotky | Nejsou. |
-| Migrace článků a stránek (krok 9 a 11 v [migration.md](./migration.md)) | Musí počkat na etapu 13; ostatní kroky migrace ne. |
-
-**Etapa 11 (migrace) se tím rozpadá na dvě části** — data bez ECC v 11, články a stránky
-až po 13. To je hlavní cena za přesun; stojí za to vědět předem, ne až u přepínání domény.
+| Etapa 13 | Není to port modulu se sekcemi, zámky a revizemi, ale obyčejná entita `page` (`code`, `name`, `content`, `desc`) nad `Dao`/`Crud` — řádově méně práce. Součástí je **seed obsahu z v0**, aby web nešel do provozu se šesti prázdnými stránkami. |
+| Etapa 14 | `article.content` je pole, ne vazba na stránku; `article/create` nezakládá nic navíc a `article/delete` nemaže nic navíc. `/rss` má konečně co publikovat. |
+| Tělo článku | `content` je **nullable**; do etapy 14 se v detailu ukazuje jen titulek, foto a perex. Metadata i seznam novinek fungují od etapy 8. |
+| Migrace | Krok 9 a 11 v [migration.md](./migration.md) plní `content` jedním `uu5String` místo skládání sekcí — jednodušší, ale pořád až po etapě 13/14. |
+| Cena | Obsah je plochý řetězec, ne `contentMap` po jazycích. Druhý jazyk = migrace jednoho pole. Až vznikne ECC, převod je „stránka s jednou sekcí z `content`". |
 
 ---
 
@@ -426,12 +426,14 @@ součtu pro jednu sezónu.
 
 ## Etapa 8 — `article`, `appConfig`, přihlašování
 
-**Jen metadata článku** — `pageId` je zatím `null`. ECC modul přijde až v etapě 13, takže
-`article/create` teď ukládá titulek, perex, autora, titulní foto, `publishTime`, `priority`,
-`state` a vazbu na zápas. Zakládání ECC stránky se doplní v etapě 14; `pageId` je proto
-**nullable** a klient musí umět článek bez těla.
+**Jen metadata článku** — `content` je zatím `null`. `article/create` ukládá titulek, perex,
+autora, titulní foto, `publishTime`, `priority`, `state` a vazbu na zápas; tělo se zapíná
+v etapě 14. `content` je proto **nullable** a klient musí umět článek bez těla.
 
-`article/delete` už teď maže titulní fotku (ECC stránku začne mazat v etapě 14).
+`article/list` `content` **nevrací** — výpis novinek potřebuje perex, ne celé texty.
+
+`article/delete` maže titulní fotku; nic dalšího uklízet nemusí (obsah je pole téhož
+dokumentu, ne samostatná entita).
 
 `article/list` bez `state` vrací nepřihlášeným jen `published` s `publishTime <= nyní`.
 Řazení `priority` DESC, `publishTime` DESC (shodně s v0).
@@ -484,7 +486,7 @@ Tři výjimky a upřesnění:
   do GCS (viz [migration.md](./migration.md), krok 8).
 - **Kroky 9 (články) a 11 (ECC stránky) se v téhle etapě nedělají** — ECC modul ještě
   neexistuje. Migrují se až po etapě 13; do té doby se u článků naplní jen metadata
-  (titulek, perex, foto, datum, vazba na zápas) a `pageId` zůstane prázdné.
+  (titulek, perex, foto, datum, vazba na zápas) a `content` zůstane prázdné.
 - ECC sekce z v1 mají plochý `uu5String`; migrace ho zabalí do `contentMap: { cs: … }`.
 
 ---
@@ -500,55 +502,57 @@ Pozor na `PORT`: GAE si ho nastavuje sám, `8081` platí jen lokálně.
 
 ---
 
-## Etapa 13 — modul `ecc`
+## Etapa 13 — entita `page`
 
-> **Design ECC se ladí zvlášť (2026-09-06).** Co je o ECC napsané v tomhle návrhu — kontrakt use casů, `contentMap` po jazycích, autorizace sekcí podle vlastníka stránky — je zatím **pracovní**. Než se do ECC pustí implementace, vyhrává výsledek toho samostatného kola.
+Obyčejná entita nad `Dao`/`Crud`: `code` (unikátní, z pevného číselníku), `name`, `content`
+(`uu5String`), `desc`. Use casy `page/get|list|create|update|delete`, zápisy na `PAGES`.
+Kontrakt: [api.md](./api.md), sekce 2.9.
 
-`caio-ui` volá `eccPage/*` a `eccSection/*`, ale `caio-server` je nemá. Port z v1
-(`server/dao/ecc-page-dao.js`, `ecc-section-dao.js`, `abl/ecc-*-abl.js`, `api/ecc-*-api.js`)
-do `server/ecc/` v ESM, nad `Dao`/`Crud`.
+Tři věci, na kterých záleží:
 
-Přesný kontrakt (co komponenta volá a co si přidává appka) je v [api.md](./api.md), sekce 2.9.
-Čtyři věci, které `Crud` sám neumí a musí se dopsat:
+- **`page/get` bere `code`**, ne jen `id` — routa je `/page?code=history` a na ty kódy míří
+  `server/legacy-redirect.js`. Neznámý `code` je 404 `afkbratcice/page/notFound`.
+- **`code` je součást veřejného kontraktu.** Překlep v administraci = rozbité přesměrování
+  ze starého webu, ne jen chybějící stránka.
+- **Seed obsahu z v0** (`tools/seed-pages.js`): historie, hymna, kontakt (včetně `<iframe>`
+  mapy), výbor, tréninky, týmové fotky. Bez něj by web šel do provozu se šesti prázdnými
+  stránkami.
 
-- **pořadí sekcí** — `eccPage.sectionList` je pole `id`; `createSectionBefore/After` vloží na
-  správný index, `updateSectionOrder` pole přeuspořádá,
-- **zámek** — `eccSection.lock = { timeFrom, identity, name }`, expirace 8 h
-  (`LOCK_TIMEOUT_MS`); cizí identita dostane `afkbratcice/eccSection/locked`
-  s `paramMap.lockedBy`,
-- **`getByCode`** — `UiEcc.Page` bere jen `id`, takže překlad `code → id` musí být vlastní
-  use case,
-- **vícejazyčný obsah** — sekce ukládá `contentMap: { cs: uu5String }` místo plochého
-  stringu. `unlock` zapisuje do `contentMap[language ?? "cs"]`, `load` vrací
-  `uu5String = contentMap[language] ?? contentMap.cs`. **Klientský kontrakt se nemění** —
-  `UiEcc` dál posílá a čte plochý `uu5String`, jazyk je záležitost serveru. Dnes se plní
-  jen `cs`, ale kvůli druhému jazyku se nebude migrovat.
+Žádné zámky, revize ani sekce — šest stránek a jeden kronikář; osmihodinový lock by tu
+neřešil nic, co se reálně děje.
 
-> Kód se píše tak, aby šel bez úprav vytáhnout do balíčku `caio-server-ecc` — žádné importy
-> z `server/<entita>/`, konstanty přes parametr, ne z `server/config.js`.
-
-**Hotovo, když:** `eccPage/create` založí stránku s jednou prázdnou sekcí, `eccPage/load`
-ji vrátí i se `sectionList`, dvě `lock` po sobě z různých identit skončí 409, a obsah je
-v databázi uložený pod `contentMap.cs`.
+**Hotovo, když:** `page/get?code=history` vrátí naseedovaný obsah a `page/update` ho změní.
 
 ---
 
-## Etapa 14 — obsah nad ECC
+## Etapa 14 — tělo článku, historie, RSS
 
-Teprve tady se rozsvítí všechno, co na ECC čekalo:
-
-- **`article/create` zakládá ECC stránku atomicky** a ukládá její `id` do `article.pageId`;
-  při selhání se stránka uklidí. `article/delete` maže i stránku, sekce a titulní fotku.
-  Existujícím článkům z etapy 8 se `pageId` doplní.
-- **Obsahové stránky** `history`, `hymn`, `contact`, `board`, `training`, `team-photos`
-  se založí a naplní.
+- **`article.content`** se zapne: `article/create` a `update` ho ukládají, `article/get` vrací,
+  `article/list` ne. Nic se nezakládá ani neuklízí navíc — je to pole téhož dokumentu.
 - **Historie** dostane časovou osu — `Uu5Bricks.VerticalTimeline` zaregistrovaná do
   `uu5String`, aby zůstala editovatelná redakcí
   (viz [frontend.md](./frontend.md), sekce 3.11.1).
+- **`/rss`** — teď má co publikovat.
 - **Dokončí se migrace** kroků 9 a 11.
 
-**Hotovo, když:** redakce upraví odstavec v historii přímo na stránce a změna se uloží
-do `contentMap.cs`.
+**Hotovo, když:** redakce založí novinku s textem, ta se objeví na home i v `/rss`.
+
+---
+
+## Etapa 15 — `pageInfo` v `caio-serveru`
+
+Běží mimo tohle repo. `Dao.find` vrátí `{ itemList, pageInfo: { pageIndex, pageSize, total } }`
+(`total` z `countDocuments` nad stejným filtrem), `Crud.list` a use casy tvar propustí dál.
+
+Není to kosmetika: `UiElements.Crud` volá `handlerMap.loadNext({ pageInfo: { pageIndex } })`
+a `useDataList` bez `total` neví, kdy přestat — takže bez toho nejde stránkovat novinky,
+dotahovat fotky v albu ani listovat administrací. Do té doby jedou seznamy na jednu dávku
+`pageSize: 1000`, což pro dnešní objem stačí, ale po migraci ~2 600 fotek už ne.
+
+**Ověřit i na `caio_propertyman`** — mění se tvar odpovědi každého seznamu na stacku.
+
+**Hotovo, když:** `match/list` vrátí `pageInfo.total`, a tabulka v administraci si sama
+řekne o druhou stránku.
 
 ---
 

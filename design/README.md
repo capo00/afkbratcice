@@ -110,13 +110,16 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 | **Implementace UI** | **Výhradně `uu5g05` + `caio-ui`.** Vzhled se ladí **propsy** komponent, ne přestylováním; `className` nad uu5 komponentou jen tam, kde prop neexistuje, a vždy se zápisem do `docs/decisions.md`. Žádný Tailwind, žádné kopírování kódu z předlohy. |
 | **uu5g04** | **Zakázané.** Nic se na g04 nenavrhuje ani neimplementuje — ani jako varianta. Chybí-li komponenta, hledá se v uu5g05 řadě (`uu5g05-elements`, `Uu5Bricks`, `uu5tilesg02`, `uu5g05-forms`), jinak se napíše vlastní nad uu5g05. |
 | Rozsah | Jádro dle ER diagramu + **fotogalerie** + **statické obsahové stránky** (historie, hymna, kontakt, výbor). Klubová kasa (pokladna, pokuty, příjmy/výdaje) a diskuze **nejsou** v rozsahu. |
-| Články | Obsah článku je **ECC page/section (uu5String)** – znovupoužití `UiEcc` z `caio-ui`. |
-| Design ECC | **Ladí se samostatně** (od 2026-09-06). Části návrhu, které se ECC týkají, jsou do té doby pracovní. |
-| Obsah do doby ECC | Obsahové stránky (historie, hymna, kontakt, výbor, týmové fotky) jsou **natvrdo v kódu klienta** (`client/src/content/*.js`, vzor propertyman). **Články zatím nejsou vůbec.** |
+| **Obsah** | Článek i obsahová stránka drží obsah jako **jeden `uu5String` v poli `content`** (rozhodnuto 2026-09-06). Žádné ECC, žádné sekce, žádné zámky. |
+| **Editace obsahu** | Zatím **jako kód, ne WYSIWYG** – `uu5codekitg01` nad `content`. Rich-text přijde s ECC a bude to výměna jednoho formulářového vstupu. |
+| Design ECC | **Ladí se samostatně** (od 2026-09-06) a web na něj nečeká. Až vznikne, migrace je „vytvoř stránku s jednou sekcí z `content`“. |
+| Obsahové stránky | Entita `page` s `code` (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) – **ne** natvrdo v kódu klienta, jinak by je redakce nemohla měnit a `legacy-redirect` by neměl kam ukazovat. Obsah se seeduje z v0. |
 | Migrace | **Mimo rozsah této dávky.** Neimplementuje se; `migration.md` zůstává jako návrh na později. |
 | Pořadí kategorií | `["men","u18","u16","u14","u12","u10","u6","old"]` — od nejstarších, stará garda je výjimka na konci. |
-| Skrytí jmen | `hideNamesAgeList = ["u14","u12","u10","u6"]` — u dorostu (`u18`, `u16`) se jména ukazují. |
+| Skrytí jmen | `hideNamesAgeList = ["u14","u12","u10","u6"]` — u dorostu (`u18`, `u16`) se jména ukazují. **Filtruje server, ne klient** (2026-09-06): klientský příznak by jména dětí nechal v odpovědi API. |
 | Loga týmů | `team.logoUri` drží URI z `sys_binary` (kolekce `team`); když chybí, klient sáhne po klubovém erbu. |
+| Týmová fotka | `team.photoUri` + `team.photoDesc` (2026-09-06) — karta mužstva v přehledu je bez nich neúplná. Jen u vlastních týmů. |
+| Stránkování | `dtoOut` seznamů vrací `pageInfo` včetně `total` — **doplní se do `caio-server`** (2026-09-06), protože bez něj `UiElements.Crud` neumí načíst další stránku. |
 | Správce | Identita **`1-1-1`** s profilem `authorities`; e-mail se plní z env při seedu. |
 | Jazyk UI | **Zatím jen čeština.** Texty povinně v `client/src/lsi/cs.json` přes `importLsi`; `en.json` se nezakládá. Zapnutí dalšího jazyka = nový `<lang>.json` + řádek v `IMPORT_BY_LANGUAGE` + kód v `languageList`, ne refaktor. |
 | Jazyk obsahu (ECC) | Redakce plní **jen `cs`**, ale sekce ukládá `contentMap: { cs: uu5String }` – druhý jazyk nebude znamenat migraci dat. |
@@ -147,7 +150,7 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
   `createViteConfig()` z `caio-devkit/vite`
 - `caio-ui` – `UiApp` (SpaProvider, Spa, Page, useTop, withRoute), `UiAuth` (SessionProvider,
   useSession, Unauthenticated, Unauthorized, IdentityItem), `UiElements` (Call, CrudContext,
-  Crud, BinaryProvider, BinaryCrud, FormFile, Image), `UiEcc` (Page, Section)
+  Crud, BinaryProvider, BinaryCrud, FormFile, Image). `UiEcc` **se nepoužívá** — viz sekce 2
 - `uu5richtextg01-elements` + `uu5codekitg01` (editor ECC sekcí), `uu5imagingg01-tools`
   (zmenšení a konverze obrázků na klientu před uploadem)
 
@@ -245,10 +248,10 @@ a čtou se přes `<Lsi import={importLsi} path={[...]} />` nebo `useLsi(importLs
 | Osoby | – | CRUD | v0 `hrac` |
 | Hráči | profil, statistiky, soupiska | CRUD, přiřazení do týmů | v0 `hrac`, ve v1 chybí |
 | Trenéři | realizační tým, výbor | CRUD | v0 `trener` |
-| Články | seznam novinek, detail, vazba na zápas | CRUD + ECC editace sekcí | v0 `clanek`, v1 `ecc_*` |
+| Články | seznam novinek, detail, vazba na zápas | CRUD; obsah `uu5String` v `content` | v0 `clanek` |
 | Fotogalerie | alba, lightbox | CRUD alb + hromadný upload | v0 `fotogalerie` |
-| Soubory | ke stažení dle kategorie | `UiElements.BinaryCrud` nad `binary/*` | v0 `soubor` + `serial` |
-| Obsahové stránky | historie, hymna, kontakt, výbor, tréninky | ECC editace | v0 statické PHP |
+| Soubory | ke stažení dle kategorie | vlastní `Crud` nad `BinaryProvider` (kolekce `file`) | v0 `soubor` + `serial` |
+| Obsahové stránky | historie, hymna, kontakt, výbor, tréninky, týmové fotky | CRUD `page`; obsah `uu5String` v `content` | v0 statické PHP |
 | Identity | přihlášení, profil | správa profilů (`identity/adminList`, `identity/update`) | v1 `oc_app-auth` |
 
 ---
@@ -286,10 +289,14 @@ Pravidla:
 - Na klientu se stejná pravidla duplikují přes `UiApp.withRoute(Component, { profileList })`
   a podmíněné `actionList` – jde o UX, ne o bezpečnostní hranici.
 
-> **Otevřené s knihovnou:** `Authentication.createApi()` má `identity/adminList`
-> a `identity/update` natvrdo na profilu **`owner`**. Návrh chce `authorities`, takže se
-> do `caio-server` doplní konfigurovatelný `profileList` – stejná konvence, jakou už má
-> `BinaryStore.createApi()`. Varianty a přechodné řešení: [roles.md](./roles.md), sekce 6.
+> **Vyřešeno 2026-09-06:** `identity/adminList` a `identity/update` měly v knihovně natvrdo
+> profil `owner`; opraveno na **`authorities`**, a to napevno bez konfigurace — správa
+> identit vypadá stejně ve všech projektech na tomhle stacku.
+
+> **`teamEditor` a klientský guard.** `UiApp.withRoute` porovnává profily na přesnou shodu,
+> takže rozsahovou roli `teamEditor:<teamId>` jím vyjádřit nejde. Appka si přidá vlastní
+> `withTeamRoute` s prefixovou shodou; do `caio-ui` se nesahá, dokud to nepotřebuje víc
+> projektů než jeden. Viz [frontend.md](./frontend.md), sekce 2.2.
 
 ---
 
@@ -307,23 +314,30 @@ Pravidla:
 | 7 | Start vyžaduje `GOOGLE_CLIENT_ID` a `MONGODB_URI` | **Vyřešeno.** Obojí je nepovinné. Bez Google credentials se strategie neregistruje a provider se prostě nenabídne; bez `MONGODB_URI` server nastartuje a DB operace selžou s čitelnou hláškou. |
 | 8 | Chybí API pro správu `profileList` | **Vyřešeno.** `Authentication.createApi()` dodává `identity/search\|list\|get\|adminList\|update`. Profil opraven z `owner` na **`authorities`** (2026-09-06, `caio-server`) – identity smí editovat jen ta role. |
 | 10 | Google Drive kvóty u hromadného uploadu | **Neplatí.** GCS nemá Drive limity na zápis. Zbývá jen praktické: migrace ~2 600 fotek se pouští po dávkách s retry, a limit `BINARY_MAX_FILE_SIZE_MB` (výchozí 25) / `BINARY_MAX_FILES` (20) platí na request. |
+| 2 | `caio-server` nemá ECC modul (page/section) | **Neplatí od 2026-09-06** – ECC se nepoužívá. Článek i stránka drží obsah jako jeden `uu5String`, `UiEcc` se nevolá. Viz sekce 2 a [api.md](./api.md), 2.9. |
+| 3′ | `BinaryStore` nemá kolekce | **Vyřešeno 2026-09-06** v `caio-server`: `createApi({ collectionMap })` s autorizací per kolekce, `binary/list` filtruje `collection`/`refId`. `UiElements.BinaryCrud` bere povinnou prop `collection`. |
+| 12 | `UiEcc.Page` bere jen `{ id }`, ne `code` | **Neplatí** – `page/get` bere `code` přímo, žádný překlad `code → id`. |
+| 17 | Chybí reset hesla | **Vyřešeno 2026-09-06** v `caio-server-auth` (hashovaný jednorázový token, 30 min, nodemailer) i na přihlašovací stránce `caio-ui` (režimy `forgot` / `reset`). Appce zbývá vyplnit `SMTP_HOST`, `MAIL_FROM`, `APP_URL`. |
+| 19 | `UiEcc` neumí předat jazyk | **Neplatí** – ECC se nepoužívá. Cena za to je, že `content` je plochý `uu5String`: druhý jazyk bude migrace jednoho pole, ne jen doplnění kódu. |
 
 ### 7.2 Otevřené
 
 | # | Problém | Dopad | Navržené řešení |
 |---|---|---|---|
-| 2 | **`caio-server` nemá ECC modul** (page/section) – `UiEcc` z `caio-ui` ho ale volá (`eccPage/load`, `eccSection/lock`, …). Potvrzeno i v README `caio-ui`: *„Backend pro `UiEcc` musí appka doimplementovat sama.“* | Blokátor článků a obsahových stránek. | Portovat `ecc-page-abl.js`, `ecc-section-abl.js`, `ecc-*-dao.js`, `ecc-*-api.js` z v1 do `server/ecc/` (ESM, nad `Dao`/`Crud`). Kontrakt viz [api.md](./api.md), sekce 2.9. Následně nabídnout jako modul `caio-server-ecc`. |
-| 3′ | **`BinaryStore` nemá kolekce.** Jedna konfigurace auth pro všechny binárky (fotograf by mohl přepsat logo klubu) a `binary/list` neumí filtrovat. | Nejde oddělit, kdo co smí nahrát; galerie a „ke stažení“ nemají jak vybrat své soubory. | **Změna v `caio-server`:** zavést pojmenované kolekce (`sys`, `team`, `person`, `article`, `gallery`, `page`, `file`) s vlastní autorizací a filtrem `collection`/`refId` v `list`. Návrh: [api.md](./api.md), sekce 2.11. |
-| 9 | **`Dao.find` má výchozí `pageSize` 1000 a neumí fulltext.** | Limit u velkých seznamů (zápasy, fotky). | Seznamy stránkovat přes `pageInfo`; fotky číst po albech; vyhledávání osob řešit regex indexem na `surname`. |
+| 9 | **Seznamy nevrací `pageInfo`.** `Dao.find` vrací holé pole, `Crud.list` z něj dělá `{ itemList }` — nikde v `caio-serveru` `pageInfo` zpátky nechodí. `UiElements.Crud` přitom volá `handlerMap.loadNext({ pageInfo: { pageIndex } })` a `useDataList` bez `total` neví, kdy přestat. | Nejde stránkovat nic — ani novinky, ani fotky v albu, ani administrace. Do té doby jedou seznamy na jednu dávku `pageSize: 1000`. | **Změna v `caio-server`** (rozhodnuto 2026-09-06): `Dao.find` vrátí `{ itemList, pageInfo: { pageIndex, pageSize, total } }` a `Crud.list` i use casy tvar propustí. Ověřit i na `caio_propertyman`. Detail: [api.md](./api.md), 1.0.1. |
+| 21 | **`match/list` nevrací týmy**, jen `homeTeamId`/`guestTeamId` (týmy dotahuje jen `match/get`). | Každá dlaždice a řádek zápasu potřebuje název a logo. | Mapa týmů v `app-contextu` (`team/list` jednou při startu SPA) — levnější než denormalizace názvů do každého zápasu. Viz [frontend.md](./frontend.md), sekce 4. |
+| 22 | **`match/list` nemá filtr `playerId`**, i když index `{ "playerList.playerId": 1 }` existuje. | Blok „poslední zápasy“ na profilu hráče nemá odkud brát. | Doplnit `playerId` do `match/dao.listByFilter` a do validátoru — pár řádků. |
+| 23 | **`season/list` nemá `idList`.** `stats/getPlayerStats` vrací `bySeasonList` jen se `seasonId`. | Statistiky po sezónách nejdou dopojmenovat bez načtení všech sezón klubu. | Doplnit `idList` do `season/list`. |
+| 24 | **`UiApp.withRoute` neumí rozsahovou roli.** Porovnává profily na přesnou shodu, takže `teamEditor:<teamId>` jím vyjádřit nejde. | Guard obrazovek vázaných na tým. | Vlastní `withTeamRoute` v appce (prefixová shoda). Do `caio-ui` sáhnout, až to bude chtít víc projektů. |
+| 25 | **`file/list` filtruje podle `category`, kterou nikdo nezapisuje.** `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props. | Stránka „Ke stažení“ by byla jeden nesekcovaný seznam. | `admin/files` si složí vlastní `Crud` konfiguraci nad `BinaryProvider` s poli `category` a `date`. Viz [frontend.md](./frontend.md), 6.1. |
 | 11 | ~~`uu_appdatatypesg02` nefunguje~~ – **omyl, opraveno 2026-09-06.** Balíček (`0.2.1`) funguje, jen nemá default export a metody se jmenují `shape()` / `array()`, ne `.exact()` / `.arrayOf()`. Poznámka v `caio-server` je v tomhle zavádějící. | – | Validovat přes pojmenované importy a `dataType.validate()`; vzor v [api.md](./api.md), sekce 1.0. Pozor, že klíč navíc je jen `warning`, ne `error`. |
-| 12 | **`UiEcc.Page` bere jen `{ id, name, onCreate }`, ne `code`.** | Statické stránky nelze routovat kódem přímo přes komponentu. | Aplikace si `code → id` přeloží sama (`eccPage/getByCode`) a do `UiEcc.Page` předá `id`. Serverový `eccPage/load` může `code` přijímat navíc pro vlastní volání. |
 | 13 | **`Top` nepřidává tlačítko identity.** README `caio-ui`: přidá se až s propem `displayIdentity`, který zatím není. | Přihlášení není v liště. | Položku *Přihlásit se* / `UiAuth.IdentityItem` si appka vloží do `top.menu.itemList` sama a zavolá `UiAuth.useSession().login()`. |
 | 14 | **`caio-ui` nemá `exports` mapu** a `config.js` čte `process.env.OUTPUT_NAME`, které `createViteConfig` nedefinuje. | `ReferenceError: process is not defined`, ošklivé submodulové importy. | Importovat z root barrelu (`import { UiApp } from "caio-ui"`); `OUTPUT_NAME` si appka dodefinuje ve `vite.config.js` (`define`). |
 | 15 | **GCS negeneruje náhledy.** | Fotogalerie by stahovala originály. | Dvě binárky na fotku (náhled `w400` + plná `w1600`), zmenšení na klientu přes `uu5imagingg01-tools`. Viz sekce 3.1 a [data-model.md](./data-model.md), sekce 9. |
 | 16 | **Lokální tarbally.** `caio-server`, `caio-ui` a `caio-devkit` nejsou v registry; appka je konzumuje jako `file:../caio-architecture/…/dist/*.tgz` a samotné `npm install` novou verzi nevezme (npm ji má v cache). | Změna v knihovně se do appky nedostane. | Po každém `npm pack` v knihovně: `rm -rf node_modules/caio-ui && npm install --no-save --force file:…tgz` (postup v README `caio-ui`). |
-| 17 | **Chybí reset hesla.** v0 má `/zapomenute-heslo`; `Authentication` v `caio-server` umí jen `register`/`login`/`logout`/OAuth. | Kdo zapomene heslo, se dovnitř nedostane. | **Doplní se do `caio-server-auth` a do přihlašovací stránky `caio-ui`**, ne do aplikace — návrh endpointů, tokenu a SMTP je v [api.md](./api.md), sekce 2.14.1. Blokuje etapu 8. |
-| 19 | **`UiEcc` neumí předat jazyk.** Sekce ukládá `contentMap` po jazycích, ale komponenta posílá ploché `uu5String` bez `language`. | Dokud je jazyk jeden, nevadí; druhý jazyk nepůjde editovat. | Server defaultuje na `cs`. Až bude potřeba druhý jazyk, doplnit `language` do volání `UiEcc` v `caio-ui`. |
-| 20 | **`Uu5Bricks` není v závislostech.** Časová osa historie stojí na `Uu5Bricks.VerticalTimeline`, ale balíček není v `client/package.json` referenční appky ani v1. | Bez něj se osa za běhu nenajde. | Přidat mezi závislosti klienta **a** do import mapy `uu5loaderg01` v `createViteConfig()` — uu5 knihovny se nebundlují. Ověřit při etapě obsahu. |
+| 18 | **`/zapomenute-heslo` skončí na běžném přihlášení.** `legacy-redirect` posílá na `/login.html`, ale ta zapíná režim `forgot` jen tlačítkem. | Kdo přijde ze staré URL, musí kliknout ještě jednou. | Doplnit `?mode=forgot` do login stránky (`caio-ui`) i do přesměrování. |
+| 20 | **`Uu5Bricks` a `uu5codekitg01` nejsou v závislostech.** Časová osa historie stojí na `Uu5Bricks.VerticalTimeline`, editace obsahu na `uu5codekitg01`; ani jeden není v `client/package.json`. | Bez nich se komponenta za běhu nenajde. | Přidat mezi závislosti klienta **a** do import mapy `uu5loaderg01` v `createViteConfig()` — uu5 knihovny se nebundlují. Ověřit při etapě obsahu. |
+| 26 | **`Dao.createMany` vrací `id` jako `ObjectId` a nechává v objektu i `_id`.** Oprava z 6. 9. (`convertToId` → string) se `createMany` netýkala. | `match/createMany` vrací dva klíče pro totéž; přes drát to není vidět, uvnitř procesu ano. | Srovnat `createMany` se zbytkem `Dao` v `caio-serveru`. |
 
 ---
 
@@ -331,11 +345,11 @@ Pravidla:
 
 | Fáze | Obsah | Výstup |
 |---|---|---|
-| **0. Příprava** | Scaffold přes `caio-create-app` z lokálních tarballů, `.env`, Mongo, Google/Facebook OAuth, GCS bucket. Oprava blokátoru #2 (ECC modul). Fonty, PWA ikony, `config/theme.js`, LSI kostra. | Prázdná appka běží lokálně i na GAE, v barvách a písmech předlohy. |
+| **0. Příprava** | Scaffold přes `caio-create-app` z lokálních tarballů, `.env`, Mongo, Google/Facebook OAuth, GCS bucket. Fonty, PWA ikony, `config/theme.js`, LSI kostra. | Prázdná appka běží lokálně i na GAE, v barvách a písmech předlohy. |
 | **1. Jádro dat** | `team`, `season`, `match` (port z v1 do ESM), konfigurace aplikace, `binary/*` z knihovny. Správcovské CRUD obrazovky přes `UiElements.Crud`. | Redakce zvládne naplnit soutěž a zápasy. |
 | **2. Osoby a soupisky** | `person`, `player`, `coach`, sestavy u zápasu (`playerList`), soupiska týmu. | Kompletní ER diagram v datech. |
 | **3. Veřejný web** | Home, zápasy, tabulka (vč. bodování na penalty), detail zápasu, soupiska, profil hráče, statistiky – ve vzhledu podle [ux-design-system.md](./ux-design-system.md). | Web použitelný pro návštěvníka. |
-| **4. Obsah** | ECC stránky, články (novinky) s vazbou na zápas, RSS. | Redakce publikuje novinky. |
+| **4. Obsah** | Entity `page` a `article` (obsah = `uu5String` v `content`), seed stránek z v0, články s vazbou na zápas, RSS. | Redakce publikuje novinky a mění obsahové stránky. |
 | **5. Média** | Fotogalerie (náhled + plná verze), soubory ke stažení. | Kompletní rozsah. |
 | **6. Migrace a přepnutí** | Migrace dat z MySQL a z Mongo v1, přesměrování starých URL, ostrý provoz. | Vypnutí PHP webu. |
 
@@ -347,8 +361,8 @@ Pravidla:
    spam. Staré URL `/diskuze*` vedou 301 na `/home`, data se archivují exportem.
 2. **Klubová kasa** (pokladna, pokuty, příjmy/výdaje) – mimo rozsah; data z MySQL
    doporučujeme archivovat exportem, ne migrovat.
-3. **Tréninky** (`treninky.php`) – řešit jako obsahovou ECC stránku, nebo jako entitu
-   s docházkou? Návrh počítá s ECC stránkou.
+3. **Tréninky** (`treninky.php`) – řešit jako obsahovou stránku (`page?code=training`), nebo
+   jako entitu s docházkou? Návrh počítá s obsahovou stránkou.
 4. **Vazba osoba ↔ identita** – zda se hráč po přihlášení přes Google automaticky spáruje
    s `person` podle e-mailu (návrh: spárování navrhne systém, potvrdí správce).
 5. **Sloučení `player` a `coach`** – ER diagram je drží odděleně, obě entity mají shodnou
@@ -356,11 +370,17 @@ Pravidla:
 6. ~~**Struktura mužstev**~~ – **rozhodnuto: kategorie jsou dynamické.** Odvozují se ze sezón
    (`season/listCurrent`), nikde se nevyjmenovávají. `appConfig.teams` a `homeAge` z v1
    zanikají. Viz [frontend.md](./frontend.md), sekce 2.5.
-7. ~~**Týmové fotky**~~ – **rozhodnuto: ECC stránka** `page?code=team-photos`, chronologicky,
-   odkazovaná z historie.
+7. ~~**Týmové fotky**~~ – **rozhodnuto: obsahová stránka** `page?code=team-photos`,
+   chronologicky, odkazovaná z historie.
 8. **Velikost hero nadpisu.** Pravidlo „velikosti vždy z uuGds“ dává strop 44/52 px, předloha
    má 96/96. Hero tím ztratí část důrazu. Potvrdit, že je to tak v pořádku — nebo schválit
    jedno přebití nad GDS hodnotou a zapsat ho do `decisions.md`.
 9. ~~**Časová osa historie**~~ – **rozhodnuto: `Uu5Bricks.VerticalTimeline`**, registrovaná
-   do `uu5String`, aby osa zůstala součástí ECC obsahu. Zbývá jen ji přidat mezi závislosti
-   klienta a do import mapy loaderu (riziko #20).
+   do `uu5String`, aby osa zůstala součástí `page.content`. Zbývá jen ji přidat mezi
+   závislosti klienta a do import mapy loaderu (riziko #20).
+10. ~~**Články a ECC**~~ – **rozhodnuto 2026-09-06: obsah je plain `uu5String` v poli
+    `content`**, editovaný zatím jako kód. Platí pro článek i obsahovou stránku; `UiEcc`
+    se nepoužívá. Viz sekce 2 a [api.md](./api.md), 2.8 a 2.9.
+11. ~~**Skrytí jmen mládeže**~~ – **rozhodnuto 2026-09-06: filtruje server**, ne klient.
+12. ~~**Stránkování**~~ – **rozhodnuto 2026-09-06: `pageInfo` se doplní do `caio-serveru`**,
+    ne obchází na klientu.

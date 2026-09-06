@@ -39,9 +39,10 @@ erDiagram
     PERSON       ||--o| PLAYER      : "personId"
     PERSON       ||--o| COACH       : "personId"
     SYS_IDENTITY ||--o| PERSON      : "identity"
-    ECC_PAGE     ||--o{ ECC_SECTION : "sectionList"
-    ECC_PAGE     ||--o| ARTICLE     : "pageId"
 ```
+
+`PAGE` v mapě vazeb není schválně — obsahová stránka na nic neodkazuje a nic neodkazuje
+na ni; váže ji jen `code` v URL.
 
 ### 1.2 Sportovní jádro — schémata a vazby
 
@@ -197,7 +198,7 @@ erDiagram
         string   id PK
         string   name
         string   perex
-        string   pageId FK "ecc_page, nullable"
+        string   content "uu5String"
         string   author
         string   authorIdentity FK
         string   photographId FK
@@ -207,30 +208,24 @@ erDiagram
         datetime publishTime
         string[] tagList
     }
-    ECC_PAGE {
-        string   id PK
-        string   name
-        string   code "history|hymn|contact|board|training|team-photos"
-        string[] sectionList "uspořádané id sekcí"
-    }
-    ECC_SECTION {
+    PAGE {
         string id PK
-        object contentMap "uu5String po jazycích: { cs }"
-        int    rev
-        object lock "timeFrom, identity, name; expirace 8 h"
+        string code "history|hymn|contact|board|training|team-photos"
+        string name
+        string content "uu5String"
+        string desc "meta description"
     }
 
     SYS_BINARY   ||--o{ GALLERY     : "coverBinaryId + refId fotek"
     SYS_BINARY   ||--o| SYS_BINARY  : "thumbBinaryId"
     SYS_BINARY   ||--o{ ARTICLE     : "photographId"
     SYS_IDENTITY ||--o{ ARTICLE     : "authorIdentity"
-    ECC_PAGE     ||--o{ ECC_SECTION : "sectionList[]"
-    ECC_PAGE     ||--o| ARTICLE     : "pageId"
 ```
 
-> **`ARTICLE`, `ECC_PAGE` a `ECC_SECTION` zatím nevznikají.** Design ECC se ladí zvlášť
-> a do té doby jsou obsahové stránky natvrdo v kódu klienta a články nejsou vůbec —
-> viz [README.md](./README.md), sekce 2. V diagramu zůstávají, aby byl cílový model celý.
+> **`ARTICLE` a `PAGE` v dávce ze 6. 9. 2026 nevznikly** — server má zatím jen sportovní
+> jádro, galerii, soubory a konfiguraci. Obsah je ale odblokovaný: nečeká se na ECC modul,
+> obojí drží obsah jako jeden `uu5String` (rozhodnuto 2026-09-06, viz
+> [README.md](./README.md), sekce 2).
 
 | Kolekce | Původ | Popis |
 |---|---|---|
@@ -240,10 +235,9 @@ erDiagram
 | `person` | nová | Osoba (jméno, kontakt) – sdílená pro hráče i trenéry |
 | `player` | nová | Hráčská role osoby, členství v týmech v čase |
 | `coach` | nová | Trenérská/funkcionářská role osoby |
-| `article` | nová | Novinka; obsah je ECC stránka |
+| `article` | nová | Novinka; obsah je `uu5String` v `content` |
 | `gallery` | nová | Fotoalbum |
-| `ecc_page` | v1 | Editovatelná stránka (seznam sekcí) |
-| `ecc_section` | v1 | Sekce stránky (`uu5String`) se zámkem |
+| `page` | nová | Obsahová stránka (historie, hymna, kontakt, výbor, tréninky, týmové fotky) |
 | `app_config` | v1 (`app`) | Singleton konfigurace aplikace |
 | `sys_binary` | `caio-server` | Metadata souboru v Google Cloud Storage |
 | `sys_identity` | `caio-server` | Přihlašovací identita |
@@ -261,6 +255,9 @@ erDiagram
 | `logoId` | string | | `id` do `sys_binary` |
 | `logoUri` | string | | Denormalizované URI loga (kompatibilita s v1) |
 | `own` | boolean | | `true` = tým AFK Bratčice; usnadní filtrování a zvýraznění |
+| `photoId` | string | | Týmová fotka – `id` do `sys_binary` (kolekce `team`, `type: "photo"`) |
+| `photoUri` | string | | Denormalizované URI týmové fotky |
+| `photoDesc` | string | | Popisek k fotce; slouží zároveň jako perex karty v přehledu mužstev |
 
 **Indexy**
 
@@ -274,6 +271,9 @@ Poznámky:
 - Soupeři jsou plnohodnotné `team` dokumenty – jinak by nešlo počítat tabulku.
 - Stejný klub ve dvou kategoriích = dva dokumenty (proto je `age` v unikátním indexu).
 - `logoUri` udržuje ABL při `create`/`update`/`delete` loga (převzato z v1 `team-abl.js`).
+- `photoUri`/`photoDesc` **má smysl jen u vlastních týmů** (`own: true`) – u soupeřů zůstává
+  prázdné. Fotka jde stejnou cestou jako logo (stejná kompenzace při selhání zápisu), jen
+  s `type: "photo"`, aby se dvě binárky téhož týmu daly rozlišit.
 
 ---
 
@@ -440,7 +440,7 @@ Role `board` (výbor klubu) pokrývá stránku „Výbor AFK“ z v0 bez nutnost
 | `id` | string | ✓ | |
 | `name` | string | ✓ | Titulek |
 | `perex` | string | ✓ | Text do výpisu, RSS a OG description (max ~300 znaků) |
-| `pageId` | string | ✓ | FK `ecc_page` – vlastní obsah článku |
+| `content` | string (uu5String) | | Obsah článku jako jeden `uu5String` – **ne** vazba na ECC |
 | `author` | string | | Podpis autora (volný text; výchozí = jméno z identity) |
 | `authorIdentity` | string | | Kód identity autora |
 | `photographId` | string | | Titulní foto – `id` do `sys_binary` |
@@ -460,8 +460,12 @@ Role `board` (výbor klubu) pokrývá stránku „Výbor AFK“ z v0 bez nutnost
 
 Poznámky:
 
-- Diagramové pole `content` je nahrazeno vazbou `pageId` na ECC stránku – obsah tak
-  vzniká skládáním sekcí `uu5String` a klient použije `UiEcc.Page` bez úprav.
+- **Obsah je jedno pole `content` typu `uu5String`** (rozhodnuto 2026-09-06). Dřívější
+  návrh ho měl jako vazbu `pageId` na ECC stránku; ECC ale v `caio-server` není a jeho
+  design se ladí zvlášť, takže by článek na něj čekal. Jedno pole je zpětně slučitelné:
+  až ECC vznikne, migrace je „vytvoř stránku s jednou sekcí z `content`".
+- Editace obsahu je zatím **v kódu, ne WYSIWYG** – redakce píše `uu5String` do textového
+  pole (`uu5codekitg01`). Rich-text editor přijde s ECC.
 - Diagramové `time: sys.cts` je rozděleno: `sys.cts` = vznik záznamu, `publishTime` =
   redakční datum (v0 umožňovalo zadat datum ručně a web podle něj řadil).
 - Mapování legacy `clanek.priorita`: `NULL` → `priority: 0, state: published`;
@@ -510,50 +514,40 @@ ukazuje řadu filtrovacích chipů (viz [ux-design-system.md](./ux-design-system
 
 ---
 
-## 10. `ecc_page` a `ecc_section`
+## 10. `page` (obsahové stránky)
 
-Převzato z v1 (`server/dao/ecc-page-dao.js`, `ecc-section-dao.js`) s jediným doplňkem – `code`.
-
-### `ecc_page`
-
-| Pole | Typ | Povinné | Popis |
-|---|---|---|---|
-| `id` | string | ✓ | |
-| `name` | string \| lsi | ✓ | Nadpis stránky |
-| `code` | string | | Stabilní kód pro routování statických stránek (`history`, `hymn`, `contact`, `board`, `training`) |
-| `sectionList` | string[] | ✓ | Uspořádaný seznam `id` sekcí |
-
-```
-{ code: 1 }  unique, sparse
-```
-
-### `ecc_section`
+Nahrazuje dřívější dvojici `ecc_page` / `ecc_section` (rozhodnuto 2026-09-06). ECC se ladí
+samostatně a v `caio-server` neexistuje; obsahové stránky na něj čekat nemusí, protože
+potřebují přesně jednu věc – kus `uu5String`, který umí redakce změnit.
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
 | `id` | string | ✓ | |
-| `contentMap` | object | | Obsah sekce **po jazycích**: `{ cs: uu5String, en: uu5String }` |
-| `rev` | number | ✓ | Revize (inicializuje se na `0`) |
-| `lock` | object | | `{ timeFrom, identity, name }` – zámek editace |
+| `code` | string | ✓ | Stabilní kód pro routování (`history`, `hymn`, `contact`, `board`, `training`, `team-photos`) |
+| `name` | string | ✓ | Nadpis stránky |
+| `content` | string (uu5String) | | Obsah stránky |
+| `desc` | string | | Popis pro `<meta description>` a OG |
 
-**Vícejazyčný obsah.** Oproti v1 (a oproti tomu, co posílá klient) není obsah holý string,
-ale mapa jazyk → `uu5String`. Redakce dnes plní **jen `cs`**, ale datový model se kvůli
-druhému jazyku nebude muset měnit.
+**Indexy**
 
-Klientský kontrakt `UiEcc` se tím **nemění** – komponenta pořád posílá a čte ploché
-`uu5String`. Překlad dělá server:
+```
+{ code: 1 }  unique
+```
 
-- `eccSection/unlock({ id, uu5String, language })` zapíše do `contentMap[language ?? "cs"]`,
-- `eccPage/load({ id, language })` vrátí sekce s `uu5String = contentMap[language] ?? contentMap.cs`.
+Poznámky:
 
-`UiEcc` `language` neposílá, takže se uplatní výchozí `cs`. Až bude potřeba druhý jazyk,
-musí `caio-ui` umět jazyk předat – viz [README.md](./README.md), riziko #19.
-
-Zámek vyprší po **8 hodinách** (`MAX_LOCK_MS` v v1) nebo `unlock`em vlastníka;
-jiná identita do té doby dostane chybu `eccSection/locked` s `paramMap.lockedBy`.
-
-Nové stránky bez `code` (obsah článků) se zakládají přes `article/create`, které
-zároveň založí prázdnou ECC stránku – stejným postupem jako v1 `ecc-page-abl.create`.
+- **Jedna stránka = jeden dokument, ne seznam sekcí.** Skládání z sekcí, zamykání
+  a revize existují kvůli tomu, aby dva lidé mohli editovat dlouhou stránku vedle sebe.
+  Šest stránek, které mění jeden kronikář jednou za rok, tuhle mašinerii nepotřebuje.
+- **Obsah je plain `uu5String`, ne `contentMap` po jazycích.** Druhý jazyk by tedy byl
+  migrace jednoho pole (`content` → `contentMap.cs`), ne jen doplnění kódu — vědomá cena
+  za to, že se stránky rozjedou hned. Jazyk UI je zatím stejně jediný (`cs`).
+- Editace je **v kódu, ne WYSIWYG**: `uu5codekitg01` nad `content`. Komponenty jako
+  `Uu5Bricks.VerticalTimeline` (časová osa v historii) se do `uu5String` registrují
+  a redakce je píše ručně — stejně, jako by je psala do ECC sekce.
+- Obrázky ve stránkách jdou přes `BinaryStore`, kolekce `page`.
+- Stránky se **seedují** (`tools/seed-pages.js`) s obsahem přepsaným z v0, aby web nešel
+  do provozu s šesti prázdnými stránkami.
 
 ---
 
@@ -686,7 +680,7 @@ stringů, které `Identity.createToken` kopíruje do JWT beze změny. Model rol�
 |---|---|---|---|
 | 1 | `Match.playerList (FK)` | pole objektů se statistikami | v0 tabulka `ucast` eviduje u každého hráče post, góly, žlutou a červenou kartu – prostý seznam FK by tuto funkčnost zahodil |
 | 2 | `Match.penalty` | `penaltyWinnerTeamId` | v0 (`getTable.php`) ukládá do `penalty` `id` vítěze rozstřelu a počítá 3/2/1/0; boolean by neumožnil rozlišit, kdo penalty vyhrál |
-| 3 | `Article.content` | `pageId` → `ecc_page` | zvolená editace přes ECC sekce; klient použije `UiEcc.Page` beze změny |
+| 3 | `Article.content` | ponecháno jako `content` (`uu5String`) | ECC v `caio-server` není a jeho design se ladí zvlášť; jedno pole rozjede obsah hned a migrace do ECC je „stránka s jednou sekcí" |
 | 4 | `Article.time: sys.cts` | `publishTime` + `sys.cts` | redakce potřebuje zadat datum zpětně (v0 to umožňuje) |
 | 5 | `Article.photograph` | `photographId` (+ odvozené URI) | soubory jdou vždy přes `sys_binary` |
 | 6 | – | `Person.identity` | propojení osoby s přihlášením (profil hráče, nominace) |
@@ -697,5 +691,6 @@ stringů, které `Identity.createToken` kopíruje do JWT beze změny. Model rol�
 | 11 | – | `Match.state`, `Article.state`, `Gallery.state` | rozlišení rozpracovaného a publikovaného obsahu, odložené zápasy |
 | 12 | – | `sys_binary.collection`, `type: "photoThumb"`, `thumbBinaryId`, `thumbUri`, `Gallery.coverThumbUri` | Google Cloud Storage negeneruje náhledy (na rozdíl od Drive) – každá velikost je vlastní objekt nahraný z klienta |
 | 13 | – | `Gallery.category` | předloha filtruje fotogalerii chipy (Zápasy / Trénink / Fanoušci / Mládež / Klub) |
-| 14 | – | `ecc_section.contentMap` místo `uu5String` | obsah má jít ukládat ve víc jazycích, i když se dnes plní jen `cs` |
+| 14 | – | `page` (jeden dokument na stránku) | obsahové stránky mění jeden člověk jednou za rok; sekce, zámky a revize by tu nic neřešily |
 | 15 | `app_config.teams`, `homeAge` (v1) | zrušeno, kategorie se odvozují ze `season` | složení mužstev se mění každou sezónu; statický výčet by se musel opravovat ručně |
+| 16 | – | `Team.photoUri`, `Team.photoDesc` | karta mužstva v přehledu chce týmovou fotku s popiskem; obojí má smysl jen u `own: true` |

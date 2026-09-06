@@ -30,8 +30,8 @@ client/
     fonts.css           @font-face pro Bebas Neue a Barlow
     config/config.js    TAG, Css, AGE_MAP, POSITION_MAP
     config/theme.js     designové tokeny (jediné místo s hexy a velikostmi písma)
-    lsi/                import-lsi.js, cs.json, en.json
-    core/app-context.jsx  načtení appConfig/get, poskytnutí konfigurace a menu
+    lsi/                import-lsi.js, cs.json          (en.json se nezakládá)
+    core/app-context.jsx  appConfig/get + season/listCurrent + team/list -> konfigurace, menu, mapa týmů
 ```
 
 ### 1.1 `app.jsx`
@@ -44,7 +44,7 @@ a – dostane-li `top`/`footer` – i celý rám stránky (`UiApp.Page`: lišta 
 ```jsx
 <Uu5Elements.SpacingProvider type="loose">
   <UiApp.SpaProvider languageList={["cs"]}>
-    <UiApp.Spa top={TOP} footer={<Footer />} main={{ padding: false }}>
+    <UiApp.Spa top={TOP} footer={<Footer />} main={{ padding: false, sticky: "always" }}>
       <Router />
     </UiApp.Spa>
   </UiApp.SpaProvider>
@@ -55,6 +55,10 @@ a – dostane-li `top`/`footer` – i celý rám stránky (`UiApp.Page`: lišta 
   bez jediného řádku CSS.
 - `main={{ padding: false }}` – sekce si gutter i vertikální rytmus řeší samy
   (`components/layout/section.jsx`).
+- **`sticky` patří do `main`, ne do `top`.** `Spa` rozbaluje objekt `main` do props `Page`
+  a `sticky` je prop `Page`, ne lišty (`Top` má jen `logo`, `menu`, `transparent`,
+  `cssBackground`, `cssColor`, `colorScheme`, `maxWidth`). Výchozí `sticky: true` je
+  `"onScrollUp"`, což by lištu při scrollování dolů schovávalo — předloha ji chce vidět pořád.
 - Klubová barva: `Uu5Elements.UuGds.setMeaningColor("primary", "#D01319")` (hodnota z předlohy;
   v1 měla `#8b0000`).
 
@@ -67,8 +71,7 @@ a – dostane-li `top`/`footer` – i celý rám stránky (`UiApp.Page`: lišta 
 | `logo` | `{ uri: Config.asset.logo, href: "home", tooltip: undefined }` – klubový erb |
 | `children` | `Uu5Elements.Header` s `title` „AFK Bratčice“ a `subtitle` „od roku 1932“ |
 | `menu.itemList` | Aktuality, Historie, Mužstva (s podpoložkami), Fotogalerie, Ke stažení, Kontakt + položka identity |
-| `cssBackground` / `cssColor` | `theme.color.bg` / `theme.color.fg` – GDS paleta `building` je bílá a nepřenastaví se |
-| `sticky` | `"always"` – předloha má lištu vidět pořád (výchozí `"onScrollUp"` by ji schovávalo) |
+| `cssBackground` / `cssColor` | `theme.color.bg` / `theme.color.fg` – GDS paleta `building` je bílá a nepřenastaví se. Obojí bere i funkci `({ stuck }) => hodnota`, takže lišta může nad hero fotkou začít průhledná a po dosednutí ztmavnout |
 
 Sbalení menu do hamburgeru na mobilu řeší `Uu5Elements.ActionGroup` uvnitř `Top` sám – nic se
 nenastavuje. Aktivní položka se zvýrazní `significance: "highlighted"`.
@@ -79,9 +82,12 @@ přihlášenému `UiAuth.IdentityItem` s dropdownem *Profil* / *Odhlásit se*.
 
 ### 1.3 Router
 
-Router se přebírá z v1 (`core/router.js`) – `useRouter(routeMap)` + `Suspense` +
-`ErrorBoundary` s `resetKey` odvozeným z routy a stavu session. Obrazovky se načítají lazy přes
-`Utils.Component.lazy(() => import(...))`.
+`useRouter(routeMap)` + `Suspense` + `ErrorBoundary` s `resetKey` odvozeným z routy a stavu
+session. Obrazovky se načítají lazy přes `Utils.Component.lazy(() => import(...))`.
+
+> Vzor je v1 `client/.../core/router.js`. Ten soubor už **v pracovní kopii není** — v2 celý
+> starý strom nahradil; sáhnout se pro něj dá do historie (`git show master:…`). Živá
+> reference je `caio_propertyman`.
 
 **Menu a routy se odvozují ze `season/listCurrent`**, ne z konfigurace: pro každou kategorii,
 kterou klub v aktuálním ročníku má, se do menu vloží položka s podpoložkami Soupiska /
@@ -115,10 +121,16 @@ Podrobně sekce 2.5.
 | `profile` | Profil přihlášeného uživatele | – |
 | `notFound` | 404 s odkazy na hlavní sekce | – |
 
-Pro čitelné odkazy mají ECC stránky i vlastní aliasy v `routeMap`
+Pro čitelné odkazy mají obsahové stránky i vlastní aliasy v `routeMap`
 (`history`, `hymn`, `contact`, `board`), které se interně přemapují na `page?code=...`.
-Obrazovka `page` si `code` přeloží na `id` (`eccPage/getByCode`) a teprve to předá do
-`UiEcc.Page` – komponenta prop `code` nemá (viz [README.md](./README.md), riziko #12).
+Obrazovka `page` volá `page/get?code=<code>` a vykreslí `content` přes
+`Utils.Uu5String.toChildren()`. Žádný překlad `code → id` — use case bere `code` přímo
+(viz [api.md](./api.md), 2.9), takže riziko #12 z README padá i s `UiEcc`.
+
+**Na kódy stránek míří `server/legacy-redirect.js`** (`/historie` → `/page?code=history`,
+`/vybor` → `/page?code=board`, `/tymove_fotky` → `/page?code=team-photos`, …). Jsou tedy
+součástí veřejného kontraktu, ne interním detailem: přejmenovat `code` znamená rozbít
+přesměrování ze starého webu.
 
 **Poznámka k předloze:** prototyp má jen `/`, `/historie`, `/muzstva`, `/fotogalerie`
 a `/kontakt`. Routa `teams` odpovídá jeho `/muzstva`, `page?code=history` jeho `/historie`
@@ -134,10 +146,10 @@ a `page?code=contact` jeho `/kontakt`; zbytek předloha nemá.
 | `admin/persons` | CRUD osob |
 | `admin/players` | CRUD hráčů, členství v týmech |
 | `admin/coaches` | CRUD trenérů a výboru |
-| `admin/articles` | CRUD článků + editace obsahu (ECC) |
+| `admin/articles` | CRUD článků; obsah `uu5String` v `uu5codekitg01` |
 | `admin/galleries` | CRUD alb, hromadný upload fotek |
-| `admin/files` | `UiElements.BinaryCrud` – soubory ke stažení |
-| `admin/pages` | CRUD obsahových stránek |
+| `admin/files` | Soubory ke stažení – vlastní `Crud` nad `BinaryProvider` (viz 6.1) |
+| `admin/pages` | CRUD obsahových stránek; obsah `uu5String` v `uu5codekitg01` |
 | `admin/identities` | Správa identit a `profileList` (jen ADMIN) |
 | `admin/config` | Konfigurace aplikace (jen ADMIN) |
 
@@ -149,6 +161,13 @@ Ochranu řeší `UiApp.withRoute(Component, { profileList: [...] })` – nepřih
 `UiAuth.Unauthenticated`, přihlášený bez role `UiAuth.Unauthorized`. Je to **UX, ne
 bezpečnostní hranice**; rozhoduje server. Co uživatel nesmí, se nemá ukazovat zašedlé —
 nemá se ukazovat vůbec.
+
+**`withRoute` neumí `teamEditor:<teamId>`.** Porovnává profily na přesnou shodu
+(`profileList.some((p) => session.identity.profileList?.includes(p))`), takže „kdokoli, kdo
+spravuje nějaký tým" se jím vyjádřit nedá. Appka si proto přidá tenký `withTeamRoute`
+(`components/core/with-team-route.jsx`) s prefixovou shodou nad `teamEditor:`; do `caio-ui`
+se nesahá, dokud nebude jasné, že to potřebuje víc projektů než jeden. Obrazovky, které to
+používají: `admin/matches`, `admin/players`, `admin/coaches`, `admin/teams`.
 
 ### 2.3 Pokrytí rout současného webu
 
@@ -173,8 +192,8 @@ Kontrola proti živému `afkbratcice.cz` (5. 9. 2026) — odtud se bere obsah.
 | `/treninky` | informace o trénincích | `page?code=training` | ✅ |
 | `/diskuze` | diskuzní fórum | – | ❌ **vyřazeno z rozsahu** |
 | `/prihlaseni` | přihlášení (formulář v hlavičce) | `/login.html` (devkit) | ✅ |
-| `/zapomenute-heslo` | reset hesla | `/login.html?reset=<token>` | ⚠️ **doplní se do `caio-server` + `caio-ui`**, viz [api.md](./api.md), 2.14.1 |
-| `/rss` | RSS kanál | `GET /rss` | ✅ |
+| `/zapomenute-heslo` | reset hesla | `/login.html?mode=forgot` → mail → `?reset=<token>` | ✅ **hotovo 6. 9.** v `caio-server` i `caio-ui`; zbývá `?mode=forgot`, viz [api.md](./api.md), 2.14.1 |
+| `/rss` | RSS kanál | `GET /rss` | ⏳ čeká na entitu `article` |
 | `/editace-*`, `/upravit-*`, `/novy-*`, `/smazat-*` | správa obsahu | `admin/*` | ✅ |
 | `/pokladna`, `/pokuty`, `/prijem`, `/vydaj` | klubová kasa | – | ❌ mimo rozsah (410 Gone) |
 | `/api/<uc>` | staré JSON API | – | ❌ 410 Gone (nový kontrakt) |
@@ -299,17 +318,25 @@ Grid: `Uu5Elements.Grid` s `templateColumns={{ xs: "1fr", m: "repeat(3, 1fr)" }}
 
 ### 3.2 Novinky a detail článku
 
-- Seznam: dlaždice s `photograph`, kategorií, titulkem, datem a `perex`; stránkování po 10.
-- Detail: hlavička (titulek, datum, autor, foto) + `UiEcc.Page` s `id = article.pageId`.
+- Seznam: dlaždice s `photograph`, kategorií, titulkem, datem a `perex`; stránkování po 10
+  (`article/list` `content` nevrací — výpis ho nepotřebuje).
+- Detail: hlavička (titulek, datum, autor, foto) + obsah z `article.content`, vykreslený
+  přes `Utils.Uu5String.toChildren()`.
 - Je-li vyplněn `matchId`, nad obsahem se zobrazí panel s výsledkem a odkazem na zápas.
-- Pro `operatives` je v hlavičce akce **Upravit** (přepne ECC do editačního režimu)
-  a **Vlastnosti** (modal s formulářem článku).
+- Pro `newsEditor` a výš je v hlavičce akce **Upravit** – jeden modal s formulářem článku,
+  kde je `content` textové pole s `uu5codekitg01`. **Zatím se edituje jako kód, ne WYSIWYG**
+  (rozhodnuto 2026-09-06); rich-text přijde s ECC a bude to výměna jednoho vstupu.
 
 ### 3.3 Přehled mužstev (`teams`)
 
-Karta na každou kategorii ze `season/listCurrent`: týmová fotka, odznak kategorie, název, perex,
-řádky *soutěž* (`season/getCurrent`), *trenér* (`coach/list?teamId&role=headCoach`),
-*tréninky* (`appConfig`), tlačítko na `team`.
+Karta na každou kategorii ze `season/listCurrent`: týmová fotka (`team.photoUri`), odznak
+kategorie, název, perex (`team.photoDesc`), řádky *soutěž* (přímo z `season/listCurrent`,
+kde `competition` už je), *trenér* (`coach/list?teamId&role=headCoach`), *tréninky*
+(`appConfig`), tlačítko na `team`.
+
+`photoUri` a `photoDesc` jsou **doplněk do entity `team`** (rozhodnuto 2026-09-06) — do té
+doby karta dvě pole předlohy neměla odkud vzít. Chybí-li fotka, karta ji vynechá a nesahá
+po klubovém erbu; erb je fallback loga, ne fotky.
 
 ### 3.4 Soupiska týmu (`team`)
 
@@ -317,8 +344,10 @@ Karta na každou kategorii ze `season/listCurrent`: týmová fotka, odznak kateg
 - Sekce **Hráči** – `player/list?teamId&active=true`, dlaždice s fotem, číslem, postem
   a základní statistikou v sezóně; skupiny podle postu (brankáři, obránci, …).
 - Sekce **Realizační tým** – `coach/list?teamId`.
-- U mládeže se **nezobrazují jména** (předloha to řeší stejně) – řídí příznak
-  `appConfig.hideNamesAgeList`.
+- U mládeže **jména nechodí ze serveru** (`appConfig.hideNamesAgeList`, rozhodnuto
+  2026-09-06). Klient tedy nic neschovává — jen musí umět vykreslit dlaždici hráče **bez
+  jména**: číslo dresu, post, foto se nepoužije. Totéž platí pro sestavu na detailu zápasu
+  a pro statistiky hráčů. Redakce (`CONTENT`) a hráč sám jména vidí.
 
 ### 3.5 Zápasy týmu
 
@@ -366,11 +395,16 @@ Seznam z `file/list`, seskupený podle kategorie z `appConfig.fileCategoryList`;
 
 ### 3.11 Obsahové stránky
 
-`UiEcc.Page` s `id` přeloženým z `code`. Pro `operatives` akce **Upravit** – zapne editaci sekcí
-(`UiEcc.Section` s `lock`/`unlock`, rich-text editor a fallback na `uu5String`
-v `uu5codekitg01`).
+`page/get?code=<code>` → `Utils.Uu5String.toChildren(page.content)`. Pro `contentEditor`
+a výš akce **Upravit** – modal s `name`, `desc` a `content` v `uu5codekitg01`.
+**Zatím se edituje jako kód, ne WYSIWYG** (rozhodnuto 2026-09-06).
 
-Stránky: `history`, `hymn`, `contact`, `board`, `training`, `team-photos`.
+Stránky: `history`, `hymn`, `contact`, `board`, `training`, `team-photos`. Kódy jsou pevné —
+míří na ně legacy přesměrování (sekce 2.1).
+
+Obsah se **seeduje** z v0 (`tools/seed-pages.js`), aby web nešel do provozu se šesti
+prázdnými stránkami. Kontakt obsahuje `<iframe>` mapy, výbor tabulku sedmi lidí — obojí je
+součást `uu5String`, ne kód appky.
 
 ### 3.11.1 Historie jako časová osa
 
@@ -379,7 +413,7 @@ Historie je **svislá časová osa** s roky, jak ji ukazuje předloha (1932, 194
 se vlastní.
 
 Musí zůstat editovatelná redakcí, takže se komponenta **registruje do `uu5String`** a osa
-je součást obsahu ECC sekce, ne natvrdo psaná stránka:
+je součást `page.content`, ne natvrdo psaná stránka:
 
 ```
 <Uu5Bricks.VerticalTimeline>
@@ -402,7 +436,7 @@ Dvě věci k dořešení při implementaci:
 ### 3.11.2 Týmové fotky
 
 `page?code=team-photos` — chronologie od roku 1943 po ročnících: fotka + jmenný seznam
-sestavy pod ní. Je to ECC stránka, ne album, protože popisky jsou dlouhé a struktura
+sestavy pod ní. Je to obsahová stránka, ne album, protože popisky jsou dlouhé a struktura
 (rok → mužstvo → dvě řady jmen) je součást obsahu. Odkazuje se z historie a patří k ní.
 
 Fotky samotné jdou přes `BinaryStore` a do sekce se vkládají jako `UiElements.Image`.
@@ -434,7 +468,9 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 | `layout/footer.jsx` | Třísloupcová patička + spodní řádek |
 | `layout/notice-bar.jsx` | Proužek `appConfig.notice` pod lištou (`Uu5Elements.Alert`) |
 | `countdown.jsx` | Odpočet do výkopu v kartě nejbližšího zápasu |
-| `core/app-context.jsx` | `appConfig/get`, mapa kategorií, menu a routy |
+| `core/app-context.jsx` | `appConfig/get`, `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů** |
+| `core/with-team-route.jsx` | Guard s prefixovou shodou nad `teamEditor:<teamId>` (`withRoute` to neumí) |
+| `empty-state.jsx` | Jednotný prázdný stav seznamu – ikona, text z LSI, volitelná akce |
 | `team-logo.jsx` | Logo z `binary.uri` + fallback na erb klubu |
 | `match-tile.jsx` | Dlaždice zápasu (loga, skóre, datum) – použitá na home i v seznamech |
 | `match-result.jsx` | Formátování výsledku včetně poločasu a penalt + výsledkový odznak |
@@ -451,6 +487,12 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 Kompletní rozpad obrazovek na komponenty včetně toho, co dodává uu5 a co si píšeme sami,
 je v [component-tree.md](./component-tree.md).
 
+**Mapa týmů v `app-contextu` je nutnost, ne optimalizace.** `match/list` vrací jen
+`homeTeamId` / `guestTeamId` — týmy dotahuje pouze `match/get`. Každá dlaždice a řádek
+zápasu přitom potřebuje název a logo, takže by jinak každá obrazovka se seznamem zápasů
+řešila to samé zvlášť. Klub má desítky týmů včetně soupeřů, takže `team/list` jednou při
+startu SPA je levnější než denormalizace názvů do každého zápasu.
+
 Upload souborů se **nedělá vlastní komponentou** – používá se `UiElements.FormFile` z `caio-ui`
 (existující hodnota se ukáže jako `Uu5Forms.Link` s křížkem, `accept="image/*"` přepne na
 `Uu5Imaging.ImageInput`).
@@ -466,8 +508,15 @@ Upload souborů se **nedělá vlastní komponentou** – používá se `UiElemen
 - Soubory: `UiElements.BinaryProvider` / `useBinary` (už hotová dvojice nad `binary/*`).
 - Jednotlivé objekty a nestandardní use casy: `useDataObject` +
   `UiElements.Call.cmdGet/cmdPost`.
-- ECC: `UiEcc.Page` si data řídí sám.
+- Obsah (`article`, `page`): obyčejný `useDataObject` nad `article/get` / `page/get`.
+  `UiEcc` se **nepoužívá** – viz [api.md](./api.md), 2.9.
 - Chyby: `ErrorBoundary` ve `Spa` + `AlertBus` pro nefatální chyby (`Uu5Elements.useAlertBus`).
+
+**Stránkování stojí na `pageInfo` v `dtoOut`**, který se doplňuje do `caio-server`
+(rozhodnuto 2026-09-06, [api.md](./api.md), 1.0.1). Do té doby `UiElements.Crud` neví, kolik
+je celkem záznamů, a `loadNext` si o další stránku neřekne — seznamy jedou na jednu dávku
+`pageSize: 1000`. Netýká se to jen administrace: stránkování novinek (`news?pageIndex`)
+a dotahování fotek v albu na tom stojí taky.
 
 `UiElements.Call` posílá vždy `credentials: "include"`; `post` odešle `FormData` automaticky,
 jakmile je v `dtoIn` `File`.
@@ -524,6 +573,14 @@ const { seriesList, columnList, sorterList, filterList } = UiElements.Crud.gener
 Bez `children` je `Crud` read-only tabulka. Výběr řádků odemkne hromadné mazání
 (`entity/deleteMany({ idList })`). `compact` přesune akce do „…“ menu, když jsou řádky úzké.
 
+**`admin/files` není holá `UiElements.BinaryCrud`.** Ta kolekci umí (`collection="file"`),
+ale je záměrně nerozšiřitelná přes props — a veřejná stránka „Ke stažení" seskupuje podle
+`category` a řadí podle `date`, což jsou pole, která by tak nikdo nezapsal. `admin/files`
+si proto skládá **vlastní `Crud` konfiguraci nad `UiElements.BinaryProvider`** (kolekce
+`file`) se dvěma poli navíc: `category` jako `Uu5Forms.Select` z `appConfig.fileCategoryList`
+a `date`. Zbytek sloupců (název, velikost, typ, odkaz) se opíše z `BinaryCrud` —
+je to přesně ta cesta, kterou README `caio-ui` pro tenhle případ předepisuje.
+
 Popisky tlačítek a dialogů `Crud`u jsou z LSI `caio-ui` (`src/lsi/cs.json`) – aplikace do nich
 nesahá; potřebuje-li jiné znění, skládá si vlastní konfiguraci.
 
@@ -537,7 +594,8 @@ const { imageFile: webp } = await Uu5ImagingTools.Adjustment.changeType(imageFil
 ```
 
 Doporučené šířky: logo 400 px, portrét osoby 600 px, titulní foto článku 1200 px,
-fotka v galerii **1600 px (plná) + 400 px (náhled)** – u galerie se nahrávají obě.
+týmová fotka 1200 px, fotka v galerii **1600 px (plná) + 400 px (náhled)** – u galerie
+se nahrávají obě.
 
 ### 6.3 Hromadné vytvoření zápasů
 
@@ -646,5 +704,38 @@ Devkit z těchto souborů plní i přihlašovací stránku `/login.html`.
 | Stránkování | `pageInfo` u zápasů, článků a fotek |
 | Náhledy | vlastní binárka `w400` – GCS náhledy negeneruje (viz [README.md](./README.md), sekce 3.1) |
 | Denormalizace | `team.logoUri`, `gallery.photoCount`, `gallery.coverThumbUri` – šetří dotazy v seznamech |
-| Cache konfigurace | `appConfig/get` se volá jednou při startu SPA |
+| Cache konfigurace | `appConfig/get`, `season/listCurrent` a `team/list` se volají jednou při startu SPA |
 | uu5 mimo bundle | `uu5loaderg01` je stahuje z `public/libs/` – appkový bundle je malý |
+
+---
+
+## 12. Stav proti serveru (revize 2026-09-06)
+
+Serverová dávka z 6. 9. pokrývá sportovní jádro, galerii, soubory, konfiguraci a SEO trasy.
+Tahle tabulka říká, co z frontendu na čem stojí — aby se implementace nerozjela proti
+neexistujícímu endpointu.
+
+| Obrazovka / blok | Server | Stav |
+|---|---|---|
+| Home – hero, statistiky, CTA | `appConfig/get` | ✅ |
+| Home – program víkendu | `match/list?teamIdList&dateFrom&dateTo` | ✅ (potřebuje mapu týmů) |
+| Home – poslední výsledky | `match/getLast` per kategorie | ✅ |
+| Home – tabulky | `stats/getTable` | ✅ vč. bodování na penalty a sloupce `form` |
+| Home – aktuality | `article/list` | ⏳ entita `article` |
+| Mužstva, soupiska, realizační tým | `season/listCurrent`, `player/list`, `coach/list` | ✅ (fotka a perex až s `team.photoUri`/`photoDesc`) |
+| Zápasy týmu, kolo, detail zápasu | `match/list`, `match/get` | ✅ |
+| Odběr kalendáře | `GET /calendar/team-<id>.ics` | ✅ |
+| Tabulka soutěže | `stats/getTable` | ✅ |
+| Statistiky hráčů | `stats/listPlayerStats` | ✅ |
+| Profil hráče – karta a sezóny | `player/get`, `stats/getPlayerStats` | ⚠️ sezóny bez názvu – čeká na `season/list?idList` |
+| Profil hráče – poslední zápasy | `match/list?playerId` | ⏳ filtr `playerId` |
+| Fotogalerie | `gallery/list`, `gallery/listPhotos` | ✅ |
+| Ke stažení | `file/list?category` | ⚠️ `category` nikdo nezapisuje, dokud nevznikne `admin/files` (6.1) |
+| Obsahové stránky | `page/get?code` | ⏳ entita `page` |
+| Novinky, detail článku, RSS | `article/*`, `GET /rss` | ⏳ entita `article` |
+| `admin/*` CRUD | `*/create|update|delete` | ✅ pro existující entity |
+| `admin/identities` | `identity/adminList`, `identity/update` | ✅ na profilu `authorities` |
+| Přihlášení, registrace, reset hesla | `caio-server-auth` + `/login.html` | ✅ |
+| Stránkování čehokoli | `pageInfo` v `dtoOut` | ⏳ změna v `caio-server` ([api.md](./api.md), 1.0.1) |
+
+Legenda: ✅ server to umí · ⚠️ jde postavit, ale s omezením · ⏳ čeká na doplnění.
