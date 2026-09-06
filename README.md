@@ -8,17 +8,17 @@ běhové příkazy z [`caio-devkit`](../caio-architecture/caio-devkit).
 
 ## Stav
 
-Hotová je **serverová část** (etapy 0b–10 z [impl-plan-server.md](./design/impl-plan-server.md)).
-Mimo rozsah zatím zůstává:
+**Co běží:** serverové sportovní jádro (týmy, sezóny, zápasy, osoby, hráči, trenéři),
+tabulka a statistiky, galerie, konfigurace, iCal a sitemap — a nad tím veřejná část webu:
+home, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče
+a fotogalerie s lightboxem.
 
-- **migrace dat** z v0/v1 — řeší se zvlášť, `design/migration.md` je návrh na později,
-- **ECC** (`eccPage`/`eccSection`) — design se ladí samostatně; do té doby jsou obsahové
-  stránky natvrdo v kódu klienta a **články nejsou**,
-- **klient** — zatím jen scaffold.
+**Co chybí:** obsah (`page`, `article`, `/rss`), „Ke stažení", celá administrace, migrace
+a nasazení. Kompletní seznam i s pořadím je v **[todo.md](./todo.md)**.
 
-Důsledky: `/rss` nevzniká (nemá co publikovat) a legacy přesměrování s číselným ID
-(`/novinka-<n>`, `/informace-o-zapase-<n>`) čekají na `migration_map` z migrace.
-Statická přesměrování fungují.
+Dvě věci, které je dobré vědět hned: `client/public/assets/fonts/` je prázdný, takže web
+jede na náhradních písmech, a `GCS_BUCKET_NAME` není vyplněné, takže **upload souborů
+nebyl nikdy otestovaný**.
 
 ## Rozjezd
 

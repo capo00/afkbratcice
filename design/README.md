@@ -327,7 +327,7 @@ Pravidla:
 | # | Problém | Dopad | Navržené řešení |
 |---|---|---|---|
 | 9 | **Seznamy nevrací `pageInfo`.** `Dao.find` vrací holé pole, `Crud.list` z něj dělá `{ itemList }` — nikde v `caio-serveru` `pageInfo` zpátky nechodí. `UiElements.Crud` přitom volá `handlerMap.loadNext({ pageInfo: { pageIndex } })` a `useDataList` bez `total` neví, kdy přestat. | Nejde stránkovat nic — ani novinky, ani fotky v albu, ani administrace. Do té doby jedou seznamy na jednu dávku `pageSize: 1000`. | **Změna v `caio-server`** (rozhodnuto 2026-09-06): `Dao.find` vrátí `{ itemList, pageInfo: { pageIndex, pageSize, total } }` a `Crud.list` i use casy tvar propustí. Ověřit i na `caio_propertyman`. Detail: [api.md](./api.md), 1.0.1. |
-| 21 | **`match/list` nevrací týmy**, jen `homeTeamId`/`guestTeamId` (týmy dotahuje jen `match/get`). | Každá dlaždice a řádek zápasu potřebuje název a logo. | Mapa týmů v `app-contextu` (`team/list` jednou při startu SPA) — levnější než denormalizace názvů do každého zápasu. Viz [frontend.md](./frontend.md), sekce 4. |
+| 21 | ~~`match/list` nevrací týmy~~ | – | **Vyřešeno 2026-09-06**: mapa týmů v `app-contextu` (`team/list` jednou při startu SPA) — levnější než denormalizace názvů do každého zápasu. Viz [frontend.md](./frontend.md), sekce 4. |
 | 22 | ~~`match/list` nemá filtr `playerId`~~ | – | **Vyřešeno 2026-09-06**: filtr je v `match/dao.listByFilter` i ve validátoru, index tam byl od začátku. |
 | 23 | ~~`season/list` nemá `idList`~~ | – | **Vyřešeno 2026-09-06**: profil hráče podle něj dopojmenovává sezóny ze statistik. |
 | 24 | `UiApp.withRoute` neuměl rozsahovou roli | **Vyřešeno 2026-09-06 v `caio-ui`**: `profileList: ["teamEditor:*"]` matchuje prefix s neprázdným rozsahem, `UiAuth.getScopeList(identity, "teamEditor")` vrátí konkrétní id. |
@@ -338,7 +338,7 @@ Pravidla:
 | 15 | **GCS negeneruje náhledy.** | Fotogalerie by stahovala originály. | Dvě binárky na fotku (náhled `w400` + plná `w1600`), zmenšení na klientu přes `uu5imagingg01-tools`. Viz sekce 3.1 a [data-model.md](./data-model.md), sekce 9. |
 | 16 | **Lokální tarbally.** `caio-server`, `caio-ui` a `caio-devkit` nejsou v registry; appka je konzumuje jako `file:../caio-architecture/…/dist/*.tgz` a samotné `npm install` novou verzi nevezme (npm ji má v cache). | Změna v knihovně se do appky nedostane. | Po každém `npm pack` v knihovně: `rm -rf node_modules/caio-ui && npm install --no-save --force file:…tgz` (postup v README `caio-ui`). |
 | 20 | **`Uu5Bricks` a `uu5codekitg01` nejsou v závislostech.** Časová osa historie stojí na `Uu5Bricks.VerticalTimeline`, editace obsahu na `uu5codekitg01`; ani jeden není v `client/package.json`. | Bez nich se komponenta za běhu nenajde. | Přidat mezi závislosti klienta **a** do import mapy `uu5loaderg01` v `createViteConfig()` — uu5 knihovny se nebundlují. Ověřit při etapě obsahu. |
-| 26 | **`Dao.createMany` vrací `id` jako `ObjectId` a nechává v objektu i `_id`.** Oprava z 6. 9. (`convertToId` → string) se `createMany` netýkala. | `match/createMany` vrací dva klíče pro totéž; přes drát to není vidět, uvnitř procesu ano. | Srovnat `createMany` se zbytkem `Dao` v `caio-serveru`. |
+| 26 | ~~`Dao.createMany` vrací `ObjectId` a nechává v objektu `_id`~~ | – | **Vyřešeno 2026-09-06** v `caio-server` (`d2cc1d5`) — `createMany` vrací stejný tvar jako `create`; tarball přeinstalovaný. |
 
 ---
 
