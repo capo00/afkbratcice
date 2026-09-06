@@ -84,10 +84,10 @@ function useTop() {
           children: teamsLabel,
           significance: "subdued",
           colorScheme: "building",
-          // Podpoložky = kategorie z aktuálního ročníku. Dokud nejsou routy mužstva
-          // hotové, vede každá na přehled — ne na 404.
+          // Podpoložky = kategorie z aktuálního ročníku, každá rovnou na soupisku svého
+          // mužstva. Routa je klíčovaná `teamId`, ne kategorií.
           itemList: categoryList.map((category) => ({
-            href: "teams",
+            href: `team?id=${category.teamId}`,
             children: category.teamName ?? category.competition,
           })),
         },

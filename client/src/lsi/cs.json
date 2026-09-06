@@ -41,6 +41,12 @@
       "header": "Chceš si zahrát za Bratčice?",
       "perex": "Hledáme hráče do všech kategorií — od přípravky po starou gardu. Ozvi se nám.",
       "button": "Kontaktujte nás"
+    },
+    "tables": {
+      "eyebrow": "Soutěže",
+      "header": "Tabulky",
+      "empty": "Tabulka zatím není — v soutěži se ještě nehrálo.",
+      "note": "${categoryList} hraje soutěž bez tabulky."
     }
   },
   "teams": {
@@ -103,6 +109,52 @@
       "fans": "Fanoušci",
       "youth": "Mládež",
       "club": "Klub"
+    },
+    "positionGroup": {
+      "GK": "Brankáři",
+      "DF": "Obránci",
+      "MF": "Záložníci",
+      "FW": "Útočníci"
+    }
+  },
+  "table": {
+    "team": "Tým",
+    "played": "Z",
+    "wins": "V",
+    "penaltyWins": "VP",
+    "penaltyLosses": "PP",
+    "draws": "R",
+    "losses": "P",
+    "score": "Skóre",
+    "points": "B",
+    "form": "Forma"
+  },
+  "team": {
+    "season": "Sezóna",
+    "tab": {
+      "roster": "Soupiska",
+      "matches": "Zápasy",
+      "table": "Tabulka"
+    },
+    "players": "Hráči",
+    "staff": "Realizační tým",
+    "otherPlayers": "Ostatní",
+    "unnamedPlayer": "Hráč",
+    "noPlayers": "Soupiska pro tuhle sezónu zatím není vyplněná.",
+    "noTable": "Tahle soutěž tabulku nemá, nebo se v ní ještě nehrálo.",
+    "missing": "Mužstvo se nepodařilo najít. Vyberte ho v přehledu mužstev.",
+    "matches": {
+      "mode": {
+        "upcoming": "Rozpis",
+        "played": "Výsledky"
+      },
+      "filter": {
+        "all": "Vše",
+        "home": "Doma",
+        "away": "Venku"
+      },
+      "noUpcoming": "Žádný nadcházející zápas.",
+      "noPlayed": "V téhle sezóně se zatím nehrálo."
     }
   }
 }

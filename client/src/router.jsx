@@ -6,13 +6,16 @@ import Config from "./config/config.js";
 // administrace. `Utils.Component.lazy` je uu5 obálka nad `React.lazy`.
 const Home = Utils.Component.lazy(() => import("./routes/home.jsx"));
 const Teams = Utils.Component.lazy(() => import("./routes/teams.jsx"));
+const Team = Utils.Component.lazy(() => import("./routes/team.jsx"));
+const TeamMatches = Utils.Component.lazy(() => import("./routes/team-matches.jsx"));
+const TeamTable = Utils.Component.lazy(() => import("./routes/team-table.jsx"));
 const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
 
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
 //
-// Routy vázané na kategorii (`team`, `team/matches`, `team/table`, `team/stats`) se sem
-// **nepíšou po jedné**: klíčují se `teamId`, který je znát až ze `season/listCurrent`.
-// Menu je skládá za běhu, routeMap pro ně bude mít jeden vzor s parametrem.
+// Routy mužstva jsou **klíčované `teamId` v parametru**, ne kategorií: `team?id=<teamId>`
+// přežije i to, že kategorie letos není — jen se dostane do archivního režimu. Menu je
+// skládá za běhu ze `season/listCurrent`.
 // Kanonická adresa úvodní stránky je **`/`, ne `/home`**: `server/legacy-redirect.js` posílá
 // `/home` (adresa z v0) natrvalo na `/`, takže kdyby klient renderoval home na `home`, každé
 // obnovení stránky by prošlo přesměrováním tam a zpátky. `home` proto zůstává jen jako alias
@@ -21,6 +24,9 @@ const ROUTE_MAP = {
   "": <Home />,
   home: { redirect: "" },
   teams: <Teams />,
+  team: <Team />,
+  "team/matches": <TeamMatches />,
+  "team/table": <TeamTable />,
   "*": <NotFound />,
 };
 

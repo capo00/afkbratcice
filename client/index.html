@@ -3,6 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Kořen aplikace. BEZ TOHOHLE SE ROZBIJÍ DEEP LINKY NA VNOŘENÉ ROUTY.
+
+      uu5g05 si `appBaseUri` odvozuje z adresáře aktuální URL
+      (`loc.pathname.replace(/^(.*)\/.*/, "$1") + "/"`), pokud v dokumentu není `<base>`
+      s atributem `data-uu-app-base`. Otevření `/team/matches` napřímo pak vypadá jako
+      appka běžící v `/team/` a z routy zbude `matches`, což v `routeMap` není — takže
+      místo zápasů přijde 404. Prokliknutí se z home chová správně, protože `setRoute()`
+      dostane celý název routy; projeví se to teprve při obnovení stránky nebo sdíleném
+      odkazu, tedy přesně tam, kde to nejvíc bolí.
+
+      `href="/"` je pro appku na kořeni domény no-op (devkit generuje absolutní cesty
+      k assetům), `data-uu-app-base` je to, co uu5 opravdu čte.
+    -->
+    <base href="/" data-uu-app-base="/" />
     <title>afkbratcice</title>
   </head>
   <body>

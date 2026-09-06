@@ -8,6 +8,7 @@ import Eyebrow from "../components/layout/eyebrow.jsx";
 import Button from "../components/layout/button.jsx";
 import WeekendProgram from "../components/home/weekend-program.jsx";
 import LastResults from "../components/home/last-results.jsx";
+import TablesSection from "../components/home/tables-section.jsx";
 import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
@@ -15,9 +16,8 @@ const { theme } = Config;
 // Úvodní stránka. Pořadí bloků drží předloha (design/frontend.md, 3.1):
 // hero → statistiky → program víkendu → poslední výsledky → aktuality → tabulky → CTA.
 //
-// Aktuality a tabulky tu zatím **nejsou**: aktuality čekají na entitu `article`, tabulky na
-// komponentu `StandingsTable`. Blok se nepředstírá prázdným rámečkem — dokud nemá co
-// ukázat, na stránce prostě není.
+// Aktuality tu zatím **nejsou**: čekají na entitu `article`. Blok se nepředstírá prázdným
+// rámečkem — dokud nemá co ukázat, na stránce prostě není.
 
 function Hero() {
   const [, setRoute] = useRoute();
@@ -119,7 +119,11 @@ function Stats() {
 }
 
 function CtaBand() {
-  const [, setRoute] = useRoute();
+  const { appConfig } = useApp();
+  // Kontaktní stránka (`page?code=contact`) čeká na entitu `page`, takže výzva míří rovnou
+  // na klubový e-mail z konfigurace. Bez e-mailu se tlačítko **neukáže** — pruh s výzvou
+  // a mrtvým tlačítkem je horší než pruh se samotnou výzvou.
+  const email = appConfig?.contact?.email;
 
   return (
     <Section variant="red">
@@ -130,7 +134,7 @@ function CtaBand() {
             <Lsi import={importLsi} path={["home", "cta", "perex"]} />
           </Uu5Elements.Text>
         </div>
-        <Button onRed size="xl" onClick={() => setRoute("page", { code: "contact" })} lsi={lsi("home", "cta", "button")} />
+        {email ? <Button onRed size="xl" href={`mailto:${email}`} lsi={lsi("home", "cta", "button")} /> : null}
       </div>
     </Section>
   );
@@ -143,6 +147,7 @@ function Home() {
       <Stats />
       <WeekendProgram />
       <LastResults />
+      <TablesSection />
       <CtaBand />
     </>
   );
