@@ -4,6 +4,13 @@
 > mizí `system-identity.json` a proměnná `GOOGLE_DISK_PUBLIC_FOLDER_ID`, přibývá
 > `GCS_BUCKET_NAME`. Viz [README.md](./README.md), sekce 3.1 a 7.
 
+> **Aktualizováno 2026-09-07: MySQL dump je k dispozici** (`caio-share/d27814_afk.sql`)
+> a proběhla z něj **částečná migrace sezóny 2026** — `tools/migrate-2026.js`. Není to
+> etapa 11: bere jen jeden ročník (týmy, sezóny, zápasy, soupisku mužů, trenéra
+> a konfiguraci), aby appka běžela na reálných datech místo na vymyšleném seedu. Historie,
+> články, soubory ani fotogalerie v ní nejsou. `migration_map` ale plní, takže na ni
+> plná migrace naváže. Co se u toho ukázalo, je v sekci 6.1.
+
 ## 1. Zdroje dat
 
 | Zdroj | Obsah | Poznámka |
@@ -68,7 +75,7 @@ přepočítají až po tomto kroku.
 |---|---|---|
 | `id` | – | do `migration_map` |
 | `nazev` | `name` | |
-| `vek` | `age` | `m→men`, `d→u18`, `z→u14`, `s→old` (**k potvrzení**, viz sekce 6) |
+| `vek` | `age` | `M→men`, `D→u18`, `Z→u14`, `S→old` — **potvrzeno** proti `team_age` v dumpu a proti webu v0 (2026-09-07) |
 | `aktivni` | – | neaktivní týmy se migrují také (historické zápasy) |
 | – | `own` | `true` pro `nazev = "AFK Bratčice"` |
 | – | `logoId`, `logoUri` | doplní se ručně, v0 loga neměl |
@@ -97,7 +104,7 @@ přepočítají až po tomto kroku.
 | v0 | v2 | Transformace |
 |---|---|---|
 | `kolo` | `round` | prázdné = přátelský zápas |
-| `datum` | `time` | `DATETIME` → ISO 8601 (`Europe/Prague` → UTC) |
+| `datum` | `time` | **Už je v UTC**, jen se doplní `Z` — viz sekce 6.1 |
 | `hriste` | `place` | |
 | `odjezd` | `departureTime` | |
 | `idD` / `idH` | `homeTeamId` / `guestTeamId` | přes mapu týmů |
@@ -241,9 +248,7 @@ s odkazem na odpovídající seznam.
 
 ## 6. Otázky k potvrzení před migrací
 
-1. **Mapování věkových kategorií** – v0 zná jen `m/d/z/s`, v2 má osm kategorií
-   (`AGE_MAP`). Návrh mapuje `d→u18` a `z→u14`; potvrdit, případně rozpadnout
-   podle ročníků narození hráčů.
+1. ~~**Mapování věkových kategorií**~~ – **potvrzeno 2026-09-07** (sekce 6.1).
 2. **Rozsah historie** – migrovat všechny sezóny, nebo jen od určitého roku?
    (fotogalerie tvoří ~2 600 souborů × 2 velikosti; upload do GCS je nejdelší část migrace).
 3. **Účty hráčů** – hesla se nemigrují (v0 je má v SHA-1). Potvrdit komunikaci směrem
@@ -251,6 +256,32 @@ s odkazem na odpovídající seznam.
    přiřazení role `members` správcem přes `admin/identities`.
 4. **Osobní údaje** – v0 uchovává telefony a e-maily hráčů. Potvrdit, že se migrují,
    a že veřejná část je nezobrazuje (viz [api.md](./api.md), sekce 1.2).
+
+### 6.1 Co se ukázalo při migraci sezóny 2026 (2026-09-07)
+
+Pět věcí, které se z návrhu poznat nedaly, protože do té doby nebyl dump k dispozici.
+Všechny jsou zapracované v `tools/migrate-2026.js` a platí i pro plnou migraci:
+
+1. **`zapas.datum` je v dumpu UTC, ne v pražském čase.** Dump má v hlavičce
+   `SET time_zone = "+00:00"` a MySQL `TIMESTAMP` konvertuje na výdej podle relace, takže
+   hodnoty jsou už převedené. Původní pravidlo „Europe/Prague → UTC" by celý rozpis posunulo
+   o dvě hodiny. Ověřeno proti webu v0: zápas s `15:00:00` v dumpu na v0 svítí jako 17:00.
+2. **Kategorie sedí** (`M→men`, `D→u18`, `Z→u14`, `S→old`) — potvrzuje to číselník
+   `team_age` přímo v dumpu (`M` = Muži, `D` = Dorost, `Z` = Žáci, `S` = Stará garda).
+3. **`hrac.tym` nesmí sloužit jako soupiska mládeže.** Enum má jen `M/Z/S` (žádné `D`)
+   a skupina `Z` jsou dnes pětadvacetiletí — je to zbytek žákovského týmu z let 2007–2013,
+   který nikdo nepřeřadil. Kdo dnes hraje za dorost a žáky, v0 v `hrac` vůbec nemá; jediná
+   stopa po nich jsou sestavy v `ucast`. Migrace 2026 proto zakládá jen soupisku mužů.
+4. **Název soutěže v0 nikde není** — ani v databázi, ani na webu. `season.competition` je
+   proto odhad (`III. třída okresu Kutná Hora`, `Okresní přebor dorostu`, `Okresní přebor
+   starších žáků`) a **je potřeba ho potvrdit**.
+5. **Řazení tabulky se od v0 liší, a je to záměr.** Čísla sedí přesně (ověřeno proti
+   `tabulka-muzi` a `tabulka-zaci` na v0: 25 řádků, žádný rozdíl v zápasech, skóre ani
+   bodech), ale při shodě bodů rozhoduje v2 podle
+   [api.md](./api.md), 2.9 **vzájemný zápas**, kdežto v0 rozhoduje rozdílem skóre a týmy
+   bez odehraného zápasu strká na konec. Projeví se to u dvou dvojic v tabulce mužů
+   a u dvou týmů bez zápasu v žácích. Regresní test tabulky (etapa 12) tohle musí čekat,
+   ne to hlásit jako chybu.
 
 ---
 
