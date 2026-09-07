@@ -32,7 +32,12 @@ async function prepareImage(file, role = "photo") {
   const maxWidth = MAX_WIDTH[role] ?? MAX_WIDTH.photo;
   const { imageFile } = await Uu5ImagingTools.Adjustment.resizeMax(file, maxWidth);
   const { imageFile: webp } = await Uu5ImagingTools.Adjustment.changeType(imageFile, "webp", WEBP_QUALITY);
-  return webp;
+
+  // `Adjustment` vrací Blob s dopsaným `name`, ne File -- a navíc s vlastností `imageFile`,
+  // která ukazuje sama na sebe. `Call.post()` se rozhoduje podle `instanceof File`, takže by
+  // takový Blob poslal jako JSON a spadl na "Converting circular structure to JSON"
+  // (stejně to obchází caio-ui's BinaryCrud#onPreSubmit).
+  return new File([webp], webp.name, { type: webp.type, lastModified: file.lastModified });
 }
 
 export { prepareImage, MAX_WIDTH };
