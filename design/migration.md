@@ -6,9 +6,9 @@
 
 > **Aktualizováno 2026-09-07: MySQL dump je k dispozici** (`caio-share/d27814_afk.sql`)
 > a proběhla z něj **částečná migrace sezóny 2026** — `tools/migrate-2026.js`. Není to
-> etapa 11: bere jen jeden ročník (týmy, sezóny, zápasy, soupisku mužů, trenéra
+> etapa 11: bere jen jeden ročník (týmy, sezóny, zápasy, soupisku mužů, trenéra, články
 > a konfiguraci), aby appka běžela na reálných datech místo na vymyšleném seedu. Historie,
-> články, soubory ani fotogalerie v ní nejsou. `migration_map` ale plní, takže na ni
+> soubory ke stažení ani fotogalerie v ní nejsou. `migration_map` ale plní, takže na ni
 > plná migrace naváže. Co se u toho ukázalo, je v sekci 6.1.
 
 ## 1. Zdroje dat
@@ -272,10 +272,19 @@ Všechny jsou zapracované v `tools/migrate-2026.js` a platí i pro plnou migrac
    a skupina `Z` jsou dnes pětadvacetiletí — je to zbytek žákovského týmu z let 2007–2013,
    který nikdo nepřeřadil. Kdo dnes hraje za dorost a žáky, v0 v `hrac` vůbec nemá; jediná
    stopa po nich jsou sestavy v `ucast`. Migrace 2026 proto zakládá jen soupisku mužů.
-4. **Název soutěže v0 nikde není** — ani v databázi, ani na webu. `season.competition` je
-   proto odhad (`III. třída okresu Kutná Hora`, `Okresní přebor dorostu`, `Okresní přebor
-   starších žáků`) a **je potřeba ho potvrdit**.
-5. **Řazení tabulky se od v0 liší, a je to záměr.** Čísla sedí přesně (ověřeno proti
+4. **Název soutěže v0 nikde není** — ani v databázi, ani na webu. Doplnil je klub
+   (2026-09-07): muži **9. liga**, dorost **6. liga**, starší žáci **5. liga**. Migrace je
+   proto hledá podle `{ yearFrom, age }`, ne podle celé trojice z unikátního indexu — jinak
+   by přejmenování soutěže založilo druhou sezónu a zápasy by zůstaly viset na té staré.
+5. **Text článku v dumpu vůbec není.** `clanek.popis` je perex (medián 192 znaků, maximum
+   586) a vlastní text je PHP fragment `reporty/<soubor>.php`, který v0 includuje. Titulní
+   foto je `galerie/clanky/other/<soubor>.webp`, ne `reporty/<soubor>`, jak čekala sekce 3.6.
+   Platí to u **všech 345 článků**, takže krok 9 plné migrace potřebuje soubory z v0, ne jen
+   databázi. Dokud v0 běží, jde tělo i fotku vytáhnout z webu — `migrate-2026.js --v0` to
+   dělá a je to berlička, ne cílový stav.
+   Perex se přitom z těla vyhazuje: v0 ho nemá jako pole, `popis` je ručně opsaná první věta
+   článku, takže ve v2 (kde `desc` stojí nad obsahem) by ji čtenář dostal dvakrát.
+6. **Řazení tabulky se od v0 liší, a je to záměr.** Čísla sedí přesně (ověřeno proti
    `tabulka-muzi` a `tabulka-zaci` na v0: 25 řádků, žádný rozdíl v zápasech, skóre ani
    bodech), ale při shodě bodů rozhoduje v2 podle
    [api.md](./api.md), 2.9 **vzájemný zápas**, kdežto v0 rozhoduje rozdílem skóre a týmy

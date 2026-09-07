@@ -63,8 +63,6 @@ Co u toho zůstalo otevřené:
 - **SEO za běhu** — `document.title` a OG tagy na detailu zápasu, článku a alba
   ([`frontend.md`](./design/frontend.md), 10). Sitemapa i RSS už české adresy vypisují
   správně, tohle je poslední kus SEO, který chybí.
-- **Titulní foto článku** — server i `admin/articles` to umí a GCS je nastavené (5.1);
-  proklikané zatím není.
 
 ### 2.1 Fotogalerie — kód zůstává, obsah ne (2026-09-07)
 
@@ -77,11 +75,8 @@ Co se kvůli tomu udělalo: `appConfig.socialList` se plní z v0 (Facebook) a od
 se vykreslují v patičce a nad výpisem alb. Instagram stačí přidat v administraci, kód se
 nedotkne.
 
-**V dev databázi ale pořád leží seed:** tři vymyšlená alba („Bratčice – Syrovice 3:1",
-„Letní soustředění mládeže", „Klubový ples") a šestnáct vymyšlených novinek. Migrace
-sezóny 2026 je nemaže, protože zadání znělo na sportovní data. Titulní fotky těch alb se
-navíc nevykreslí — seed odkazuje na `/assets/meta/og-image.png`, ale soubor je `.jpg`.
-Než se pojede naostro, patří obojí pryč (a novinky nahradit skutečnými z `clanek`).
+Seed je pryč (2026-09-07): tři vymyšlená alba i šestnáct vymyšlených novinek smazal
+`migrate-2026.js --reset`, takže fotogalerie je prázdná — a to je zamýšlený stav.
 
 ---
 
@@ -211,19 +206,23 @@ a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
 ## 6. Migrace a nasazení
 
 - **Sezóna 2026 je zmigrovaná** (2026-09-07) — `node tools/migrate-2026.js [dump] [--dry]
-  [--reset]` nad `caio-share/d27814_afk.sql`. Naveze 34 týmů, 3 sezóny, **184 zápasů**,
-  soupisku mužů (24 osob), trenéra a konfiguraci z v0 (proužek s tréninkem, adresa, GPS,
-  Facebook). Je idempotentní a plní `migration_map`. `--reset` napřed vyhodí sportovní
-  jádro — je na první běh proti databázi se seedem, kde by jinak vedle sebe stály dvě
-  sezóny téže kategorie (a seed měl adresu **jiných** Bratčic, u Brna).
+  [--reset] [--v0]` nad `caio-share/d27814_afk.sql`. Naveze 34 týmů, 3 sezóny (**9. liga**
+  muži, **6. liga** dorost, **5. liga** starší žáci), **184 zápasů**, soupisku mužů
+  (24 osob), trenéra, články a konfiguraci z v0 (proužek s tréninkem, adresa, GPS,
+  Facebook). Je idempotentní a plní `migration_map`. `--reset` napřed vyhodí seed — je na
+  první běh proti databázi se seedem, kde by jinak vedle sebe stály dvě sezóny téže
+  kategorie (a seed měl adresu **jiných** Bratčic, u Brna).
   Ověřeno proti v0: tabulka mužů i žáků sedí na zápas přesně, viz
   [`migration.md`](./design/migration.md), 6.1 — a taky co se u toho ukázalo (časy v dumpu
-  jsou UTC, `hrac.tym` neodpovídá dnešní mládeži, název soutěže v0 nemá).
-  **Zbývá potvrdit názvy soutěží** — dnes jsou to odhady.
+  jsou UTC, `hrac.tym` neodpovídá dnešní mládeži, text článků v dumpu vůbec není).
+- **Titulní foto článku je ověřené** — jediný článek sezóny 2026 (parte) má fotku nahranou
+  přes `article/create` do GCS a zobrazuje se ve výpisu i v detailu. Tím padá poslední
+  nevyzkoušená cesta uploadu.
 - **Etapa 11 — plná migrace dat.** MySQL (v0) i Mongo (v1). Návrh je v
   [`migration.md`](./design/migration.md); dump už k dispozici je.
-  Mimo sezónu 2026 zbývá historie (2 522 zápasů od ~2005), články, soubory ke stažení
-  a fotogalerie. Kompletní `migration_map` je podmínkou **ID-based přesměrování**
+  Mimo sezónu 2026 zbývá historie (2 522 zápasů od ~2005), starší články, soubory ke
+  stažení a fotogalerie. **Články potřebují soubory z v0**, ne jen dump: text i titulní
+  foto jsou u všech 345 článků v souborech na disku, ne v databázi (migration.md, 6.1). Kompletní `migration_map` je podmínkou **ID-based přesměrování**
   (`/novinka-<n>`, `/informace-o-zapase-<n>`, `/fotogalerie-<n>`) — statická fungují.
   Krok 9 (články) už má kam migrovat; krok 10 (fotogalerie) **se dělat nebude**, dokud
   platí rozhodnutí, že fotky jedou přes Facebook (README, sekce 2); krok 11 (stránky) je
