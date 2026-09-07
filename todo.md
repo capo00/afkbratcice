@@ -12,9 +12,9 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
 | Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny | ID-based přesměrování (čeká na migraci) |
-| Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky, kontakt, 404 | ke stažení, profil uživatele |
+| Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky **s textem z v0**, kontakt, 404 | ke stažení, profil uživatele |
 | Klient — administrace | rozcestník + **11 obrazovek** (týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace), **upload ověřený proti GCS** | filtrování dat podle `teamEditor:*` |
-| Provoz | dev proti lokálnímu Mongu, **dev GCS bucket** | produkční GCS bucket, OAuth, SMTP, migrace, deploy |
+| Provoz | dev proti lokálnímu Mongu **s reálnými daty sezóny 2026**, dev GCS bucket | produkční GCS bucket, OAuth, SMTP, migrace historie, deploy |
 
 Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 12.
 
@@ -22,14 +22,33 @@ Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 
 
 ## 1. Obsah
 
-### 1.1 Text obsahových stránek
+### 1.1 Text obsahových stránek — **hotovo 2026-09-07**
 
-Stránky **fungují** (`/historie`, `/hymna`, `/vybor`, `/treninky`, `/tymove-fotky`), ale
-mají v `client/src/content/pages.js` jen kostry — **text se má přepsat z běžícího
-`afkbratcice.cz`**. Historii klubu, jména výboru ani slova hymny si nevymýšlíme.
+Všech pět stránek (`/historie`, `/hymna`, `/vybor`, `/treninky`, `/tymove-fotky`) má text
+přepsaný z běžícího `afkbratcice.cz`. Historie je časová osa o dvanácti milnících (text
+z v0 rozdělený podle let, žádná událost navíc), hymna i výbor doslova, týmové fotky
+chronologie 35 sezón od 1943/1944 včetně fotek.
+
+Soubory jsou nově tři, ne jeden:
+
+| Soubor | Co drží | Kdo ho importuje |
+|---|---|---|
+| `content/pages.js` | jen seznam stránek a názvy | `router.jsx`, `app.jsx` (hlavní bundle) |
+| `content/page-content.js` | `uu5String` texty | `routes/page.jsx` (lazy chunk) |
+| `content/team-photos.js` | sestavy k týmovým fotkám | `page-content.js` |
+
+Rozdělené schválně: než se text oddělil, tahal hlavní bundle i jmenné sestavy všech
+týmových fotek (index.js 64 → 94 kB). Teď je zpátky na 62 kB a obsah jede až se stránkou.
 
 Entita `page` se **nedělá** a počká na ECC (viz [`README.md`](./design/README.md), sekce 2).
-Časová osa historie už je `Uu5Bricks.VerticalTimeline` a jede — jen s roky bez textu.
+
+Co u toho zůstalo otevřené:
+
+- **Rozpis tréninků mládeže** — v0 ho nemá (tabulka `trenink` končí rokem 2015), takže
+  stránka říká jen páteční čas mužů a odkazuje na Facebook. Doplní klub.
+- **Týmové fotky váží 7,5 MB** (35 × ~215 kB JPEG, 600 px). Jsou to náhledy z v0
+  (originály mají přes 5 MB kus) uložené neúsporně; převod do webp by je srazil zhruba na
+  pětinu. Zatím to řeší `loading="lazy"`. Viz 5.5.
 
 ---
 
@@ -46,6 +65,23 @@ Entita `page` se **nedělá** a počká na ECC (viz [`README.md`](./design/READM
   správně, tohle je poslední kus SEO, který chybí.
 - **Titulní foto článku** — server i `admin/articles` to umí a GCS je nastavené (5.1);
   proklikané zatím není.
+
+### 2.1 Fotogalerie — kód zůstává, obsah ne (2026-09-07)
+
+Fotky z v0 (~2 600 souborů) **se nemigrují** a nové se sem zatím nenahrávají: fotogalerii
+nahrazuje **Facebook** (README, sekce 2). Kód se nemaže — entita, `admin/galleries`
+i veřejná stránka fungují a jsou ověřené uploadem proti GCS, takže návrat je spuštění
+migračního kroku 10, ne psaní obrazovky.
+
+Co se kvůli tomu udělalo: `appConfig.socialList` se plní z v0 (Facebook) a odkazy na sítě
+se vykreslují v patičce a nad výpisem alb. Instagram stačí přidat v administraci, kód se
+nedotkne.
+
+**V dev databázi ale pořád leží seed:** tři vymyšlená alba („Bratčice – Syrovice 3:1",
+„Letní soustředění mládeže", „Klubový ples") a šestnáct vymyšlených novinek. Migrace
+sezóny 2026 je nemaže, protože zadání znělo na sportovní data. Titulní fotky těch alb se
+navíc nevykreslí — seed odkazuje na `/assets/meta/og-image.png`, ale soubor je `.jpg`.
+Než se pojede naostro, patří obojí pryč (a novinky nahradit skutečnými z `clanek`).
 
 ---
 
@@ -163,16 +199,35 @@ Rozhodnuto, že se **neřeší**: odkaz na reset hesla nebude nikde jinde než n
 stránce, takže `/zapomenute-heslo` končí na `/login.html` a uživatel klikne ještě jednou.
 Zapsáno, ať se to znovu neotvírá.
 
+### 5.5 Týmové fotky do webp
+
+`client/public/assets/teams/` má 35 JPEGů za 7,5 MB — náhledy z v0 (600 px) uložené
+neúsporně. Ve webp z toho bude zhruba pětina. Není to na běhu appky: klient převádí do webp
+`uu5imagingg01-tools` v prohlížeči, tohle je jednorázový převod souborů (`sharp`, `cwebp`),
+a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
+
 ---
 
 ## 6. Migrace a nasazení
 
-- **Etapa 11 — migrace dat.** MySQL (v0) i Mongo (v1). Návrh je v
-  [`migration.md`](./design/migration.md), MySQL dump zatím není k dispozici.
-  Vzniká při ní `migration_map`, bez které nejdou dodělat **ID-based přesměrování**
+- **Sezóna 2026 je zmigrovaná** (2026-09-07) — `node tools/migrate-2026.js [dump] [--dry]
+  [--reset]` nad `caio-share/d27814_afk.sql`. Naveze 34 týmů, 3 sezóny, **184 zápasů**,
+  soupisku mužů (24 osob), trenéra a konfiguraci z v0 (proužek s tréninkem, adresa, GPS,
+  Facebook). Je idempotentní a plní `migration_map`. `--reset` napřed vyhodí sportovní
+  jádro — je na první běh proti databázi se seedem, kde by jinak vedle sebe stály dvě
+  sezóny téže kategorie (a seed měl adresu **jiných** Bratčic, u Brna).
+  Ověřeno proti v0: tabulka mužů i žáků sedí na zápas přesně, viz
+  [`migration.md`](./design/migration.md), 6.1 — a taky co se u toho ukázalo (časy v dumpu
+  jsou UTC, `hrac.tym` neodpovídá dnešní mládeži, název soutěže v0 nemá).
+  **Zbývá potvrdit názvy soutěží** — dnes jsou to odhady.
+- **Etapa 11 — plná migrace dat.** MySQL (v0) i Mongo (v1). Návrh je v
+  [`migration.md`](./design/migration.md); dump už k dispozici je.
+  Mimo sezónu 2026 zbývá historie (2 522 zápasů od ~2005), články, soubory ke stažení
+  a fotogalerie. Kompletní `migration_map` je podmínkou **ID-based přesměrování**
   (`/novinka-<n>`, `/informace-o-zapase-<n>`, `/fotogalerie-<n>`) — statická fungují.
-  Krok 9 (články) už má kam migrovat; krok 11 (stránky) počká na ECC — do té doby je to
-  přepis do `client/src/content/pages.js`, ne migrace.
+  Krok 9 (články) už má kam migrovat; krok 10 (fotogalerie) **se dělat nebude**, dokud
+  platí rozhodnutí, že fotky jedou přes Facebook (README, sekce 2); krok 11 (stránky) je
+  hotový přepisem do `client/src/content/`, ne migrací.
 - **Etapa 12 — deploy na GAE.** GCP projekty existují (prod + dev), env se doplní později.
 - **Regresní test tabulky** proti v0 `/api/getTable` za poslední tři sezóny — podle plánu
   je to součást etapy, ne dodatek. Jde udělat teprve s migrovanými daty.
@@ -204,7 +259,9 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 ## Doporučené pořadí
 
 1. ~~**GCS**~~ — dev bucket hotový a upload ověřený (5.1). Produkční bucket patří k deploy etapě.
-2. **Text obsahových stránek** z v0 — je to přepis, ne vývoj, takže může běžet vedle.
-3. **Zbytek veřejné části** — „Ke stažení", profil uživatele, SEO za běhu (kapitola 2).
-4. **Hero fotka** — poslední kus vizuálu.
-5. **Migrace + deploy.**
+2. ~~**Text obsahových stránek** z v0~~ — hotovo (1.1).
+3. ~~**Data sezóny 2026**~~ — hotovo, appka běží na reálném rozlosování (kapitola 6).
+4. **Zbytek veřejné části** — „Ke stažení", profil uživatele, SEO za běhu (kapitola 2).
+5. **Hero fotka** — poslední kus vizuálu. Fotky jsou teď na Facebooku, takže i tuhle je
+   potřeba vybrat ručně.
+6. **Migrace historie + deploy.**
