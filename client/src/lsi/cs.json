@@ -338,7 +338,8 @@
     },
     "empty": "V téhle kategorii zatím není žádné album.",
     "noPhotos": "Album je zatím prázdné.",
-    "missing": "Album se nepodařilo najít."
+    "missing": "Album se nepodařilo najít.",
+    "social": "Nejnovější fotky dáváme na sociální sítě:"
   },
   "player": {
     "stats": "Statistiky po sezónách",

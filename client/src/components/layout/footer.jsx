@@ -32,6 +32,11 @@ const CONTACT_ICON = {
   phone: "uugds-phone",
 };
 
+// Sítě drží `appConfig.socialList` jako `{ code, uri }`, takže přidat Instagram je změna
+// v administraci, ne v kódu. Popisky jsou v `Config.SOCIAL_LABEL` — a je tam i vysvětlené,
+// proč jsou to texty a ne ikony (GDS logo ikony neexistují). Neznámý `code` se vypíše tak,
+// jak přišel, aby se nová síť neztratila jen proto, že pro ni není popisek.
+
 function ContactLine({ icon, children, href }) {
   return (
     <div className={Config.Css.css({ display: "flex", gap: 8, alignItems: "baseline" })}>
@@ -54,6 +59,7 @@ const Footer = createVisualComponent({
     const { appConfig } = useApp();
     const [, setRoute] = useRoute();
     const contact = appConfig?.contact ?? {};
+    const socialList = appConfig?.socialList ?? [];
     const clubName = useLsi(importLsi, ["club", "name"]);
     const founded = appConfig?.founded ?? 1932;
 
@@ -128,6 +134,16 @@ const Footer = createVisualComponent({
                 <ContactLine icon={CONTACT_ICON.phone} href={`tel:${contact.phone.replace(/\s/g, "")}`}>
                   {contact.phone}
                 </ContactLine>
+              ) : null}
+
+              {socialList.length ? (
+                <div className={Config.Css.css({ display: "flex", gap: 16, marginBlockStart: 8 })}>
+                  {socialList.map(({ code, uri }) => (
+                    <Uu5Elements.Link key={code} href={uri} target="_blank" colorScheme="primary">
+                      {Config.SOCIAL_LABEL[code] ?? code}
+                    </Uu5Elements.Link>
+                  ))}
+                </div>
               ) : null}
             </div>
           </div>

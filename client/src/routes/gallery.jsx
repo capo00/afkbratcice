@@ -9,6 +9,7 @@ import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
 import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
 
@@ -91,6 +92,8 @@ const Gallery = createVisualComponent({
   render() {
     const [, setRoute] = useRoute();
     const [category, setCategory] = useState(ALL);
+    const { appConfig } = useApp();
+    const socialList = appConfig?.socialList ?? [];
 
     const dataObject = useDataObject(
       {
@@ -107,6 +110,29 @@ const Gallery = createVisualComponent({
     return (
       <Section>
         <Heading eyebrow={lsi("gallery", "eyebrow")} lsi={lsi("gallery", "header")} />
+
+        {/* Nová alba se sem zatím nenahrávají — fotky z víkendu jdou na Facebook, což je
+            i důvod, proč se historická fotogalerie z v0 nemigrovala (rozhodnuto 7. 9. 2026).
+            Odkaz proto stojí nad výpisem, ne pod ním. Zmizí sám, až bude `socialList` prázdný. */}
+        {socialList.length ? (
+          <div
+            className={Config.Css.css({
+              display: "flex",
+              gap: 12,
+              alignItems: "center",
+              flexWrap: "wrap",
+              marginBlockStart: 16,
+              color: theme.color.mutedFg,
+            })}
+          >
+            <Lsi import={importLsi} path={["gallery", "social"]} />
+            {socialList.map(({ code, uri }) => (
+              <Uu5Elements.Link key={code} href={uri} target="_blank" colorScheme="primary">
+                {Config.SOCIAL_LABEL[code] ?? code}
+              </Uu5Elements.Link>
+            ))}
+          </div>
+        ) : null}
 
         <div className={Config.Css.css({ display: "flex", gap: 8, flexWrap: "wrap", marginBlockStart: 16 })}>
           {[ALL, ...Config.GALLERY_CATEGORY_LIST].map((code) => (

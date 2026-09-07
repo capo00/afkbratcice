@@ -34,6 +34,19 @@ const GALLERY_CATEGORY_LIST = ["match", "training", "fans", "youth", "club"];
 // (`BINARY_COLLECTION.DOWNLOAD`) — podle ní `binary/*` autorizuje zápis.
 const BINARY_COLLECTION_DOWNLOAD = "download";
 
+// Popisky sítí z `appConfig.socialList`. Nejsou v LSI schválně — jsou to obchodní názvy,
+// které se nepřekládají.
+//
+// **Nejsou to ikony.** GDS stencil sada nemá skupinu `logo` (má `alert`, `arrow`, `badge`,
+// `communication`, … a to je vše), takže `uugdsstencil-logo-facebook` se vykreslí jako
+// prázdné místo se správnou šířkou — přesně ten případ z `component-tree.md`, F.2.
+// Ověřeno v prohlížeči 7. 9. 2026. Odkazy jsou proto textové.
+const SOCIAL_LABEL = {
+  facebook: "Facebook",
+  instagram: "Instagram",
+  youtube: "YouTube",
+};
+
 // Kódy obsahových stránek tu **nejsou**: stránky jsou natvrdo v `content/pages.js`
 // a jeho `PAGE_CODE_LIST` je zdroj pravdy pro routu i pro menu. Dvojí seznam by se
 // rozešel hned, jak by někdo přidal stránku.
@@ -73,6 +86,7 @@ const Config = {
   COACH_ROLE_LIST,
   GALLERY_CATEGORY_LIST,
   BINARY_COLLECTION_DOWNLOAD,
+  SOCIAL_LABEL,
 
   ROLE,
   ADMIN,

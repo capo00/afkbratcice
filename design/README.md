@@ -118,8 +118,10 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 | Design ECC | **Ladí se samostatně** (od 2026-09-06). Články na něj nečekají; obsahové stránky ano. Až vznikne, migrace je rozpad `sectionList` na dokumenty `ecc_section` a přesun textu z `content/pages.js` do databáze — obojí beze změny tvaru obsahu. |
 | Kontakt | **Není obsahová stránka, ale data** — routa `/kontakt` skládá adresu, e-mail a telefon z `appConfig.contact` a mapu z `gps`. Mít je natvrdo a zároveň v konfiguraci by znamenalo dvě pravdy. |
 | Soubory ke stažení | Binární kolekce **`download`**, čtení veřejné. |
+| **Fotogalerie** | **Kód zůstává, obsah se nemigruje** (2026-09-07). Entita, admin obrazovka i veřejná stránka jsou hotové a funkční, ale ~2 600 fotek z v0 se do GCS nepřenáší — nové fotky chodí na **Facebook** (`appConfig.socialList`), na který stránka odkazuje. Je to rozhodnutí o obsahu, ne o kódu: až se klub rozhodne fotky vozit zpátky k sobě, je to spuštění migračního kroku 10, ne psaní obrazovky. |
+| **Týmové fotky** | Historická chronologie mužstev (35 sezón od 1943) jde ze **statiky** `client/public/assets/teams/`, ne z BinaryStore. Obsah té stránky je natvrdo v kódu, takže i obrázky mají cestovat s buildem; odkaz do dev bucketu by v produkci neexistoval. |
 | **Perex** | V celém modelu je to samostatné pole `desc` (`page.desc`, `team.desc`, `season.desc`), nikdy první sekce ani popisek fotky. |
-| Migrace | **Mimo rozsah této dávky.** Neimplementuje se; `migration.md` zůstává jako návrh na později. |
+| Migrace | Plná migrace zůstává **mimo rozsah této dávky** (`migration.md` je návrh na později), ale **sezóna 2026 už zmigrovaná je** (2026-09-07, `tools/migrate-2026.js`) — týmy, sezóny, zápasy, soupiska mužů, trenér a konfigurace z MySQL dumpu. Důvod: vývoj na vymyšleném seedu ukazoval jiný web než ten, co poběží. |
 | Pořadí kategorií | `["men","u18","u16","u14","u12","u10","u6","old"]` — od nejstarších, stará garda je výjimka na konci. |
 | Skrytí jmen | `hideNamesAgeList = ["u14","u12","u10","u6"]` — u dorostu (`u18`, `u16`) se jména ukazují. **Filtruje server, ne klient** (2026-09-06): klientský příznak by jména dětí nechal v odpovědi API. |
 | Loga týmů | `team.logoUri` drží URI z `sys_binary` (kolekce `team`); když chybí, klient sáhne po klubovém erbu. |
