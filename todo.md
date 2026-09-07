@@ -1,6 +1,6 @@
 # TODO — co zbývá do hotového webu
 
-Stav k **2026-09-06**, větev `feature/caio`.
+Stav k **2026-09-07**, větev `feature/caio`.
 
 Zadání vlastní [`design/`](./design/) — tenhle soubor jen říká, **co z něj ještě není
 udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhrává `design/`.
@@ -13,8 +13,8 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 |---|---|---|
 | Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny | ID-based přesměrování (čeká na migraci) |
 | Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky, kontakt, 404 | ke stažení, profil uživatele |
-| Klient — administrace | rozcestník + **11 obrazovek** (týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace) | filtrování dat podle `teamEditor:*`, ověření uploadu (čeká na GCS) |
-| Provoz | dev proti lokálnímu Mongu | GCS, OAuth, SMTP, migrace, deploy |
+| Klient — administrace | rozcestník + **11 obrazovek** (týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace), **upload ověřený proti GCS** | filtrování dat podle `teamEditor:*` |
+| Provoz | dev proti lokálnímu Mongu, **dev GCS bucket** | produkční GCS bucket, OAuth, SMTP, migrace, deploy |
 
 Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 12.
 
@@ -44,8 +44,8 @@ Entita `page` se **nedělá** a počká na ECC (viz [`README.md`](./design/READM
 - **SEO za běhu** — `document.title` a OG tagy na detailu zápasu, článku a alba
   ([`frontend.md`](./design/frontend.md), 10). Sitemapa i RSS už české adresy vypisují
   správně, tohle je poslední kus SEO, který chybí.
-- **Titulní foto článku** — `article/create|update` binárku uloží, ale nahrát ji jde teprve
-  z `admin/articles`, a GCS zatím není nastavené (5.1).
+- **Titulní foto článku** — server i `admin/articles` to umí a GCS je nastavené (5.1);
+  proklikané zatím není.
 
 ---
 
@@ -59,9 +59,6 @@ Ověřeno v prohlížeči včetně **založení článku proklikáním formulá�
 
 Co zbývá dodělat uvnitř administrace:
 
-- **`admin/files` se nedá vyzkoušet**, dokud není GCS: `binary/*` use case sice odpovídá,
-  ale nahrát soubor bez bucketu nejde (5.1). Obrazovka je napsaná a tabulka se vykreslí
-  prázdná.
 - **Rozsahová role `teamEditor:*`** je v guardu (`admin/menu.js`), ale obrazovky ještě
   **nefiltrují data podle `UiAuth.getScopeList()`** — editor jednoho mužstva tak vidí
   v tabulce i cizí týmy. Server ho k zápisu nepustí (ověřeno smoke testem), takže je to
@@ -112,9 +109,35 @@ po přihlášení z `app-contextu`. Pravidla a pojistky: [`api.md`](./design/api
 
 | Co | Důsledek, dokud chybí |
 |---|---|
-| `GCS_BUCKET_NAME` | `binary/*` se nezaregistrují; **upload fotek nebyl nikdy otestovaný** — galerie se ověřovala proti ručně vloženým binárkám mířícím na statické assety |
+| `GCS_BUCKET_NAME` v `.env` (produkce) | hotový je jen **dev** bucket `afkbratcice-binary-dev` (us-central1, Standard, uniform, `allUsers` = Storage Object Viewer, public access prevention vypnutá); produkční se založí u deploye |
 | `GOOGLE_CLIENT_ID` / `SECRET`, `FACEBOOK_*` | přihlášení jen e-mailem a heslem |
 | `SMTP_HOST`, `MAIL_FROM`, `APP_URL` | reset hesla se nenabízí (`passwordResetEnabled: false`) |
+
+**Ověřeno 2026-09-07** proti dev bucketu: `binary/create|get|list|update|delete` z API i proklikáním
+`admin/files` a hromadného uploadu fotek do alba; nahraná fotka se zobrazí na `/fotogalerie`.
+Pozor na dvě věci, na které se přišlo až tímhle testem:
+
+- **Bez kroku 4 návodu (`allUsers` + vypnutá public access prevention) upload projde, ale obrázky
+  se nezobrazí** — klient je bere přímo z `storage.googleapis.com`, takže se to projeví až jako
+  403 v `<img>`, ne jako chyba uploadu.
+- **Smazaný nebo přejmenovaný soubor drží na svém uri starý obsah až hodinu**
+  (`Cache-Control: public, max-age=3600` je výchozí u veřejných objektů). Týká se to i
+  `Content-Disposition` po přejmenování — v metadatech objektu je nová hodnota hned, ale
+  `storage.googleapis.com` chvíli vydává starou. Výměna obsahu tím netrpí, ta dělá nový
+  `objectName`, a tedy i nové uri.
+
+### 5.1.1 Chyby v `caio-server`, na které se přišlo při testu GCS — **opraveno 2026-09-07**
+
+Obojí bylo v knihovně, ne v appce; podrobně v `caio-server/docs/binary.md`, páté kolo.
+Appka má knihovnu přeinstalovanou z nového tarballu a obojí je ověřené proti dev bucketu.
+
+- **`Content-Disposition` se do GCS nikdy nezapisoval.** `StorageAbl.create()` předával
+  `contentDisposition` jako top-level option do `file.save()`, kde ho `@google-cloud/storage`
+  beze slova zahodí — patří pod `metadata`. Soubor „Ke stažení" se tak stahoval pojmenovaný
+  jako UUID. `setName()` tu chybu neměl.
+- **`get` na neexistující ID vracelo 500 místo 404.** `dao.get()` vrátí u platného ID, které nic
+  nenajde, `null` a `Crud._getData()` na něm padl na destrukturalizaci. Netýkalo se to jen
+  binárek, ale všech entit.
 
 ### 5.2 Velikost `public/libs` po přidání Uu5Bricks
 
@@ -180,9 +203,7 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 
 ## Doporučené pořadí
 
-1. **GCS** — je to teď největší jednotlivá blokace: bez bucketu se nedá nahrát logo, portrét,
-   fotka do galerie ani soubor ke stažení, takže polovina administrace je napsaná a
-   nevyzkoušená. Postup: `caio-devkit/docs/how-to-set-gcs.md`.
+1. ~~**GCS**~~ — dev bucket hotový a upload ověřený (5.1). Produkční bucket patří k deploy etapě.
 2. **Text obsahových stránek** z v0 — je to přepis, ne vývoj, takže může běžet vedle.
 3. **Zbytek veřejné části** — „Ke stažení", profil uživatele, SEO za běhu (kapitola 2).
 4. **Hero fotka** — poslední kus vizuálu.
