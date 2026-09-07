@@ -54,7 +54,12 @@ class MatchDao extends Dao {
       if (dateTo) filter.time.$lte = dateTo;
     }
 
-    return this.find(filter, pageInfo, { time: order === "desc" ? -1 : 1 });
+    // `_id` jako druhé kritérium: dva zápasy se stejným výkopem (běžné -- celé kolo se
+    // hraje v sobotu v 15:00) jsou pro Mongo shodné klíče a jejich pořadí pak není nijak
+    // dané. To rozbíjí stránkování (řádek se může zopakovat i vypadnout) a `asc`/`desc`
+    // pak nejsou opačné. `_id` je vždycky unikátní, takže řazení dorovná.
+    const direction = order === "desc" ? -1 : 1;
+    return this.find(filter, pageInfo, { time: direction, _id: direction });
   }
 
   /** Poslední odehraný zápas týmu. */
