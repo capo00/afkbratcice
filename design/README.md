@@ -263,7 +263,8 @@ a čtou se přes `<Lsi import={importLsi} path={[...]} />` nebo `useLsi(importLs
 
 ## 6. Role a autorizace
 
-Role vychází z `identity.profileList` (JWT cookie) – shodně s v1.
+Role vychází z `identity.profileList`, který server čte **z databáze** při každém requestu
+(JWT cookie říká jen, kdo se ptá).
 **Kompletní model, tabulka use casů a rozsahové role jsou v [roles.md](./roles.md);**
 tady je jen přehled.
 
@@ -289,8 +290,9 @@ Pravidla:
   v `server/config.js` pojmenované množiny (`CONTENT`, `MATCH`, `NEWS`, …).
 - **`teamEditor` má rozsah zapsaný v názvu profilu** (`teamEditor:<teamId>`), protože
   `profileList` je plochý seznam stringů. Detail a jeho úskalí: [roles.md](./roles.md), sekce 3.
-- `profileList` je součástí JWT → **změna profilu se projeví až po novém přihlášení**.
-  UI na to musí uživatele upozornit.
+- `profileList` **není** v JWT (změna v `caio-server` 7. 9. 2026): token nese jen identitu
+  a server si roli přečte z kolekce. Změna profilu se tak projeví **okamžitě**, včetně
+  odebrání role i smazání účtu — a jedno uniklé `JWT_SECRET` už neznamená libovolnou roli.
 - Na klientu se stejná pravidla duplikují přes `UiApp.withRoute(Component, { profileList })`
   a podmíněné `actionList` – jde o UX, ne o bezpečnostní hranici.
 

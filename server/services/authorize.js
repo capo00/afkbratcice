@@ -1,8 +1,11 @@
 import Config from "../config.js";
 
 // teamEditor je jediná role s rozsahem: váže se ke konkrétnímu týmu a rozsah je zapsaný
-// v názvu profilu (`teamEditor:<teamId>`), protože profileList je plochý seznam stringů,
-// který jde beze změny do JWT. Detail a jeho úskalí: design/roles.md, sekce 3.
+// v názvu profilu (`teamEditor:<teamId>`), protože profileList je plochý seznam stringů.
+// Detail a jeho úskalí: design/roles.md, sekce 3.
+//
+// `identity` sem chodí **z databáze**, ne z JWT (caio-server od 7. 9. 2026), takže odebrání
+// role platí okamžitě a podvržený token si roli nevymyslí.
 
 const PREFIX = Config.ROLE.TEAM_EDITOR + ":";
 

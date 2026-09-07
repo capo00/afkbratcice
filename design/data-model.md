@@ -179,7 +179,7 @@ erDiagram
         string   surname
         string   email "unique"
         string   photo
-        string[] profileList "role, jde do JWT"
+        string[] profileList "role, server je čte odsud"
         string   googleId
         string   facebookId
         string   password "bcrypt hash, nikdy v dtoOut"
@@ -717,8 +717,8 @@ ve stejném sloupci, což znemožňovalo evidovat post střídajícího hráče)
 **`PROFILE`**: `members`, `teamEditor`, `matchEditor`, `newsEditor`, `galleryEditor`,
 `contentEditor`, `operatives`, `authorities` – hodnoty `identity.profileList`.
 `teamEditor` se ukládá **s rozsahem** jako `teamEditor:<teamId>`; `profileList` je volné pole
-stringů, které `Identity.createToken` kopíruje do JWT beze změny. Model rolí:
-[roles.md](./roles.md)
+stringů a **server ho čte z téhle kolekce při každém requestu** — v JWT není (`caio-server`,
+`docs/auth.md`, kapitola 9). Model rolí: [roles.md](./roles.md)
 
 ---
 

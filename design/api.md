@@ -366,11 +366,12 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
 - **Volá to klient jednou po přihlášení** (z `core/app-context.jsx`, který stejně běží při
   startu SPA), ne middleware u každého requestu — párovací dotaz nemá smysl dělat pořád.
   Je idempotentní, takže na opakovaném volání nezáleží.
-- **`authMethodList` je v JWT** (`Identity.getBasicData`), takže si appka nemusí sahat do
-  `sys_identity`. Knihovna ho ale popisuje jako údaj „pro UI, ne pro autorizaci" — tady
-  se používá k rozhodnutí, na kterém záleží. Je odvozený přímo z `googleId`/`facebookId`,
-  takže je to bezpečné, ale kdyby `caio-server-auth` někdy začal seznam plnit jinak, tohle
-  místo se musí zkontrolovat. Čistší by bylo, aby knihovna appce zpřístupnila `Identity.get`.
+- **`authMethodList` chodí v `req.identity`** (odvozuje ho `Identity.getBasicData` z polí
+  identity, kterou server od 7. 9. 2026 čte z databáze — v tokenu už není nic než
+  `{ identity, authSchema }`). Knihovna ho popisuje jako údaj „pro UI, ne pro autorizaci" —
+  tady se používá k rozhodnutí, na kterém záleží. Je odvozený přímo z `googleId`/`facebookId`
+  uložených v kolekci, takže je to bezpečné, ale kdyby `caio-server-auth` někdy začal seznam
+  plnit jinak, tohle místo se musí zkontrolovat.
 
 ### 2.6 `player`
 
@@ -632,8 +633,10 @@ konfigurace**: práce s identitami a přidělování rolí vypadá stejně ve v�
 tomhle stacku. Nejvyšší role aplikace se jmenuje stejně, takže sedí bez dalšího zařizování.
 `update` nevaliduje po polích; obrazovka `admin/identities` posílá jen to, co reálně změnila.
 
-Pozor: `profileList` je zapečený v JWT (`Identity.createToken`), změna se projeví až
-po novém přihlášení. UI to musí uživateli sdělit.
+**Změna role se projeví okamžitě** (od 7. 9. 2026): server čte `profileList` z kolekce při
+každém requestu, ne z tokenu. V otevřeném prohlížeči stačí načíst stránku znovu, aby si
+klient přečetl nový `GET /auth` — odhlašovat se není potřeba. Dřív role jezdily v tokenu,
+platily do jeho expirace a odebrat je nešlo vůbec.
 
 ### 2.14 Autentizace (knihovna)
 

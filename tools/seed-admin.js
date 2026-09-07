@@ -35,6 +35,8 @@ if (existing) {
   console.log("Heslo si nastav přes 'Zapomenuté heslo' na /login.html, nebo se přihlas přes Google.");
 }
 
-// Změna profilu se projeví až po novém přihlášení -- profileList je zapečený v JWT.
-console.log("Pozor: pokud jsi přihlášený, odhlas se a přihlas znovu, jinak se role neprojeví.");
+// Změna se projeví hned: role se od 7. 9. 2026 čtou z databáze při každém requestu, ne
+// z JWT (caio-server, docs/auth.md, kapitola 9). Odhlašovat se není potřeba -- v prohlížeči
+// jen stačí načíst stránku znovu, aby si klient přečetl `GET /auth`.
+console.log("Role se projeví okamžitě; v otevřeném prohlížeči načti stránku znovu.");
 process.exit(0);

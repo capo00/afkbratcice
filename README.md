@@ -69,7 +69,8 @@ npm run seed:admin -- muj@email.cz
 Identita dostane kód `1-1-1`. Heslo se nenastavuje; přihlas se přes Google, nebo si ho
 nastav přes *Zapomenuté heslo* na `/login.html`.
 
-> `profileList` je zapečený v JWT, takže **změna role se projeví až po novém přihlášení**.
+> **Změna role platí okamžitě.** Server čte `profileList` z databáze při každém requestu,
+> ne z JWT; v otevřeném prohlížeči stačí načíst stránku znovu.
 
 ## Ověření
 

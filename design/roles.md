@@ -9,9 +9,12 @@ odkazuje na množiny definované tady; když si odporují, vyhrává tenhle doku
 
 ## 1. Jak autorizace funguje v `caio-server`
 
-- Role jsou **pole stringů v `identity.profileList`**. `Identity.createToken` ho kopíruje
-  beze změny do JWT (`caio-server-auth/abl/identity.js`), takže je to volný seznam —
-  knihovna obsah nijak nevaliduje.
+- Role jsou **pole stringů v `identity.profileList`** a je to volný seznam — knihovna obsah
+  nijak nevaliduje.
+- **Server je čte z databáze při každém requestu**, ne z tokenu (změna v `caio-server`
+  7. 9. 2026, `docs/auth.md`, kapitola 9). Token nese jen `{ identity, authSchema }`.
+  Dřív v něm jel celý `profileList`, což znamenalo, že jediná obrana proti libovolné roli
+  byl podpis — jedno uniklé `JWT_SECRET` a kdokoli si podepíše `authorities`.
 - Use case deklaruje `auth`:
   - `true` — stačí být přihlášený,
   - `["a", "b"]` — musí sedět **alespoň jedna** role,
@@ -19,8 +22,8 @@ odkazuje na množiny definované tady; když si odporují, vyhrává tenhle doku
     rozhodnout podle obsahu `dtoIn`**.
 - **Dědičnost neexistuje.** `auth: ["operatives"]` znamená doslova ten jeden profil.
   Nadřazené role se proto musí vypisovat do každého seznamu — což řeší množiny v sekci 4.
-- **Změna role se projeví až po novém přihlášení**, protože `profileList` je zapečený
-  v JWT. UI to musí uživateli říct.
+- **Změna role se projeví okamžitě** — i odebrání, i smazání účtu (týž token pak dostane
+  401). Dokud role jezdily v tokenu, platily do jeho expirace a odebrat je nešlo.
 
 > **Dvě změny v `caio-server`, které z tohohle modelu plynou:**
 > **(1)** identity smí editovat jen `authorities` — **hotovo**, viz sekce 6;
@@ -142,15 +145,17 @@ Tři věci, které je snadné přehlédnout a bolí později:
 | | Profil s parametrem (**zvoleno**) | Kolekce `grant` |
 |---|---|---|
 | Změna knihovny | žádná | žádná |
-| Dotaz do DB při každém volání | ne (je v JWT) | ano (cachovatelné) |
-| Projeví se změna hned | ne, až po novém přihlášení | ano |
+| Dotaz do DB při každém volání | ano (identita se čte z databáze) | ano (a navíc druhý dotaz) |
+| Projeví se změna hned | ano | ano |
 | Smazání týmu | zůstane osiřelý profil | dá se uklidit cizím klíčem |
 
 Pro klub se třemi až čtyřmi mužstvy a hrstkou správců, kde se role mění jednou za sezónu,
-je parametrizovaný profil dost dobrý — a „projeví se až po novém přihlášení“ platí
-u `profileList` tak jako tak, takže to nepřidává nový druh problému. Kdyby rozsahů
-přibylo (podle sezóny, podle soutěže), je přechod na kolekci `grant` přímočarý:
-změní se jen `myTeamIdList()`.
+je parametrizovaný profil dost dobrý. Řádek o dotazu do databáze **býval argumentem pro
+profil** („je v JWT, nestojí to dotaz“) — od 7. 9. 2026 už neplatí: identita se čte
+z kolekce při každém requestu, protože role v tokenu byly zbytečné bezpečnostní riziko.
+Zůstává jediný rozdíl, a ten je pořád ve prospěch profilu: jeden dotaz místo dvou.
+Kdyby rozsahů přibylo (podle sezóny, podle soutěže), je přechod na kolekci `grant`
+přímočarý: změní se jen `myTeamIdList()`.
 
 Administrace v `admin/identities` musí `teamEditor:<id>` **zobrazovat jako název týmu**,
 ne jako holé id, a nabízet výběr týmu — jinak to nikdo nenastaví správně.

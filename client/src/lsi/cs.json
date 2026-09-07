@@ -127,7 +127,7 @@
     "identities": {
       "roleHeader": "Role pro ${name}",
       "teamEditor": "Správce mužstev",
-      "hint": "Změna rolí se projeví až po novém přihlášení — role jsou zapečené v přihlašovacím tokenu.",
+      "hint": "Změna rolí platí okamžitě. Pokud má uživatel web otevřený, uvidí ji po načtení stránky.",
       "save": "Uložit",
       "cancel": "Zrušit"
     },
