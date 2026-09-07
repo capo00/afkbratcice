@@ -1,74 +1,45 @@
-// Obsahové stránky natvrdo v kódu.
+// Obsahové stránky — jejich seznam a názvy.
 //
-// **Zatím se needitují přes API** (rozhodnuto 2026-09-06): entita `page` počká na ECC,
-// protože obsahová stránka je přesně to, co ECC řeší, a stavět kvůli mezidobí druhou
-// polovinu téhož by znamenalo napsat editaci dvakrát. Do té doby se text mění tady
-// v kódu a nasazuje s buildem — což u stránek, které se přepisují jednou za rok, není
-// horší než administrace, kterou nikdo neotevře.
-//
-// Obsah je **`uu5String`**, ne JSX: až ECC vznikne, přesune se odsud do databáze beze
-// změny tvaru. Renderuje ho `Uu5.Content` (`routes/page.jsx`).
+// **Rozdělené na dva soubory schválně.** Tenhle importuje `router.jsx` i `app.jsx`, aby
+// věděly, jaké routy a položky menu vůbec existují, takže se veze v hlavním bundlu. Text
+// stránek je proto vedle v `page-content.js`, který si natahuje až `routes/page.jsx` ve
+// svém lazy chunku — jinak by každý návštěvník home stahoval i jmenné sestavy všech
+// týmových fotek od roku 1943 (30 kB, které si otevře málokdo).
 //
 // `code` je zároveň routa — `/historie`, `/hymna`, … Adresy jsou převzaté z v0, takže
 // staré odkazy sedí bez přesměrování.
-//
-// > **Texty jsou zatím kostry.** Skutečné znění se přepisuje z běžícího `afkbratcice.cz`;
-// > historii klubu, jména výboru ani slova hymny si nevymýšlíme. Struktura je hotová,
-// > doplnit se má text mezi značkami.
 
 const PAGES = {
   historie: {
     name: "Historie klubu",
     desc: "Fotbal v Bratčicích od roku 1932 po dnešek.",
-    // Časová osa je `Uu5Bricks.VerticalTimeline` — hotová komponenta, nepíše se vlastní
-    // (design/frontend.md, 3.11.1). Je **lazy**, takže se její kód stáhne teprve na téhle
-    // stránce; do `client/package.json` přibyl `uu5bricksg01` a tím i do import mapy.
-    content: `<uu5string/>
-<p>Doplnit úvodní odstavec o historii klubu — text z afkbratcice.cz, sekce Historie.</p>
-<h3>Milníky</h3>
-<Uu5Bricks.VerticalTimeline>
-  <Uu5Bricks.VerticalTimeline.Item label="1932 · Založení klubu" icon="uugds-favorites" colorScheme="primary" significance="highlighted">
-    Doplnit text k založení z afkbratcice.cz.
-  </Uu5Bricks.VerticalTimeline.Item>
-  <Uu5Bricks.VerticalTimeline.Item label="1948">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
-  <Uu5Bricks.VerticalTimeline.Item label="1972">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
-  <Uu5Bricks.VerticalTimeline.Item label="1992">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
-  <Uu5Bricks.VerticalTimeline.Item label="2005">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
-  <Uu5Bricks.VerticalTimeline.Item label="2012">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
-  <Uu5Bricks.VerticalTimeline.Item label="2022">Doplnit.</Uu5Bricks.VerticalTimeline.Item>
-</Uu5Bricks.VerticalTimeline>`,
   },
 
   hymna: {
     name: "Hymna",
     desc: "Klubová hymna Traverza.",
-    content: `<uu5string/>
-<p>Doplnit text hymny „Traverza" z afkbratcice.cz.</p>`,
   },
 
   vybor: {
     name: "Výbor AFK",
     desc: "Lidé, kteří klub vedou.",
     // Výbor jde časem vzít z `coach/list?role=board` — jsou to osoby s rolí, ne text.
-    // Do té doby platí totéž co u ostatních stránek: přepsat z v0, nevymýšlet.
-    content: `<uu5string/>
-<p>Doplnit sedm členů výboru z afkbratcice.cz, sekce Výbor — funkce, jméno, telefon, e-mail.</p>`,
+    // Do té doby je to text: v0 ho tak má a druhý zdroj pravdy (stránka i entita) by
+    // znamenal udržovat totéž dvakrát. Migrace 2026 proto členy výboru do `coach`
+    // vědomě nezakládá.
   },
 
   treninky: {
     name: "Tréninky",
     desc: "Kdy a kde trénují jednotlivá mužstva.",
-    content: `<uu5string/>
-<p>Doplnit rozpis tréninků z afkbratcice.cz.</p>`,
+    // v0 tabulka `trenink` končí rokem 2015, takže rozpis po mužstvech z čeho přepsat
+    // není. Jediný aktuální údaj je proužek „Upozornění" na v0 — a ten se sem nekopíruje
+    // podruhé, drží ho `appConfig.notice` a vykresluje rám nad každou stránkou.
   },
 
   "tymove-fotky": {
     name: "Týmové fotky",
     desc: "Mužstva AFK Bratčice od roku 1943.",
-    content: `<uu5string/>
-<p>Chronologie týmových fotek od roku 1943 — u každé fotka a jmenný seznam sestavy.
-Fotky se nahrají do <code>BinaryStore</code> (kolekce <code>page</code>) a vloží sem
-jako <code>UiElements.Image</code>.</p>`,
   },
 };
 

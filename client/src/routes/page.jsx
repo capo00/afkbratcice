@@ -5,6 +5,9 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import PAGES from "../content/pages.js";
+// Text stránek se veze až s touhle obrazovkou (lazy chunk), ne v hlavním bundlu --
+// důvod je v komentáři nahoře v `content/pages.js`.
+import PAGE_CONTENT from "../content/page-content.js";
 
 const { theme } = Config;
 
@@ -54,7 +57,7 @@ const Page = createVisualComponent({
             "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
           })}
         >
-          <Content>{page.content}</Content>
+          <Content>{PAGE_CONTENT[route.uu5Route]}</Content>
         </div>
       </Section>
     );
