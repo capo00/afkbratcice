@@ -1,11 +1,10 @@
-import { Lsi, useLsi } from "uu5g05";
+import { useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiApp, UiAuth } from "caio-ui";
 import Config from "./config/config.js";
 import importLsi from "./lsi/import-lsi.js";
 import Router from "./router.jsx";
 import Footer from "./components/layout/footer.jsx";
-import NoticeBar from "./components/layout/notice-bar.jsx";
 import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "./admin/menu.js";
@@ -205,7 +204,8 @@ function Shell() {
       // vidět pořád.
       main={{ padding: false, sticky: "always" }}
     >
-      <NoticeBar />
+      {/* Upozornění redakce tu **není schválně** — vykresluje se u mužstva, kam obsahem
+          patří, ne nad každou obrazovkou webu (components/layout/notice-bar.jsx). */}
       <Router />
     </UiApp.Spa>
   );

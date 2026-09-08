@@ -1,20 +1,25 @@
-import { createVisualComponent, useState, Utils } from "uu5g05";
+import { createVisualComponent, useState } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config.js";
 import { useApp } from "../../core/app-context.jsx";
 
-const { theme } = Config;
-
-// Úzký proužek „Upozornění!" pod horní lištou.
+// Upozornění redakce (`appConfig.notice`) — „zápas se přesouvá na neděli", „trénink
+// v pátek v 17:00".
 //
-// Ve v0 byl v pravém sloupci na každé stránce; ten sloupec nová verze nemá, ale obsah se
-// nezahazuje — jen se přesouvá tam, kam patří (design/frontend.md, 3.12). Proužek je nad
-// obsahem na všech stránkách, protože se týká celého klubu, ne jedné obrazovky.
+// **Není to celostránkový pruh pod lištou.** Ve v0 stálo v pravém sloupci na každé
+// stránce a při přepisu z něj byl proužek nade vším; jenže obsah upozornění se týká
+// mužstva, ne úvodní stránky ani novinek, a nad každou obrazovkou z něj byl šum. Od
+// 8. 9. 2026 se vykresluje **jen na detailu mužstva** (`components/team/team-shell.jsx`),
+// tedy tam, kde ho čte ten, komu je určené.
 //
-// Zavření se pamatuje v `sessionStorage`, ne `localStorage`: upozornění bývá krátkodobé
-// („zápas se přesouvá na neděli"), takže se má znovu ukázat při další návštěvě. A klíč nese
-// **hash textu**, aby nové upozornění nezůstalo schované jen proto, že návštěvník zavřel
-// to předchozí.
+// Vzhled dělá `Uu5Elements.HighlightedBox`: ikona, text a zavírací křížek jsou jeho vlastní
+// mřížka, takže se tu neskládá flex s vlastními barvami. `Uu5Elements.Alert` by byla chyba —
+// ta se registruje do `AlertBus`, portáluje se do plovoucího kontejneru a sama zmizí po
+// `durationMs`. To je toast, ne trvalé upozornění na stránce.
+//
+// Zavření se pamatuje v `sessionStorage`, ne `localStorage`: upozornění bývá krátkodobé,
+// takže se má znovu ukázat při další návštěvě. A klíč nese **hash textu**, aby nové
+// upozornění nezůstalo schované jen proto, že návštěvník zavřel to předchozí.
 
 const KEY_PREFIX = "afk-notice-";
 
@@ -47,55 +52,23 @@ const NoticeBar = createVisualComponent({
 
     if (!notice || dismissed) return null;
 
-    const attrs = Utils.VisualComponent.getAttrs(
-      props,
-      Config.Css.css({
-        backgroundColor: theme.color.muted,
-        borderBlockEnd: `1px solid ${theme.color.border}`,
-      }),
-    );
-
     return (
-      <div {...attrs}>
-        <div
-          className={Config.Css.css({
-            maxWidth: theme.maxWidth,
-            marginInline: "auto",
-            paddingInline: theme.gutter.s,
-            paddingBlock: 8,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          })}
-        >
-          <Uu5Elements.Icon
-            icon="uugds-alert-circle"
-            className={Config.Css.css({ color: theme.color.clubRed, flexShrink: 0 })}
-          />
-          <Uu5Elements.Text
-            category="interface"
-            segment="content"
-            type="medium"
-            className={Config.Css.css({ flexGrow: 1 })}
-          >
-            {notice}
-          </Uu5Elements.Text>
-          <Uu5Elements.Button
-            icon="uugds-close"
-            significance="subdued"
-            size="s"
-            tooltip="Zavřít"
-            onClick={() => {
-              setDismissed(true);
-              try {
-                sessionStorage.setItem(key, "1");
-              } catch {
-                // Viz readDismissed — zavření se pak nepamatuje, ale zavřít jde.
-              }
-            }}
-          />
-        </div>
-      </div>
+      <Uu5Elements.HighlightedBox
+        {...props}
+        icon="uugds-alert-circle"
+        colorScheme="primary"
+        significance="distinct"
+        onClose={() => {
+          setDismissed(true);
+          try {
+            sessionStorage.setItem(key, "1");
+          } catch {
+            // Viz readDismissed — zavření se pak nepamatuje, ale zavřít jde.
+          }
+        }}
+      >
+        {notice}
+      </Uu5Elements.HighlightedBox>
     );
   },
 });

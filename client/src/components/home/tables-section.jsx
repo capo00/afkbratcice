@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useState, useMemo, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useMemo, useLsi, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
@@ -31,6 +31,8 @@ const TablesSection = createVisualComponent({
 
   render() {
     const { categoryList } = useApp();
+    // Popisky jako řetězce kvůli `toUpperCase()` — viz team-shell.jsx.
+    const ageLsi = useLsi(importLsi, ["enum", "age"]);
 
     const withTable = useMemo(() => categoryList.filter((category) => category.hasTable), [categoryList]);
     const withoutTable = useMemo(() => categoryList.filter((category) => !category.hasTable), [categoryList]);
@@ -68,7 +70,7 @@ const TablesSection = createVisualComponent({
             onChange={(e) => setActiveSeasonId(e.data.activeCode)}
             itemList={withTable.map((category) => ({
               code: category.seasonId,
-              label: <Lsi import={importLsi} path={["enum", "age", category.age]} />,
+              label: (ageLsi[category.age] ?? category.age).toUpperCase(),
             }))}
             className={Config.Css.css({ marginBlockStart: 16 })}
           />

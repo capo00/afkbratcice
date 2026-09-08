@@ -117,14 +117,12 @@ function LineupRow({ player, entry, onChange }) {
   const set = (patch) => onChange({ ...entry, ...patch });
 
   return (
+    <>
     <Uu5Elements.Grid
       templateColumns={LINEUP_COLUMNS}
       columnGap={8}
       alignItems="center"
-      className={Config.Css.css({
-        paddingBlock: 4,
-        borderBlockEnd: `1px solid ${theme.color.border}`,
-      })}
+      className={Config.Css.css({ paddingBlock: 4 })}
     >
       <div>
         {player.person ? personLabel(player.person) : `#${player.number ?? "?"}`}
@@ -153,6 +151,10 @@ function LineupRow({ player, entry, onChange }) {
         <Uu5Forms.Checkbox value={!!entry?.redCard} disabled={!entry} onChange={(e) => set({ redCard: e.data.value })} />
       </div>
     </Uu5Elements.Grid>
+    {/* Linka za řádkem, ne `borderBlockEnd` na mřížce — barvu i sílu dá GDS. Řádky jsou
+        sourozenci v obyčejném `<div>`, takže `Line` mezi ně jde vložit bez obalu navíc. */}
+    <Uu5Elements.Line significance="subdued" />
+    </>
   );
 }
 

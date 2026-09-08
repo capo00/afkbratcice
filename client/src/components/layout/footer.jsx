@@ -67,10 +67,13 @@ const Footer = createVisualComponent({
       <footer
         className={Config.Css.css({
           backgroundColor: theme.color.card,
-          borderBlockStart: `1px solid ${theme.color.border}`,
           color: theme.color.fg,
         })}
       >
+        {/* Oddělovače jsou `Uu5Elements.Line`, ne `borderBlockStart` s barvou z theme —
+            linku kreslí GDS (`Shape.line`) a je stejná jako uvnitř dlaždic. */}
+        <Uu5Elements.Line significance="subdued" />
+
         {/* Tři sloupce, které se na mobilu poskládají pod sebe. `auto-fit`, aby zabraly
             celou šířku i ve dvou — patička nemá mít prázdný sloupec vpravo. */}
         <Uu5Elements.Grid
@@ -158,31 +161,27 @@ const Footer = createVisualComponent({
           </div>
         </Uu5Elements.Grid>
 
+        <Uu5Elements.Line significance="subdued" />
+
         <div
           className={Config.Css.css({
-            borderBlockStart: `1px solid ${theme.color.border}`,
+            maxWidth: theme.maxWidth,
+            marginInline: "auto",
+            paddingInline: theme.gutter.s,
+            paddingBlock: 16,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            justifyContent: "space-between",
+            color: theme.color.mutedFg,
           })}
         >
-          <div
-            className={Config.Css.css({
-              maxWidth: theme.maxWidth,
-              marginInline: "auto",
-              paddingInline: theme.gutter.s,
-              paddingBlock: 16,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-              justifyContent: "space-between",
-              color: theme.color.mutedFg,
-            })}
-          >
-            <Uu5Elements.Text category="interface" segment="content" type="medium">
-              <Lsi import={importLsi} path={["footer", "copyright"]} params={{ year: new Date().getFullYear(), clubName }} />
-            </Uu5Elements.Text>
-            <span className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12 })}>
-              <Lsi import={importLsi} path={["footer", "motto"]} />
-            </span>
-          </div>
+          <Uu5Elements.Text category="interface" segment="content" type="medium">
+            <Lsi import={importLsi} path={["footer", "copyright"]} params={{ year: new Date().getFullYear(), clubName }} />
+          </Uu5Elements.Text>
+          <span className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12 })}>
+            <Lsi import={importLsi} path={["footer", "motto"]} />
+          </span>
         </div>
       </footer>
     );

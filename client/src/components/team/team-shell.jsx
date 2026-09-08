@@ -1,10 +1,11 @@
-import { createVisualComponent, useRoute, Lsi } from "uu5g05";
+import { createVisualComponent, useRoute, useLsi, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../layout/section.jsx";
 import TeamLogo from "../team-logo.jsx";
 import SeasonSelect from "../season-select.jsx";
+import NoticeBar from "../layout/notice-bar.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
 
@@ -30,6 +31,9 @@ const TeamShell = createVisualComponent({
   render({ children }) {
     const [route, setRoute] = useRoute();
     const { getTeam, categoryList } = useApp();
+    // Popisky záložek jako **řetězce**, ne `<Lsi>`: verzálky se dělají `toUpperCase()`
+    // nad textem, a to jde jen s hotovým překladem. `Tabs` prop na `textTransform` nemá.
+    const tabLsi = useLsi(importLsi, ["team", "tab"]);
 
     const teamId = route?.params?.id;
     const seasonId = route?.params?.seasonId;
@@ -83,6 +87,11 @@ const TeamShell = createVisualComponent({
             />
           </div>
 
+          {/* Upozornění redakce („trénink v pátek v 17:00") patří sem, ne nad celý web:
+              týká se mužstva a čte ho ten, kdo si otevřel jeho stránku. Nad hlavičkou
+              proto ne — pod ní, kde už je jasné, o čí mužstvo jde. */}
+          <NoticeBar className={Config.Css.css({ marginBlockStart: 16 })} />
+
           {/* Čtyři pohledy na jedno mužstvo jsou záložky, ne řada tlačítek — `Tabs` k tomu
               dá `role="tab"` a ovládání šipkami. `displayBottomLine={false}`, protože linku
               pod hlavičkou tu předloha nemá; dřív se kreslila vlastním `borderBlockEnd`.
@@ -98,7 +107,7 @@ const TeamShell = createVisualComponent({
             onChange={(e) => setRoute(e.data.activeCode, { id: teamId, seasonId })}
             itemList={tabList.map((tab) => ({
               code: tab.route,
-              label: <Lsi import={importLsi} path={["team", "tab", tab.code]} />,
+              label: (tabLsi[tab.code] ?? tab.code).toUpperCase(),
             }))}
             className={Config.Css.css({ marginBlockStart: 24 })}
           />

@@ -485,10 +485,18 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 
 | Co bylo v panelu | Kam jde |
 |---|---|
-| **Upozornění!** (`appConfig.notice`) | úzký proužek pod horní lištou na všech stránkách – `Uu5Elements.Alert`, zavíratelný, stav v `sessionStorage` |
+| **Upozornění!** (`appConfig.notice`) | **na detail mužstva** – `Uu5Elements.HighlightedBox`, zavíratelný, stav v `sessionStorage` (viz níž) |
 | **Poslední / následující zápas** | sekce *Program víkendu* a *Poslední výsledky* na home (3.1) |
 | **Odpočet do zápasu** | do karty nejbližšího zápasu na home – `Countdown` zůstává, jen jinde |
 | **Zkrácená tabulka** | sekce *Tabulky* na home s přepínačem kategorií |
+
+> **Změna 8. 9. 2026: upozornění není proužek nad celým webem.** Původní návrh ho dával pod
+> lištu na všechny stránky — jenže obsahem („trénink v pátek v 17:00", „zápas se přesouvá na
+> neděli") se týká mužstva, ne úvodní stránky ani výpisu novinek, a nad každou obrazovkou
+> z něj byl jen šum. Vykresluje se proto v hlavičce mužstva (`components/team/team-shell.jsx`),
+> tedy tam, kde ho čte ten, komu je určené. Komponenta je `Uu5Elements.HighlightedBox`, ne
+> `Alert` — `Alert` se registruje do `AlertBus`, portáluje se do plovoucího kontejneru a sám
+> zmizí po `durationMs`, což je toast, ne trvalé upozornění na stránce.
 
 ---
 
@@ -500,7 +508,7 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 | `layout/heading.jsx` | Eyebrow + `h2` s červeným svislým pruhem – tokeny z `theme.text` |
 | `layout/card.jsx` | Karta na `theme.color.card` s 1px rámečkem, volitelný horní červený proužek |
 | `layout/footer.jsx` | Třísloupcová patička + spodní řádek |
-| `layout/notice-bar.jsx` | Proužek `appConfig.notice` pod lištou (`Uu5Elements.Alert`) |
+| `layout/notice-bar.jsx` | `appConfig.notice` v hlavičce mužstva (`Uu5Elements.HighlightedBox`) |
 | `countdown.jsx` | Odpočet do výkopu v kartě nejbližšího zápasu |
 | `core/app-context.jsx` | `appConfig/get`, `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů**; po přihlášení jednou zavolá `person/linkSelf` |
 | `core/with-team-route.jsx` | Guard s prefixovou shodou nad `teamEditor:<teamId>` (`withRoute` to neumí) |

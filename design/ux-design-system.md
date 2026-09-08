@@ -252,7 +252,9 @@ i s důvodem (stejná konvence jako v `caio_propertyman`, `docs/component-tree.m
 | Mřížka | `Uu5Elements.Grid`, prop `templateColumns` — viz 5.1 |
 | Odznak kategorie, výsledkový odznak | `Uu5Elements.Badge` / `Uu5Elements.Tag` |
 | Kolečka formy V-R-P | `Uu5Elements.Badge` s `borderRadius="full"`; tři vzhledy jsou tři `significance` nad tvarem `interactiveElement` — `highlighted` plná, `common` jemná, `distinct` jen obrys |
-| Přepínač (záložky mužstva, kategorie tabulek) | `Uu5Elements.Tabs` s `type="line"` a `displayBottomLine={false}` — **obojí spolu**, `displayBottomLine` se u jiného `type` ignoruje |
+| Přepínač (záložky mužstva, kategorie tabulek) | `Uu5Elements.Tabs` s `type="line"` a `displayBottomLine={false}` — **obojí spolu**, `displayBottomLine` se u jiného `type` ignoruje. Verzálky se dělají `toUpperCase()` nad popiskem (proto `useLsi`, ne `<Lsi>`); font se neřeší, `Tabs` na něj prop nemá |
+| Upozornění redakce (`appConfig.notice`) | `Uu5Elements.HighlightedBox`, **jen na detailu mužstva** — ne pruh nad celým webem. `Uu5Elements.Alert` to není: registruje se do `AlertBus`, portáluje se a mizí po `durationMs`, tedy toast |
+| Oddělovač | `Uu5Elements.Line` — ne `borderBlockStart/End` s barvou z theme. Výjimka je linka *uvnitř* buňky tabulky, kam element vložit nejde (`components/data-table.jsx`) |
 | Datum a čas | `components/date-text.jsx` nad `Uu5Elements.DateTime` s explicitním `format`; nikdy `dateFormat="short\|medium\|long"` (bere vzor z locale prohlížeče, ne z `cs`) |
 | Datová tabulka (soutěž, statistiky) | `components/data-table.jsx` — obal, sazba buněk a vodorovný scroll přes `Uu5Elements.ScrollableBox`; řádky si píše každá obrazovka sama |
 | Tlačítka | `components/layout/button.jsx` nad `Uu5Elements.Button`; váhu určuje **`significance`** (`highlighted` = plné, `distinct` = rámeček, `subdued` = jen text), žádná vlastní osa typu `variant` |
