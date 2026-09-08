@@ -19,7 +19,7 @@ const color = {
   input: "#362E2D", // oklch(31% .012 25)
   fg: "#F3EFED", // oklch(95.5% .005 60) — základní text
   mutedFg: "#99908E", // oklch(66% .012 30) — sekundární text, perex, popisky
-  clubRed: "#8b0000", // oklch(40% .164 29.23) — CTA, eyebrow, aktivní nav, skóre
+  clubRed: "#D01319", // oklch(54.5% .215 27.56) — CTA, eyebrow, aktivní nav, skóre
   clubRedBright: "#F92725", // oklch(63% .24 28) — hover, CTA pruh
   onRed: "#FEF7F2", // oklch(98% .01 60) — text na červené
   destructive: "#E7000B",

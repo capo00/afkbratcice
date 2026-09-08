@@ -99,49 +99,51 @@ const MatchTile = createVisualComponent({
       </div>
     );
 
+    // Spodní řádek (kdy, kde, jak dopadlo) je patička dlaždice — `Tile` má na oddělovací
+    // linku `footerSeparator` z GDS, takže se nekreslí vlastní `borderBlockStart`.
+    const footer = (
+      <div
+        className={Config.Css.css({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          inlineSize: "100%",
+          color: theme.color.mutedFg,
+        })}
+      >
+        <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 6 })}>
+          <Uu5Elements.Icon icon="uugds-calendar" />
+          <DateText value={match.time} type={played ? "date" : "dayMonth"} />
+          {!played && match.time ? (
+            <>
+              <Uu5Elements.Icon icon="uugds-clock" className={Config.Css.css({ marginInlineStart: 6 })} />
+              <DateText value={match.time} type="time" />
+            </>
+          ) : null}
+        </span>
+
+        {played && result ? (
+          <Uu5Elements.Tag colorScheme={OUTCOME_COLOR_SCHEME[result]} significance="distinct" size="s">
+            <Lsi import={importLsi} path={["match", "outcome", result]} />
+          </Uu5Elements.Tag>
+        ) : null}
+
+        {match.place && !played ? (
+          <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 6 })}>
+            <Uu5Elements.Icon icon="uugds-mapmarker" />
+            {match.place}
+          </span>
+        ) : null}
+      </div>
+    );
+
     return (
-      <Card topStripe header={header} onClick={handleClick}>
-        <div className={Config.Css.css({ display: "grid", gap: 6 })}>
+      <Card topStripe header={header} footer={footer} footerSeparator onClick={handleClick}>
+        <Uu5Elements.Grid rowGap={6}>
           <TeamRow teamId={match.homeTeamId} goals={match.homeGoals} ownTeamId={ownTeamId} showGoals={played} />
           <TeamRow teamId={match.guestTeamId} goals={match.guestGoals} ownTeamId={ownTeamId} showGoals={played} />
-        </div>
-
-        <div
-          className={Config.Css.css({
-            marginBlockStart: 12,
-            paddingBlockStart: 12,
-            borderBlockStart: `1px solid ${theme.color.border}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 8,
-            color: theme.color.mutedFg,
-          })}
-        >
-          <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 6 })}>
-            <Uu5Elements.Icon icon="uugds-calendar" />
-            <DateText value={match.time} type={played ? "date" : "dayMonth"} />
-            {!played && match.time ? (
-              <>
-                <Uu5Elements.Icon icon="uugds-clock" className={Config.Css.css({ marginInlineStart: 6 })} />
-                <DateText value={match.time} type="time" />
-              </>
-            ) : null}
-          </span>
-
-          {played && result ? (
-            <Uu5Elements.Tag colorScheme={OUTCOME_COLOR_SCHEME[result]} significance="distinct" size="s">
-              <Lsi import={importLsi} path={["match", "outcome", result]} />
-            </Uu5Elements.Tag>
-          ) : null}
-
-          {match.place && !played ? (
-            <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 6 })}>
-              <Uu5Elements.Icon icon="uugds-mapmarker" />
-              {match.place}
-            </span>
-          ) : null}
-        </div>
+        </Uu5Elements.Grid>
       </Card>
     );
   },

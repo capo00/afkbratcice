@@ -29,30 +29,15 @@ function PlayerCard({ player, isNameHidden }) {
   return (
     <Card topStripe>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" })}>
-        {player?.person?.photoUri ? (
-          <UiElements.Image
-            src={player.person.photoUri}
-            alt=""
-            className={Config.Css.css({ inlineSize: 96, blockSize: 96, borderRadius: "50%", objectFit: "cover" })}
-          />
-        ) : (
-          <span
-            className={Config.Css.css({
-              inlineSize: 96,
-              blockSize: 96,
-              borderRadius: "50%",
-              backgroundColor: theme.color.muted,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              ...theme.typography.display,
-              fontSize: 36,
-              color: theme.color.mutedFg,
-            })}
-          >
-            {player?.number ?? "?"}
-          </span>
-        )}
+        {/* Stejné kolečko jako na soupisce (`routes/team.jsx`), jen větší — `RichIcon`
+            bere výšku i číslem, když na ni není token. Bez fotky se ukáže číslo dresu;
+            `text` a `imageSrc` se nesmí sejít, text by se vykreslil přes fotku. */}
+        <Uu5Elements.RichIcon
+          height={96}
+          significance="distinct"
+          imageSrc={player?.person?.photoUri}
+          text={player?.person?.photoUri ? undefined : String(player?.number ?? "?")}
+        />
 
         <div>
           <div className={Config.Css.css({ ...theme.typography.display, fontSize: 32 })}>
@@ -224,18 +209,14 @@ const Player = createVisualComponent({
         {matchList.length ? (
           <Section>
             <Heading lsi={lsi("player", "matches")} />
-            <div
-              className={Config.Css.css({
-                marginBlockStart: 24,
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              })}
+            <Uu5Elements.Grid
+              templateColumns="repeat(auto-fill, minmax(280px, 1fr))"
+              className={Config.Css.css({ marginBlockStart: 24 })}
             >
               {matchList.map((match) => (
                 <MatchTile key={match.id} match={match} ownTeamId={category?.teamId} />
               ))}
-            </div>
+            </Uu5Elements.Grid>
           </Section>
         ) : null}
       </>

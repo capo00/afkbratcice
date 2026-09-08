@@ -25,7 +25,11 @@ const NotFound = createVisualComponent({
 
     return (
       <Section padTop={96} padBottom={96}>
-        <div className={Config.Css.css({ textAlign: "center", display: "grid", gap: 24, justifyItems: "center" })}>
+        <Uu5Elements.Grid
+          justifyItems="center"
+          rowGap={24}
+          className={Config.Css.css({ textAlign: "center" })}
+        >
           <Heading level={1} bar={false} lsi={lsi("notFound", "header")} />
           {/* Perex je věta, ne nadpis — Heading by ji vysázel verzálkami Bebasem
               a vypadala by jako druhý titulek. */}
@@ -39,10 +43,15 @@ const NotFound = createVisualComponent({
           </Uu5Elements.Text>
           <div className={Config.Css.css({ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" })}>
             {LINKS.map((link) => (
-              <Button key={link.route || "home"} variant="outline" onClick={() => setRoute(link.route)} lsi={link.lsi} />
+              <Button
+                key={link.route || "home"}
+                significance="distinct"
+                onClick={() => setRoute(link.route)}
+                lsi={link.lsi}
+              />
             ))}
           </div>
-        </div>
+        </Uu5Elements.Grid>
       </Section>
     );
   },

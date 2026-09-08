@@ -74,13 +74,7 @@ const WeekendProgram = createVisualComponent({
           ) : itemList.length === 0 ? (
             <EmptyState lsi={lsi("home", "program", "empty")} icon="uugds-calendar" />
           ) : (
-            <div
-              className={Config.Css.css({
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              })}
-            >
+            <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
               {itemList.map((match) => {
                 const ownTeamId = teamIdList.find((id) => id === match.homeTeamId || id === match.guestTeamId);
                 return (
@@ -92,7 +86,7 @@ const WeekendProgram = createVisualComponent({
                   />
                 );
               })}
-            </div>
+            </Uu5Elements.Grid>
           )}
         </div>
       </Section>

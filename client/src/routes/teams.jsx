@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, Lsi, useMemo } from "uu5g05";
+import { createVisualComponent, useDataObject, useRoute, Lsi, useMemo } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
@@ -6,6 +6,7 @@ import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
+import Button from "../components/layout/button.jsx";
 import TeamLogo from "../components/team-logo.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
@@ -32,6 +33,7 @@ function InfoRow({ icon, children }) {
 
 function TeamCard({ category, coach }) {
   const { getTeam } = useApp();
+  const [, setRoute] = useRoute();
   const team = getTeam(category.teamId);
 
   const header = (
@@ -48,8 +50,19 @@ function TeamCard({ category, coach }) {
     </div>
   );
 
+  // Cesta na soupisku. Do lišty se **nedává** — položka Mužstva vede sem a výběr mužstva
+  // patří na tuhle stránku, kde je vedle sebe logo, soutěž i trenér (app.jsx, `useTop`).
+  // Bez tlačítka by se sem člověk proklikal a dál by neměl kudy.
+  const detail = category.teamId ? (
+    <Button
+      size="m"
+      onClick={() => setRoute("muzstvo", { id: category.teamId })}
+      lsi={lsi("teams", "detail")}
+    />
+  ) : null;
+
   return (
-    <Card header={header}>
+    <Card header={header} footer={detail} footerSeparator>
       {team?.photoUri ? (
         <UiElements.Image
           src={team.photoUri}
@@ -76,14 +89,14 @@ function TeamCard({ category, coach }) {
         </Uu5Elements.Text>
       ) : null}
 
-      <div className={Config.Css.css({ display: "grid", gap: 8 })}>
+      <Uu5Elements.Grid rowGap={8}>
         {category.competition ? <InfoRow icon="uugds-favorites">{category.competition}</InfoRow> : null}
         {coach ? (
           <InfoRow icon="uugds-account">
             {[coach.person?.name, coach.person?.surname].filter(Boolean).join(" ")}
           </InfoRow>
         ) : null}
-      </div>
+      </Uu5Elements.Grid>
     </Card>
   );
 }
@@ -127,17 +140,11 @@ const Teams = createVisualComponent({
           {categoryList.length === 0 ? (
             <EmptyState lsi={lsi("teams", "empty")} icon="uugds-account-multi" />
           ) : (
-            <div
-              className={Config.Css.css({
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              })}
-            >
+            <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))">
               {categoryList.map((category) => (
                 <TeamCard key={category.seasonId} category={category} coach={coachByTeamId[category.teamId]} />
               ))}
-            </div>
+            </Uu5Elements.Grid>
           )}
         </div>
       </Section>

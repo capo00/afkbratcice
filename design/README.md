@@ -397,3 +397,10 @@ Pravidla:
 11. ~~**Skrytí jmen mládeže**~~ – **rozhodnuto 2026-09-06: filtruje server**, ne klient.
 12. ~~**Stránkování**~~ – **rozhodnuto 2026-09-06: `pageInfo` se doplní do `caio-serveru`**,
     ne obchází na klientu.
+13. ~~**Podpoložky Mužstev v liště**~~ – **rozhodnuto 2026-09-08: menu je plochý seznam rout.**
+    Rozbalovací nabídka s kategoriemi aktuálního ročníku zmizela: nabízela stejnou volbu,
+    jakou návštěvník o klik dál udělá líp — na `/muzstva` má mužstva vedle sebe s logem,
+    soutěží a trenérem, v menu jen holé názvy. Cenou je, že přehled mužstev **musí** mít
+    cestu dál; proto má každá karta patičku s tlačítkem *Detail mužstva*
+    ([ux-design-system.md](./ux-design-system.md), 4.4). Podpoložky si nechává jen
+    administrace — tam jsou to opravdu různé obrazovky, ne jeden seznam.

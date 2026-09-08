@@ -144,10 +144,10 @@ flowchart TD
   card["Card highlighted?, topStripe?"]:::own
   tile["Uu5Elements.Tile<br/>colorScheme dle GDS, borderRadius=moderate,<br/>padding ze SpacingProvideru"]:::uu5
 
-  button["Button variant=solid|outline, size, href"]:::own
-  uubtn["Uu5Elements.Button<br/>significance highlighted|common<br/>colorScheme=primary (#D01319)"]:::uu5
+  button["Button significance, size, onRed?, href"]:::own
+  uubtn["Uu5Elements.Button<br/>significance highlighted|distinct|subdued<br/>colorScheme=primary (klubová červená)"]:::uu5
 
-  grid["Uu5Elements.Grid<br/>templateColumns {xs:1fr, m:repeat(3,1fr)}"]:::uu5
+  grid["Uu5Elements.Grid<br/>templateColumns=repeat(auto-fill|fit, minmax(min, 1fr))<br/>mezery ze SpacingProvideru"]:::uu5
 
   badge["Badge kind=category|result<br/>A-TÝM / MLÁDEŽ / VETERÁNI, VÝHRA / REMÍZA / PROHRA"]:::own
   uubadge["Uu5Elements.Tag / Uu5Elements.Badge"]:::uu5

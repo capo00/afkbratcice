@@ -1,14 +1,13 @@
-import { createVisualComponent, useDataObject, useState, useMemo, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useMemo } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
-import importLsi, { lsi } from "../lsi/import-lsi.js";
+import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
+import Button from "../components/layout/button.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
-
-const { theme } = Config;
 
 // Zápasy mužstva v sezóně — rozpis i výsledky na jedné ose.
 //
@@ -26,24 +25,20 @@ function isPlayed(match) {
   return Number.isFinite(match.homeGoals) && Number.isFinite(match.guestGoals);
 }
 
+// Přepínač je řada tlačítek, ne segmentovaný ovladač — aktivní se od ostatních liší jen
+// `significance`. Sází se přes `components/layout/button.jsx`, aby se klubové písmo
+// nepředepisovalo podruhé.
 function ButtonRow({ itemList, active, onChange, path }) {
   return (
     <div className={Config.Css.css({ display: "flex", gap: 8, flexWrap: "wrap" })}>
       {itemList.map((code) => (
-        <Uu5Elements.Button
+        <Button
           key={code}
-          colorScheme="primary"
+          size="m"
           significance={code === active ? "highlighted" : "subdued"}
-          borderRadius="moderate"
           onClick={() => onChange(code)}
-          className={Config.Css.css({
-            fontFamily: theme.font.display,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          })}
-        >
-          <Lsi import={importLsi} path={[...path, code]} />
-        </Uu5Elements.Button>
+          lsi={lsi(...path, code)}
+        />
       ))}
     </div>
   );
@@ -110,17 +105,11 @@ function MatchList({ teamId, seasonId, category }) {
           icon="uugds-calendar"
         />
       ) : (
-        <div
-          className={Config.Css.css({
-            display: "grid",
-            gap: 16,
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          })}
-        >
+        <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
           {itemList.map((match) => (
             <MatchTile key={match.id} match={match} ownTeamId={teamId} category={category?.age} />
           ))}
-        </div>
+        </Uu5Elements.Grid>
       )}
     </Section>
   );

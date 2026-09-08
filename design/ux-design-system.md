@@ -54,7 +54,7 @@ hex je bezpečný fallback pro místa, kde `uu5g05` `oklch` nezvládne.
 | `input` | `oklch(31% .012 25)` | `#362E2D` | rámeček vstupu |
 | `foreground` | `oklch(95.5% .005 60)` | `#F3EFED` | základní text |
 | `mutedForeground` | `oklch(66% .012 30)` | `#99908E` | sekundární text, perex, popisky |
-| **`primary` / `clubRed`** | `oklch(40% .164 29.23)` | **`#8b0000`** | klubová červená (rudá): CTA, eyebrow, aktivní nav, skóre |
+| **`primary` / `clubRed`** | `oklch(54.5% .215 27.56)` | **`#D01319`** | klubová červená: CTA, eyebrow, aktivní nav, skóre |
 | `clubRedBright` | `oklch(63% .24 28)` | `#F92725` | světlejší varianta (hover, CTA pruh) — zatím se nikde nepoužívá |
 | `primaryForeground` | `oklch(98% .01 60)` | `#FEF7F2` | text na červené |
 | `destructive` | `oklch(57.7% .245 27.325)` | `#E7000B` | chyby |
@@ -62,13 +62,13 @@ hex je bezpečný fallback pro místa, kde `uu5g05` `oklch` nezvládne.
 **Pravidlo, které drží celý vzhled:** nikde není čistá černá ani čistá bílá. Všechno je posunuté
 do teplé (hue 25–30). Když se v implementaci objeví `#000000` nebo `#FFFFFF`, je to chyba.
 
-> **Změna 7. 9. 2026: klubová barva je tmavší rudá `#8b0000`** (dřív `#D01319`). Je to
-> rozhodnutí o značce a platí. Má ale jeden důsledek, se kterým se musí počítat: na
-> podkladu `bg` (`#070404`) dává rudá kontrast **2,0 : 1** (dřív 3,6 : 1), takže **jako text
-> na tmavém pozadí je pod hranicí čitelnosti** — týká se skóre, eyebrow, ikon a zvýrazněného
-> vlastního týmu v tabulce. Jako **plocha** (CTA pruh, proužek karty, forma W) je v pořádku:
-> `onRed` na ní má 9,6 : 1. Až se to začne řešit, cesta je světlejší odstín pro text
-> (`clubRedBright` už v tokenech je a nikde se nepoužívá), ne návrat značky.
+> **Změna 8. 9. 2026: klubová barva je zpátky na `#D01319`.** Tmavší rudá `#8b0000`,
+> zavedená 7. 9., vydržela jeden den — měla na podkladu `bg` (`#070404`) kontrast
+> **2,0 : 1**, takže jako text (skóre, eyebrow, ikony, zvýrazněný vlastní tým v tabulce)
+> byla pod hranicí čitelnosti. `#D01319` dává **3,7 : 1**, což je pro velká čísla a verzálky
+> v pořádku, a `onRed` na ní má **5,2 : 1** (dřív 9,6 : 1) — pořád nad AA pro běžný text.
+> Tím padá i tehdejší úkol „najít světlejší odstín pro text": `clubRedBright` (`#F92725`)
+> zůstává jen pro hover a CTA pruh.
 
 Rytmus stránky: sekce se střídají `background` → `background` s **diagonálním šrafováním**
 (velmi jemný opakovaný pruh v `card`/`secondary`) a jednou za stránku to přeruší **plný červený
@@ -211,6 +211,11 @@ podnadpis a odstavec. Milníky: 1932, 1948, 1972, 1992, 2005, 2012, 2022.
 3 karty: týmová fotka s odznakem kategorie (`A-TÝM` / `MLÁDEŽ` / `VETERÁNI`), název Bebas,
 perex, tři řádky s ikonami (soutěž, trenér, tréninky) a plné červené tlačítko *Detail mužstva*.
 
+**Tlačítko není ozdoba, je to jediná cesta na soupisku** — od 8. 9. 2026 nemá položka
+*Mužstva* v liště podpoložky ([README.md](./README.md), §9.13), takže výběr mužstva se dělá
+tady. Je v patičce karty (`footer` + `footerSeparator`), aby stálo na stejné výšce
+i u karet s různě dlouhým obsahem.
+
 ### 4.5 Fotogalerie (`mockups/desktop-04-fotogalerie.jpg`)
 
 Řada filtrovacích chipů (`VŠE`, `ZÁPASY`, `TRÉNINK`, `FANOUŠCI`, `MLÁDEŽ`, `KLUB`) — aktivní
@@ -241,10 +246,12 @@ i s důvodem (stejná konvence jako v `caio_propertyman`, `docs/component-tree.m
 | Patička | vlastní komponenta předaná do `UiApp.Spa` prop `footer` |
 | Sekce s max šířkou a paddingem | vlastní `components/layout/section.jsx` nad `Uu5Elements.Block`; `main={{ padding: false }}`, sekce si gutter řeší samy |
 | Eyebrow + `h2` s červeným pruhem | vlastní `components/layout/heading.jsx` nad `Uu5Elements.Text` s tokeny z `config/theme.js` |
-| Karta (zápas, článek, hráč, člen výboru) | `Uu5Elements.Tile` nebo `Uu5Elements.Block` s `card`/`border` tokeny |
-| Mřížka 3/1 sloupce | `Uu5Elements.Grid` s `templateColumns={{ xs: "1fr", m: "repeat(3, 1fr)" }}` |
+| Karta (zápas, článek, hráč, člen výboru) | `components/layout/card.jsx` nad `Uu5Elements.Tile`, `significance="subdued"`; spodní řádek karty je `footer` + `footerSeparator`, ne vlastní `borderBlockStart` |
+| Rámeček bez hlavičky a patičky (prázdný stav, rám mapy, řádek seznamu) | `Uu5Elements.Box` — `subdued` = linka bez výplně, `distinct` = jemná výplň bez linky |
+| Kolečko s portrétem nebo číslem dresu | `Uu5Elements.RichIcon` (`imageSrc`, nebo `text` — nikdy obojí najednou) |
+| Mřížka | `Uu5Elements.Grid`, prop `templateColumns` — viz 5.1 |
 | Odznak kategorie, výsledkový odznak | `Uu5Elements.Badge` / `Uu5Elements.Tag` |
-| Tlačítka | `Uu5Elements.Button` (`significance` `highlighted`/`common`, `colorScheme`) |
+| Tlačítka | `components/layout/button.jsx` nad `Uu5Elements.Button`; váhu určuje **`significance`** (`highlighted` = plné, `distinct` = rámeček, `subdued` = jen text), žádná vlastní osa typu `variant` |
 | Přepínač `MUŽI`/`ŽÁCI`, filtr galerie | `Uu5Elements.Tabs` nebo `Uu5Forms.SwitchSelect` |
 | Tabulka soutěže | `uu5tilesg02` `Table` přes `UiElements.Crud` v `readOnly` režimu, nebo přímo `Uu5Tiles.Table` |
 | Časová osa historie | obsahová stránka `page?code=history` — osa je `Uu5Bricks.VerticalTimeline` uvnitř `content` jedné sekce (`uu5String`), ne natvrdo psaná komponenta |
@@ -253,6 +260,32 @@ i s důvodem (stejná konvence jako v `caio_propertyman`, `docs/component-tree.m
 | Ikony | `Uu5Elements.Icon` s `uugds-*` / `uugdsstencil-*` sadou |
 | Rozestupy | `Uu5Elements.SpacingProvider type="loose"` kolem celé appky (web, ne aplikace) |
 | Skeletony místo spinnerů | `Uu5Elements.Skeleton` |
+
+### 5.1 Mřížky
+
+Každá mřížka je `Uu5Elements.Grid` — **žádné vlastní `display: "grid"`**. Sloupce se
+předávají propem `templateColumns` jako hotový CSS řetězec; nad tím není žádná pomocná
+funkce, protože by jen schovala, co se doopravdy nastavuje:
+
+```jsx
+<Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
+```
+
+Dvě věci, které se z toho zápisu nepoznají a je kolem nich vždycky stejná otázka:
+
+- **Sloupce se určují minimální šířkou dlaždice, ne počtem.** Mřížka se pak zalomí sama
+  a u každého seznamu nemusí být breakpointy. Minima drží rytmus z tabulky výš: 300 px
+  články a mužstva, 280 zápasy a sestavy, 260 alba, 240 hráči a trenéři, 180 statistiky
+  a náhledy fotek.
+- **`auto-fill` vs. `auto-fit`.** `auto-fill` drží šířku dlaždice, i když jich je zrovna
+  málo — to chtějí výpisy, které porostou (novinky, zápasy, alba). `auto-fit` prázdné
+  sloupce sbalí, takže obsah roztáhne celou šířku — to chtějí pevně velké skupiny (tři
+  statistiky na home, dvě sestavy u zápasu, kontakt s mapou, sloupce patičky).
+
+**Mezery se nepředávají.** `Grid` je bere ze `SpacingProvider type="loose"` v `app.jsx`
+(24 px na desktopu, 16 na mobilu), takže je celý web má stejné a mění se na jednom místě.
+`rowGap`/`columnGap` se píše jen tam, kde jde o **vnitřek** jednoho prvku (řádky kontaktu,
+dva řádky názvu klubu v liště), ne o mřížku dlaždic.
 
 ### `client/src/config/theme.js`
 
@@ -269,7 +302,7 @@ const color = {
   input: "#362E2D",
   fg: "#F3EFED",
   mutedFg: "#99908E",
-  clubRed: "#8b0000",
+  clubRed: "#D01319",
   clubRedBright: "#F92725",
   onRed: "#FEF7F2",
 };
@@ -325,7 +358,7 @@ Klubovou červenou je navíc potřeba nastavit jako GDS význam, aby ji `Uu5Elem
 braly bez explicitních barev:
 
 ```js
-Uu5Elements.UuGds.setMeaningColor("primary", "#8b0000");
+Uu5Elements.UuGds.setMeaningColor("primary", "#D01319");
 ```
 
 (v1 to dělá se svým `#8b0000`; nová hodnota je z předlohy.)

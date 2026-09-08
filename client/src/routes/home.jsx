@@ -6,6 +6,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Eyebrow from "../components/layout/eyebrow.jsx";
 import Button from "../components/layout/button.jsx";
+import Card from "../components/layout/card.jsx";
 import WeekendProgram from "../components/home/weekend-program.jsx";
 import LastResults from "../components/home/last-results.jsx";
 import NewsSection from "../components/home/news-section.jsx";
@@ -36,11 +37,11 @@ function Hero() {
       })}
     >
       <img
-        src={Config.asset.logo}
-        alt=""
-        className={Config.Css.css({ inlineSize: 96, blockSize: 96, marginBlockEnd: 24 })}
+        src={Config.asset.logoTransparent}
+        alt={lsi("club", "name")}
+        className={Config.Css.css({ inlineSize: 180, blockSize: 180, marginBlockEnd: 24 })}
       />
-      <Heading level={1} bar={false} lsi={lsi("club", "name")} />
+      <Heading level={1} bar={false} lsi={lsi("club", "name")} style={{ fontSize: 96, lineHeight: "normal" }} />
       <Eyebrow className={Config.Css.css({ marginBlockStart: 12 })} lsi={lsi("club", "since")} />
 
       <div className={Config.Css.css({ maxWidth: 640, marginInline: "auto", marginBlockStart: 16 })}>
@@ -64,7 +65,7 @@ function Hero() {
         })}
       >
         <Button size="xl" onClick={() => setRoute("muzstva")} lsi={lsi("home", "hero", "teams")} />
-        <Button size="xl" variant="outline" href="#program" lsi={lsi("home", "hero", "program")} />
+        <Button size="xl" significance="distinct" href="#program" lsi={lsi("home", "hero", "program")} />
       </div>
     </Section>
   );
@@ -86,24 +87,14 @@ function Stats() {
 
   return (
     <Section variant="hatched" padTop={40} padBottom={40}>
-      <div
-        className={Config.Css.css({
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          textAlign: "center",
-        })}
+      {/* `auto-fit`, ne `auto-fill`: dlaždice jsou tři a mají se roztáhnout přes celou
+          šířku sekce, ne se schoulit vlevo a nechat za sebou prázdné sloupce. */}
+      <Uu5Elements.Grid
+        templateColumns="repeat(auto-fit, minmax(180px, 1fr))"
+        className={Config.Css.css({ textAlign: "center" })}
       >
         {items.map((item, index) => (
-          <div
-            key={index}
-            className={Config.Css.css({
-              padding: 24,
-              border: `1px solid ${theme.color.border}`,
-              borderRadius: theme.radius,
-              backgroundColor: theme.color.card,
-            })}
-          >
+          <Card key={index}>
             <Uu5Elements.Text category="expose" segment="default" type="lead">
               {({ style }) => (
                 <div className={Config.Css.css({ ...style, ...theme.typography.display, color: theme.color.clubRed })}>
@@ -112,9 +103,9 @@ function Stats() {
               )}
             </Uu5Elements.Text>
             <Eyebrow className={Config.Css.css({ marginBlockStart: 8, marginBlockEnd: 0 })} lsi={item.lsi} />
-          </div>
+          </Card>
         ))}
-      </div>
+      </Uu5Elements.Grid>
     </Section>
   );
 }
@@ -124,7 +115,11 @@ function CtaBand() {
 
   return (
     <Section variant="red">
-      <div className={Config.Css.css({ textAlign: "center", display: "grid", gap: 16, justifyItems: "center" })}>
+      <Uu5Elements.Grid
+        justifyItems="center"
+        rowGap={16}
+        className={Config.Css.css({ textAlign: "center" })}
+      >
         <Heading bar={false} lsi={lsi("home", "cta", "header")} />
         <div className={Config.Css.css({ maxWidth: 560 })}>
           <Uu5Elements.Text category="interface" segment="content" type="large">
@@ -132,7 +127,7 @@ function CtaBand() {
           </Uu5Elements.Text>
         </div>
         <Button onRed size="xl" onClick={() => setRoute("kontakt")} lsi={lsi("home", "cta", "button")} />
-      </div>
+      </Uu5Elements.Grid>
     </Section>
   );
 }

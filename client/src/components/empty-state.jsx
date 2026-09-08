@@ -10,6 +10,10 @@ const { theme } = Config;
 // bez zápasů, soutěž bez tabulky, album bez fotek. Starý web na to nemyslel a prázdný seznam
 // vypadal jako rozbitá stránka.
 //
+// Rámeček je `Uu5Elements.Box` se `significance="subdued"` — tvar `ground` má v GDS právě
+// v téhle váze linku bez výplně a bez stínu, což je přesně předloha (ux-design-system.md, 3).
+// Vlastní `border` + `borderRadius` by dělaly totéž o dvě barvy vedle.
+//
 // Text je **povinný** — bez `lsi` by komponenta vykreslila prázdný rámeček, což je přesně to,
 // čemu má zabránit. Volitelná `action` je pro případy, kdy z prázdna vede cesta ven
 // (např. přepnout sezónu).
@@ -21,7 +25,9 @@ const EmptyState = createVisualComponent({
     const { lsi, icon = "uugds-alert-circle", action } = props;
 
     return (
-      <div
+      <Uu5Elements.Box
+        significance="subdued"
+        borderRadius="moderate"
         className={Config.Css.css({
           display: "flex",
           flexDirection: "column",
@@ -29,8 +35,6 @@ const EmptyState = createVisualComponent({
           gap: 12,
           padding: 32,
           textAlign: "center",
-          border: `1px solid ${theme.color.border}`,
-          borderRadius: theme.radius,
           color: theme.color.mutedFg,
         })}
       >
@@ -39,7 +43,7 @@ const EmptyState = createVisualComponent({
           <Lsi lsi={lsi} />
         </Uu5Elements.Text>
         {action}
-      </div>
+      </Uu5Elements.Box>
     );
   },
 });

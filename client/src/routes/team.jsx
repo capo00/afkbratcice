@@ -34,31 +34,16 @@ function PlayerTile({ player, isNameHidden }) {
   return (
     <Card onClick={() => setRoute("hrac", { id: player.id })}>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12 })}>
-        {player.person?.photoUri ? (
-          <UiElements.Image
-            src={player.person.photoUri}
-            alt=""
-            loading="lazy"
-            className={Config.Css.css({ inlineSize: 48, blockSize: 48, borderRadius: "50%", objectFit: "cover" })}
-          />
-        ) : (
-          <span
-            className={Config.Css.css({
-              inlineSize: 48,
-              blockSize: 48,
-              borderRadius: "50%",
-              backgroundColor: theme.color.muted,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              ...theme.typography.display,
-              fontSize: 20,
-              color: theme.color.mutedFg,
-            })}
-          >
-            {player.number ?? "?"}
-          </span>
-        )}
+        {/* Portrét i náhrada za něj je `RichIcon` — kolečko s obrázkem nebo s textem je
+            přesně to, na co je (`size="xl"` = 48 px z GDS). Hráč bez fotky je běžný stav,
+            u mládeže dokonce pravidlo, takže se místo portrétu ukáže číslo dresu.
+            `text` se nesmí předat spolu s `imageSrc` — vykreslilo by se přes fotku. */}
+        <Uu5Elements.RichIcon
+          size="xl"
+          significance="distinct"
+          imageSrc={player.person?.photoUri}
+          text={player.person?.photoUri ? undefined : String(player.number ?? "?")}
+        />
 
         <div className={Config.Css.css({ minInlineSize: 0 })}>
           <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>
@@ -148,17 +133,11 @@ function Roster({ teamId, category }) {
                     <Lsi import={importLsi} path={["team", "otherPlayers"]} />
                   )}
                 </div>
-                <div
-                  className={Config.Css.css({
-                    display: "grid",
-                    gap: 12,
-                    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                  })}
-                >
+                <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))">
                   {group.list.map((player) => (
                     <PlayerTile key={player.id} player={player} isNameHidden={nameHidden} />
                   ))}
-                </div>
+                </Uu5Elements.Grid>
               </div>
             ))
           )}
@@ -168,13 +147,9 @@ function Roster({ teamId, category }) {
       {coachList.length ? (
         <Section variant="hatched">
           <Heading level={2} lsi={lsi("team", "staff")} />
-          <div
-            className={Config.Css.css({
-              marginBlockStart: 24,
-              display: "grid",
-              gap: 12,
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            })}
+          <Uu5Elements.Grid
+            templateColumns="repeat(auto-fill, minmax(240px, 1fr))"
+            className={Config.Css.css({ marginBlockStart: 24 })}
           >
             {coachList.map((coach) => (
               <Card key={coach.id}>
@@ -186,7 +161,7 @@ function Roster({ teamId, category }) {
                 </div>
               </Card>
             ))}
-          </div>
+          </Uu5Elements.Grid>
         </Section>
       ) : null}
     </>

@@ -56,17 +56,11 @@ const Novinky = createVisualComponent({
           ) : itemList.length === 0 ? (
             <EmptyState lsi={lsi("news", "empty")} icon="uugdsstencil-communication-megaphone" />
           ) : (
-            <div
-              className={Config.Css.css({
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              })}
-            >
+            <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))">
               {itemList.map((article) => (
                 <ArticleTile key={article.id} article={article} />
               ))}
-            </div>
+            </Uu5Elements.Grid>
           )}
         </div>
 

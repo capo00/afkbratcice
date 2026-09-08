@@ -77,7 +77,7 @@ const AdminConfig = createVisualComponent({
           }}
         >
           <Uu5Forms.Form.View>
-            <div className={Config.Css.css({ display: "grid", gap: 16, maxWidth: 720 })}>
+            <Uu5Elements.Grid rowGap={16} className={Config.Css.css({ maxWidth: 720 })}>
               <Uu5Forms.FormTextArea
                 name="notice"
                 label={<Lsi import={importLsi} path={["admin", "field", "notice"]} />}
@@ -125,7 +125,7 @@ const AdminConfig = createVisualComponent({
                   </Uu5Elements.Text>
                 ) : null}
               </div>
-            </div>
+            </Uu5Elements.Grid>
           </Uu5Forms.Form.View>
         </Uu5Forms.Form.Provider>
       </AdminScreen>

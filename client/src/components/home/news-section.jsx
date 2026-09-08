@@ -44,21 +44,17 @@ const NewsSection = createVisualComponent({
       <Section id="aktuality">
         <Heading eyebrow={lsi("news", "eyebrow")} lsi={lsi("news", "header")} />
 
-        <div
-          className={Config.Css.css({
-            marginBlockStart: 24,
-            display: "grid",
-            gap: 16,
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          })}
+        <Uu5Elements.Grid
+          templateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+          className={Config.Css.css({ marginBlockStart: 24 })}
         >
           {itemList.map((article) => (
             <ArticleTile key={article.id} article={article} />
           ))}
-        </div>
+        </Uu5Elements.Grid>
 
         <div className={Config.Css.css({ marginBlockStart: 24, display: "flex", justifyContent: "center" })}>
-          <Button variant="outline" onClick={() => setRoute("novinky")} lsi={lsi("news", "all")} />
+          <Button significance="distinct" onClick={() => setRoute("novinky")} lsi={lsi("news", "all")} />
         </div>
       </Section>
     );

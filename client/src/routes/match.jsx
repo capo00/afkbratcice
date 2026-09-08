@@ -36,27 +36,63 @@ function MatchHeader({ match }) {
   const played = isPlayed(match);
   const penaltyWinner = match.penaltyWinnerTeamId;
 
+  // Kolo, výkop, hřiště a odjezd jsou **patička dlaždice**, ne další blok v jejím těle:
+  // `Tile` na to má `footer` a `footerSeparator`, takže oddělovací linku kreslí GDS
+  // (`Shape.line`) a nemusí se psát `borderBlockStart` s vlastní barvou.
+  const meta = (
+    <div
+      className={Config.Css.css({
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 16,
+        justifyContent: "center",
+        inlineSize: "100%",
+        color: theme.color.mutedFg,
+      })}
+    >
+      <span>
+        {match.round ? (
+          <Lsi import={importLsi} path={["match", "round"]} params={{ round: match.round }} />
+        ) : (
+          <Lsi import={importLsi} path={["match", "friendly"]} />
+        )}
+      </span>
+      <span>
+        <Uu5Elements.Icon icon="uugds-calendar" /> <DateText value={match.time} type="dateTime" />
+      </span>
+      {match.place ? (
+        <span>
+          <Uu5Elements.Icon icon="uugds-mapmarker" /> {match.place}
+        </span>
+      ) : null}
+      {/* `departureTime` je interní údaj — server ho vrací jen roli `members` a výš,
+          takže když tu je, smí se ukázat. */}
+      {match.departureTime ? (
+        <span className={Config.Css.css({ color: theme.color.clubRed })}>
+          <Uu5Elements.Icon icon="uugds-clock" />{" "}
+          <Lsi import={importLsi} path={["match", "departure"]} />: <DateText value={match.departureTime} type="time" />
+        </span>
+      ) : null}
+    </div>
+  );
+
   return (
-    <Card topStripe>
-      <div
-        className={Config.Css.css({
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
-          gap: 16,
-          textAlign: "center",
-        })}
+    <Card topStripe footer={meta} footerSeparator footerHorizontalAlignment="center">
+      {/* Domácí – skóre – hosté. Prostřední sloupec je `auto`, aby si skóre vzalo jen
+          tolik, kolik potřebuje, a oba týmy dostaly stejnou půlku zbytku. */}
+      <Uu5Elements.Grid
+        templateColumns="1fr auto 1fr"
+        alignItems="center"
+        columnGap={16}
+        className={Config.Css.css({ textAlign: "center" })}
       >
         {[match.homeTeam, match.guestTeam].map((team, index) => (
-          <div
+          <Uu5Elements.Grid
             key={index}
-            className={Config.Css.css({
-              display: "grid",
-              justifyItems: "center",
-              gap: 8,
-              // Skóre je uprostřed, takže hosté musí být až za ním.
-              order: index === 0 ? 0 : 2,
-            })}
+            justifyItems="center"
+            rowGap={8}
+            // Skóre je uprostřed, takže hosté musí být až za ním.
+            className={Config.Css.css({ order: index === 0 ? 0 : 2 })}
           >
             <TeamLogo uri={team?.logoUri} size={64} alt="" />
             <div className={Config.Css.css({ ...theme.typography.display, fontSize: 20 })}>{team?.name ?? "—"}</div>
@@ -65,7 +101,7 @@ function MatchHeader({ match }) {
                 <Lsi import={importLsi} path={["match", "penaltyWinner"]} />
               </Uu5Elements.Tag>
             ) : null}
-          </div>
+          </Uu5Elements.Grid>
         ))}
 
         <div className={Config.Css.css({ order: 1 })}>
@@ -83,44 +119,7 @@ function MatchHeader({ match }) {
             </Uu5Elements.Text>
           ) : null}
         </div>
-      </div>
-
-      <div
-        className={Config.Css.css({
-          marginBlockStart: 16,
-          paddingBlockStart: 16,
-          borderBlockStart: `1px solid ${theme.color.border}`,
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 16,
-          justifyContent: "center",
-          color: theme.color.mutedFg,
-        })}
-      >
-        <span>
-          {match.round ? (
-            <Lsi import={importLsi} path={["match", "round"]} params={{ round: match.round }} />
-          ) : (
-            <Lsi import={importLsi} path={["match", "friendly"]} />
-          )}
-        </span>
-        <span>
-          <Uu5Elements.Icon icon="uugds-calendar" /> <DateText value={match.time} type="dateTime" />
-        </span>
-        {match.place ? (
-          <span>
-            <Uu5Elements.Icon icon="uugds-mapmarker" /> {match.place}
-          </span>
-        ) : null}
-        {/* `departureTime` je interní údaj — server ho vrací jen roli `members` a výš,
-            takže když tu je, smí se ukázat. */}
-        {match.departureTime ? (
-          <span className={Config.Css.css({ color: theme.color.clubRed })}>
-            <Uu5Elements.Icon icon="uugds-clock" />{" "}
-            <Lsi import={importLsi} path={["match", "departure"]} />: <DateText value={match.departureTime} type="time" />
-          </span>
-        ) : null}
-      </div>
+      </Uu5Elements.Grid>
     </Card>
   );
 }
@@ -231,18 +230,14 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
         <Heading eyebrow={eyebrowLsi} lsi={headerLsi} />
         {action}
       </div>
-      <div
-        className={Config.Css.css({
-          marginBlockStart: 24,
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-        })}
+      <Uu5Elements.Grid
+        templateColumns="repeat(auto-fill, minmax(280px, 1fr))"
+        className={Config.Css.css({ marginBlockStart: 24 })}
       >
         {itemList.map((match) => (
           <MatchTile key={match.id} match={match} ownTeamId={ownTeamId} />
         ))}
-      </div>
+      </Uu5Elements.Grid>
     </Section>
   );
 }
@@ -301,17 +296,15 @@ function MatchDetail({ matchId }) {
       {hasLineup ? (
         <Section variant="hatched">
           <Heading lsi={lsi("match", "lineups")} />
-          <div
-            className={Config.Css.css({
-              marginBlockStart: 24,
-              display: "grid",
-              gap: 16,
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            })}
+          {/* Sestavy jsou dvě a mají si šířku rozdělit napůl — proto `auto-fit`; na úzkém
+              okně se poskládají pod sebe. */}
+          <Uu5Elements.Grid
+            templateColumns="repeat(auto-fit, minmax(280px, 1fr))"
+            className={Config.Css.css({ marginBlockStart: 24 })}
           >
             <LineupColumn team={match.homeTeam} entryList={homeLineup} />
             <LineupColumn team={match.guestTeam} entryList={guestLineup} />
-          </div>
+          </Uu5Elements.Grid>
 
           {scorers.length ? (
             <div className={Config.Css.css({ marginBlockStart: 24 })}>

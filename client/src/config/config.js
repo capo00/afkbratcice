@@ -16,6 +16,7 @@ const TAG = "Afk.";
 // tatáž ikona, kterou používá manifest.json a favicon, aby se nemohly rozejít.
 const asset = {
   logo: "/assets/meta/icon-192.png",
+  logoTransparent: "/assets/icon-192-transparent.png",
 };
 
 // Číselníky. Drží se tu jen **kódy a pořadí**, popisky jsou v LSI (`enum.age.*`,

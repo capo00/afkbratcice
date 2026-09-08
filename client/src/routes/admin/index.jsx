@@ -27,13 +27,9 @@ const AdminIndex = createVisualComponent({
       <Section>
         <Heading eyebrow={lsi("admin", "eyebrow")} lsi={lsi("admin", "header")} />
 
-        <div
-          className={Config.Css.css({
-            marginBlockStart: 24,
-            display: "grid",
-            gap: 16,
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-          })}
+        <Uu5Elements.Grid
+          templateColumns="repeat(auto-fill, minmax(240px, 1fr))"
+          className={Config.Css.css({ marginBlockStart: 24 })}
         >
           {itemList.map((item) => (
             <Card key={item.code} onClick={() => setRoute(item.route)}>
@@ -58,7 +54,7 @@ const AdminIndex = createVisualComponent({
               </div>
             </Card>
           ))}
-        </div>
+        </Uu5Elements.Grid>
 
         {itemList.length === 0 ? (
           <Uu5Elements.Text category="interface" segment="content" type="medium">

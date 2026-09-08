@@ -5,6 +5,7 @@ import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
+import Button from "../components/layout/button.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
 
@@ -69,20 +70,18 @@ const Kontakt = createVisualComponent({
       <Section>
         <Heading eyebrow={lsi("contact", "eyebrow")} lsi={lsi("contact", "header")} />
 
-        <div
-          className={Config.Css.css({
-            marginBlockStart: 24,
-            display: "grid",
-            gap: 16,
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          })}
+        {/* Dva sloupce, které se na úzkém okně poskládají pod sebe. `auto-fit`, protože
+            karta s kontaktem a mapa mají zabrat celou šířku, ne půlku a prázdno. */}
+        <Uu5Elements.Grid
+          templateColumns="repeat(auto-fit, minmax(300px, 1fr))"
+          className={Config.Css.css({ marginBlockStart: 24 })}
         >
           <Card>
             {rows.length === 0 ? (
               // Prázdná konfigurace je stav, ne chyba — web může jet dřív, než ji někdo vyplní.
               <EmptyState lsi={lsi("contact", "empty")} icon="uugds-mapmarker" />
             ) : (
-              <div className={Config.Css.css({ display: "grid", gap: 16 })}>
+              <Uu5Elements.Grid rowGap={16}>
                 {rows.map((row) => {
                   const value = contact[row.code];
                   return (
@@ -106,25 +105,28 @@ const Kontakt = createVisualComponent({
                     </div>
                   );
                 })}
-              </div>
+              </Uu5Elements.Grid>
             )}
           </Card>
 
           {embed ? (
-            <iframe
-              title="Mapa"
-              src={embed}
-              loading="lazy"
-              className={Config.Css.css({
-                inlineSize: "100%",
-                minBlockSize: 320,
-                border: `1px solid ${theme.color.border}`,
-                borderRadius: theme.radius,
-              })}
-            />
+            // Rám kolem mapy je `Box`, ne `border` na iframu: linka i rádius jsou tytéž
+            // hodnoty, které GDS dává kartě vedle, a `overflow: hidden` zaoblí i mapu uvnitř.
+            <Uu5Elements.Box
+              significance="subdued"
+              borderRadius="moderate"
+              className={Config.Css.css({ overflow: "hidden", display: "flex" })}
+            >
+              <iframe
+                title="Mapa"
+                src={embed}
+                loading="lazy"
+                className={Config.Css.css({ inlineSize: "100%", minBlockSize: 320, border: "none" })}
+              />
+            </Uu5Elements.Box>
           ) : search ? (
             <Card>
-              <div className={Config.Css.css({ display: "grid", gap: 12, justifyItems: "start" })}>
+              <Uu5Elements.Grid rowGap={12} justifyItems="start">
                 <Uu5Elements.Text
                   category="interface"
                   segment="content"
@@ -133,13 +135,18 @@ const Kontakt = createVisualComponent({
                 >
                   <Lsi import={importLsi} path={["contact", "noMap"]} />
                 </Uu5Elements.Text>
-                <Uu5Elements.Button href={search} target="_blank" significance="distinct" icon="uugds-mapmarker">
-                  <Lsi import={importLsi} path={["contact", "showOnMap"]} />
-                </Uu5Elements.Button>
-              </div>
+                <Button
+                  href={search}
+                  target="_blank"
+                  size="m"
+                  significance="distinct"
+                  icon="uugds-mapmarker"
+                  lsi={lsi("contact", "showOnMap")}
+                />
+              </Uu5Elements.Grid>
             </Card>
           ) : null}
-        </div>
+        </Uu5Elements.Grid>
       </Section>
     );
   },

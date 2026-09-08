@@ -74,17 +74,17 @@ function ResultModal({ match, onClose, onSaved }) {
         }
       >
         <Uu5Forms.Form.View>
-          <div className={Config.Css.css({ display: "grid", gap: 12 })}>
+          <Uu5Elements.Grid rowGap={12}>
             <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>
               {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
             </div>
 
-            <div className={Config.Css.css({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 })}>
+            <Uu5Elements.Grid templateColumns="1fr 1fr" rowGap={12} columnGap={12}>
               <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required />
               <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required />
               <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
               <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
-            </div>
+            </Uu5Elements.Grid>
 
             <Uu5Forms.FormSelect
               name="penaltyWinnerTeamId"
@@ -102,24 +102,26 @@ function ResultModal({ match, onClose, onSaved }) {
                 {error}
               </Uu5Elements.Text>
             ) : null}
-          </div>
+          </Uu5Elements.Grid>
         </Uu5Forms.Form.View>
       </Uu5Elements.Modal>
     </Uu5Forms.Form.Provider>
   );
 }
 
+// Sloupce sestavy drží hlavička i řádky — jeden zdroj, aby se nemohly rozejít.
+const LINEUP_COLUMNS = "minmax(140px, 2fr) 110px 90px 70px 70px 70px";
+
 /** Řádek sestavy — jeden hráč a co v zápase udělal. */
 function LineupRow({ player, entry, onChange }) {
   const set = (patch) => onChange({ ...entry, ...patch });
 
   return (
-    <div
+    <Uu5Elements.Grid
+      templateColumns={LINEUP_COLUMNS}
+      columnGap={8}
+      alignItems="center"
       className={Config.Css.css({
-        display: "grid",
-        gridTemplateColumns: "minmax(140px, 2fr) 110px 90px 70px 70px 70px",
-        gap: 8,
-        alignItems: "center",
         paddingBlock: 4,
         borderBlockEnd: `1px solid ${theme.color.border}`,
       })}
@@ -150,7 +152,7 @@ function LineupRow({ player, entry, onChange }) {
         <Uu5Forms.Checkbox value={!!entry?.yellowCard} disabled={!entry} onChange={(e) => set({ yellowCard: e.data.value })} />
         <Uu5Forms.Checkbox value={!!entry?.redCard} disabled={!entry} onChange={(e) => set({ redCard: e.data.value })} />
       </div>
-    </div>
+    </Uu5Elements.Grid>
   );
 }
 
@@ -219,14 +221,10 @@ function LineupModal({ match, onClose, onSaved }) {
         <Uu5Elements.Skeleton height={240} />
       ) : (
         <div>
-          <div
-            className={Config.Css.css({
-              display: "grid",
-              gridTemplateColumns: "minmax(140px, 2fr) 110px 90px 70px 70px 70px",
-              gap: 8,
-              color: theme.color.mutedFg,
-              paddingBlockEnd: 4,
-            })}
+          <Uu5Elements.Grid
+            templateColumns={LINEUP_COLUMNS}
+            columnGap={8}
+            className={Config.Css.css({ color: theme.color.mutedFg, paddingBlockEnd: 4 })}
           >
             <span><Lsi import={importLsi} path={[...LSI_PATH, "player"]} /></span>
             <span><Lsi import={importLsi} path={[...LSI_PATH, "position"]} /></span>
@@ -234,7 +232,7 @@ function LineupModal({ match, onClose, onSaved }) {
             <span><Lsi import={importLsi} path={[...LSI_PATH, "played"]} /></span>
             <span><Lsi import={importLsi} path={[...LSI_PATH, "substitute"]} /></span>
             <span><Lsi import={importLsi} path={[...LSI_PATH, "cards"]} /></span>
-          </div>
+          </Uu5Elements.Grid>
 
           {players.map((player) => (
             <LineupRow key={player.id} player={player} entry={entryOf(player.id)} onChange={(entry) => change(player.id, entry)} />

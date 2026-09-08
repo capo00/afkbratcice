@@ -5,8 +5,6 @@ import Uu5CodeKit from "uu5codekitg01-forms";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 
-const { theme } = Config;
-
 // Editor obsahu článku: pole sekcí, každá s `content` v `uu5String`.
 //
 // **Zatím se píše kód, ne WYSIWYG** (rozhodnuto 2026-09-06). Rich-text přijde s ECC a bude
@@ -36,45 +34,41 @@ const SectionListInput = createVisualComponent({
     }
 
     return (
-      <div className={Config.Css.css({ display: "grid", gap: 12 })} {...props}>
+      <Uu5Elements.Grid rowGap={12} {...props}>
         {list.map((section, index) => (
-          <div
-            key={index}
-            className={Config.Css.css({
-              border: `1px solid ${theme.color.border}`,
-              borderRadius: theme.radius,
-              padding: 8,
-              display: "grid",
-              gap: 8,
-            })}
-          >
-            <div className={Config.Css.css({ display: "flex", justifyContent: "space-between", alignItems: "center" })}>
-              <Uu5Elements.Text category="interface" segment="content" type="medium">
-                <Lsi import={importLsi} path={[...LSI_PATH, "section"]} params={{ index: index + 1 }} />
-              </Uu5Elements.Text>
-              <Uu5Elements.ActionGroup
-                itemList={[
-                  { icon: "uugds-up", onClick: (e) => move(index, -1, e), disabled: index === 0 },
-                  { icon: "uugds-down", onClick: (e) => move(index, 1, e), disabled: index === list.length - 1 },
-                  {
-                    icon: "uugds-delete",
-                    colorScheme: "negative",
-                    onClick: (e) => change(list.filter((_, i) => i !== index), e),
-                  },
-                ]}
-              />
-            </div>
+          // Rám sekce je `Box` se `subdued` — linka bez výplně z GDS, ne vlastní border.
+          <Uu5Elements.Box key={index} significance="subdued" borderRadius="moderate">
+            <Uu5Elements.Grid rowGap={8} className={Config.Css.css({ padding: 8 })}>
+              <div
+                className={Config.Css.css({ display: "flex", justifyContent: "space-between", alignItems: "center" })}
+              >
+                <Uu5Elements.Text category="interface" segment="content" type="medium">
+                  <Lsi import={importLsi} path={[...LSI_PATH, "section"]} params={{ index: index + 1 }} />
+                </Uu5Elements.Text>
+                <Uu5Elements.ActionGroup
+                  itemList={[
+                    { icon: "uugds-up", onClick: (e) => move(index, -1, e), disabled: index === 0 },
+                    { icon: "uugds-down", onClick: (e) => move(index, 1, e), disabled: index === list.length - 1 },
+                    {
+                      icon: "uugds-delete",
+                      colorScheme: "negative",
+                      onClick: (e) => change(list.filter((_, i) => i !== index), e),
+                    },
+                  ]}
+                />
+              </div>
 
-            <Uu5CodeKit.Uu5String.Input
-              value={section.content ?? ""}
-              displayGutter={false}
-              minRows={4}
-              maxRows={20}
-              onChange={(e) =>
-                change(list.map((item, i) => (i === index ? { ...item, content: e.data.value } : item)), e)
-              }
-            />
-          </div>
+              <Uu5CodeKit.Uu5String.Input
+                value={section.content ?? ""}
+                displayGutter={false}
+                minRows={4}
+                maxRows={20}
+                onChange={(e) =>
+                  change(list.map((item, i) => (i === index ? { ...item, content: e.data.value } : item)), e)
+                }
+              />
+            </Uu5Elements.Grid>
+          </Uu5Elements.Box>
         ))}
 
         <div>
@@ -87,7 +81,7 @@ const SectionListInput = createVisualComponent({
             <Lsi import={importLsi} path={[...LSI_PATH, "add"]} />
           </Uu5Elements.Button>
         </div>
-      </div>
+      </Uu5Elements.Grid>
     );
   },
 });

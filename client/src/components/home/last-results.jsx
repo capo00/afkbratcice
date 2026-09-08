@@ -66,17 +66,11 @@ const LastResults = createVisualComponent({
           ) : resultList.length === 0 ? (
             <EmptyState lsi={lsi("home", "results", "empty")} icon="uugds-check" />
           ) : (
-            <div
-              className={Config.Css.css({
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              })}
-            >
+            <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
               {resultList.map(({ category, match }) => (
                 <MatchTile key={category.seasonId} match={match} ownTeamId={category.teamId} category={category.age} />
               ))}
-            </div>
+            </Uu5Elements.Grid>
           )}
         </div>
       </Section>

@@ -71,15 +71,17 @@ const Footer = createVisualComponent({
           color: theme.color.fg,
         })}
       >
-        <div
+        {/* Tři sloupce, které se na mobilu poskládají pod sebe. `auto-fit`, aby zabraly
+            celou šířku i ve dvou — patička nemá mít prázdný sloupec vpravo. */}
+        <Uu5Elements.Grid
+          templateColumns="repeat(auto-fit, minmax(220px, 1fr))"
+          rowGap={32}
+          columnGap={32}
           className={Config.Css.css({
             maxWidth: theme.maxWidth,
             marginInline: "auto",
             paddingInline: theme.gutter.s,
             paddingBlock: 48,
-            display: "grid",
-            gap: 32,
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
           })}
         >
           <div>
@@ -100,30 +102,37 @@ const Footer = createVisualComponent({
             <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>
               <Lsi import={importLsi} path={["footer", "navigation"]} />
             </div>
-            <ul className={Config.Css.css({ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 })}>
-              {NAV.map((item) => (
-                <li key={item.code}>
-                  <Uu5Elements.Link
-                    href={item.href}
-                    colorScheme="building"
-                    significance="subdued"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setRoute(item.href);
-                    }}
-                  >
-                    <Lsi import={importLsi} path={["header", "nav", item.code]} />
-                  </Uu5Elements.Link>
-                </li>
-              ))}
-            </ul>
+            {/* `children` jako funkce je cesta, jak si vzít styl mřížky, ale vykreslit
+                si element sám — `Grid` jinak vždycky renderuje `<div>` a `<li>` mimo
+                `<ul>` je neplatné HTML. Stejný idiom jako u `Uu5Elements.Text`. */}
+            <Uu5Elements.Grid rowGap={8}>
+              {({ style }) => (
+                <ul className={Config.Css.css({ ...style, listStyle: "none", margin: 0, padding: 0 })}>
+                  {NAV.map((item) => (
+                    <li key={item.code}>
+                      <Uu5Elements.Link
+                        href={item.href}
+                        colorScheme="building"
+                        significance="subdued"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setRoute(item.href);
+                        }}
+                      >
+                        <Lsi import={importLsi} path={["header", "nav", item.code]} />
+                      </Uu5Elements.Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Uu5Elements.Grid>
           </nav>
 
           <div>
             <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>
               <Lsi import={importLsi} path={["footer", "contact"]} />
             </div>
-            <div className={Config.Css.css({ display: "grid", gap: 8, color: theme.color.mutedFg })}>
+            <Uu5Elements.Grid rowGap={8} className={Config.Css.css({ color: theme.color.mutedFg })}>
               {contact.address ? <ContactLine icon={CONTACT_ICON.address}>{contact.address}</ContactLine> : null}
               {contact.email ? (
                 <ContactLine icon={CONTACT_ICON.email} href={`mailto:${contact.email}`}>
@@ -145,9 +154,9 @@ const Footer = createVisualComponent({
                   ))}
                 </div>
               ) : null}
-            </div>
+            </Uu5Elements.Grid>
           </div>
-        </div>
+        </Uu5Elements.Grid>
 
         <div
           className={Config.Css.css({

@@ -6,7 +6,7 @@ import importLsi from "./lsi/import-lsi.js";
 import Router from "./router.jsx";
 import Footer from "./components/layout/footer.jsx";
 import NoticeBar from "./components/layout/notice-bar.jsx";
-import { AppProvider, useApp } from "./core/app-context.jsx";
+import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "./admin/menu.js";
 
@@ -23,27 +23,35 @@ function useIdentityItem() {
 
   if (session.state !== "authenticated") {
     return {
-      children: loginLabel,
+      icon: "uugds-account",
+      // children: loginLabel.toUpperCase(),
       onClick: () => session.login(),
-      significance: "distinct",
       colorScheme: "building",
       collapsed: "never",
     };
   }
 
   return {
-    children: <UiAuth.IdentityItem {...session.identity} />,
-    itemList: [{ children: "Odhlásit se", onClick: () => session.logout() }],
-    significance: "subdued",
+    children: <Uu5Elements.RichIcon imageSrc={session.identity.photo} size="m" significance="subdued" className={Config.Css.css({ marginInline: -16 })} />,
+    itemList: [
+      { children: <Uu5Elements.Header title={session.identity.name} subtitle={session.identity.identity} /> },
+      { divider: true },
+      { icon: "uugds-log-out", children: "Odhlásit se", onClick: () => session.logout() }
+    ],
     colorScheme: "building",
     collapsed: "never",
+    iconOpen: null,
+    iconClosed: null,
   };
 }
 
 /** Název klubu vedle erbu — dva řádky sázené GDS tokeny, ale klubovým písmem. */
 function ClubName({ name, since }) {
   return (
-    <div className={Config.Css.css({ display: "grid", alignContent: "center" })}>
+    // Dva řádky nalepené na sebe, vycentrované na výšku lišty: `rowGap={0}` je tu proto,
+    // že výchozí mezera `Grid` (24 px z `loose`) je mezera mezi dlaždicemi, ne mezi řádky
+    // jednoho popisku.
+    <Uu5Elements.Grid alignContent="center" rowGap={0}>
       <Uu5Elements.Text category="interface" segment="title" type="minor">
         {({ style }) => (
           <span
@@ -58,20 +66,19 @@ function ClubName({ name, since }) {
           </span>
         )}
       </Uu5Elements.Text>
-      <Uu5Elements.Text category="interface" segment="highlight" type="small">
+      <Uu5Elements.Text category="interface" segment="highlight" type="small" colorScheme="primary">
         {({ style }) => (
           <span
             className={Config.Css.css({
               ...style,
               ...theme.typography.eyebrow,
-              color: theme.color.mutedFg,
             })}
           >
             {since}
           </span>
         )}
       </Uu5Elements.Text>
-    </div>
+    </Uu5Elements.Grid>
   );
 }
 
@@ -88,7 +95,7 @@ function useAdminItem() {
 
   return {
     href: "admin",
-    children: adminLabel,
+    children: adminLabel.toUpperCase(),
     significance: "subdued",
     colorScheme: "building",
     itemList: ADMIN_MENU.filter((item) => UiAuth.hasProfile(session.identity, item.profileList)).map((item) => ({
@@ -99,11 +106,15 @@ function useAdminItem() {
   };
 }
 
-// Menu se staví **z dat, ne z konfigurace**: pro každou kategorii, kterou klub v aktuálním
-// ročníku má, přibude položka s podpoložkami. Přidání mužstva je pak založení sezóny
-// v administraci, ne nasazení (design/frontend.md, 2.5).
+// Menu je **plochý seznam rout**, ne strom. Mužstva mívala rozbalovací podpoložky
+// s kategoriemi aktuálního ročníku, ale byla to práce navíc pro obě strany: návštěvník
+// musel trefit položku v rozbaleném seznamu, aby se dostal tam, kde stejně uvidí všechna
+// mužstva vedle sebe s logem, soutěží a trenérem. Přehled mužstev tuhle volbu udělá líp
+// než menu, takže se na něj jen proklikne (rozhodnuto 8. 9. 2026).
+//
+// Jediná položka, která si podpoložky nechává, je administrace — tam jsou to opravdu různé
+// obrazovky, ne jeden seznam.
 function useTop() {
-  const { categoryList } = useApp();
   const clubName = useLsi(importLsi, ["club", "name"]);
   const clubSince = useLsi(importLsi, ["club", "since"]);
   const identityItem = useIdentityItem();
@@ -116,7 +127,7 @@ function useTop() {
   const adminItem = useAdminItem();
 
   return {
-    logo: { uri: Config.asset.logo, href: "" },
+    logo: { uri: Config.asset.logoTransparent, href: "/", significance: "subdued" },
     // Dvouřádkový název vedle erbu. `children` Topu je jeho volný obsah.
     //
     // Skládá se **z vlastních elementů, ne z `Uu5Elements.Header`**. Header nemá token pro
@@ -140,39 +151,33 @@ function useTop() {
       itemList: [
         {
           href: "novinky",
-          children: newsLabel,
+          children: newsLabel.toUpperCase(),
           significance: "subdued",
           colorScheme: "building",
         },
         {
           href: "muzstva",
-          children: teamsLabel,
-          significance: "subdued",
-          colorScheme: "building",
-          // Podpoložky = kategorie z aktuálního ročníku, každá rovnou na soupisku svého
-          // mužstva. Routa je klíčovaná `teamId`, ne kategorií.
-          itemList: categoryList.map((category) => ({
-            href: `muzstvo?id=${category.teamId}`,
-            children: category.teamName ?? category.competition,
-          })),
-        },
-        {
-          href: "fotogalerie",
-          children: galleryLabel,
+          children: teamsLabel.toUpperCase(),
           significance: "subdued",
           colorScheme: "building",
         },
+        // {
+        //   href: "fotogalerie",
+        //   children: galleryLabel.toUpperCase(),
+        //   significance: "subdued",
+        //   colorScheme: "building",
+        // },
         {
           // Obsahové stránky pod jednou položkou — samostatně by jich v liště bylo pět
           // a Mužstva by se vytlačila do hamburgeru i na desktopu.
-          children: clubLabel,
+          children: clubLabel.toUpperCase(),
           significance: "subdued",
           colorScheme: "building",
           itemList: PAGE_CODE_LIST.map((code) => ({ href: code, children: pageLsi[code] })),
         },
         {
           href: "kontakt",
-          children: contactLabel,
+          children: contactLabel.toUpperCase(),
           significance: "subdued",
           colorScheme: "building",
         },

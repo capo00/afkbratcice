@@ -53,7 +53,7 @@ const PhotoUpload = createVisualComponent({
     }
 
     return (
-      <div className={Config.Css.css({ display: "grid", gap: 12 })}>
+      <Uu5Elements.Grid rowGap={12}>
         <Uu5Forms.File
           multiple
           accept="image/*"
@@ -63,7 +63,7 @@ const PhotoUpload = createVisualComponent({
         />
 
         {progress ? (
-          <div className={Config.Css.css({ display: "grid", gap: 4 })}>
+          <Uu5Elements.Grid rowGap={4}>
             <Uu5Elements.Progress value={(progress.index / progress.total) * 100} />
             <Uu5Elements.Text category="interface" segment="content" type="medium">
               <Lsi
@@ -72,7 +72,7 @@ const PhotoUpload = createVisualComponent({
                 params={{ index: progress.index, total: progress.total, name: progress.name }}
               />
             </Uu5Elements.Text>
-          </div>
+          </Uu5Elements.Grid>
         ) : null}
 
         {failed.length ? (
@@ -99,7 +99,7 @@ const PhotoUpload = createVisualComponent({
             <Lsi import={importLsi} path={[...LSI_PATH, "upload"]} />
           </Uu5Elements.Button>
         </div>
-      </div>
+      </Uu5Elements.Grid>
     );
   },
 });

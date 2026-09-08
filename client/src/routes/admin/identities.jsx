@@ -75,7 +75,7 @@ function RoleModal({ item, teamMap, onClose, onSave }) {
         </div>
       }
     >
-      <div className={Config.Css.css({ display: "grid", gap: 16 })}>
+      <Uu5Elements.Grid rowGap={16}>
         <Uu5Forms.Checkboxes
           label={<Lsi import={importLsi} path={["admin", "field", "profileList"]} />}
           value={profileList}
@@ -99,7 +99,7 @@ function RoleModal({ item, teamMap, onClose, onSave }) {
         >
           <Lsi import={importLsi} path={["admin", "identities", "hint"]} />
         </Uu5Elements.Text>
-      </div>
+      </Uu5Elements.Grid>
     </Uu5Elements.Modal>
   );
 }
@@ -138,19 +138,20 @@ const AdminIdentities = createVisualComponent({
         {identityList.state === "pendingNoData" ? (
           <Uu5Elements.Skeleton height={240} />
         ) : (
-          <div className={Config.Css.css({ display: "grid", gap: 8 })}>
+          <Uu5Elements.Grid rowGap={8}>
             {rows.map((row) => (
-              <div
+              // Řádek seznamu je `Box`, ne vlastní rámeček: `significance="subdued"` je
+              // z GDS plocha s linkou a bez stínu, tedy totéž, co dělá `Card` o úroveň výš.
+              <Uu5Elements.Box
                 key={row.data.id}
+                significance="subdued"
+                borderRadius="moderate"
                 className={Config.Css.css({
                   display: "flex",
                   gap: 12,
                   alignItems: "center",
                   flexWrap: "wrap",
                   padding: 12,
-                  border: `1px solid ${theme.color.border}`,
-                  borderRadius: theme.radius,
-                  backgroundColor: theme.color.card,
                 })}
               >
                 <div className={Config.Css.css({ minInlineSize: 200, flexGrow: 1 })}>
@@ -182,9 +183,9 @@ const AdminIdentities = createVisualComponent({
                   disabled={row.state === "pending"}
                   onClick={() => setEditItem(row)}
                 />
-              </div>
+              </Uu5Elements.Box>
             ))}
-          </div>
+          </Uu5Elements.Grid>
         )}
 
         {editItem ? (

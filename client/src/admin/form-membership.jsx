@@ -41,16 +41,13 @@ const MembershipInput = createVisualComponent({
     }
 
     return (
-      <div className={Config.Css.css({ display: "grid", gap: 8 })} {...props}>
+      <Uu5Elements.Grid rowGap={8} {...props}>
         {list.map((item, index) => (
-          <div
+          <Uu5Elements.Grid
             key={index}
-            className={Config.Css.css({
-              display: "grid",
-              gridTemplateColumns: "minmax(160px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) auto",
-              gap: 8,
-              alignItems: "end",
-            })}
+            templateColumns="minmax(160px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) auto"
+            columnGap={8}
+            alignItems="end"
           >
             <Uu5Forms.Select
               value={item.id}
@@ -71,7 +68,7 @@ const MembershipInput = createVisualComponent({
               significance="subdued"
               onClick={(e) => change(list.filter((_, i) => i !== index), e)}
             />
-          </div>
+          </Uu5Elements.Grid>
         ))}
 
         <div>
@@ -97,7 +94,7 @@ const MembershipInput = createVisualComponent({
         >
           <Lsi import={importLsi} path={[...LSI_PATH, "hint"]} />
         </Uu5Elements.Text>
-      </div>
+      </Uu5Elements.Grid>
     );
   },
 });

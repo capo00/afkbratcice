@@ -1,8 +1,8 @@
-import { createVisualComponent, useDataObject, useState, useRoute, useEffect, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useRoute, useEffect } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
-import importLsi, { lsi } from "../lsi/import-lsi.js";
+import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import DateText from "../components/date-text.jsx";
@@ -144,27 +144,26 @@ const GalleryDetail = createVisualComponent({
           {photoList.length === 0 ? (
             <EmptyState lsi={lsi("gallery", "noPhotos")} icon="uugds-image" />
           ) : (
-            <div
-              className={Config.Css.css({
-                display: "grid",
-                gap: 8,
-                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-              })}
-            >
+            <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(180px, 1fr))" rowGap={8} columnGap={8}>
               {photoList.map((photo, index) => (
-                <button
+                // Rám i hover stav dává `Box` s `onClick` — GDS `ground`/`subdued`, tedy
+                // tatáž linka jako u karet. `Box` ale vykreslí `<div role="button">`
+                // a klávesnici neřeší, takže `tabIndex` i Enter/mezera se dodávají přes
+                // `elementAttrs`; bez toho by se album nedalo projít klávesnicí.
+                <Uu5Elements.Box
                   key={photo.id}
-                  type="button"
+                  significance="subdued"
+                  borderRadius="moderate"
                   onClick={() => setOpenIndex(index)}
-                  className={Config.Css.css({
-                    padding: 0,
-                    border: `1px solid ${theme.color.border}`,
-                    borderRadius: theme.radius,
-                    overflow: "hidden",
-                    background: "none",
-                    cursor: "pointer",
-                    lineHeight: 0,
-                  })}
+                  elementAttrs={{
+                    tabIndex: 0,
+                    onKeyDown: (e) => {
+                      if (e.key !== "Enter" && e.key !== " ") return;
+                      e.preventDefault();
+                      setOpenIndex(index);
+                    },
+                  }}
+                  className={Config.Css.css({ padding: 0, overflow: "hidden", lineHeight: 0 })}
                 >
                   <UiElements.Image
                     // Náhled, ne plná verze — viz komentář nahoře.
@@ -173,9 +172,9 @@ const GalleryDetail = createVisualComponent({
                     loading="lazy"
                     className={Config.Css.css({ inlineSize: "100%", aspectRatio: "4 / 3", objectFit: "cover" })}
                   />
-                </button>
+                </Uu5Elements.Box>
               ))}
-            </div>
+            </Uu5Elements.Grid>
           )}
         </div>
 
