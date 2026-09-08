@@ -17,10 +17,14 @@ const { theme } = Config;
 // Stará garda hraje soutěž bez tabulky, takže by prázdná záložka jen mátla — místo ní je
 // pod tabulkou poznámka, stejně jako v předloze.
 //
-// Přepínač je řada `Uu5Elements.Button`, ne `Uu5Forms.SwitchSelect`: `SwitchSelect` je
-// v `uu5g05-forms` netypovaný (`const SwitchSelect: any`), takže by se jeho API hádalo.
-// Tlačítka jsou uu5 komponenty konfigurované propsy, což je přesně to, co pravidlo chce,
-// a vypadají jako segmentovaný přepínač z předlohy.
+// Přepínač je `Uu5Elements.Tabs` s `displayBottomLine={false}` — stejná komponenta jako
+// záložky na detailu mužstva, aby se web přepínal všude stejně. `Uu5Forms.SwitchSelect` to
+// není schválně: je v `uu5g05-forms` netypovaný (`const SwitchSelect: any`), roztáhne se přes
+// celou šířku jako formulářový vstup a sází Barlowem, takže z chipů předlohy nezbude nic.
+//
+// Obsah tabulky **nejde do `children` položek**: načítá se podle aktivní sezóny jedním
+// `useDataObject` a musí kolem sebe mít stavy (skeleton, prázdno). `Tabs` je tu tedy jen
+// přepínač a tabulka se kreslí pod ním.
 
 const TablesSection = createVisualComponent({
   uu5Tag: Config.TAG + "TablesSection",
@@ -55,24 +59,19 @@ const TablesSection = createVisualComponent({
         <Heading eyebrow={lsi("home", "tables", "eyebrow")} lsi={lsi("home", "tables", "header")} />
 
         {withTable.length > 1 ? (
-          <div className={Config.Css.css({ display: "flex", gap: 8, flexWrap: "wrap", marginBlockStart: 16 })}>
-            {withTable.map((category) => (
-              <Uu5Elements.Button
-                key={category.seasonId}
-                colorScheme="primary"
-                significance={category.seasonId === active?.seasonId ? "highlighted" : "subdued"}
-                borderRadius="moderate"
-                onClick={() => setActiveSeasonId(category.seasonId)}
-                className={Config.Css.css({
-                  fontFamily: theme.font.display,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                })}
-              >
-                <Lsi import={importLsi} path={["enum", "age", category.age]} />
-              </Uu5Elements.Button>
-            ))}
-          </div>
+          <Uu5Elements.Tabs
+            activeCode={active?.seasonId}
+            // `displayBottomLine` funguje jen s `type="line"`, viz team-shell.jsx.
+            type="line"
+            displayBottomLine={false}
+            colorScheme="primary"
+            onChange={(e) => setActiveSeasonId(e.data.activeCode)}
+            itemList={withTable.map((category) => ({
+              code: category.seasonId,
+              label: <Lsi import={importLsi} path={["enum", "age", category.age]} />,
+            }))}
+            className={Config.Css.css({ marginBlockStart: 16 })}
+          />
         ) : null}
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>

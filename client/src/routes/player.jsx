@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
 import MatchTile from "../components/match-tile.jsx";
+import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { seasonLabel } from "../components/season-select.jsx";
 import { useApp } from "../core/app-context.jsx";
@@ -61,68 +62,51 @@ function PlayerCard({ player, isNameHidden }) {
 }
 
 function StatsTable({ bySeasonList, total, seasonMap }) {
-  const cell = Config.Css.css({
-    paddingBlock: 10,
-    paddingInline: 8,
-    borderBlockEnd: `1px solid ${theme.color.border}`,
-    whiteSpace: "nowrap",
-  });
-
   return (
-    <div className={Config.Css.css({ overflowX: "auto" })}>
-      <table
-        className={Config.Css.css({
-          inlineSize: "100%",
-          borderCollapse: "collapse",
-          fontVariantNumeric: "tabular-nums",
+    <DataTable>
+      <thead>
+        <DataTable.HeaderRow>
+          <DataTable.Th>
+            <Lsi import={importLsi} path={["team", "season"]} />
+          </DataTable.Th>
+          {STAT_COLUMN_LIST.map((code) => (
+            <DataTable.Th key={code} align="center">
+              <Lsi import={importLsi} path={["stats", code]} />
+            </DataTable.Th>
+          ))}
+        </DataTable.HeaderRow>
+      </thead>
+      <tbody>
+        {bySeasonList.map((row) => {
+          const season = seasonMap.get(row.seasonId);
+          return (
+            <tr key={row.seasonId ?? "?"}>
+              <DataTable.Th scope="row" className={Config.Css.css({ fontWeight: 400 })}>
+                {season ? `${seasonLabel(season)} · ${season.competition}` : "—"}
+              </DataTable.Th>
+              {STAT_COLUMN_LIST.map((code) => (
+                <DataTable.Td key={code}>{row[code] ?? 0}</DataTable.Td>
+              ))}
+            </tr>
+          );
         })}
-      >
-        <thead>
-          <tr className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 11, textAlign: "start" })}>
-            <th className={cell + " " + Config.Css.css({ textAlign: "start" })} scope="col">
-              <Lsi import={importLsi} path={["team", "season"]} />
-            </th>
-            {STAT_COLUMN_LIST.map((code) => (
-              <th key={code} scope="col" className={cell + " " + Config.Css.css({ textAlign: "center" })}>
-                <Lsi import={importLsi} path={["stats", code]} />
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {bySeasonList.map((row) => {
-            const season = seasonMap.get(row.seasonId);
-            return (
-              <tr key={row.seasonId ?? "?"}>
-                <th scope="row" className={cell + " " + Config.Css.css({ textAlign: "start", fontWeight: 400 })}>
-                  {season ? `${seasonLabel(season)} · ${season.competition}` : "—"}
-                </th>
-                {STAT_COLUMN_LIST.map((code) => (
-                  <td key={code} className={cell + " " + Config.Css.css({ textAlign: "center" })}>
-                    {row[code] ?? 0}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-          <tr className={Config.Css.css({ fontWeight: 700 })}>
-            <th scope="row" className={cell + " " + Config.Css.css({ textAlign: "start" })}>
-              <Lsi import={importLsi} path={["stats", "total"]} />
-            </th>
-            {STAT_COLUMN_LIST.map((code) => (
-              <td
-                key={code}
-                className={
-                  cell + " " + Config.Css.css({ textAlign: "center", color: code === "goals" ? theme.color.clubRed : "inherit" })
-                }
-              >
-                {total?.[code] ?? 0}
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        {/* Součtový řádek zůstává v `tbody`, ne v `tfoot`: je to poslední řádek téže
+            sady dat, ne patička tabulky. */}
+        <tr className={Config.Css.css({ fontWeight: 700 })}>
+          <DataTable.Th scope="row">
+            <Lsi import={importLsi} path={["stats", "total"]} />
+          </DataTable.Th>
+          {STAT_COLUMN_LIST.map((code) => (
+            <DataTable.Td
+              key={code}
+              className={Config.Css.css({ color: code === "goals" ? theme.color.clubRed : "inherit" })}
+            >
+              {total?.[code] ?? 0}
+            </DataTable.Td>
+          ))}
+        </tr>
+      </tbody>
+    </DataTable>
   );
 }
 

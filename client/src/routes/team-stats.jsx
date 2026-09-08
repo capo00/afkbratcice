@@ -4,6 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
+import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 
@@ -45,13 +46,6 @@ function Stats({ teamId, seasonId }) {
   const { state, data } = dataObject;
   const itemList = data?.itemList ?? [];
 
-  const cell = Config.Css.css({
-    paddingBlock: 10,
-    paddingInline: 8,
-    borderBlockEnd: `1px solid ${theme.color.border}`,
-    whiteSpace: "nowrap",
-  });
-
   return (
     <Section>
       {state === "pendingNoData" ? (
@@ -59,60 +53,47 @@ function Stats({ teamId, seasonId }) {
       ) : itemList.length === 0 ? (
         <EmptyState lsi={lsi("team", "noStats")} icon="uugds-view-list" />
       ) : (
-        <div className={Config.Css.css({ overflowX: "auto" })}>
-          <table
-            className={Config.Css.css({
-              inlineSize: "100%",
-              borderCollapse: "collapse",
-              fontVariantNumeric: "tabular-nums",
-            })}
-          >
-            <thead>
-              <tr className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 11, textAlign: "start" })}>
-                <th className={cell + " " + Config.Css.css({ textAlign: "start" })} scope="col">
-                  <Lsi import={importLsi} path={["stats", "player"]} />
-                </th>
+        <DataTable>
+          <thead>
+            <DataTable.HeaderRow>
+              <DataTable.Th>
+                <Lsi import={importLsi} path={["stats", "player"]} />
+              </DataTable.Th>
+              {COLUMN_LIST.map((column) => (
+                <DataTable.Th key={column.code} align="center">
+                  <Lsi import={importLsi} path={["stats", column.code]} />
+                </DataTable.Th>
+              ))}
+            </DataTable.HeaderRow>
+          </thead>
+          <tbody>
+            {itemList.map((row) => (
+              <tr key={row.playerId}>
+                <DataTable.Th scope="row" className={Config.Css.css({ fontWeight: 400 })}>
+                  <span className={Config.Css.css({ display: "flex", alignItems: "baseline", gap: 8 })}>
+                    <span>{playerLabel(row) ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}</span>
+                    {row.player?.position ? (
+                      <span className={Config.Css.css({ color: theme.color.mutedFg, fontSize: 12 })}>
+                        <Lsi import={importLsi} path={["enum", "position", row.player.position]} />
+                      </span>
+                    ) : null}
+                  </span>
+                </DataTable.Th>
                 {COLUMN_LIST.map((column) => (
-                  <th key={column.code} scope="col" className={cell + " " + Config.Css.css({ textAlign: "center" })}>
-                    <Lsi import={importLsi} path={["stats", column.code]} />
-                  </th>
+                  <DataTable.Td
+                    key={column.code}
+                    className={Config.Css.css({
+                      fontWeight: column.strong ? 700 : 400,
+                      color: column.strong && row[column.code] ? theme.color.clubRed : "inherit",
+                    })}
+                  >
+                    {row[column.code] ?? 0}
+                  </DataTable.Td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {itemList.map((row) => (
-                <tr key={row.playerId}>
-                  <th scope="row" className={cell + " " + Config.Css.css({ textAlign: "start", fontWeight: 400 })}>
-                    <span className={Config.Css.css({ display: "flex", alignItems: "baseline", gap: 8 })}>
-                      <span>{playerLabel(row) ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}</span>
-                      {row.player?.position ? (
-                        <span className={Config.Css.css({ color: theme.color.mutedFg, fontSize: 12 })}>
-                          <Lsi import={importLsi} path={["enum", "position", row.player.position]} />
-                        </span>
-                      ) : null}
-                    </span>
-                  </th>
-                  {COLUMN_LIST.map((column) => (
-                    <td
-                      key={column.code}
-                      className={
-                        cell +
-                        " " +
-                        Config.Css.css({
-                          textAlign: "center",
-                          fontWeight: column.strong ? 700 : 400,
-                          color: column.strong && row[column.code] ? theme.color.clubRed : "inherit",
-                        })
-                      }
-                    >
-                      {row[column.code] ?? 0}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
       )}
     </Section>
   );

@@ -83,33 +83,25 @@ const TeamShell = createVisualComponent({
             />
           </div>
 
-          <div
-            className={Config.Css.css({
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              marginBlockStart: 24,
-              borderBlockEnd: `1px solid ${theme.color.border}`,
-              paddingBlockEnd: 12,
-            })}
-          >
-            {tabList.map((tab) => (
-              <Uu5Elements.Button
-                key={tab.route}
-                colorScheme="primary"
-                significance={tab.route === activeRoute ? "highlighted" : "subdued"}
-                borderRadius="moderate"
-                onClick={() => setRoute(tab.route, { id: teamId, seasonId })}
-                className={Config.Css.css({
-                  fontFamily: theme.font.display,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                })}
-              >
-                <Lsi import={importLsi} path={["team", "tab", tab.code]} />
-              </Uu5Elements.Button>
-            ))}
-          </div>
+          {/* Čtyři pohledy na jedno mužstvo jsou záložky, ne řada tlačítek — `Tabs` k tomu
+              dá `role="tab"` a ovládání šipkami. `displayBottomLine={false}`, protože linku
+              pod hlavičkou tu předloha nemá; dřív se kreslila vlastním `borderBlockEnd`.
+              Obsah záložky dodává **router**, ne `Tabs`, takže položky nemají `children`
+              a panel zůstane prázdný — `code` je rovnou cílová routa. */}
+          <Uu5Elements.Tabs
+            activeCode={activeRoute}
+            // `displayBottomLine` platí **jen pro `type="line"`** — u výchozího `card-inner`
+            // se ignoruje a linku stejně nakreslí `&:after` v hlavičce. Obojí musí být spolu.
+            type="line"
+            displayBottomLine={false}
+            colorScheme="primary"
+            onChange={(e) => setRoute(e.data.activeCode, { id: teamId, seasonId })}
+            itemList={tabList.map((tab) => ({
+              code: tab.route,
+              label: <Lsi import={importLsi} path={["team", "tab", tab.code]} />,
+            }))}
+            className={Config.Css.css({ marginBlockStart: 24 })}
+          />
         </Section>
 
         {children({ teamId, seasonId, team, category })}

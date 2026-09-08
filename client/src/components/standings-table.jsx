@@ -3,6 +3,7 @@ import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 import TeamLogo from "./team-logo.jsx";
 import FormDots from "./form-dots.jsx";
+import DataTable from "./data-table.jsx";
 
 const { theme } = Config;
 
@@ -13,6 +14,10 @@ const { theme } = Config;
 // vlastního týmu klubovou barvou, skrývat sloupce po breakpointech a zůstat sémantickou
 // tabulkou kvůli čtečkám a SEO. Zápasy naopak `Uu5Tiles.Table` používají, protože řazení
 // a filtry chtějí zadarmo.
+//
+// Obal, sazbu buněk a vodorovný scroll drží `components/data-table.jsx` — sdílí je se
+// statistikami hráče a mužstva. Řádky zůstávají tady, protože zvýraznění vlastního týmu
+// je pravidlo jen téhle tabulky.
 //
 // **Sloupce VP/PP se ukazují jen tam, kde dávají smysl.** Okresní soutěže se dělí na ty
 // s penaltovým rozstřelem (výhra 3 / na penalty 2 / prohra na penalty 1) a bez něj (remíza
@@ -62,104 +67,70 @@ const StandingsTable = createVisualComponent({
     const isCompact = screenSize === "xs" || screenSize === "s";
     const columns = useColumns({ hasPenalties, isCompact });
 
-    const cell = Config.Css.css({
-      paddingBlock: 10,
-      paddingInline: 8,
-      borderBlockEnd: `1px solid ${theme.color.border}`,
-      whiteSpace: "nowrap",
-    });
-
     return (
-      // Tabulka je na úzkém displeji širší než obrazovka i po skrytí sloupců, takže se
-      // scrolluje vodorovně uvnitř svého rámečku — ne celá stránka.
-      <div className={Config.Css.css({ overflowX: "auto" })}>
-        <table
-          className={Config.Css.css({
-            inlineSize: "100%",
-            borderCollapse: "collapse",
-            fontVariantNumeric: "tabular-nums",
-          })}
-        >
-          <thead>
-            <tr className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 11, textAlign: "start" })}>
-              <th className={cell} scope="col">
-                #
-              </th>
-              <th className={cell + " " + Config.Css.css({ textAlign: "start" })} scope="col">
-                <Lsi import={importLsi} path={["table", "team"]} />
-              </th>
-              {columns.map((column) => (
-                <th
-                  key={column.code}
-                  scope="col"
-                  className={cell + " " + Config.Css.css({ textAlign: column.numeric ? "center" : "start" })}
-                >
-                  <Lsi import={importLsi} path={["table", column.code]} />
-                </th>
-              ))}
-            </tr>
-          </thead>
+      <DataTable>
+        <thead>
+          <DataTable.HeaderRow>
+            <DataTable.Th align="center">#</DataTable.Th>
+            <DataTable.Th>
+              <Lsi import={importLsi} path={["table", "team"]} />
+            </DataTable.Th>
+            {columns.map((column) => (
+              <DataTable.Th key={column.code} align={column.numeric ? "center" : "start"}>
+                <Lsi import={importLsi} path={["table", column.code]} />
+              </DataTable.Th>
+            ))}
+          </DataTable.HeaderRow>
+        </thead>
 
-          <tbody>
-            {table.map((row) => {
-              const isOwn = row.team?.id === ownTeamId;
+        <tbody>
+          {table.map((row) => {
+            const isOwn = row.team?.id === ownTeamId;
 
-              return (
-                <tr
-                  key={row.team?.id ?? row.rank}
+            return (
+              <tr
+                key={row.team?.id ?? row.rank}
+                className={Config.Css.css({
+                  backgroundColor: isOwn ? theme.color.accent : "transparent",
+                  fontWeight: isOwn ? 700 : 400,
+                })}
+              >
+                <DataTable.Td
+                  align="center"
                   className={Config.Css.css({
-                    backgroundColor: isOwn ? theme.color.accent : "transparent",
-                    fontWeight: isOwn ? 700 : 400,
+                    color: isOwn ? theme.color.clubRed : theme.color.mutedFg,
+                    fontWeight: 700,
                   })}
                 >
-                  <td
-                    className={
-                      cell +
-                      " " +
-                      Config.Css.css({
-                        textAlign: "center",
-                        color: isOwn ? theme.color.clubRed : theme.color.mutedFg,
-                        fontWeight: 700,
-                      })
-                    }
-                  >
-                    {row.rank}
-                  </td>
+                  {row.rank}
+                </DataTable.Td>
 
-                  <th
-                    scope="row"
-                    className={cell + " " + Config.Css.css({ textAlign: "start", fontWeight: "inherit" })}
-                  >
-                    <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 8 })}>
-                      <TeamLogo uri={row.team?.logoUri} size={20} alt="" />
-                      {/* Na úzkém displeji zkratka; když ji tým nemá, plný název je pořád
-                          lepší než prázdno. */}
-                      <span>{(isCompact && row.team?.shortName) || row.team?.name || "—"}</span>
-                    </span>
-                  </th>
+                <DataTable.Th scope="row" className={Config.Css.css({ fontWeight: "inherit" })}>
+                  <span className={Config.Css.css({ display: "flex", alignItems: "center", gap: 8 })}>
+                    <TeamLogo uri={row.team?.logoUri} size={20} alt="" />
+                    {/* Na úzkém displeji zkratka; když ji tým nemá, plný název je pořád
+                        lepší než prázdno. */}
+                    <span>{(isCompact && row.team?.shortName) || row.team?.name || "—"}</span>
+                  </span>
+                </DataTable.Th>
 
-                  {columns.map((column) => (
-                    <td
-                      key={column.code}
-                      className={
-                        cell +
-                        " " +
-                        Config.Css.css({
-                          textAlign: column.numeric ? "center" : "start",
-                          fontWeight: column.strong ? 700 : "inherit",
-                          color: column.strong && isOwn ? theme.color.clubRed : "inherit",
-                        })
-                      }
-                    >
-                      {cellValue(row, column.code)}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                {columns.map((column) => (
+                  <DataTable.Td
+                    key={column.code}
+                    align={column.numeric ? "center" : "start"}
+                    className={Config.Css.css({
+                      fontWeight: column.strong ? 700 : "inherit",
+                      color: column.strong && isOwn ? theme.color.clubRed : "inherit",
+                    })}
+                  >
+                    {cellValue(row, column.code)}
+                  </DataTable.Td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </DataTable>
     );
   },
 });

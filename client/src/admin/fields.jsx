@@ -3,7 +3,7 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
-import { format } from "../components/date-text.jsx";
+import DateText from "../components/date-text.jsx";
 
 // Stavební kameny konfigurací pro `UiElements.Crud`.
 //
@@ -87,18 +87,21 @@ const ageField = {
   },
 };
 
-/** Datum se vypisuje česky, ukládá se ISO — proto `output`, ne holá hodnota. */
+// Datum se vypisuje česky, ukládá se ISO — proto `output`, ne holá hodnota. Vrací se
+// `DateText`, tedy komponenta, ne řetězec: sazbu data řeší `Uu5Elements.DateTime` uvnitř
+// a administrace tak píše datum stejně jako web. `output` node umí — `caio-ui` sám vrací
+// `<Uu5Elements.DateTime>` ve svém `binary-crud`.
 const dateField = (labelPath, { required = false } = {}) => ({
   label: labelPath,
   sort: true,
-  output: (value) => format(value),
+  output: (value) => <DateText value={value} />,
   input: { Component: Uu5Forms.FormDate, props: { required } },
 });
 
 const dateTimeField = (labelPath, { required = false } = {}) => ({
   label: labelPath,
   sort: true,
-  output: (value) => format(value, "dateTime"),
+  output: (value) => <DateText value={value} type="dateTime" />,
   input: { Component: Uu5Forms.FormDateTime, props: { required } },
 });
 
