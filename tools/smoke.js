@@ -310,7 +310,7 @@ const cleanupFilter = {
     { personId: person.body.id },
   ],
 };
-for (const c of ["team", "season", "match", "person", "player", "coach", "article"]) {
+for (const c of ["afk_team", "afk_season", "afk_match", "afk_person", "afk_player", "afk_coach", "afk_article"]) {
   await db.collection(c).deleteMany(cleanupFilter);
 }
 await db.collection("sys_identity").deleteMany({ email: ADMIN.email });

@@ -56,6 +56,7 @@ const EntitySelect = createVisualComponent({
 // popisek číselníku by sem musel přes LSI komponentu, což by z jednoduchého selectu
 // udělalo asynchronní.
 const teamLabel = (team) => team.name;
+const clubLabel = (club) => club.name;
 const personLabel = (person) => [person.surname, person.name].filter(Boolean).join(" ") || person.id;
 const seasonLabel = (season) => `${season.competition} ${season.yearFrom}/${String(Number(season.yearFrom) + 1).slice(-2)}`;
 
@@ -120,6 +121,7 @@ export {
   EnumText,
   enumItemList,
   teamLabel,
+  clubLabel,
   personLabel,
   seasonLabel,
   nameField,

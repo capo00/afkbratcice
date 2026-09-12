@@ -5,23 +5,29 @@ import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
 import AdminScreen from "../../admin/screen.jsx";
-import { nameField, ageField, boolField } from "../../admin/fields.jsx";
-import { prepareImage } from "../../admin/image.js";
+import { entityCalls } from "../../admin/crud-calls.js";
+import { nameField, ageField, boolField, EntitySelect, clubLabel } from "../../admin/fields.jsx";
 
 // Správa týmů — vlastních i soupeřů.
 //
 // `own` rozhoduje o tom, jestli tým patří klubu; podle něj se staví přehled mužstev
 // a `team/list?own=true`. Není to příznak k odvození: soupeř se stejným názvem jako naše
 // mužstvo je běžná věc a z dat by to nikdo nepoznal.
+//
+// Logo se tady nenahrává — patří klubu (`admin/clubs.jsx`), na který se tým odkazuje
+// přes `clubId`. Víc věkových kategorií stejného klubu tak sdílí jedno logo, ne tři
+// nahrané kopie (design/data-model.md, 1.2).
 
 const [TeamProvider] = UiElements.CrudContext.create("team");
+// Bez `createMany`/`deleteMany` -- `team` je na serveru nemá (admin/crud-calls.js).
+const CALLS = entityCalls("team");
 
 const CONFIG = {
   logo: {
     label: lsi("admin", "field", "logo"),
     output: (value, item) => <TeamLogo uri={item.data.logoUri} size={28} alt="" />,
     columnProps: { maxWidth: 72, horizontalAlignment: "center" },
-    input: { Component: UiElements.FormFile, props: { accept: "image/*" } },
+    input: false,
   },
   name: nameField,
   shortName: {
@@ -30,6 +36,14 @@ const CONFIG = {
   },
   age: ageField,
   own: boolField(lsi("admin", "field", "own")),
+  clubId: {
+    label: lsi("admin", "field", "clubId"),
+    output: false,
+    input: {
+      Component: EntitySelect,
+      props: { required: true, useCase: "/club/list", getLabel: clubLabel },
+    },
+  },
 };
 
 const { seriesList, columnList, sorterList, filterList } = UiElements.Crud.generate(CONFIG);
@@ -40,7 +54,7 @@ const AdminTeams = createVisualComponent({
   render() {
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "teams", "header")}>
-        <TeamProvider>
+        <TeamProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
               dataList={dataList}
@@ -48,11 +62,6 @@ const AdminTeams = createVisualComponent({
               columnList={columnList}
               sorterDefinitionList={sorterList}
               filterDefinitionList={filterList}
-              // Logo se zmenší až tady, ne ve vstupu: `onPreSubmit` je jediné místo, kudy
-              // projde vytvoření i úprava, takže se to nedá obejít jedním z nich.
-              onPreSubmit={async (e) => {
-                if (e.data.value.logo) e.data.value.logo = await prepareImage(e.data.value.logo, "logo");
-              }}
             >
               {() => UiElements.Crud.generateInputs(CONFIG)}
             </UiElements.Crud>

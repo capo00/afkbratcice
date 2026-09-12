@@ -18,8 +18,7 @@ const writeDtoIn = shape({
   shortName: string(),
   age: oneOf(Config.AGE_LIST),
   own: boolean(),
-  // File dorazí z multipart/form-data; `null` znamená "smazat logo".
-  logo: any(),
+  clubId: mongoId(),
 });
 
 export default {
@@ -43,7 +42,8 @@ export default {
     fn: ({ dtoIn }) => crud.create(dtoIn),
   },
 
-  // Editor týmu smí upravit svůj tým (logo, název, zkratku).
+  // Editor týmu smí upravit svůj tým (název, zkratku, klub). Logo je od 2026-09-11 věcí
+  // `club/update` (jen CONTENT) -- TE ho spravovat nemá, viz design/roles.md, 5.2.
   "team/update": {
     method: "post",
     auth: teamScoped(async (dtoIn) => [dtoIn?.id], Config.CONTENT, "all"),

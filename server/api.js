@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { Authentication, BinaryStore } from "caio-server";
 
 import Config from "./config.js";
+import clubApi from "./club/api.js";
 import teamApi from "./team/api.js";
 import seasonApi from "./season/api.js";
 import matchApi from "./match/api.js";
@@ -43,6 +44,7 @@ const sysApi = {
 // Čtení je všude veřejné: co se sem nahraje, se stejně veřejně zobrazuje.
 const binaryCollectionMap = {
   [Config.BINARY_COLLECTION.SYS]: { write: { profileList: Config.CONTENT } },
+  [Config.BINARY_COLLECTION.CLUB]: { write: { profileList: Config.CONTENT } },
   [Config.BINARY_COLLECTION.TEAM]: { write: { profileList: Config.CONTENT } },
   [Config.BINARY_COLLECTION.PERSON]: { write: { profileList: Config.CONTENT } },
   [Config.BINARY_COLLECTION.ARTICLE]: { write: { profileList: Config.NEWS } },
@@ -54,6 +56,7 @@ const binaryCollectionMap = {
 
 export default {
   ...sysApi,
+  ...clubApi,
   ...teamApi,
   ...seasonApi,
   ...matchApi,

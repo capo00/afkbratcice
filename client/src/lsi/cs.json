@@ -23,7 +23,8 @@
     "header": "Administrace",
     "empty": "Na žádnou obrazovku administrace nemáte oprávnění.",
     "menu": {
-      "teams": { "header": "Mužstva a soupeři", "desc": "Týmy, loga a kategorie" },
+      "clubs": { "header": "Kluby", "desc": "Erby a názvy klubů, sdílené napříč kategoriemi" },
+      "teams": { "header": "Mužstva a soupeři", "desc": "Týmy a kategorie" },
       "seasons": { "header": "Sezóny", "desc": "Ročníky soutěží a jejich účastníci" },
       "matches": { "header": "Zápasy", "desc": "Rozpis, výsledky a sestavy" },
       "persons": { "header": "Osoby", "desc": "Lidé klubu a jejich kontakty" },
@@ -43,6 +44,7 @@
       "age": "Kategorie",
       "own": "Naše",
       "logo": "Logo",
+      "clubId": "Klub",
       "photo": "Foto",
       "note": "Poznámka",
       "birthdate": "Narození",

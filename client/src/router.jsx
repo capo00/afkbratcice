@@ -29,6 +29,7 @@ const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
 // přišel na výsledek zápasu, je nemá stahovat vůbec.
 const ADMIN_SCREEN = {
   "": Utils.Component.lazy(() => import("./routes/admin/index.jsx")),
+  clubs: Utils.Component.lazy(() => import("./routes/admin/clubs.jsx")),
   teams: Utils.Component.lazy(() => import("./routes/admin/teams.jsx")),
   seasons: Utils.Component.lazy(() => import("./routes/admin/seasons.jsx")),
   matches: Utils.Component.lazy(() => import("./routes/admin/matches.jsx")),

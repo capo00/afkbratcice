@@ -2,7 +2,7 @@ import { Dao } from "caio-server";
 
 class MatchDao extends Dao {
   constructor() {
-    super("match");
+    super("afk_match");
   }
 
   createIndexes() {

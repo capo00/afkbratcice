@@ -4,7 +4,12 @@
 > (viz [README.md](./README.md), sekce 3.1) – mění se `sys_binary` (sekce 12) a `gallery`
 > (sekce 9). Role a jejich rozsah vlastní [roles.md](./roles.md).
 
-MongoDB, jedna databáze, bez prefixu kolekcí (aplikace je samostatná).
+MongoDB, jedna databáze. **Kolekce appky mají od 2026-09-11 prefix `afk_`** (`afk_team`,
+`afk_club`, `afk_config`, …) – výjimka jsou `sys_binary` a `sys_identity`, které patří
+knihovně `caio-server` a sdílí je i jiné appky nad stejným Mongem. Prefix je jen na
+kolekci samotné (druhý argument `Dao` konstruktoru); API cesty (`team/list`, `appConfig/get`)
+se neměnily.
+
 Přístup přes `Dao`, business logika přes `Crud` – obojí z balíčku `caio-server`
 (`import { Dao, Crud, Error } from "caio-server"`).
 
@@ -23,7 +28,8 @@ Společné vlastnosti všech kolekcí (zajišťuje `Dao`):
 
 ```mermaid
 erDiagram
-    SYS_BINARY   ||--o{ TEAM        : "logoId"
+    SYS_BINARY   ||--o{ CLUB        : "logoId"
+    CLUB         ||--o{ TEAM        : "clubId"
     SYS_BINARY   ||--o{ PERSON      : "photoId"
     SYS_BINARY   ||--o{ ARTICLE     : "photographId"
     SYS_BINARY   }o--|| GALLERY     : "refId (fotky alba)"
@@ -48,13 +54,19 @@ na ni; váže ji jen `code` v URL.
 
 ```mermaid
 erDiagram
+    CLUB {
+        string id PK
+        string name "unique"
+        string logoId FK "sys_binary, kolekce club"
+        string logoUri "denormalizace"
+    }
     TEAM {
         string id PK
         string name "unique s age"
         string shortName "pro tabulku na mobilu"
         enum   age "AGE_MAP"
-        string logoId FK "sys_binary, kolekce team"
-        string logoUri "denormalizace; fallback klubový erb"
+        string clubId FK "club -- odkud se bere logo"
+        string logoUri "denormalizace club.logoUri; fallback klubový erb"
         bool   own "true = mužstvo AFK"
     }
     SEASON {
@@ -232,22 +244,46 @@ erDiagram
 
 | Kolekce | Původ | Popis |
 |---|---|---|
-| `team` | v1 | Tým – vlastní i soupeři, vždy v rámci věkové kategorie |
-| `season` | v1 | Ročník soutěže (soutěž + rok + kategorie + účastníci) |
-| `match` | v1 | Zápas včetně výsledku a sestavy |
-| `person` | nová | Osoba (jméno, kontakt) – sdílená pro hráče i trenéry |
-| `player` | nová | Hráčská role osoby, členství v týmech v čase |
-| `coach` | nová | Trenérská/funkcionářská role osoby |
-| `article` | nová | Novinka; obsah je `sectionList[].content` (`uu5String`) |
-| `gallery` | nová | Fotoalbum |
+| `afk_club` | nová | Reálný klub – jméno a erb, sdílené napříč věkovými kategoriemi (viz 2.1) |
+| `afk_team` | v1 | Tým – vlastní i soupeři, vždy v rámci věkové kategorie |
+| `afk_season` | v1 | Ročník soutěže (soutěž + rok + kategorie + účastníci) |
+| `afk_match` | v1 | Zápas včetně výsledku a sestavy |
+| `afk_person` | nová | Osoba (jméno, kontakt) – sdílená pro hráče i trenéry |
+| `afk_player` | nová | Hráčská role osoby, členství v týmech v čase |
+| `afk_coach` | nová | Trenérská/funkcionářská role osoby |
+| `afk_article` | nová | Novinka; obsah je `sectionList[].content` (`uu5String`) |
+| `afk_gallery` | nová | Fotoalbum |
 | `page` | **nevzniká** | Obsahová stránka — zatím natvrdo v klientu, čeká na ECC |
-| `app_config` | v1 (`app`) | Singleton konfigurace aplikace |
-| `sys_binary` | `caio-server` | Metadata souboru v Google Cloud Storage |
-| `sys_identity` | `caio-server` | Přihlašovací identita |
+| `afk_config` | v1 (`app`) | Singleton konfigurace aplikace |
+| `sys_binary` | `caio-server` | Metadata souboru v Google Cloud Storage — **bez prefixu**, sdílí ji knihovna |
+| `sys_identity` | `caio-server` | Přihlašovací identita — **bez prefixu**, sdílí ji knihovna |
 
 ---
 
-## 2. `team`
+## 2. `club` a `team`
+
+> **Doplněno 2026-09-11:** logo se od teď váže na `club`, ne na `team`. Důvod: víc
+> věkových kategorií stejného reálného klubu (Chotusice muži, dorost, žáci, …) je pořád
+> tři samostatné `team` dokumenty – jinak by nešlo počítat tabulku ani vést oddělené
+> soupisky – ale erb mají všechny stejný. Dřív se tak nahrával a spravoval třikrát;
+> `club` je jeden záznam, na který se všechny věkové varianty odkazují přes `team.clubId`.
+
+### 2.1 `club`
+
+| Pole | Typ | Povinné | Popis |
+|---|---|---|---|
+| `id` | string | ✓ | |
+| `name` | string | ✓, unique | Název reálného klubu, např. `AFK Bratčice`, `Sokol Kluky` |
+| `logoId` | string | | `id` do `sys_binary` (kolekce `club`) |
+| `logoUri` | string | | Denormalizované URI loga |
+
+**Indexy**
+
+```
+{ name: 1 }  unique
+```
+
+### 2.2 `team`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -255,8 +291,8 @@ erDiagram
 | `name` | string | ✓ | Název týmu, např. `AFK Bratčice` |
 | `shortName` | string | | Zkratka pro tabulku a mobil (max 12 znaků) |
 | `age` | enum | ✓ | Klíč z `AGE_MAP` (viz sekce 13) |
-| `logoId` | string | | `id` do `sys_binary` |
-| `logoUri` | string | | Denormalizované URI loga (kompatibilita s v1) |
+| `clubId` | string | ✓ | FK na `club` – odkud se bere logo |
+| `logoUri` | string | | Denormalizace `club.logoUri`; udržuje ji `club/update`, ne `team` (viz 2.1) |
 | `own` | boolean | | `true` = tým AFK Bratčice; usnadní filtrování a zvýraznění |
 | `desc` | string | | Perex mužstva pro kartu v přehledu |
 | `photoId` | string | | Týmová fotka – `id` do `sys_binary` (kolekce `team`, `type: "photo"`) |
@@ -268,22 +304,30 @@ erDiagram
 ```
 { name: 1, age: 1 }  unique
 { age: 1, name: 1 }
+{ clubId: 1 }
 ```
 
 Poznámky:
 
 - Soupeři jsou plnohodnotné `team` dokumenty – jinak by nešlo počítat tabulku.
-- Stejný klub ve dvou kategoriích = dva dokumenty (proto je `age` v unikátním indexu).
-- `logoUri` udržuje ABL při `create`/`update`/`delete` loga (převzato z v1 `team-abl.js`).
+- Stejný klub ve dvou kategoriích = dva dokumenty (proto je `age` v unikátním indexu),
+  ale se stejným `clubId`.
+- `name` na `team` **není spolehlivý klíč ke sloučení klubů** – dva různé reálné kluby se
+  stejným jménem (běžné u „Sokol", „TJ" apod.) nejsou vyloučené, a appka to z dat nepozná
+  (`client/src/routes/admin/teams.jsx`). Sloučení dvou `team` na jeden `club` je proto vždy
+  ruční volba admina (přepnutí `clubId`), ne automatický odhad.
+- `logoUri` je čistě denormalizace pro čtení bez joinu; zapisuje ji `TeamDao.updateLogoUriByClub`
+  při `club/update`, a `TeamCrud.create`/`update` při změně `clubId` (dopočet z cílového
+  klubu). `team` sama o sobě logo nikdy nezapisuje.
 - `desc`, `photoUri` a `photoDesc` **mají smysl jen u vlastních týmů** (`own: true`) –
-  u soupeřů zůstávají prázdné. Fotka jde stejnou cestou jako logo (stejná kompenzace při
-  selhání zápisu), jen s `type: "photo"`, aby se dvě binárky téhož týmu daly rozlišit.
+  u soupeřů zůstávají prázdné. Fotka jde stejnou cestou jako dřív logo (stejná kompenzace
+  při selhání zápisu), jen s `type: "photo"`, aby se dvě binárky téhož týmu daly rozlišit.
 - **`desc` je perex, `photoDesc` popisek fotky** – dvě různé věci, dvě pole. Perex se jmenuje
   `desc` všude v modelu (`page.desc`, `season.desc`), takže tady taky.
 
 ---
 
-## 3. `season`
+## 3. `afk_season`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -294,6 +338,15 @@ Poznámky:
 | `desc` | string | | Poznámka (změny v rozlosování apod.) |
 | `teamList` | string[] | ✓ | `id` účastnických týmů |
 | `hasPenalties` | boolean | | Hraje se na penaltový rozstřel? Rozhoduje o bodování tabulky |
+| `state` | enum | | `open` (výchozí) / `closed` — dohráno a vyhodnoceno |
+| `finalTable` | object[] | | Konečná tabulka uzavřené sezóny; u `open` prázdné |
+| `closedAt` | datetime | | Kdy se sezóna uzavřela |
+
+**`state`, `finalTable` a `closedAt` zatím nejsou implementované** (rozhodnuto 2026-09-09).
+Ukončený ročník se vyhodnotí jednou a tabulka se uloží, místo aby se pokaždé počítala
+z neúplných historických dat: doplnění jednoho chybějícího zápasu z roku 2011 by jinak
+potichu přepsalo pořadí celé sezóny. Zdůvodnění a pravidlo, kdy se sezóna uzavírá, je
+v [migration.md](./migration.md), sekce 2.1.
 
 **Indexy**
 
@@ -321,7 +374,7 @@ nezměnil bodování celé tabulky.
 
 ---
 
-## 4. `match`
+## 4. `afk_match`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -376,7 +429,7 @@ Poznámky:
 
 ---
 
-## 5. `person`
+## 5. `afk_person`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -409,7 +462,7 @@ selhalo. Pravidla a proč jsou takhle úzká: [api.md](./api.md), sekce 2.5.1.
 
 ---
 
-## 6. `player`
+## 6. `afk_player`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -434,7 +487,7 @@ Aktuální soupiska týmu = `{ "teamList": { $elemMatch: { id: teamId, $or: [ { 
 
 ---
 
-## 7. `coach`
+## 7. `afk_coach`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -454,7 +507,7 @@ Role `board` (výbor klubu) pokrývá stránku „Výbor AFK“ z v0 bez nutnost
 
 ---
 
-## 8. `article`
+## 8. `afk_article`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -506,7 +559,7 @@ Poznámky:
 
 ---
 
-## 9. `gallery`
+## 9. `afk_gallery`
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
@@ -599,7 +652,7 @@ Poznámky:
 
 ---
 
-## 11. `app_config`
+## 11. `afk_config`
 
 Singleton (jediný dokument v kolekci) – převzato z v1 `app-dao` / `app-abl`.
 

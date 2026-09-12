@@ -11,6 +11,11 @@ import Config from "../config/config.js";
 // a `router.jsx` jí neregistruje routu. Položka, která vede na 404, je horší než kratší
 // rozcestník. (Dnes jsou hotové všechny — příznak zůstává pro tu příští.)
 const ADMIN_MENU = [
+  // Klub drží erb (design/data-model.md, 1.2) -- víc věkových kategorií stejného klubu
+  // (Chotusice muži/dorost/žáci) na něj odkazuje týmž `clubId`, takže se logo nahrává
+  // jednou, ne za každý tým zvlášť. Jen CONTENT, ne TEAM_SCOPED: TE svoje logo neřeší
+  // (design/roles.md, 5.2).
+  { code: "clubs", route: "admin/clubs", icon: "uugdsstencil-navigation-flag", ready: true, profileList: Config.CONTENT },
   { code: "teams", route: "admin/teams", icon: "uugds-shield", ready: true, profileList: [...Config.CONTENT, ...Config.TEAM_SCOPED] },
   { code: "seasons", route: "admin/seasons", icon: "uugds-calendar", ready: true, profileList: Config.CONTENT },
   { code: "matches", route: "admin/matches", icon: "uugds-sprint", ready: true, profileList: [...Config.MATCH, ...Config.TEAM_SCOPED] },

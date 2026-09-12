@@ -123,7 +123,7 @@ function sqlTable(name) {
 // --- pomocné -------------------------------------------------------------------------
 
 const migrationMapDao = new (class extends Dao {
-  constructor() { super("migration_map"); }
+  constructor() { super("afk_migration_map"); }
   createIndexes() { return this.createIndex({ entity: 1, v0Id: 1 }, { unique: true }); }
 })();
 
@@ -256,7 +256,17 @@ if (RESET && !DRY) {
   // který si sám odporuje. Fotogalerie se navíc nemigruje vůbec -- fotky jedou přes
   // Facebook (README, sekce 2) --, takže po resetu zůstane prázdná, a to je správně.
   //
-  for (const name of ["team", "season", "match", "person", "player", "coach", "gallery", "article", "migration_map"]) {
+  for (const name of [
+    "afk_team",
+    "afk_season",
+    "afk_match",
+    "afk_person",
+    "afk_player",
+    "afk_coach",
+    "afk_gallery",
+    "afk_article",
+    "afk_migration_map",
+  ]) {
     const { deletedCount } = await db.collection(name).deleteMany({});
     console.log(`  reset ${name.padEnd(14)} smazáno ${deletedCount}`);
   }

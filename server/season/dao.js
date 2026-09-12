@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 
 class SeasonDao extends Dao {
   constructor() {
-    super("season");
+    super("afk_season");
   }
 
   createIndexes() {

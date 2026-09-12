@@ -61,6 +61,11 @@ const MEMBER = [ROLE.MEMBERS, ...CONTENT];
 // nahrává do galerie, nemá mít možnost přepsat logo klubu (design/roles.md, 5.1).
 const BINARY_COLLECTION = {
   SYS: "sys",
+  CLUB: "club",
+  // Erb je od 2026-09-11 na `club`; `team` zůstává vyhrazené pro plánovanou týmovou
+  // fotku (design/data-model.md, 2.2, pole `photoId`) -- zatím se nezapisuje, ale
+  // patří jinam než logo, protože fotka je vlastnost jednoho konkrétního mužstva
+  // v jedné sezóně, ne klubu jako celku.
   TEAM: "team",
   PERSON: "person",
   ARTICLE: "article",

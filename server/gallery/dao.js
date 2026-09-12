@@ -2,7 +2,7 @@ import { Dao } from "caio-server";
 
 class GalleryDao extends Dao {
   constructor() {
-    super("gallery");
+    super("afk_gallery");
   }
 
   createIndexes() {

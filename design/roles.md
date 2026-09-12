@@ -201,9 +201,11 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 
 | Use case | Kdo | Poznámka |
 |---|---|---|
+| `club/list`, `club/get` | – | erb a jméno klubu, nic neveřejného; viz 5.2 |
+| `club/create`, `update`, `delete` | CONTENT | **ne TE** — viz 5.2 |
 | `team/list`, `team/get` | – | |
 | `team/create` | CONTENT | |
-| `team/update` | CONTENT, **TE** | TE jen svůj tým (logo, název, zkratka) |
+| `team/update` | CONTENT, **TE** | TE jen svůj tým (název, zkratka, `clubId`) — logo ne, viz 5.2 |
 | `team/delete` | CONTENT | |
 | `season/list`, `get`, `getCurrent`, `listCurrent`, `listYears` | – | `listCurrent` staví menu |
 | `season/create`, `update`, `delete` | CONTENT | zakládá kategorie pro ročník |
@@ -272,8 +274,9 @@ a autorizace se nastavuje per kolekce.**
 
 | Kolekce | Co v ní je | Zápis |
 |---|---|---|
-| `sys` | logo klubu, favicon, PWA ikony | CONTENT |
-| `team` | loga týmů | CONTENT, **TE** |
+| `sys` | klubový erb jako statický asset (favicon, PWA ikony) | CONTENT |
+| `club` | erby klubů (`club.logoId`) | CONTENT — **ne TE**, viz 5.2 |
+| `team` | vyhrazeno pro budoucí týmovou fotku, dnes se nezapisuje | CONTENT, **TE** |
 | `person` | portréty osob | CONTENT, **TE** |
 | `article` | titulní fotky článků | NEWS |
 | `gallery` | fotky alb (plné i náhledy) | GALLERY |
@@ -302,6 +305,27 @@ jen na dva lidi bez ohledu na to, kdo má `operatives`.
 
 **Je to změna v `caio-server`**, ne v aplikaci; návrh API je v [api.md](./api.md),
 sekce 2.11.
+
+### 5.2 Klub a logo — proč TE nemá přístup
+
+Doplněno 2026-09-11: logo se přesunulo z `team` na novou entitu `club` — víc věkových
+kategorií stejného reálného klubu (Chotusice muži/dorost/žáci) sdílí jeden erb, viz
+[data-model.md](./data-model.md), sekce 2.
+
+**`teamEditor:<teamId>` na `club/update` nedosáhne.** Rozsah TE je vázaný na konkrétní
+`teamId` (sekce 3), ne na klub — a `club` může být sdílený mezi víc týmy, tedy i mezi
+víc různými TE. Dvě možnosti, jak to řešit:
+
+- **(a) TE logo ztrácí** — zvoleno. Editace loga jde jen přes `club/update` (CONTENT).
+  Trenér, který dřív směl přepsat logo svého týmu, teď musí požádat správce.
+- (b) `club/update` by dostal vlastní `auth`, který ověří, jestli identity má
+  `teamEditor:<X>` pro **některý** tým s daným `clubId` — zachovalo by to dnešní chování,
+  ale je to výjimka z principu „žádná dědičnost, auth je plochý seznam" (sekce 1) a přidává
+  dotaz `team → club` navíc do autorizační vrstvy. Zamítnuto pro jednoduchost.
+
+TE si nadále může sám změnit `clubId` svého týmu (přepnout, na který klub se odkazuje) —
+to zůstává v `team/update` beze změny, protože nesahá na cizí `club` záznam, jen na
+vlastní FK.
 
 ### Provoz a identity
 

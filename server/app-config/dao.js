@@ -2,7 +2,7 @@ import { Dao } from "caio-server";
 
 class AppConfigDao extends Dao {
   constructor() {
-    super("app_config");
+    super("afk_config");
   }
 
   /** Singleton: v kolekci je nejvýš jeden dokument. */

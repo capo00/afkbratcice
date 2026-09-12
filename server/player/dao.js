@@ -2,7 +2,7 @@ import { Dao } from "caio-server";
 
 class PlayerDao extends Dao {
   constructor() {
-    super("player");
+    super("afk_player");
   }
 
   createIndexes() {

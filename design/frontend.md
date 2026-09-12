@@ -146,7 +146,8 @@ a `withRoute` guard nemohly rozejít.
 
 | Routa | Obsah |
 |---|---|
-| `admin/teams` | CRUD týmů (vč. loga) |
+| `admin/clubs` | CRUD klubů (jméno + erb) — doplněno 2026-09-11, viz sekce 2.2.1 |
+| `admin/teams` | CRUD týmů (výběr klubu přes `clubId`, logo se tu už nenahrává) |
 | `admin/seasons` | CRUD sezón, přiřazení týmů, `hasPenalties` |
 | `admin/matches` | CRUD zápasů, hromadné vytvoření, zápis výsledku a sestavy |
 | `admin/persons` | CRUD osob |
@@ -162,6 +163,20 @@ a `withRoute` guard nemohly rozejít.
 Kdo na kterou obrazovku smí, určuje [roles.md](./roles.md); většina z nich je pro množinu
 `CONTENT`, specializované role vidí jen svou část (`newsEditor` → `admin/articles`,
 `galleryEditor` → `admin/galleries`, `teamEditor` → jen svoje týmy).
+
+#### 2.2.1 `admin/clubs` — proč vlastní obrazovka
+
+Víc věkových kategorií stejného reálného klubu (Chotusice muži, dorost, žáci, …) je pořád
+tři samostatné `team` dokumenty, ale erb mají stejný — dřív se tak nahrával a spravoval
+třikrát. `club` nese jméno a erb jednou, `team.clubId` na něj odkazuje (viz
+[data-model.md](./data-model.md), sekce 2). Proto **samostatná obrazovka**, ne jen pole ve
+formuláři týmu: erb se mění nezávisle na tom, jestli se zrovna zakládá nebo edituje nějaký
+tým, a menu `CONTENT` uživatele k němu chce dostat i bez otevírání konkrétní kategorie.
+
+`admin/teams` proto logo nezobrazuje jako vstup, jen jako náhled (`input: false` u sloupce
+`logo`), a přidává `clubId` jako `EntitySelect` nad `/club/list` — stejný vzor jako výběr
+sezóny/týmu u zápasu (`admin/matches`, sekce 6.2). **Jen CONTENT, ne `teamEditor`** — logo
+je teď věc klubu, ne konkrétního týmu, viz [roles.md](./roles.md), sekce 5.2.
 
 Ochranu řeší `UiApp.withRoute(Component, { profileList: [...] })` – nepřihlášený dostane
 `UiAuth.Unauthenticated`, přihlášený bez role `UiAuth.Unauthorized`. Je to **UX, ne
@@ -458,10 +473,13 @@ se dostane sám, protože `createViteConfig()` staví mapu z tranzitivního uzá
 závislostí klienta. Ověřeno v prohlížeči na `/historie`.
 
 Cena je ale citelná: `uu5bricksg01` s sebou přitáhne dalších **28 `uu*` balíčků** a výstup
-`public/libs` naroste z ~30 MB na **~120 MB** — sama komponenta je líná, ale do nasazení jde
-všechno, co je v mapě. Největší kusy jsou `uu_uubmldraw_iconsg04` (51 MB) a starý
-`uu5codekitg01-forms` (18 MB), které tenhle web nikdy nezobrazí. Až to začne vadit u deploye, jde
-je vyřadit přes `client/uu5-imports.json`.
+`public/libs` naroste z ~30 MB na **126 MB** — sama komponenta je líná, ale do nasazení jde
+všechno, co je v mapě. Největší kus je `uu_uubmldraw_iconsg04` (**70 MB**, ikony BML
+diagramů), který tenhle web nikdy nezobrazí.
+
+**Balíček přesto zůstává** (2026-09-09): kromě časové osy z něj přijdou komponenty do obsahu,
+až se bude dělat ECC. Řeší se tedy jen ta jedna závislost — vyřadit `uu_uubmldraw_iconsg04`
+z import mapy přes `client/uu5-imports.json`, až to začne vadit u deploye (`todo.md`, 5.2).
 
 > **uu5g04 je zakázané.** Ani jako varianta, ani jako „hotové řešení, které by šlo
 > přitáhnout“. Chybí-li komponenta, hledá se v uu5g05 řadě, nebo se napíše vlastní nad

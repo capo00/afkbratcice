@@ -2,7 +2,7 @@ import { Dao } from "caio-server";
 
 class TeamDao extends Dao {
   constructor() {
-    super("team");
+    super("afk_team");
   }
 
   createIndexes() {
@@ -11,6 +11,7 @@ class TeamDao extends Dao {
       super.createIndex({ name: 1, age: 1 }, { unique: true }),
       super.createIndex({ age: 1, name: 1 }),
       super.createIndex({ own: 1 }),
+      super.createIndex({ clubId: 1 }),
     ]);
   }
 
@@ -24,6 +25,21 @@ class TeamDao extends Dao {
 
   listOwn() {
     return this.find({ own: true }, undefined, { name: 1 });
+  }
+
+  listByClub(clubId) {
+    return this.find({ clubId });
+  }
+
+  /**
+   * Erb je od klubu odvozený, ale `team.logoUri` zůstává denormalizace (čtení bez joinu,
+   * stejně jako dřív) -- takže při změně loga na klubu se musí přepsat na všech
+   * kategoriích, ne jen na tom týmu, který logo zrovna edituje (design/data-model.md, 1.2).
+   */
+  async updateLogoUriByClub(clubId, logoUri) {
+    await this._exec(() =>
+      this.coll.updateMany({ clubId }, { $set: { logoUri, "sys.mts": new Date().toISOString() } }),
+    );
   }
 }
 

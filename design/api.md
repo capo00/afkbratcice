@@ -175,19 +175,40 @@ Binárky se autorizují **podle kolekce**, ne rolí z téhle tabulky — viz sek
 Kde je u zápisového use casu navíc **TE**, smí ho volat i editor konkrétního týmu —
 rozsah a jeho úskalí jsou v [roles.md](./roles.md), sekce 3.
 
-### 2.1 `team`
+### 2.1 `club` a `team`
+
+> **Doplněno 2026-09-11:** logo se odsud přesunulo na `club` — víc věkových kategorií
+> stejného reálného klubu sdílí jeden erb, viz [data-model.md](./data-model.md), sekce 2.
+> `team/create`/`update` proto místo `logo` nesou `clubId`.
+
+| Use case | Metoda | Auth | dtoIn | dtoOut |
+|---|---|---|---|---|
+| `club/list` | get | – | `{ pageInfo }` | `{ itemList }` |
+| `club/get` | get | – | `{ id }` | `club` |
+| `club/create` | post | CONTENT | `{ name, logo: File }` | `club` |
+| `club/update` | post | CONTENT | `{ id, name, logo: File \| null }` | `club` |
+| `club/delete` | post | CONTENT | `{ id }` | `{}` |
+
+`club/list`/`get` jsou veřejné jako u `team` (nic neveřejného v sobě nenesou) — je to čistě
+proto, že výběr klubu ve formuláři týmu otevírá i `teamEditor:<id>`, který na `CONTENT`
+nemá dosah (viz [roles.md](./roles.md), sekce 5.2).
+
+Práce s logem se přebírá z toho, jak dřív fungovala na `team` (`team-abl.js` z v1): `create`
+nahraje binárku a uloží `logoId` + `logoUri`, `update` s `logo: null` binárku smaže, `delete`
+smaže i logo. Při selhání zápisu se nahraná binárka uklidí (kompenzace). Navíc `club/update`
+propaguje `logoUri` na **všechny** `team` dokumenty se stejným `clubId` — je to
+denormalizace pro čtení bez joinu, ne vlastnictví loga týmem.
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
 | `team/list` | get | – | `{ age, idList, own, pageInfo }` | `{ itemList }` |
 | `team/get` | get | – | `{ id }` | `team` |
-| `team/create` | post | CONTENT | `{ name, shortName, age, own, desc, logo: File, photo: File, photoDesc }` | `team` |
-| `team/update` | post | CONTENT, **TE** | `{ id, name, shortName, age, own, desc, logo: File \| null, photo: File \| null, photoDesc }` | `team` |
+| `team/create` | post | CONTENT | `{ name, shortName, age, own, clubId, desc, photo: File, photoDesc }` | `team` |
+| `team/update` | post | CONTENT, **TE** | `{ id, name, shortName, age, own, clubId, desc, photo: File \| null, photoDesc }` | `team` |
 | `team/delete` | post | CONTENT | `{ id }` | `{}` |
 
-Práce s logem se přebírá z v1 `team-abl.js`: `create` nahraje binárku a uloží
-`logoId` + `logoUri`, `update` s `logo: null` binárku smaže, `delete` smaže i logo.
-Při selhání zápisu se nahraná binárka uklidí (kompenzace).
+**TE (`teamEditor:<teamId>`) smí měnit název, zkratku a `clubId` svého týmu, ale ne logo** —
+to je teď `club/update`, které TE nevolá (viz [roles.md](./roles.md), sekce 5.2).
 
 **Týmová fotka** (`photo` / `photoUri` / `photoDesc`) jede úplně stejnou cestou, jen do
 `sys_binary` s `type: "photo"` místo `"logo"` — z toho se skládá karta v přehledu mužstev
@@ -528,7 +549,8 @@ aplikační přílepek — knihovna podle něj autorizuje i filtruje.
 ...(BinaryStore.isConfigured() ? BinaryStore.createApi({
   collectionMap: {
     sys:     { write: { profileList: Config.CONTENT } },
-    team:    { write: { authorize: teamScopedBinary } },
+    club:    { write: { profileList: Config.CONTENT } },  // erb -- CONTENT, TE ho neřeší
+    team:    { write: { authorize: teamScopedBinary } },  // vyhrazené pro budoucí týmovou fotku
     person:  { write: { authorize: teamScopedBinary } },
     article: { write: { profileList: Config.NEWS } },
     gallery: { write: { profileList: Config.GALLERY } },
