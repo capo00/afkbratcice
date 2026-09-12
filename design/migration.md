@@ -4,6 +4,14 @@
 > mizí `system-identity.json` a proměnná `GOOGLE_DISK_PUBLIC_FOLDER_ID`, přibývá
 > `GCS_BUCKET_NAME`. Viz [README.md](./README.md), sekce 3.1 a 7.
 
+> **Aktualizováno 2026-09-09: plná migrace je jen o zápasech.** Z v0 se převádí
+> **rozlosování a výsledky** (a co k nim patří — týmy, sezóny, sestavy), a ukončené ročníky
+> se při tom **vyhodnotí a uzavřou** (sekce 2.1). **Články ani fotogalerie se nemigrují**:
+> obojí drží obsah v souborech na disku v0, ne v databázi, takže by to byla nejdelší
+> a nejkřehčí část migrace kvůli obsahu, který dnes klub vydává jinde (novinky nově,
+> fotky na Facebooku). Kroky 8–10 tím padají; mapování v sekcích 3.6–3.8 zůstává zapsané
+> pro případ, že se to rozhodnutí otočí.
+
 > **Aktualizováno 2026-09-07: MySQL dump je k dispozici** (`caio-share/d27814_afk.sql`)
 > a proběhla z něj **částečná migrace sezóny 2026** — `tools/migrate-2026.js`. Není to
 > etapa 11: bere jen jeden ročník (týmy, sezóny, zápasy, soupisku mužů, trenéra, články
@@ -18,7 +26,7 @@
 | **MySQL (v0)** | `tym`, `hrac`, `trener`, `zapas`, `ucast`, `post`, `clanek`, `soubor`, `serial`, `pripona`, `fotogalerie` | Historická data od roku ~2005 |
 | **MySQL (v0) – mimo rozsah** | `diskuze`, `prijem`, `pokuta`, `vydaj`, `zakazip` | Archivovat exportem, nemigrovat |
 | **MongoDB (v1)** | `team`, `season`, `match`, `ecc_page`, `ecc_section`, `sys_binary`, `sys_identity`, `app` | Novější data, už ve správném tvaru |
-| **Souborový systém (v0)** | `galerie/<datum>/*.jpg`, `galerie/hraci/<login>_1.jpg`, `galerie/historie/teams/*`, `reporty/*`, `soubory/*` | Nahrát do GCS bucketu přes `BinaryStore.Binary` |
+| **Souborový systém (v0)** | `galerie/<datum>/*.jpg`, `galerie/hraci/<login>_1.jpg`, `reporty/*`, `soubory/*` | **Nemigruje se** (2026-09-09). Výjimkou jsou týmové fotky z `galerie/historie/teams/*` — ty už v repu jsou jako statika `client/public/assets/teams/`, ne v BinaryStore |
 
 Přednost má **v1**: kde se záznam vyskytuje v obou zdrojích (týmy, novější sezóny
 a zápasy), je zdrojem pravdy Mongo z v1 a MySQL doplňuje jen historii.
@@ -33,12 +41,9 @@ cílové databázi. Vlastnosti:
 - **Idempotence** – každý skript lze spustit opakovaně; už zmigrované záznamy přeskočí.
 - **Mapovací kolekce `migration_map`** – `{ source: "mysql" | "mongo-v1", entity, legacyId, id }`.
   Slouží k rozpouštění cizích klíčů i k přesměrování starých URL (sekce 5).
-- **Dávkování** – uploady do GCS po dávkách s retry a exponenciálním backoffem. GCS nemá
-  Drive kvóty na zápis, ale ~2 600 souborů × 2 velikosti je i tak dlouhá operace a síť
-  selhává; skript musí jít doběhnout znovu bez duplicit.
-- **Zmenšování při migraci** – náhledy `w400` a plné verze `w1600` se generují **v migračním
-  skriptu** (`sharp` jako devDependency skriptu), ne na klientu; klientská cesta
-  (`uu5imagingg01-tools`) platí jen pro nové uploady přes UI.
+- ~~**Dávkování** uploadů do GCS a **zmenšování při migraci**~~ – bezpředmětné od
+  2026-09-09, kdy z rozsahu vypadly binárky, články i fotogalerie. Migrace zápasů sahá
+  jen do Monga; jediná dlouhá operace je zápis ~2 500 zápasů.
 - **Report** – každý krok vypíše počty `created / skipped / failed` a chyby do
   `tools/migrate/log/<krok>.jsonl`.
 
@@ -47,23 +52,68 @@ Pořadí kroků respektuje závislosti:
 ```
 1. team          <- mongo-v1.team, mysql.tym
 2. season        <- mongo-v1.season, dopočet z mysql.zapas (datum + vek)
-3. person        <- mysql.hrac (+ foto galerie/hraci/<login>_1.jpg)
+3. person        <- mysql.hrac
 4. player        <- mysql.hrac (tym, post, aktivni)
 5. coach         <- mysql.trener
 6. match         <- mongo-v1.match, mysql.zapas
 7. match.playerList <- mysql.ucast (+ mysql.post)
-8. binary        <- mongo-v1.sys_binary (STÁHNOUT z Drive + nahrát do GCS), soubory/*, reporty/*
-9. article       <- mysql.clanek (+ ecc_page, ecc_section)
-10. gallery      <- mysql.fotogalerie (+ galerie/<datum>/*, plná w1600 + náhled w400)
-11. ecc_page     <- mongo-v1.ecc_page, ecc_section (beze změny, doplnit code)
-12. appConfig    <- mongo-v1.app
+8. uzavření sezón <- dopočet z výsledků (sekce 2.1)
+9. appConfig     <- mongo-v1.app
 ```
 
-**Krok 8 není kopie.** `sys_binary` z v1 drží `gFileId` na Google Drive; v2 ukládá do GCS
-a klíčem je `objectName` + `uri`. Migrace tedy každý soubor **stáhne z Drive a nahraje do
-bucketu** přes `BinaryStore.Binary.create()`, a staré `gFileId` si nechá jen v
-`migration_map` (kvůli dohledání). Pole `logoUri` u týmů a `photographId` u článků se
-přepočítají až po tomto kroku.
+**Mimo rozsah (2026-09-09):** binárky, články a fotogalerie — původní kroky 8, 9 a 10.
+Padá s nimi i migrace fotek osob (`galerie/hraci/<login>_1.jpg`) a souborů ke stažení;
+mapování zůstává popsané v sekcích 3.6–3.8, kdyby se to mělo vrátit. Důvod je u všech tří
+stejný: obsah není v databázi, ale v souborech na disku v0 (sekce 6.1, bod 5), takže je to
+nejdelší a nejkřehčí kus migrace — a zároveň jediný, který **nemá jednu jasnou pravdu**
+(text článku je PHP fragment, u fotek nejde poznat album od náhledu). Novinky se píšou
+v nové administraci od začátku, fotky vydává klub na Facebooku.
+
+Co z toho plyne pro zbytek návrhu:
+
+- **`logoUri` u týmů zůstává prázdné** a klient sáhne po klubovém erbu (to už umí).
+- **ID-based přesměrování je jen pro zápasy.** `migration_map` bude mít `match`, takže
+  `/informace-o-zapase-<n>` se přeloží; `/novinka-<n>` a `/fotogalerie-<n>` mapu mít nebudou
+  a končí na seznamu (sekce 5).
+
+---
+
+### 2.1 Uzavření a vyhodnocení ukončených sezón
+
+Rozhodnuto 2026-09-09. Historie je ~2 500 zápasů ve dvaceti ročnících, které **už nikdy
+nikdo neupraví**. Migrovat je jako živá data by znamenalo, že web při každém zobrazení
+tabulky z roku 2009 znovu čte celou sezónu a přepočítává ji z dat, o kterých se ví, že jsou
+neúplná (chybějící zápasy, sloučené názvy týmů). Proto se ukončený ročník při migraci
+**vyhodnotí jednou a uloží se výsledek**:
+
+| Pole `season` | Význam |
+|---|---|
+| `state` | `open` (běžící, výchozí) / `closed` (dohráno a vyhodnoceno) |
+| `finalTable` | konečná tabulka — pole řádků z `computeTable()`, včetně `rank` a názvu týmu |
+| `closedAt` | kdy se sezóna uzavřela (kvůli dohledání, ne kvůli zobrazení) |
+
+Sezóna se uzavírá, když **má vyplněné výsledky u všech zápasů s kolem** a její `yearFrom` je
+starší než aktuální ročník. Uzavření dělá migrace pro historii a **administrace** pro sezóny,
+které skončí za provozu (`season/close`, role z `CONTENT`); jde vzít zpět (`season/reopen`)
+a tím se `finalTable` zahodí.
+
+Proč uložený snímek, a ne dopočet:
+
+- **Neúplná data se nesmí měnit sama.** Doplnit jeden chybějící zápas z roku 2011 by jinak
+  potichu přepsalo pořadí celé sezóny. Se snímkem se to projeví jako rozdíl proti uložené
+  tabulce, tedy něco, co je vidět.
+- **Archiv se čte, ne počítá.** Tabulka ukončeného ročníku je jedno pole v jednom dokumentu
+  místo dotazu na stovky zápasů. Tím taky odpadá stránkování v archivu.
+- **Bodování se v čase mění.** `hasPenalties` platí pro dnešní soutěž; přepočet starých
+  ročníků dnešním pravidlem by dal jiné pořadí, než jaké tehdy platilo.
+
+Živá sezóna se **nikdy** nečte z `finalTable` — dokud je `state: "open"`, počítá se
+tabulka pořád nad zápasy, jako dnes. Pro `state: "closed"` je uložená tabulka zdrojem pravdy;
+`table/get` ji jen vrátí. Nesoulad mezi uloženou a dopočítanou tabulkou hlásí kontrola
+v `npm run smoke`, ne uživatelské rozhraní.
+
+**Zbývá potvrdit:** jestli ukončené sezóny mají zůstat v menu ročníků (a archiv je jen
+jiná cesta ke stejné stránce), nebo mít vlastní obrazovku „Archiv".
 
 ---
 
@@ -92,7 +142,7 @@ přepočítají až po tomto kroku.
 | `tym` | `player.teamList[0].id` | přes mapu týmů; `dateFrom` = neznámé → `null` |
 | `post` | `player.position` | `post.zkratka` → `GK/DF/MF/FW` |
 | `aktivni` | `player.teamList[0].dateTo` | `1` → `null`, jinak dnešní datum |
-| `galerie/hraci/<login>_1.jpg` | `person.photoId` | upload jako `type: "personPhoto"` |
+| `galerie/hraci/<login>_1.jpg` | `person.photoId` | ~~upload jako `type: "personPhoto"`~~ — **nemigruje se** (2026-09-09); fotky hráčů se nahrají v administraci |
 
 ### 3.3 `trener` → `coach`
 
@@ -127,7 +177,11 @@ přepočítají až po tomto kroku.
 | `goly` | `goals` (`NULL` → `0`) |
 | `zluta` / `cervena` | `yellowCard` / `redCard` (`1` → `true`, `NULL` → `false`) |
 
-### 3.6 `clanek` → `article` + `ecc_page` + `ecc_section`
+### 3.6 `clanek` → `article` + `ecc_page` + `ecc_section` — **mimo rozsah (2026-09-09)**
+
+> Zapsané pro případ, že se rozhodnutí otočí. Pozor, tabulka níž je proti skutečnosti
+> nepřesná: text ani titulní foto v dumpu nejsou (sekce 6.1, bod 5).
+
 
 | v0 | v2 | Transformace |
 |---|---|---|
@@ -140,13 +194,15 @@ přepočítají až po tomto kroku.
 | `zapas` | `matchId` | přes mapu zápasů |
 | `priorita` | `priority` + `state` | `NULL`→`0/published`, `1`→`1/published`, `2`→`0/archived` |
 
-### 3.7 `soubor` + `serial` → `sys_binary`
+### 3.7 `soubor` + `serial` → `sys_binary` — **mimo rozsah (2026-09-09)**
+
 
 `nadpis` → `title`, `nazevSouboru` → soubor ze `soubory/`, `serial.zkratka` → `category`,
 `datum` → `date`, `type: "document"`. Kategorie ze `serial` se zapíší do
 `appConfig.fileCategoryList`.
 
-### 3.8 `fotogalerie` → `gallery`
+### 3.8 `fotogalerie` → `gallery` — **mimo rozsah (2026-09-09)**
+
 
 `nazev` → `name`, `datum` → `date`, `autor` → `author`, `pocet` → kontrola počtu
 nahraných fotek. Fotky se čtou z `galerie/<YYYYMMDD>/<YYYYMMDD> (NN).jpg`
@@ -230,9 +286,9 @@ fallbackem; číselná ID se překládají přes `migration_map`.
 | `/vsechny-zapasy-muzi\|zaci\|dorost` | `/team/matches?age=...` | 301 |
 | `/tabulka-muzi\|zaci\|dorost` | `/team/table?age=...` | 301 |
 | `/informace-o-zapase-<n>` | `/match?id=<mapované>` | 301 |
-| `/novinka-<n>` | `/article?id=<mapované>` | 301 |
+| `/novinka-<n>` | `/novinky` (bez mapy — články se nemigrují, 2026-09-09) | 301 |
 | `/fotogalerie` | `/gallery` | 301 |
-| `/fotogalerie-<n>` | `/gallery/detail?id=<mapované>` | 301 |
+| `/fotogalerie-<n>` | `/fotogalerie` (bez mapy — alba se nemigrují, 2026-09-09) | 301 |
 | `/ke-stazeni` | `/files` | 301 |
 | `/rss`, `/rss/` | `/rss` | 301 |
 | `/prihlaseni` | `/login.html` (přihlašovací stránka z devkitu) | 302 |
@@ -249,8 +305,10 @@ s odkazem na odpovídající seznam.
 ## 6. Otázky k potvrzení před migrací
 
 1. ~~**Mapování věkových kategorií**~~ – **potvrzeno 2026-09-07** (sekce 6.1).
-2. **Rozsah historie** – migrovat všechny sezóny, nebo jen od určitého roku?
-   (fotogalerie tvoří ~2 600 souborů × 2 velikosti; upload do GCS je nejdelší část migrace).
+2. ~~**Rozsah historie**~~ – **potvrzeno 2026-09-09**: migrují se **všechny sezóny**, ale
+   **jen zápasy** (a co k nim patří). Ukončené ročníky se vyhodnotí a uzavřou (sekce 2.1);
+   články ani fotogalerie do migrace nejdou. Argument o délce uploadu tím padá — bez fotek
+   je celá migrace jen zápis do Monga.
 3. **Účty hráčů** – hesla se nemigrují (v0 je má v SHA-1). Potvrdit komunikaci směrem
    k hráčům: registrace na `/login.html` přes Google, Facebook nebo e-mail a heslo,
    přiřazení role `members` správcem přes `admin/identities`.
@@ -279,7 +337,8 @@ Všechny jsou zapracované v `tools/migrate-2026.js` a platí i pro plnou migrac
 5. **Text článku v dumpu vůbec není.** `clanek.popis` je perex (medián 192 znaků, maximum
    586) a vlastní text je PHP fragment `reporty/<soubor>.php`, který v0 includuje. Titulní
    foto je `galerie/clanky/other/<soubor>.webp`, ne `reporty/<soubor>`, jak čekala sekce 3.6.
-   Platí to u **všech 345 článků**, takže krok 9 plné migrace potřebuje soubory z v0, ne jen
+   Platí to u **všech 345 článků** — a je to hlavní důvod, proč články z rozsahu migrace
+   2026-09-09 vypadly úplně: potřebovaly by soubory z v0, ne jen
    databázi. Dokud v0 běží, jde tělo i fotku vytáhnout z webu — `migrate-2026.js --v0` to
    dělá a je to berlička, ne cílový stav.
    Perex se přitom z těla vyhazuje: v0 ho nemá jako pole, `popis` je ručně opsaná první věta

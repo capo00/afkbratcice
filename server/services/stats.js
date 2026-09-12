@@ -96,4 +96,7 @@ async function getPlayerStats({ playerId }) {
   return { total, bySeasonList };
 }
 
-export { listPlayerStats, getPlayerStats, countsTowardsTable };
+// `buildMatchFilter` je exportované kvůli testům: je to jediný kus statistik, který jde
+// ověřit bez Monga, a zároveň ten, kde se pravidlo „jen odehrané soutěžní zápasy" musí
+// shodovat s tabulkou (`countsTowardsTable`).
+export { listPlayerStats, getPlayerStats, countsTowardsTable, buildMatchFilter };

@@ -20,9 +20,16 @@ function toIcalDate(value) {
   );
 }
 
-/** RFC 5545: escapovat čárku, středník, zpětné lomítko a nový řádek. */
+/**
+ * RFC 5545: escapovat zpětné lomítko, čárku, středník a nový řádek.
+ *
+ * Zpětná lomítka v náhradě musí být zdvojená (`"\\$1"`, `"\\n"`). Do 2026-09-09 tu stálo
+ * `"\$1"` a `"\n"`, což JS čte jako `"$1"` a jako skutečný konec řádku -- funkce tedy
+ * vracela vstup beze změny. Projevilo by se to až na čárce v názvu soupeře nebo v místě
+ * konání (rozbité pole) a na poznámce přes dva řádky (rozbitý celý kalendář).
+ */
 function escapeText(value) {
-  return String(value ?? "").replace(/([\,;])/g, "\$1").replace(/\r?\n/g, "\n");
+  return String(value ?? "").replace(/([\\,;])/g, "\\$1").replace(/\r?\n/g, "\\n");
 }
 
 /** Řádky delší než 75 oktetů se lámou a pokračovací řádek začíná mezerou. */

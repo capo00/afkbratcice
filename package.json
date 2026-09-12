@@ -9,6 +9,7 @@
     "build": "caio-devkit build",
     "deploy": "caio-devkit deploy",
     "seed:admin": "node tools/seed-admin.js",
+    "test": "node --test \"server/test/**/*.test.js\"",
     "smoke": "node tools/smoke.js"
   },
   "dependencies": {
