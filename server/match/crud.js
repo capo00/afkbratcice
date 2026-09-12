@@ -86,10 +86,10 @@ class MatchCrud extends Crud {
     return { ...data, round: data.round === "" || data.round === undefined ? null : data.round };
   }
 
-  async create(data) {
+  async create(data, identity) {
     this._checkTeams(data);
     const item = this._normalize(data);
-    return super.create({ ...item, state: item.state ?? this._deriveState(item) });
+    return this._forIdentity(await super.create({ ...item, state: item.state ?? this._deriveState(item) }), identity);
   }
 
   async createMany(dataList) {
@@ -111,17 +111,17 @@ class MatchCrud extends Crud {
 
     if (scopedOnly) {
       const { homeTeamId, guestTeamId, ...rest } = data;
-      return super.update(this._normalize(rest));
+      return this._forIdentity(await super.update(this._normalize(rest)), identity);
     }
 
     if (data.homeTeamId || data.guestTeamId) {
       const current = await this._get(data.id);
       this._checkTeams({ ...current, ...data });
     }
-    return super.update(this._normalize(data));
+    return this._forIdentity(await super.update(this._normalize(data)), identity);
   }
 
-  async setResult({ id, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId }) {
+  async setResult({ id, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId }, identity) {
     const current = await this._get(id);
 
     if (penaltyWinnerTeamId) {
@@ -134,15 +134,21 @@ class MatchCrud extends Crud {
       }
     }
 
-    return super.update({
-      id,
-      homeGoals,
-      guestGoals,
-      homeGoalsHalf: homeGoalsHalf ?? null,
-      guestGoalsHalf: guestGoalsHalf ?? null,
-      penaltyWinnerTeamId: penaltyWinnerTeamId ?? null,
-      state: "played",
-    });
+    // `_forIdentity` i tady, aby zápis vracel týž tvar jako `list` -- klient položku
+    // v seznamu nahradí tímhle objektem (`useDataList`), takže by se jinak lišila
+    // od sousedů o `departureTime`.
+    return this._forIdentity(
+      await super.update({
+        id,
+        homeGoals,
+        guestGoals,
+        homeGoalsHalf: homeGoalsHalf ?? null,
+        guestGoalsHalf: guestGoalsHalf ?? null,
+        penaltyWinnerTeamId: penaltyWinnerTeamId ?? null,
+        state: "played",
+      }),
+      identity,
+    );
   }
 
   /**
@@ -194,7 +200,11 @@ class MatchCrud extends Crud {
       console.warn(`[match] lineup goals (${goalSum}) exceed the score (${scoreSum}) on match ${id}`);
     }
 
-    return super.update({ id, playerList: nextPlayerList });
+    // Vrací se **holý zápas**, ne rozbalená sestava ani vložené týmy. Zápis dotahovat
+    // tranzitivní data nemusí: klient si současnou položku doplní o to, co přišlo
+    // (viz `routes/admin/matches.jsx`), takže `homeTeam`/`guestTeam` z `get` zůstanou
+    // zachované a nemusí se kvůli jednomu zápisu načítat znovu.
+    return this._forIdentity(await super.update({ id, playerList: nextPlayerList }), identity);
   }
 
   _deriveState(data) {

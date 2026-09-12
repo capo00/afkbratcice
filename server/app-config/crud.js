@@ -17,11 +17,15 @@ class AppConfigCrud extends Crud {
     return { ...Config.DEFAULT_APP_CONFIG, ...(found ? this._getData(found) : {}) };
   }
 
+  // Vrací se týž tvar jako z `get`, tedy **doplněný o výchozí hodnoty**. Klient si po
+  // uložení nahradí data tím, co přišlo odsud; bez merge by z nich zmizela pole, která
+  // formulář neposílá a uložený dokument je nemá (`socialList`, `fileCategoryList`, ...)
+  // a vypadalo by to, že se nastavení uložením vynulovalo.
   async update(data) {
     const found = await dao.findSingleton();
     const { id, ...rest } = data;
-    if (!found) return this._getData(await dao.create(rest));
-    return this._getData(await dao.update({ id: found.id, ...rest }));
+    const saved = found ? await dao.update({ id: found.id, ...rest }) : await dao.create(rest);
+    return { ...Config.DEFAULT_APP_CONFIG, ...this._getData(saved) };
   }
 }
 

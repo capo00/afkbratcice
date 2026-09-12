@@ -47,14 +47,14 @@ export default {
     method: "post",
     auth: teamScoped(teamsOfCoach, Config.CONTENT, "all"),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.create(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   "coach/update": {
     method: "post",
     auth: teamScoped(teamsOfCoach, Config.CONTENT, "all"),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.update(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 
   "coach/delete": {

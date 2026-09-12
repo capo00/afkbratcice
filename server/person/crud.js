@@ -34,34 +34,39 @@ class PersonCrud extends Crud {
     return PersonCrud.forIdentity(this._getData(await this._get(id)), identity);
   }
 
-  async create(data) {
+  // Zápis filtruje stejně jako čtení: `create` smí volat i `teamEditor` bez role CONTENT
+  // (`anyTeamEditor` v api.js) a ten by jinak dostal zpátky objekt s poli, která mu
+  // `person/list` odřízne -- tvar položky by se pak lišil řádek od řádku. Platí pravidlo
+  // z hlavičky souboru: filtruje tahle vrstva, ne jednotlivé use casy.
+  async create(data, identity) {
     const { photo, ...rest } = data;
     let binary;
     if (photo) {
       binary = await BinaryStore.Binary.create({ file: photo, collection: Config.BINARY_COLLECTION.PERSON });
     }
     try {
-      return await super.create({ ...rest, photoId: binary?.id ?? null, photoUri: binary?.uri ?? null });
+      const created = await super.create({ ...rest, photoId: binary?.id ?? null, photoUri: binary?.uri ?? null });
+      return PersonCrud.forIdentity(created, identity);
     } catch (e) {
       if (binary) await this._deleteBinary(binary.id);
       throw e;
     }
   }
 
-  async update(data) {
+  async update(data, identity) {
     const { photo, ...rest } = data;
-    if (photo === undefined) return super.update(rest);
+    if (photo === undefined) return PersonCrud.forIdentity(await super.update(rest), identity);
 
     const current = await this._get(data.id);
     if (photo === null) {
       if (current.photoId) await this._deleteBinary(current.photoId);
-      return super.update({ ...rest, photoId: null, photoUri: null });
+      return PersonCrud.forIdentity(await super.update({ ...rest, photoId: null, photoUri: null }), identity);
     }
 
     const binary = await BinaryStore.Binary.create({ file: photo, collection: Config.BINARY_COLLECTION.PERSON });
     const updated = await super.update({ ...rest, photoId: binary.id, photoUri: binary.uri });
     if (current.photoId) await this._deleteBinary(current.photoId);
-    return updated;
+    return PersonCrud.forIdentity(updated, identity);
   }
 
   async delete(id) {
@@ -83,8 +88,10 @@ class PersonCrud extends Crud {
     if (current?.photoId) await this._deleteBinary(current.photoId);
   }
 
-  async linkIdentity({ id, identity }) {
-    return super.update({ id, identity });
+  // Pozor na dva různé významy `identity`: v dtoIn je to kód identity, který se osobě
+  // přiřazuje, druhý parametr je volající. Filtruje se podle volajícího, zapisuje ten z dtoIn.
+  async linkIdentity({ id, identity }, callerIdentity) {
+    return PersonCrud.forIdentity(await super.update({ id, identity }), callerIdentity);
   }
 
   async _deleteBinary(id) {

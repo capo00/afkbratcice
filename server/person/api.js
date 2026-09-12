@@ -37,14 +37,14 @@ export default {
     method: "post",
     auth: anyTeamEditor(Config.CONTENT),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.create(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   "person/update": {
     method: "post",
     auth: roleAuth(Config.CONTENT),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.update(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 
   "person/delete": {
@@ -58,6 +58,6 @@ export default {
     method: "post",
     auth: roleAuth(Config.ADMIN),
     validator: validate(shape({ id: mongoId().isRequired(), identity: string().isRequired() })),
-    fn: ({ dtoIn }) => crud.linkIdentity(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.linkIdentity(dtoIn, identity),
   },
 };

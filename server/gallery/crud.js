@@ -1,4 +1,4 @@
-import { Crud, BinaryStore } from "caio-server";
+import { Crud, Error as CoreError, BinaryStore } from "caio-server";
 import dao from "./dao.js";
 import Config from "../config.js";
 import { hasRole } from "../services/authorize.js";
@@ -18,6 +18,23 @@ class GalleryCrud extends Crud {
     const effectiveState = hasRole(identity, Config.GALLERY) ? state : "published";
     const itemList = await dao.listByFilter({ state: effectiveState, seasonId, matchId, category }, pageInfo);
     return itemList.map((item) => this._getData(item));
+  }
+
+  /**
+   * Rozpracované album nemá mít veřejný odkaz -- `list` ho nepřihlášenému neukáže, ale
+   * bez tohohle šlo přečíst napřímo přes `gallery/get?id=...`. 404, ne 403: existence
+   * rozpracovaného alba je sama o sobě informace (stejně jako u článku, `article/crud.js`).
+   */
+  async get(id, identity) {
+    const gallery = this._getData(await this._get(id));
+    if (!hasRole(identity, Config.GALLERY) && gallery.state !== "published") {
+      throw new CoreError("Gallery does not exist", {
+        status: 404,
+        code: `${Config.ERROR_PREFIX}/gallery/notFound`,
+        paramMap: { id },
+      });
+    }
+    return gallery;
   }
 
   async listPhotos({ id, pageInfo } = {}) {
@@ -57,9 +74,13 @@ class GalleryCrud extends Crud {
       patch.coverBinaryId = binary.id;
       patch.coverThumbUri = thumbBinary?.uri ?? binary.uri;
     }
-    await super.update(patch);
 
-    return { binary, thumbBinary };
+    // Vrací se **album**, ne jen nahrané binárky -- stejně jako u sesterské `deletePhoto`
+    // a jako u `get`/`list`. Album je objekt, který tahle operace mění (`photoCount`,
+    // titulní náhled), takže klient si podle návratové hodnoty může řádek aktualizovat
+    // sám. Binárky jdou vedle, pro volajícího, který právě nahrál soubor.
+    const updated = await super.update(patch);
+    return { ...updated, binary, thumbBinary };
   }
 
   async deletePhoto({ id, binaryId }) {

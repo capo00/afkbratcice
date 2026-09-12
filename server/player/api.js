@@ -52,28 +52,28 @@ export default {
     method: "post",
     auth: teamScoped(teamsOfPlayer, Config.CONTENT, "all"),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.create(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   "player/update": {
     method: "post",
     auth: teamScoped(teamsOfPlayer, Config.CONTENT, "all"),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.update(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 
   "player/addTeam": {
     method: "post",
     auth: teamScoped(async (dtoIn) => [dtoIn?.teamId], Config.CONTENT, "all"),
     validator: validate(shape({ id: mongoId().isRequired(), teamId: mongoId().isRequired(), dateFrom: string() })),
-    fn: ({ dtoIn }) => crud.addTeam(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.addTeam(dtoIn, identity),
   },
 
   "player/endTeam": {
     method: "post",
     auth: teamScoped(async (dtoIn) => [dtoIn?.teamId], Config.CONTENT, "all"),
     validator: validate(shape({ id: mongoId().isRequired(), teamId: mongoId().isRequired(), dateTo: string() })),
-    fn: ({ dtoIn }) => crud.endTeam(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.endTeam(dtoIn, identity),
   },
 
   "player/delete": {

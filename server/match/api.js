@@ -85,7 +85,7 @@ export default {
     method: "post",
     auth: teamScoped(async (dtoIn) => [dtoIn?.homeTeamId, dtoIn?.guestTeamId], Config.MATCH, "any"),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.create(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   // Hromadný import rozlosování z OFS -- jen plošné role.
@@ -115,7 +115,7 @@ export default {
       guestGoalsHalf: integer(),
       penaltyWinnerTeamId: any(),
     })),
-    fn: ({ dtoIn }) => crud.setResult(dtoIn),
+    fn: ({ dtoIn, identity }) => crud.setResult(dtoIn, identity),
   },
 
   "match/setLineup": {

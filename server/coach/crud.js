@@ -26,6 +26,21 @@ class CoachCrud extends Crud {
     const [withPerson] = await this._withPerson([this._getData(await this._get(id))], identity);
     return withPerson;
   }
+
+  /**
+   * Zápis vrací **týž tvar jako `list`/`get`**, tedy s vloženou `person` -- klient
+   * (`useDataList`) položku v seznamu nahradí tím, co přišlo ze serveru, a bez `person`
+   * by ve sloupci zůstalo holé id.
+   */
+  async create(data, identity) {
+    const [withPerson] = await this._withPerson([await super.create(data)], identity);
+    return withPerson;
+  }
+
+  async update(data, identity) {
+    const [withPerson] = await this._withPerson([await super.update(data)], identity);
+    return withPerson;
+  }
 }
 
 export default new CoachCrud();

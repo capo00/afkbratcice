@@ -33,7 +33,7 @@ export default {
   "gallery/get": {
     method: "get",
     validator: validate(idDtoIn),
-    fn: ({ dtoIn }) => crud.get(dtoIn.id),
+    fn: ({ dtoIn, identity }) => crud.get(dtoIn.id, identity),
   },
 
   "gallery/listPhotos": {
