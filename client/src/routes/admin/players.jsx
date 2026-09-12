@@ -4,6 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../../admin/screen.jsx";
+import { entityCalls } from "../../admin/crud-calls.js";
 import { EntitySelect, EnumText, enumItemList, noteField, personLabel } from "../../admin/fields.jsx";
 import FormMembership from "../../admin/form-membership.jsx";
 
@@ -11,6 +12,8 @@ import FormMembership from "../../admin/form-membership.jsx";
 // v čase. Osoba musí existovat dřív (`admin/persons`), proto je tu jen výběr, ne zakládání.
 
 const [PlayerProvider] = UiElements.CrudContext.create("player");
+// Bez `createMany`/`deleteMany` -- `player` je na serveru nemá (admin/crud-calls.js).
+const CALLS = entityCalls("player");
 
 const CONFIG = {
   personId: {
@@ -52,7 +55,7 @@ const AdminPlayers = createVisualComponent({
   render() {
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "players", "header")}>
-        <PlayerProvider>
+        <PlayerProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
               dataList={dataList}

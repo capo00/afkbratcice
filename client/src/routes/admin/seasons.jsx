@@ -4,6 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../../admin/screen.jsx";
+import { entityCalls } from "../../admin/crud-calls.js";
 import { ageField, boolField, teamLabel } from "../../admin/fields.jsx";
 
 // Sezóny — ročník soutěže jedné kategorie a její účastníci.
@@ -14,6 +15,8 @@ import { ageField, boolField, teamLabel } from "../../admin/fields.jsx";
 // rozstřelu, by znamenalo, že se model změní podle toho, kdo co vyplnil.
 
 const [SeasonProvider] = UiElements.CrudContext.create("season");
+// Bez `createMany`/`deleteMany` -- `season` je na serveru nemá (admin/crud-calls.js).
+const CALLS = entityCalls("season");
 
 /** Účastníci soutěže — víceřádkový výběr týmů. */
 function TeamListInput(props) {
@@ -62,7 +65,7 @@ const AdminSeasons = createVisualComponent({
   render() {
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "seasons", "header")}>
-        <SeasonProvider>
+        <SeasonProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
               dataList={dataList}

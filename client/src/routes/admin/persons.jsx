@@ -4,6 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../../admin/screen.jsx";
+import { entityCalls } from "../../admin/crud-calls.js";
 import { noteField, dateField } from "../../admin/fields.jsx";
 import { prepareImage } from "../../admin/image.js";
 
@@ -14,6 +15,8 @@ import { prepareImage } from "../../admin/image.js";
 // V tabulce tu tedy jsou, ve veřejné soupisce ne.
 
 const [PersonProvider] = UiElements.CrudContext.create("person");
+// Bez `createMany`/`deleteMany` -- `person` je na serveru nemá (admin/crud-calls.js).
+const CALLS = entityCalls("person");
 
 const CONFIG = {
   surname: {
@@ -51,7 +54,7 @@ const AdminPersons = createVisualComponent({
   render() {
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "persons", "header")}>
-        <PersonProvider>
+        <PersonProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
               dataList={dataList}

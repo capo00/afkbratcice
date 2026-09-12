@@ -23,7 +23,7 @@ const LSI_PATH = ["admin", "photoUpload"];
 const PhotoUpload = createVisualComponent({
   uu5Tag: Config.TAG + "PhotoUpload",
 
-  render({ galleryId, onDone, onClose }) {
+  render({ galleryId, onUpload, onDone, onClose }) {
     const [fileList, setFileList] = useState([]);
     const [progress, setProgress] = useState(null);
     const [failed, setFailed] = useState([]);
@@ -38,7 +38,12 @@ const PhotoUpload = createVisualComponent({
         setProgress({ index: i + 1, total: list.length, name: file.name });
         try {
           const [full, thumb] = await Promise.all([prepareImage(file, "photo"), prepareImage(file, "thumb")]);
-          await UiElements.Call.cmdPost("/gallery/addPhoto", { id: galleryId, file: full, thumb, name: file.name });
+          const dtoIn = { id: galleryId, file: full, thumb, name: file.name };
+          // `onUpload` = položkový handler seznamu alb; `gallery/addPhoto` vrací album
+          // s přepočítaným `photoCount` a titulním náhledem, takže se řádek aktualizuje
+          // sám a nemusí se přenačítat celý seznam.
+          if (onUpload) await onUpload(dtoIn);
+          else await UiElements.Call.cmdPost("/gallery/addPhoto", dtoIn);
         } catch (e) {
           // Jedna vadná fotka nesmí shodit celý dávkový upload — sesbírá se a nahlásí.
           problems.push(file.name);

@@ -1,6 +1,6 @@
 # TODO — co zbývá do hotového webu
 
-Stav k **2026-09-07**, větev `feature/caio`.
+Stav k **2026-09-12**, větev `feature/caio`.
 
 Zadání vlastní [`design/`](./design/) — tenhle soubor jen říká, **co z něj ještě není
 udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhrává `design/`.
@@ -11,9 +11,9 @@ udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhr
 
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
-| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny | ID-based přesměrování (čeká na migraci) |
+| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny, **jednotkové testy (`npm test`)** | uzavírání sezón (`season/close`), ID-based přesměrování na zápasy (čeká na migraci) |
 | Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky **s textem z v0**, kontakt, 404 | ke stažení, profil uživatele |
-| Klient — administrace | rozcestník + **11 obrazovek** (týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace), **upload ověřený proti GCS** | filtrování dat podle `teamEditor:*` |
+| Klient — administrace | rozcestník + **12 obrazovek** (**kluby**, týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace), **upload ověřený proti GCS** | filtrování dat podle `teamEditor:*` |
 | Provoz | dev proti lokálnímu Mongu **s reálnými daty sezóny 2026**, dev GCS bucket | produkční GCS bucket, OAuth, SMTP, migrace historie, deploy |
 
 Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 12.
@@ -69,7 +69,7 @@ Co u toho zůstalo otevřené:
 Fotky z v0 (~2 600 souborů) **se nemigrují** a nové se sem zatím nenahrávají: fotogalerii
 nahrazuje **Facebook** (README, sekce 2). Kód se nemaže — entita, `admin/galleries`
 i veřejná stránka fungují a jsou ověřené uploadem proti GCS, takže návrat je spuštění
-migračního kroku 10, ne psaní obrazovky.
+migrace podle mapování v `migration.md`, 3.8, ne psaní obrazovky.
 
 Co se kvůli tomu udělalo: `appConfig.socialList` se plní z v0 (Facebook) a odkazy na sítě
 se vykreslují v patičce a nad výpisem alb. Instagram stačí přidat v administraci, kód se
@@ -173,14 +173,26 @@ Appka má knihovnu přeinstalovanou z nového tarballu a obojí je ověřené pr
 ### 5.2 Velikost `public/libs` po přidání Uu5Bricks
 
 Závislosti jsou **hotové**: `uu5bricksg01` (časová osa historie) i `uu5codekitg01-forms@3.4.1`
-(editace obsahu) jsou v `client/package.json` a do import mapy se dostanou samy. Časová osa
-je ověřená v prohlížeči na `/historie`.
+(editace obsahu) jsou v import mapě. Časová osa je ověřená v prohlížeči na `/historie`.
 
-Zbývá rozhodnout o velikosti: `uu5bricksg01` přitáhl dalších 28 `uu*` balíčků a `public/libs`
-narostlo na **~120 MB**. Největší kusy tenhle web nikdy nezobrazí —
-`uu_uubmldraw_iconsg04` (51 MB, ikony BML diagramů) a starý `uu5codekitg01` (18 MB, kterému
-se `caio-ui` už vyhnul). Vyřadit je jde přes `client/uu5-imports.json`, ale je to sázka:
-když si o ně za běhu někdo řekne, spadne to až na té obrazovce. Řešit až u deploye.
+**Starý `uu5codekitg01` v libs není** (ověřeno 2026-09-09). `public/libs` má z řady codekit
+jen `uu5codekitg01-forms/3.4.1`, tedy ten, který se používá — devkit kopíruje přechodný uzávěr
+`uu5`/`uu_` balíčků z `client/node_modules` a `pruneStaleLibs()` starou verzi vyhodil, jakmile
+se jí `caio-ui` zbavil. Poslední kopie starého `uu5codekitg01@2.8.3` (20 MB) ležela
+v `client/dist/` — zapomenutý výstup z ručního `npx vite build` z 6. 9., ne to, co appka
+servíruje (`npm run dev` i `npm run build` staví do `public/`). Složka je smazaná.
+
+Zbývá rozhodnout o velikosti: `public/libs` má **126 MB** a největší kus tenhle web nikdy
+nezobrazí — `uu_uubmldraw_iconsg04` (**70 MB**, ikony BML diagramů), který si jako
+`dependency` říká `uu5bricksg01`.
+
+**`uu5bricksg01` zůstává** (rozhodnuto 2026-09-09): dnes drží časovou osu na `/historie`
+a hlavně z něj přijdou komponenty do obsahu, až se bude dělat ECC. Zbavovat se ho kvůli
+jeho závislosti tedy nemá smysl a zbývá jediná cesta — **vyřadit z import mapy samotný
+`uu_uubmldraw_iconsg04`** přes `client/uu5-imports.json`. Dvě věci k tomu: override dnes
+mění jen mapu, ne kopírování (`copies` v `caio-devkit/src/vite/uu5-libs.js` se staví ještě
+před ním, takže by se to muselo rozšířit), a je to sázka — když si o balíček někdo za běhu
+řekne, spadne to až na té obrazovce. Řešit až u deploye.
 
 ### 5.3 Hero bez fotky
 
@@ -218,15 +230,23 @@ a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
 - **Titulní foto článku je ověřené** — jediný článek sezóny 2026 (parte) má fotku nahranou
   přes `article/create` do GCS a zobrazuje se ve výpisu i v detailu. Tím padá poslední
   nevyzkoušená cesta uploadu.
-- **Etapa 11 — plná migrace dat.** MySQL (v0) i Mongo (v1). Návrh je v
-  [`migration.md`](./design/migration.md); dump už k dispozici je.
-  Mimo sezónu 2026 zbývá historie (2 522 zápasů od ~2005), starší články, soubory ke
-  stažení a fotogalerie. **Články potřebují soubory z v0**, ne jen dump: text i titulní
-  foto jsou u všech 345 článků v souborech na disku, ne v databázi (migration.md, 6.1). Kompletní `migration_map` je podmínkou **ID-based přesměrování**
-  (`/novinka-<n>`, `/informace-o-zapase-<n>`, `/fotogalerie-<n>`) — statická fungují.
-  Krok 9 (články) už má kam migrovat; krok 10 (fotogalerie) **se dělat nebude**, dokud
-  platí rozhodnutí, že fotky jedou přes Facebook (README, sekce 2); krok 11 (stránky) je
-  hotový přepisem do `client/src/content/`, ne migrací.
+- **Etapa 11 — migrace zápasů.** Rozsah se 2026-09-09 zúžil: z v0 jdou **jen zápasy**
+  (historie 2 522 zápasů od ~2005) a co k nim patří — týmy, sezóny, sestavy. **Články,
+  fotogalerie ani soubory ke stažení se nemigrují**; jejich obsah není v dumpu, ale
+  v souborech na disku v0 (migration.md, 6.1, bod 5), takže by to byl nejdelší a nejkřehčí
+  kus práce kvůli obsahu, který klub dnes vydává jinak. Krok 11 (stránky) je hotový
+  přepisem do `client/src/content/`, ne migrací.
+  Z toho plyne, že **ID-based přesměrování bude jen na zápasy** (`/informace-o-zapase-<n>`);
+  `/novinka-<n>` a `/fotogalerie-<n>` skončí na seznamu. Statická přesměrování fungují.
+- **Uzavírání a vyhodnocení sezón** ([`migration.md`](./design/migration.md), 2.1) — nové
+  a zatím **neimplementované**. Ukončený ročník dostane `season.state = "closed"`
+  a uloženou konečnou tabulku `finalTable`; migrace to udělá pro historii, administrace
+  pro sezóny, které skončí za provozu. Živá sezóna se počítá dál ze zápasů. Je to
+  podmínka migrace historie, ne dodatek za ní: bez uzavření by web dvacet ročníků
+  přepočítával při každém zobrazení z dat, o kterých se ví, že jsou neúplná. Práce je na
+  třech místech — pole v `season` (server: `crud.js`, `api.js`, validace), krok v migraci,
+  a v administraci tlačítko na obrazovce sezón. **Zbývá potvrdit**, jestli má archiv
+  vlastní obrazovku, nebo je to jen ročník navíc v přepínači.
 - **Etapa 12 — deploy na GAE.** GCP projekty existují (prod + dev), env se doplní později.
 - **Regresní test tabulky** proti v0 `/api/getTable` za poslední tři sezóny — podle plánu
   je to součást etapy, ne dodatek. Jde udělat teprve s migrovanými daty.
@@ -235,19 +255,31 @@ a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
 
 ## 7. Testy
 
-Server nemá **žádné automatické testy**; `npm run smoke` je smoke test proti běžícímu
-serveru a reálnému Mongu (bodování tabulky, autorizace včetně rozsahové role, pohledy na
-zápasy, ochrana osobních údajů, novinky vč. publikačního okna a RSS, přesměrování, iCal,
-sitemap). Je to náhrada za integrační testy, ne za ně.
+Dvě vrstvy, každá na něco jiného:
 
-Co by mělo přibýt, až se ustálí rozsah:
+- **`npm test`** — jednotkové testy (`node --test`, bez závislostí) v `server/test/`.
+  Běží bez databáze i bez běžícího serveru, **70 testů, 0 fail**. Pokrývají čistou logiku:
+  `services/table.js` (bodování 3/2/1/0 i 3/1/0, `hasPenalties`, forma, všechna čtyři
+  kritéria pořadí), `services/season.js` (`yearFrom` přes 1. srpen i přes přelom roku),
+  `services/authorize.js` (rozsahová role `teamEditor:*`, režimy `any`/`all`),
+  `services/ical.js`, `services/validators.js`, filtr statistik, `match/dao.listByFilter`
+  a dvě místa, kde crud rozhoduje o viditelnosti — `PersonCrud.forIdentity` (kontakty)
+  a publikační okno novinek.
+- **`npm run smoke`** — smoke test proti běžícímu serveru a reálnému Mongu (bodování
+  tabulky, autorizace včetně rozsahové role, pohledy na zápasy, ochrana osobních údajů,
+  novinky vč. publikačního okna a RSS, přesměrování, iCal, sitemap). **64 ok / 0 fail.**
+  Je to náhrada za integrační testy, ne za ně.
 
-- jednotkové testy `services/table.js` (bodování 3/2/1/0, `hasPenalties`, pořadí formy,
-  vzájemné zápasy jako druhé kritérium) — je to nejcitlivější kus serveru,
-- jednotkové testy `services/stats.js` a `services/season.js` (`yearFrom` přes přelom roku),
-- rozšířit `smoke.js` o galerii a statistiky hráčů.
+Jak psát další: dao se instanciuje při importu modulu a v konstruktoru se rovnou připojí
+k Mongu, takže test, který sahá na cokoli s dao, musí **jako první** naimportovat
+`server/test/no-db.js` (nastaví prázdné `MONGODB_URI`, což konstruktor přeskočí). Dotazy se
+pak ověřují nahrazením `dao.find` — viz `match-dao.test.js`.
 
-Stav: **64 ok / 0 fail**.
+Co zbývá:
+
+- **`services/stats.js` je pokrytý jen filtrem.** Součty jsou agregace v Mongu, takže
+  ostatek patří do `smoke.js` — spolu s galerií a statistikami hráčů.
+- Až vzniknou uzavřené sezóny (6): kontrola, že uložená `finalTable` souhlasí s dopočtem.
 
 Klient testy nemá a zatím se neověřuje jinak než spuštěním. **Ikony a texty se ověřují
 v prohlížeči** — neexistující GDS ikona se vykreslí jako prázdné místo se správnou šířkou
@@ -263,4 +295,6 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 4. **Zbytek veřejné části** — „Ke stažení", profil uživatele, SEO za běhu (kapitola 2).
 5. **Hero fotka** — poslední kus vizuálu. Fotky jsou teď na Facebooku, takže i tuhle je
    potřeba vybrat ručně.
-6. **Migrace historie + deploy.**
+6. **Uzavírání sezón** (`season.state`, `finalTable`) — patří před migraci historie, protože
+   ta ho rovnou použije na dvacet ročníků (kapitola 6).
+7. **Migrace zápasů + deploy.**

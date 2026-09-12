@@ -19,7 +19,14 @@ const LSI_PATH = ["admin", "matches"];
 //
 // Formulář výsledku odpovídá v0 `editZapas.php`, jen bez ručního psaní loginů.
 
-function ResultModal({ match, onClose, onSaved }) {
+/**
+ * @param onSubmit  volitelný zapisovač — dostane hotový dtoIn místo toho, aby se volal
+ *                  `match/setResult` napřímo. Je to kvůli `useDataList`: když zápis projde
+ *                  **položkovým handlerem** seznamu, seznam si položku aktualizuje sám tím,
+ *                  co server vrátil, a nemusí se přenačítat celý (viz `components/match-tile.jsx`).
+ *                  Bez něj se volá use case přímo — pro obrazovky, které seznam nedrží.
+ */
+function ResultModal({ match, onClose, onSaved, onSubmit }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState();
 
@@ -33,14 +40,16 @@ function ResultModal({ match, onClose, onSaved }) {
     setPending(true);
     setError();
     try {
-      await UiElements.Call.cmdPost("/match/setResult", {
+      const dtoIn = {
         id: match.id,
         homeGoals: v.homeGoals,
         guestGoals: v.guestGoals,
         homeGoalsHalf: v.homeGoalsHalf ?? null,
         guestGoalsHalf: v.guestGoalsHalf ?? null,
         penaltyWinnerTeamId: v.penaltyWinnerTeamId ?? null,
-      });
+      };
+      if (onSubmit) await onSubmit(dtoIn);
+      else await UiElements.Call.cmdPost("/match/setResult", dtoIn);
       onSaved?.();
       onClose();
     } catch (err) {
@@ -158,7 +167,8 @@ function LineupRow({ player, entry, onChange }) {
   );
 }
 
-function LineupModal({ match, onClose, onSaved }) {
+/** `onSubmit` má stejný smysl jako u `ResultModal` výš — zápis přes položkový handler. */
+function LineupModal({ match, onClose, onSaved, onSubmit }) {
   const [pending, setPending] = useState(false);
   const [playerList, setPlayerList] = useState(() => match.playerList ?? []);
 
@@ -195,7 +205,9 @@ function LineupModal({ match, onClose, onSaved }) {
   async function save() {
     setPending(true);
     try {
-      await UiElements.Call.cmdPost("/match/setLineup", { id: match.id, playerList });
+      const dtoIn = { id: match.id, playerList };
+      if (onSubmit) await onSubmit(dtoIn);
+      else await UiElements.Call.cmdPost("/match/setLineup", dtoIn);
       onSaved?.();
       onClose();
     } finally {

@@ -1,4 +1,4 @@
-import { createVisualComponent, useState, useMemo, Lsi } from "uu5g05";
+import { createVisualComponent, useState, useMemo, useRef, useDataList, Lsi } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
@@ -7,6 +7,7 @@ import AdminScreen from "../../admin/screen.jsx";
 import { EntitySelect, EnumText, enumItemList, dateTimeField, seasonLabel, teamLabel } from "../../admin/fields.jsx";
 import { ResultModal, LineupModal } from "../../admin/match-modals.jsx";
 import { useApp } from "../../core/app-context.jsx";
+import { mergeItemHandler } from "../../core/item-merge.js";
 
 // Zápasy. Nejrušnější obrazovka administrace: rozpis se zakládá hromadně na začátku
 // sezóny, výsledky a sestavy se dopisují každý víkend.
@@ -17,7 +18,36 @@ import { useApp } from "../../core/app-context.jsx";
 //   protože provider má `createMany`),
 // - **Zapsat výsledek / sestavu** — vlastní modaly nad řádkem, viz `admin/match-modals.jsx`.
 
-const [MatchProvider] = UiElements.CrudContext.create("match");
+// `useDataList` napřímo, ne `CrudContext`: ten umí položkové handlery jen pro `update`
+// a `delete` (caio-ui, `crud-context.jsx`), takže „zapsat výsledek" a „zapsat sestavu" by
+// se musely dohánět přenačtením celého rozpisu sezóny. Takhle si seznam aktualizuje právě
+// ten jeden řádek tím, co vrátil server — stejně jako `admin/identities.jsx`.
+//
+// `createMany` **tady být má** — `match` je jediná entita, která ho na serveru má; hromadný
+// import rozlosování je celý důvod jeho existence.
+//
+// Zápisové operace **nemusí vracet tranzitivní data**, kterých se netýkají — `setLineup`
+// mění sestavu, ne týmy, takže server vrací holý zápas (`server/match/crud.js`).
+// `mergeItemHandler` proto návratovou hodnotu slučuje se současnými daty položky;
+// `delete` se schválně neslučuje (viz `core/item-merge.js`).
+function matchHandlers(dataRef) {
+  const merge = (useCase) => mergeItemHandler(dataRef, (dtoIn) => UiElements.Call.cmdPost(useCase, dtoIn));
+
+  return {
+    handlerMap: {
+      load: (dtoIn) => UiElements.Call.cmdGet("match/list", dtoIn),
+      create: (dtoIn) => UiElements.Call.cmdPost("match/create", dtoIn),
+      createMany: (dtoIn) => UiElements.Call.cmdPost("match/createMany", dtoIn),
+      deleteMany: (dtoIn) => UiElements.Call.cmdPost("match/deleteMany", dtoIn),
+    },
+    itemHandlerMap: {
+      update: merge("match/update"),
+      delete: (dtoIn) => UiElements.Call.cmdPost("match/delete", dtoIn),
+      setResult: merge("match/setResult"),
+      setLineup: merge("match/setLineup"),
+    },
+  };
+}
 
 const AdminMatches = createVisualComponent({
   uu5Tag: Config.TAG + "AdminMatches",
@@ -106,55 +136,58 @@ const AdminMatches = createVisualComponent({
       [CONFIG],
     );
 
+    // Ref se plní **až za** `useDataList` — dřív `dataList` ještě neexistuje.
+    const dataRef = useRef();
+    const dataList = useDataList({ ...matchHandlers(dataRef), initialDtoIn: { order: "desc" } });
+    dataRef.current = dataList.data;
+
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "matches", "header")}>
-        <MatchProvider dtoIn={{ order: "desc" }}>
-          {(dataList) => (
-            <>
-              <UiElements.Crud
-                dataList={dataList}
-                seriesList={seriesList}
-                columnList={columnList}
-                sorterDefinitionList={sorterList}
-                filterDefinitionList={filterList}
-                getItemActionList={({ data }) => [
-                  {
-                    icon: "uugds-check",
-                    children: <Lsi import={importLsi} path={["admin", "matches", "setResult"]} />,
-                    onClick: () => setResultFor(data.data),
-                  },
-                  {
-                    icon: "uugds-account-multi",
-                    children: <Lsi import={importLsi} path={["admin", "matches", "setLineup"]} />,
-                    onClick: () => setLineupFor(data.data),
-                  },
-                ]}
-              >
-                {() => UiElements.Crud.generateInputs(CONFIG)}
-              </UiElements.Crud>
+        <UiElements.Crud
+          dataList={dataList}
+          seriesList={seriesList}
+          columnList={columnList}
+          sorterDefinitionList={sorterList}
+          filterDefinitionList={filterList}
+          // `getItemActionList` dostává `{ data }`, kde `data` je **položka seznamu**
+          // (`{ data, handlerMap }`), ne samotný zápas — proto se rozbaluje na `item`.
+          // Do stavu jde celá položka: modal pak ukládá jejím handlerem a seznam si ten
+          // jeden řádek aktualizuje sám, bez přenačtení celého rozpisu.
+          getItemActionList={({ data: item }) => [
+            {
+              icon: "uugds-check",
+              children: <Lsi import={importLsi} path={["admin", "matches", "setResult"]} />,
+              onClick: () => setResultFor(item),
+            },
+            {
+              icon: "uugds-account-multi",
+              children: <Lsi import={importLsi} path={["admin", "matches", "setLineup"]} />,
+              onClick: () => setLineupFor(item),
+            },
+          ]}
+        >
+          {() => UiElements.Crud.generateInputs(CONFIG)}
+        </UiElements.Crud>
 
-              {resultFor ? (
-                <ResultModal
-                  match={{
-                    ...resultFor,
-                    homeTeam: getTeam(resultFor.homeTeamId),
-                    guestTeam: getTeam(resultFor.guestTeamId),
-                  }}
-                  onClose={() => setResultFor()}
-                  onSaved={() => dataList.handlerMap.load(dataList.dtoIn)}
-                />
-              ) : null}
+        {resultFor ? (
+          <ResultModal
+            match={{
+              ...resultFor.data,
+              homeTeam: getTeam(resultFor.data.homeTeamId),
+              guestTeam: getTeam(resultFor.data.guestTeamId),
+            }}
+            onClose={() => setResultFor()}
+            onSubmit={resultFor.handlerMap.setResult}
+          />
+        ) : null}
 
-              {lineupFor ? (
-                <LineupModal
-                  match={lineupFor}
-                  onClose={() => setLineupFor()}
-                  onSaved={() => dataList.handlerMap.load(dataList.dtoIn)}
-                />
-              ) : null}
-            </>
-          )}
-        </MatchProvider>
+        {lineupFor ? (
+          <LineupModal
+            match={lineupFor.data}
+            onClose={() => setLineupFor()}
+            onSubmit={lineupFor.handlerMap.setLineup}
+          />
+        ) : null}
       </AdminScreen>
     );
   },

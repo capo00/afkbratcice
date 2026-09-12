@@ -4,6 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../../admin/screen.jsx";
+import { entityCalls } from "../../admin/crud-calls.js";
 import { EnumText, enumItemList, dateTimeField } from "../../admin/fields.jsx";
 import FormSectionList from "../../admin/form-section-list.jsx";
 import { prepareImage } from "../../admin/image.js";
@@ -17,6 +18,8 @@ import { prepareImage } from "../../admin/image.js";
 // Titulní foto se před uploadem zmenší na 1200 px a překlopí do WebP (frontend.md, 6.2).
 
 const [ArticleProvider] = UiElements.CrudContext.create("article");
+// Bez `createMany`/`deleteMany` -- `article` je na serveru nemá (admin/crud-calls.js).
+const CALLS = entityCalls("article");
 
 const STATE_LIST = ["draft", "published", "archived"];
 
@@ -86,7 +89,7 @@ const AdminArticles = createVisualComponent({
   render() {
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "articles", "header")}>
-        <ArticleProvider>
+        <ArticleProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
               dataList={dataList}

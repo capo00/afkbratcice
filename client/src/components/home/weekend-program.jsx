@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useMemo } from "uu5g05";
+import { createVisualComponent, useDataList, useMemo, useRef } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
@@ -8,6 +8,7 @@ import Heading from "../layout/heading.jsx";
 import MatchTile from "../match-tile.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
+import { mergeItemHandler } from "../../core/item-merge.js";
 
 // Program víkendu napříč kategoriemi.
 //
@@ -42,7 +43,11 @@ const WeekendProgram = createVisualComponent({
     const { categoryList } = useApp();
     const teamIdList = useMemo(() => categoryList.map((c) => c.teamId).filter(Boolean), [categoryList]);
 
-    const dataObject = useDataObject(
+    // `useDataList`, ne `useDataObject`: seznam pak dá každé položce vlastní `handlerMap`,
+    // takže zapsaný výsledek nahradí právě ten jeden zápas tím, co vrátil server — bez
+    // přenačítání celého programu a bez propu, kterým by si to dlaždice říkala nahoru.
+    const dataRef = useRef();
+    const dataList = useDataList(
       {
         handlerMap: {
           load: () =>
@@ -50,12 +55,20 @@ const WeekendProgram = createVisualComponent({
               ? UiElements.Call.cmdGet("/match/list", { teamIdList, ...range(), order: "asc" })
               : Promise.resolve({ itemList: [] }),
         },
+        itemHandlerMap: {
+          // `id` doplní uu5g05 z položky samo, dtoIn se jen doplní o zbytek formuláře.
+          // Merge proto, že zápis nemusí vracet všechno, co položka nese — viz
+          // `core/item-merge.js`.
+          setResult: mergeItemHandler(dataRef, (dtoIn) => UiElements.Call.cmdPost("/match/setResult", dtoIn)),
+        },
       },
       [teamIdList],
     );
+    dataRef.current = dataList.data;
 
-    const { state, data } = dataObject;
-    const itemList = data?.itemList ?? [];
+    const { state, data } = dataList;
+    // `data` je pole položek `{ data, handlerMap, state }`; `null` je nenačtená stránka.
+    const itemList = (data ?? []).filter(Boolean);
 
     // Kategorie podle týmu, aby dlaždice věděla, jestli je to A-tým nebo žáci. Mapa se
     // staví jednou, ne hledáním v poli pro každý zápas.
@@ -75,12 +88,13 @@ const WeekendProgram = createVisualComponent({
             <EmptyState lsi={lsi("home", "program", "empty")} icon="uugds-calendar" />
           ) : (
             <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
-              {itemList.map((match) => {
+              {itemList.map((item) => {
+                const match = item.data;
                 const ownTeamId = teamIdList.find((id) => id === match.homeTeamId || id === match.guestTeamId);
                 return (
                   <MatchTile
                     key={match.id}
-                    match={match}
+                    matchData={item}
                     ownTeamId={ownTeamId}
                     category={categoryByTeamId.get(ownTeamId)}
                   />
