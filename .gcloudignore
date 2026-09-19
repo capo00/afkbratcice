@@ -2,4 +2,14 @@ client/
 node_modules/
 .git
 .gitignore
+.gitattributes
 .env.development
+
+# Návrh a dokumentace -- server je za běhu nečte a v public/ nejsou.
+design/
+dtb-design.png
+README.md
+todo.md
+
+# Sám sebe -- gcloud ho čte lokálně, na App Engine nemá co dělat.
+.gcloudignore

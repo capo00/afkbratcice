@@ -13,11 +13,11 @@
     "smoke": "node tools/smoke.js"
   },
   "dependencies": {
-    "caio-server": "file:../caio-architecture/caio-server/dist/caio-server-0.1.0.tgz",
+    "caio-server": "npm:@capo00/caio-server@^0.2.0",
     "uu_appdatatypesg02": "~0.2.1"
   },
   "devDependencies": {
-    "caio-devkit": "file:../caio-architecture/caio-devkit/dist/caio-devkit-0.1.0.tgz",
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.2.0",
     "nodemon": "^3.1.14"
   }
 }
