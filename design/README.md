@@ -261,7 +261,7 @@ a čtou se přes `<Lsi import={importLsi} path={[...]} />` nebo `useLsi(importLs
 | Fotogalerie | alba, lightbox | CRUD alb + hromadný upload | v0 `fotogalerie` |
 | Soubory | ke stažení dle kategorie | vlastní `Crud` nad `BinaryProvider` (kolekce `file`) | v0 `soubor` + `serial` |
 | Obsahové stránky | historie, hymna, kontakt, výbor, tréninky, týmové fotky | CRUD `page`; obsah `uu5String` v `content` | v0 statické PHP |
-| Identity | přihlášení, profil | správa profilů (`identity/adminList`, `identity/update`) | v1 `oc_app-auth` |
+| Identity | přihlášení, profil | správa rolí (`identity/adminList`, `member/set`) | v1 `oc_app-auth` |
 
 ---
 

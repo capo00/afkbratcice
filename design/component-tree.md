@@ -475,7 +475,7 @@ flowchart TD
 
   spec1["admin/matches -- navíc modály<br/>Zapsat výsledek / Zapsat sestavu / Hromadně (JSON)"]:::own
   spec2["admin/articles + admin/pages<br/>navíc ContentEditModal (uu5codekitg01-forms)"]:::own
-  spec3["admin/identities -- identity/adminList + update<br/>teamEditor:id se zobrazuje jako název týmu"]:::own
+  spec3["admin/identities -- identity/adminList + member/set<br/>teamEditor:id se zobrazuje jako název týmu"]:::own
   spec4["admin/files -- VLASTNÍ Crud konfigurace<br/>category + date; BinaryCrud je nerozšiřitelná"]:::own
 
   gen --> ctx --> crud

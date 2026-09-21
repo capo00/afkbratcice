@@ -806,7 +806,7 @@ neexistujícímu endpointu.
 | Obsahové stránky | – | ✅ **natvrdo v klientu**, entita `page` čeká na ECC |
 | Novinky, detail článku, RSS | `article/*`, `GET /rss` | ✅ **hotovo na klientu i serveru** |
 | `admin/*` CRUD | `*/create|update|delete` | ✅ pro existující entity |
-| `admin/identities` | `identity/adminList`, `identity/update` | ✅ na profilu `authorities` |
+| `admin/identities` | `identity/adminList`, `member/set` | ✅ na profilu `authorities` |
 | Přihlášení, registrace, reset hesla | `caio-server-auth` + `/login.html` | ✅ |
 | Stránkování čehokoli | `pageInfo` v `dtoOut` | ✅ `Dao.findPage()` v `caio-server`; v appce ho zatím používá `article/list` |
 

@@ -18,6 +18,11 @@ const { theme } = Config;
 //
 // Rozsahová role `teamEditor:<teamId>` se ukazuje jako **název týmu**, ne holé id: id
 // v seznamu rolí nikdo nepřečte a překlep v něm znamená tiše nefunkční oprávnění.
+//
+// Role se ukládají přes `member/set`, ne `identity/update`: od caio-serveru 0.2.1 nejsou na
+// dokumentu identity, ale v kolekci `sys_member` pod **kódem** identity (docs/auth.md,
+// kapitola 10). `identity/update` `profileList` zahazuje, takže by se role tvářila jako
+// uložená a nic by neudělala.
 
 const ROLE_LIST = [
   Config.ROLE.AUTHORITIES,
@@ -112,7 +117,18 @@ const AdminIdentities = createVisualComponent({
 
     const identityList = useDataList({
       handlerMap: { load: () => UiElements.Call.cmdGet("/identity/adminList", {}) },
-      itemHandlerMap: { update: (dtoIn) => UiElements.Call.cmdPost("/identity/update", dtoIn) },
+      itemHandlerMap: {
+        // Volá se s celým řádkem a celý se i vrací: `member/set` odpovídá dokumentem
+        // členství (identity, profileList, sys), ne identitou -- kdyby se vracel on,
+        // řádek by přišel o jméno i e-mail.
+        update: async (dtoIn) => {
+          const member = await UiElements.Call.cmdPost("/member/set", {
+            identity: dtoIn.identity,
+            profileList: dtoIn.profileList,
+          });
+          return { ...dtoIn, profileList: member.profileList };
+        },
+      },
     });
 
     const { data: teamData } = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/team/list", {}) } }, []);
@@ -193,7 +209,7 @@ const AdminIdentities = createVisualComponent({
             item={editItem.data}
             teamMap={teamMap}
             onClose={() => setEditItem()}
-            onSave={(profileList) => editItem.handlerMap.update({ id: editItem.data.id, profileList })}
+            onSave={(profileList) => editItem.handlerMap.update({ ...editItem.data, profileList })}
           />
         ) : null}
       </AdminScreen>

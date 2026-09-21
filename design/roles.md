@@ -9,8 +9,11 @@ odkazuje na množiny definované tady; když si odporují, vyhrává tenhle doku
 
 ## 1. Jak autorizace funguje v `caio-server`
 
-- Role jsou **pole stringů v `identity.profileList`** a je to volný seznam — knihovna obsah
-  nijak nevaliduje.
+- Role jsou **pole stringů** a je to volný seznam — knihovna obsah nijak nevaliduje.
+- **Neleží na identitě, ale v kolekci `sys_member`** pod kódem identity (změna
+  v `caio-server` 0.2.1, `docs/auth.md`, kapitola 10). Do `req.identity.profileList` je
+  připojí server, takže všechno níž v tomhle dokumentu platí beze změny — mění se jen to,
+  kam se zapisují: use casem `member/set`, ne `identity/update`.
 - **Server je čte z databáze při každém requestu**, ne z tokenu (změna v `caio-server`
   7. 9. 2026, `docs/auth.md`, kapitola 9). Token nese jen `{ identity, authSchema }`.
   Dřív v něm jel celý `profileList`, což znamenalo, že jediná obrana proti libovolné roli
@@ -338,6 +341,7 @@ vlastní FK.
 | `identity/get` | – | jen zobrazovací data |
 | `identity/search`, `identity/list` | A | výběr uživatele ve formuláři |
 | `identity/adminList`, `identity/update` | ADMIN | **viz sekce 6** |
+| `member/list`, `member/get`, `member/set`, `member/delete` | ADMIN | role identit; **jediné místo, kudy se přidělují** |
 | `/auth/*` | – | login, logout, OAuth, reset hesla |
 
 ---

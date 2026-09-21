@@ -646,8 +646,15 @@ Původní návrh počítal s vlastním `identity/updateProfileList`; ten **odpad
 | `identity/search` | get | A | vyhledání identit podle `query` (jen zobrazovací data) |
 | `identity/list` | get | A | seznam podle `idList` / `identityList` (jen zobrazovací data) |
 | `identity/get` | get | – | identita podle `id` nebo kódu `identity` |
-| `identity/adminList` | get | ADMIN | plný seznam vč. `email`, `profileList`, `registrationType`, `sys` – bez hashe hesla a reset tokenu |
-| `identity/update` | post | ADMIN | zápis libovolných polí identity (typicky `profileList`); `password` se zahazuje |
+| `identity/adminList` | get | ADMIN | plný seznam vč. `email`, `registrationType`, `sys` a **dopočítaného** `profileList` – bez hashe hesla a jednorázových tokenů |
+| `identity/update` | post | ADMIN | zápis libovolných polí identity; `password` i `profileList` se zahazují |
+| `member/list`, `member/get` | get | ADMIN | členství = role jedné identity v téhle appce (`sys_member`) |
+| `member/set`, `member/delete` | post | ADMIN | **jediné místo, kudy se přidělují role** |
+
+**Změna v `caio-server` 0.2.1:** role nejsou na dokumentu identity, ale v kolekci `sys_member`
+pod kódem identity (knihovna, `docs/auth.md`, kapitola 10). `identity/update` `profileList`
+zahazuje, takže role se mění výhradně přes `member/set`. Pro appku se jinak nic nemění —
+`req.identity.profileList` má stejný tvar jako dřív, join dělá server.
 
 **Vyřešeno 2026-09-06.** `adminList` a `update` měly v knihovně natvrdo profil `owner`,
 který si nedefinuje žádná appka; opraveno na **`authorities`** — a záměrně **napevno, bez
@@ -701,6 +708,17 @@ Dvě věci, které se při implementaci rozhodly a stojí za zapamatování: `/p
 **nenastaví cookie** (přístup do schránky není totéž co sezení u důvěryhodného zařízení,
 takže po nastavení hesla následuje normální přihlášení) a reset se nabízí **jen účtům,
 které heslo mají** — poslat odkaz Google účtu by mu přidalo heslo, o které nikdo nežádal.
+
+**Registrace e-mailem a heslem od `caio-server` 0.2.1 taky stojí na SMTP.** `/auth/register`
+založí účet jako neověřený, pošle potvrzovací odkaz a **nepřihlásí** (`202`); účet se
+aktivuje až kliknutím (`/login.html?verify=<token>` → `POST /auth/verify`), do té doby
+`/auth/login` vrací `403 emailNotVerified`. Bez `SMTP_HOST` + `MAIL_FROM` + `APP_URL` se
+registrace na přihlašovací stránce vůbec nenabídne (`/auth/config` hlásí
+`registrationEnabled: false`). Rozbor: knihovna, `docs/auth.md`, kapitola 11.
+
+**Pro AFK to znamená:** dokud v `.env` není pošta, je web přihlášení přes Google a Facebook,
+bez registrace heslem i bez resetu hesla. Účty, které už existují, se chovají jako ověřené
+a přihlásit se s nimi jde dál. Prvního správce zakládá `tools/seed-admin.js`.
 
 `server/legacy-redirect.js` posílá `/zapomenute-heslo` na `/login.html` a **tam to končí**
 (rozhodnuto 2026-09-06). Odkaz na reset hesla nikde jinde než na přihlašovací stránce není
