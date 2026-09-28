@@ -30,6 +30,23 @@ npm run dev          # server i klient, http://localhost:8081
 Porty jsou **8081 / 3001** schválně jiné než u `caio_propertyman` (8080/3000), aby šly
 obě appky pustit vedle sebe.
 
+### Práce proti rozdělanému stacku
+
+Appka má `caio-ui`, `caio-server` i `caio-devkit` z GitHub Packages, takže běží proti
+**vydanému** kódu. Když je zrovna měníš v klonu pod `caio-architecture/`, podstrč je appce:
+
+```bash
+npm run sync -- --ui          # jen caio-ui
+npm run sync                  # celý stack
+npm run sync -- --status      # co je lokální a co publikované
+npm run sync -- --restore     # zpátky na publikované
+```
+
+Dev server přitom může běžet — skript na konci šťouchne do vstupních `index.html`, takže si
+rebuild vynutí sám. `package.json` nechává být, takže **každý `npm install` lokální kopii
+přepíše**; pak `sync` spusť znovu. Podrobnosti: `caio-devkit` README, *Vyvíjená appka proti
+lokálnímu stacku*.
+
 ### Prerekvizity
 
 - **Node 24** (`app.yaml` cílí na `runtime: nodejs24`)

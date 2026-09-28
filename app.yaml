@@ -1,1 +1,9 @@
 runtime: nodejs24
+
+# Strop na počet instancí. Bez něj App Engine škáluje automaticky dál, dokud nenarazí na
+# kvóty projektu -- jeden zacyklený request nebo nálet botů pak neznamená pomalou appku,
+# ale fakturu. Free kvóta je 28 instance-hodin/den na projekt.
+#
+# `caio-devkit deploy` strop kontroluje ještě před buildem a bez něj se zastaví.
+automatic_scaling:
+  max_instances: 2
