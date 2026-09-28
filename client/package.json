@@ -19,6 +19,6 @@
   },
   "devDependencies": {
     "vite": "^6.3.5",
-    "caio-devkit": "npm:@capo00/caio-devkit@^0.2.0"
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.3.1"
   }
 }
