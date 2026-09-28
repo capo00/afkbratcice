@@ -13,37 +13,6 @@ const { theme } = Config;
 
 const LANGUAGE_LIST = ["cs"];
 
-// Položka identity si přidává aplikace — `Top` ji sám nepřidává (README caio-ui: přijde až
-// s propem `displayIdentity`, který zatím není). Nepřihlášenému *Přihlásit se*, přihlášenému
-// jeho jméno; `login()` otevře popup na /login.html.
-function useIdentityItem() {
-  const session = UiAuth.useSession();
-  const loginLabel = useLsi(importLsi, ["header", "login"]);
-
-  if (session.state !== "authenticated") {
-    return {
-      icon: "uugds-account",
-      // children: loginLabel.toUpperCase(),
-      onClick: () => session.login(),
-      colorScheme: "building",
-      collapsed: "never",
-    };
-  }
-
-  return {
-    children: <Uu5Elements.RichIcon imageSrc={session.identity.photo} size="m" significance="subdued" className={Config.Css.css({ marginInline: -16 })} />,
-    itemList: [
-      { children: <Uu5Elements.Header title={session.identity.name} subtitle={session.identity.identity} /> },
-      { divider: true },
-      { icon: "uugds-log-out", children: "Odhlásit se", onClick: () => session.logout() }
-    ],
-    colorScheme: "building",
-    collapsed: "never",
-    iconOpen: null,
-    iconClosed: null,
-  };
-}
-
 /** Název klubu vedle erbu — dva řádky sázené GDS tokeny, ale klubovým písmem. */
 function ClubName({ name, since }) {
   return (
@@ -116,7 +85,6 @@ function useAdminItem() {
 function useTop() {
   const clubName = useLsi(importLsi, ["club", "name"]);
   const clubSince = useLsi(importLsi, ["club", "since"]);
-  const identityItem = useIdentityItem();
   const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
   const galleryLabel = useLsi(importLsi, ["header", "nav", "gallery"]);
@@ -181,9 +149,13 @@ function useTop() {
           colorScheme: "building",
         },
         adminItem,
-        identityItem,
       ].filter(Boolean),
     },
+    // Položka identity, odhlášení i správa rolí jsou z caio-ui: `authorities` je role
+    // celého stacku, takže obrazovka vypadá ve všech appkách stejně. Role klubu se
+    // konfigurují až na obrazovce (`routes/admin/identities.jsx`), protože rozsahová
+    // `teamEditor:<id>` potřebuje seznam mužstev ze serveru.
+    displayIdentity: true,
   };
 }
 

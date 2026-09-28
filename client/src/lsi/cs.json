@@ -4,8 +4,6 @@
     "since": "od roku 1932"
   },
   "header": {
-    "login": "Přihlásit se",
-    "logout": "Odhlásit se",
     "nav": {
       "home": "Úvod",
       "news": "Aktuality",
@@ -23,18 +21,54 @@
     "header": "Administrace",
     "empty": "Na žádnou obrazovku administrace nemáte oprávnění.",
     "menu": {
-      "clubs": { "header": "Kluby", "desc": "Erby a názvy klubů, sdílené napříč kategoriemi" },
-      "teams": { "header": "Mužstva a soupeři", "desc": "Týmy a kategorie" },
-      "seasons": { "header": "Sezóny", "desc": "Ročníky soutěží a jejich účastníci" },
-      "matches": { "header": "Zápasy", "desc": "Rozpis, výsledky a sestavy" },
-      "persons": { "header": "Osoby", "desc": "Lidé klubu a jejich kontakty" },
-      "players": { "header": "Hráči", "desc": "Soupisky, čísla dresů a posty" },
-      "coaches": { "header": "Trenéři a výbor", "desc": "Realizační týmy a funkcionáři" },
-      "articles": { "header": "Novinky", "desc": "Články, perexy a publikace" },
-      "galleries": { "header": "Fotogalerie", "desc": "Alba a nahrávání fotek" },
-      "files": { "header": "Ke stažení", "desc": "Rozpisy a formuláře v PDF" },
-      "identities": { "header": "Identity", "desc": "Přihlášení uživatelé a jejich role" },
-      "config": { "header": "Konfigurace", "desc": "Kontakty, kategorie a proužek s upozorněním" }
+      "clubs": {
+        "header": "Kluby",
+        "desc": "Erby a názvy klubů, sdílené napříč kategoriemi"
+      },
+      "teams": {
+        "header": "Mužstva a soupeři",
+        "desc": "Týmy a kategorie"
+      },
+      "seasons": {
+        "header": "Sezóny",
+        "desc": "Ročníky soutěží a jejich účastníci"
+      },
+      "matches": {
+        "header": "Zápasy",
+        "desc": "Rozpis, výsledky a sestavy"
+      },
+      "persons": {
+        "header": "Osoby",
+        "desc": "Lidé klubu a jejich kontakty"
+      },
+      "players": {
+        "header": "Hráči",
+        "desc": "Soupisky, čísla dresů a posty"
+      },
+      "coaches": {
+        "header": "Trenéři a výbor",
+        "desc": "Realizační týmy a funkcionáři"
+      },
+      "articles": {
+        "header": "Novinky",
+        "desc": "Články, perexy a publikace"
+      },
+      "galleries": {
+        "header": "Fotogalerie",
+        "desc": "Alba a nahrávání fotek"
+      },
+      "files": {
+        "header": "Ke stažení",
+        "desc": "Rozpisy a formuláře v PDF"
+      },
+      "identities": {
+        "header": "Identity",
+        "desc": "Přihlášení uživatelé a jejich role"
+      },
+      "config": {
+        "header": "Konfigurace",
+        "desc": "Kontakty, kategorie a proužek s upozorněním"
+      }
     },
     "field": {
       "name": "Název",
@@ -74,7 +108,6 @@
       "photoCount": "Fotek",
       "file": "Soubor",
       "size": "Velikost",
-      "profileList": "Role",
       "identity": "Identita",
       "notice": "Upozornění",
       "founded": "Založeno",
@@ -123,13 +156,6 @@
       "substitute": "Střídal",
       "cards": "ŽK / ČK",
       "noPlayers": "Ani jeden z týmů nemá aktivní hráče na soupisce.",
-      "save": "Uložit",
-      "cancel": "Zrušit"
-    },
-    "identities": {
-      "roleHeader": "Role pro ${name}",
-      "teamEditor": "Správce mužstev",
-      "hint": "Změna rolí platí okamžitě. Pokud má uživatel web otevřený, uvidí ji po načtení stránky.",
       "save": "Uložit",
       "cancel": "Zrušit"
     },
