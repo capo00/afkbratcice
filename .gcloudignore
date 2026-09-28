@@ -11,5 +11,11 @@ dtb-design.png
 README.md
 todo.md
 
+# Ikony pro kreslení BML diagramů -- peerDependency uu5bricksg01 (kvůli
+# Uu5Bricks.VerticalTimeline na /historie), appka je nikde nepoužívá. 1129 souborů
+# přímo v public/libs/uu_uubmldraw_iconsg04/<verze> překračuje limit GAE 1000
+# souborů na adresář a deploy bez týhle výjimky rovnou spadne (design/todo.md, 5.2).
+public/libs/uu_uubmldraw_iconsg04/
+
 # Sám sebe -- gcloud ho čte lokálně, na App Engine nemá co dělat.
 .gcloudignore
