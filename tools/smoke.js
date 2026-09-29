@@ -6,6 +6,11 @@
 // role s rozsahem, pohledy na zápasy, ochranu osobních údajů, legacy přesměrování,
 // iCal a sitemap -- a po sobě uklidí. Je to náhrada za neexistující integrační testy,
 // ne za ně: běží proti reálnému Mongu, takže odhalí i chyby v indexech a v dotazech.
+import "caio-server/src/caio-server-app/config/env.js";
+import { Authentication } from "caio-server";
+
+const { Identity, Member } = Authentication;
+
 const BASE = process.env.SMOKE_BASE || `http://localhost:${process.env.PORT || 8081}`;
 
 let pass = 0;
@@ -36,18 +41,25 @@ async function post(uc, dtoIn = {}, cookie) {
 
 // --- přihlášení správce -------------------------------------------------------
 const ADMIN = { email: `smoke-admin-${Date.now()}@afkbratcice.cz`, password: "SmokeHeslo123" };
-const reg = await post("auth/register", { firstName: "Smoke", surname: "Admin", ...ADMIN });
-ok("registrace projde", reg.status === 201, reg.body);
+// Identitu zakládáme rovnou přes balíček, ne přes POST /auth/register: registrace heslem
+// vyžaduje nakonfigurovanou poštu (potvrzovací odkaz) a v devu ji nemáme. Role žijí
+// v kolekci sys_member (caio-server docs/auth.md, 10), ne na identitě.
+const adminIdentity = await Identity.create({
+  email: ADMIN.email,
+  password: ADMIN.password,
+  firstName: "Smoke",
+  surname: "Admin",
+  name: "Smoke Admin",
+  emailVerified: true,
+  registrationType: "password",
+});
+ok("identita správce vznikla", Boolean(adminIdentity?.identity), adminIdentity);
+await Member.set(adminIdentity.identity, ["authorities"], { note: "smoke" });
 
-// profil authorities zapíšeme přímo do Monga (jako první správce v ostrém provozu)
 const { MongoClient } = await import("mongodb");
 const mongo = new MongoClient("mongodb://127.0.0.1:27017");
 await mongo.connect();
 const db = mongo.db("afkbratcice");
-await db.collection("sys_identity").updateOne(
-  { email: ADMIN.email },
-  { $set: { profileList: ["authorities"] } },
-);
 
 const login = await fetch(`${BASE}/auth/login`, {
   method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ADMIN),
@@ -251,9 +263,7 @@ ok("RSS je kanál s publikovanou novinkou",
 ok("RSS nepouští naplánovanou novinku ven", !rssBody.includes("SMOKE naplánovaná novinka"));
 
 console.log("\n== teamEditor (role s rozsahem) ==");
-await db.collection("sys_identity").updateOne(
-  { email: ADMIN.email }, { $set: { profileList: ["teamEditor:" + teamIds[0]] } },
-);
+await Member.set(adminIdentity.identity, ["teamEditor:" + teamIds[0]], { note: "smoke" });
 const teLogin = await fetch(`${BASE}/auth/login`, {
   method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ADMIN),
 });
@@ -313,6 +323,7 @@ const cleanupFilter = {
 for (const c of ["afk_team", "afk_season", "afk_match", "afk_person", "afk_player", "afk_coach", "afk_article"]) {
   await db.collection(c).deleteMany(cleanupFilter);
 }
+await Member.delete(adminIdentity.identity);
 await db.collection("sys_identity").deleteMany({ email: ADMIN.email });
 await mongo.close();
 console.log("  hotovo");

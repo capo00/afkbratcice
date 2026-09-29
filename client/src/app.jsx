@@ -94,7 +94,7 @@ function useTop() {
   const adminItem = useAdminItem();
 
   return {
-    logo: { uri: Config.asset.logoTransparent, href: "/", significance: "subdued" },
+    logo: { imageSrc: Config.asset.logoTransparent, href: "/", significance: "subdued" },
     // Dvouřádkový název vedle erbu. `children` Topu je jeho volný obsah.
     //
     // Skládá se **z vlastních elementů, ne z `Uu5Elements.Header`**. Header nemá token pro

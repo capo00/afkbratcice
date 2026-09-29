@@ -15,10 +15,10 @@
     "uu5imagingg01": "^2.0.0",
     "uu5imagingg01-tools": "^2.0.0",
     "uu5bricksg01": "^1.25.0",
-    "caio-ui": "npm:@capo00/caio-ui@^0.2.0"
+    "caio-ui": "npm:@capo00/caio-ui@^0.4.0"
   },
   "devDependencies": {
     "vite": "^6.3.5",
-    "caio-devkit": "npm:@capo00/caio-devkit@^0.3.1"
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.4.0"
   }
 }
