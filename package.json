@@ -16,15 +16,15 @@
     "build": "caio-devkit build",
     "deploy": "caio-devkit deploy",
     "seed:admin": "node tools/seed-admin.js",
-    "test": "node --test \"server/test/**/*.test.js\"",
+    "test": "node --test \"server/test/**/*.test.js\" \"client/src/**/*.test.js\"",
     "smoke": "node tools/smoke.js"
   },
   "dependencies": {
-    "caio-server": "npm:@capo00/caio-server@^0.3.0",
+    "caio-server": "npm:@capo00/caio-server@^0.4.3",
     "uu_appdatatypesg02": "~0.2.1"
   },
   "devDependencies": {
-    "caio-devkit": "npm:@capo00/caio-devkit@^0.4.0",
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.4.5",
     "nodemon": "^3.1.14"
   }
 }

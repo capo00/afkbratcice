@@ -7,3 +7,12 @@ runtime: nodejs24
 # `caio-devkit deploy` strop kontroluje ještě před buildem a bez něj se zastaví.
 automatic_scaling:
   max_instances: 2
+
+# Vynucení HTTPS (šablona caio-devkit 0.4.1+). Bez `handlers` App Engine odpovídá na http://
+# i https:// stejně (200), takže web na vlastní doméně jde otevřít nešifrovaně. Node runtime
+# podporuje jen `script: auto`; přesměrování (301) udělá App Engine před Expressem.
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+    redirect_http_response_code: 301
