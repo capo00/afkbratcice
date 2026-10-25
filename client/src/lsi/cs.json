@@ -13,7 +13,12 @@
       "contact": "Kontakt",
       "history": "Historie",
       "club": "Klub",
-      "admin": "Administrace"
+      "admin": "Administrace",
+      "web": "Web"
+    },
+    "colorMode": {
+      "toDark": "Přepnout na tmavý režim",
+      "toLight": "Přepnout na světlý režim"
     }
   },
   "admin": {

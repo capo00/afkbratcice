@@ -9,21 +9,59 @@
 // svoji a jednu uvnitř uu5 komponent — a mobilní stupně (`smallScreen`) by přestaly platit.
 // Viz design/ux-design-system.md, 2.1.
 
-const color = {
-  // Nikde není čistá černá ani bílá; všechno je posunuté do teplé (hue 25–30).
-  bg: "#070404", // oklch(11.5% .006 25) — základní podklad stránky
-  card: "#120D0C", // oklch(16.5% .009 25) — podklad karet
-  muted: "#1D1716", // oklch(21% .01 25) — jemné plochy, neaktivní chip
-  accent: "#2A1B19", // oklch(24% .025 27) — zvýrazněný řádek tabulky (vlastní tým)
-  border: "#2C2423", // oklch(27% .012 25) — rámečky karet, oddělovače
-  input: "#362E2D", // oklch(31% .012 25)
-  fg: "#F3EFED", // oklch(95.5% .005 60) — základní text
-  mutedFg: "#99908E", // oklch(66% .012 30) — sekundární text, perex, popisky
-  clubRed: "#D01319", // oklch(54.5% .215 27.56) — CTA, eyebrow, aktivní nav, skóre
-  clubRedBright: "#F92725", // oklch(63% .24 28) — hover, CTA pruh
-  onRed: "#FEF7F2", // oklch(98% .01 60) — text na červené
-  destructive: "#E7000B",
+// Dvě palety se stejnými rolemi. Tmavá je předloha webu (oklch originál u každé hodnoty),
+// světlá je schválená 2026-10-25 (canvas „AFK Bratčice – světlý režim“, kontrasty WCAG AA
+// tamtéž). Klubová červená a text na ní jsou v obou stejné.
+//
+// Destruktivní barva tu **není**: je to `colorScheme="negative"` z uuGds, kterou
+// tools/theme-setup.js přemapuje na oranžovou z GDS (klubová červená a červená chyba by
+// splývaly; rozhodl Caio 2026-10-25).
+const palette = {
+  dark: {
+    // Nikde není čistá černá ani bílá; všechno je posunuté do teplé (hue 25–30).
+    bg: "#070404", // oklch(11.5% .006 25) — základní podklad stránky
+    card: "#120D0C", // oklch(16.5% .009 25) — podklad karet
+    muted: "#1D1716", // oklch(21% .01 25) — jemné plochy, neaktivní chip
+    accent: "#2A1B19", // oklch(24% .025 27) — zvýrazněný řádek tabulky (vlastní tým)
+    border: "#2C2423", // oklch(27% .012 25) — rámečky karet, oddělovače
+    input: "#362E2D", // oklch(31% .012 25)
+    fg: "#F3EFED", // oklch(95.5% .005 60) — základní text
+    mutedFg: "#99908E", // oklch(66% .012 30) — sekundární text, perex, popisky
+    clubRed: "#D01319", // oklch(54.5% .215 27.56) — CTA, eyebrow, aktivní nav, skóre
+    clubRedBright: "#F92725", // oklch(63% .24 28) — hover, CTA pruh
+    onRed: "#FEF7F2", // oklch(98% .01 60) — text na červené
+  },
+  light: {
+    bg: "#FAF6F4",
+    card: "#FFFCFA",
+    muted: "#F1EAE7",
+    accent: "#FBE3DF",
+    border: "#E3D8D5",
+    input: "#C9BCB8",
+    fg: "#1C1312",
+    mutedFg: "#6B5E5B",
+    clubRed: "#D01319",
+    clubRedBright: "#F92725",
+    onRed: "#FEF7F2",
+  },
 };
+
+// Komponenty berou barvy jako CSS proměnné, ne hexy: režim se tak přepne jedním atributem
+// na <html> bez jediného překreslení Reactu, a tmavá plocha uprostřed světlé stránky (hero,
+// červený pruh) si proměnné jen přenastaví pro svůj podstrom (`darkScope`). Hodnoty proměnných
+// zakládá tools/theme-setup.js. Hex z palety je potřeba jen tam, kde CSS nestačí
+// (`setMeaningColor`, `setBackground`).
+const VAR_PREFIX = "--afk-";
+const color = Object.fromEntries(Object.keys(palette.dark).map((key) => [key, `var(${VAR_PREFIX}${key})`]));
+
+/** `{ "--afk-bg": "#070404", … }` -- deklarace proměnných jedné palety pro `Css.css`/`injectGlobal`. */
+function paletteVars(mode) {
+  return Object.fromEntries(Object.entries(palette[mode]).map(([key, value]) => [VAR_PREFIX + key, value]));
+}
+
+// Podstrom, který je tmavý v obou režimech (hero, červená sekce): přenastaví proměnné na
+// tmavou paletu. `Css.css({ ...darkScope })`.
+const darkScope = paletteVars("dark");
 
 // Bebas Neue je úzký velkopísmenný grotesk — sportovní charakter předlohy stojí na něm.
 // Barlow je nízkokontrastní grotesk, drží text klidný.
@@ -64,7 +102,10 @@ const typography = {
 };
 
 export default {
+  palette,
   color,
+  paletteVars,
+  darkScope,
   font,
   typography,
 

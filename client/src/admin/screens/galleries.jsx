@@ -4,10 +4,10 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { EnumText, enumItemList, dateField } from "../../admin/fields.jsx";
-import PhotoUpload from "../../admin/photo-upload.jsx";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { EnumText, enumItemList, dateField } from "../fields.jsx";
+import PhotoUpload from "../photo-upload.jsx";
 
 // Fotoalba. Nahrávání fotek je **vlastní akce řádku**, ne pole formuláře: album se zakládá
 // jednou a fotky se do něj sypou opakovaně, často jindy a někým jiným.
@@ -15,7 +15,7 @@ import PhotoUpload from "../../admin/photo-upload.jsx";
 // `useDataList` napřímo, ne `CrudContext`: ten umí položkové handlery jen pro `update`
 // a `delete`, takže nahrání fotky by se muselo dohánět přenačtením celého seznamu alb.
 // `gallery/addPhoto` vrací album s přepočítaným `photoCount` i titulním náhledem, takže
-// si řádek vystačí sám -- stejně jako `admin/matches.jsx`.
+// si řádek vystačí sám -- stejně jako `screens/matches.jsx`.
 //
 // `createMany`/`deleteMany` se nepřidávají: `gallery` je na serveru nemá.
 const GALLERY_CALLS = entityCalls("gallery");

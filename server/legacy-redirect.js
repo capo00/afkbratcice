@@ -14,7 +14,10 @@ const STATIC_REDIRECT = {
   "/home": "/",
   // v0 má podtržítko, nová routa pomlčku.
   "/tymove_fotky": "/tymove-fotky",
-  "/prihlaseni": "/login.html",
+  // Přihlášení ze v0 vede do administrace: web přihlášení v liště nemá a administrace
+  // nepřihlášenému nabídne přihlášení sama (guard). Po něm zapíše značku, podle které web
+  // ukáže odkaz do správy (client/src/tools/admin-hint.js).
+  "/prihlaseni": "/admin/",
   "/zapomenute-heslo": "/login.html",
 };
 

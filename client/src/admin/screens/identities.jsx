@@ -2,8 +2,8 @@ import { createVisualComponent, useDataObject, useLsi, useMemo } from "uu5g05";
 import { UiAuth, UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { teamLabel } from "../../admin/fields.jsx";
+import AdminScreen from "../screen.jsx";
+import { teamLabel } from "../fields.jsx";
 
 // Identity a jejich role.
 //

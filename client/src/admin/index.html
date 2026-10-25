@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Administrace je vlastní UVE (vzor z caio_propertyman): vlastní dokument, vlastní bundle
+      (admin.js) a vlastní kus URL -- server tímhle dokumentem odpovídá na /admin a všechno
+      pod ním. Návštěvník webu tak kód administrace ani její knihovny (`uu5tilesg02*`,
+      `uu5codekitg01-forms`) nestahuje vůbec. Sdílí se server, přihlášení, `config/`, `lsi/`,
+      `core/`, `tools/` a primitiva z `components/`.
+
+      `data-uu-app-base` MUSÍ být prefix téhle UVE, jinak by po obnovení /admin/clubs
+      uu5g05 počítal routu od /admin/ a z `clubs` by zbylo něco jiného (devkit neshodu
+      hlásí při buildu). Routy uvnitř jsou proto bez `admin/` (`clubs`, `matches`).
+    -->
+    <base href="/admin/" data-uu-app-base="/admin/" />
+    <!--
+      Vypnutí obnovy uuOIDC session při načtení stránky.
+
+      `uu5bricksg01` (časová osa v historii) táhne `uu_appg01` a s ním `uu_appg01_oidc`,
+      který se po načtení sám pokusí obnovit session na `uuidentity.plus4u.net` — na
+      veřejném webu fotbalového klubu, který se přihlašuje vlastní identitou přes
+      `caio-server-auth`, ne přes Plus4U. Bez tohohle meta tagu tedy každý návštěvník
+      historie mlčky posílá požadavek na cizí identity server (a v konzoli skončí chyba,
+      protože `client_id` je undefined).
+
+      Hodnota je **"disabled"**, ne "false": z meta tagu se čte doslovně a porovnává se
+      s konstantou `RESTORE_SESSION_DISABLED = "disabled"`. Řetězec "false" je pravdivý,
+      takže by se obnova session pustila dál (na "false" reaguje jen globální konfigurace,
+      ne tenhle tag).
+    -->
+    <meta uuAppOidcRestoreSessionOnLoad="disabled" />
+    <!--
+      POZOR: `uu5g05_libraryLoadDisabled` v `window.uu5Environment` se nastavit NEDÁ.
+      Vypne dotaz do uuAppLibraryRegistry (`uuapp.plus4u.net`), kterým si uu5g05 překládá
+      jmenný prostor z uu5String (u nás `Uu5Bricks`) na knihovnu — a appka pak skončí na
+      „Unexpected error". Ověřeno 7. 9. 2026. Ten jeden požadavek na cizí server je cena
+      za `Uu5Bricks.VerticalTimeline` v obsahu; padne s ním, ne dřív.
+    -->
+    <title>Administrace · AFK Bratčice</title>
+    <!-- Administrace do vyhledávání nepatří, ani přes odkaz zvenku. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <!--
+      Boot indikátor (vzor z caio_propertyman a caio-apps). Je **inline** schválně: bundle
+      appky ani Bebas/Barlow v tu chvíli ještě nejsou, takže cokoli z externího souboru by se
+      ukázalo až po tom, co má překlenout. Ze stejného důvodu systémové písmo, ne písma webu.
+
+      Jediná výjimka je erb -- jeden obrázek ze stejného originu, tatáž ikona jako v liště
+      (`Config.asset.logoTransparent`), takže ho prohlížeč po startu bere z cache. Pevné
+      rozměry na `img` drží layout, aby s ním jeho dorazení neškublo.
+
+      Rozložení je převzaté z loadingu uu5 appek: erb uvnitř kruhu 252 px (na mobilu 70vw),
+      kolem něj otáčivý prstenec 6 px s přechodem klubové červené shora dolů do 30 % a název
+      pod tím. Prstenec je jeden `div` s maskou, takže tloušťka drží 6 px při jakékoli
+      velikosti.
+
+      Barvy nejdou z `config/theme.js` (ten je až v bundlu), takže jsou opsané: `bg` a `fg`
+      světlé (#FAF6F4, #1C1312) a tmavé palety (#070404, #F3EFED) a `clubRed` #D01319. Režim
+      je podle systému, nebo podle uložené volby z přepínače (inline skript níž), stejně jako
+      v tools/theme-setup.js. Při změně palety je přepiš i tady a v `client/index.html`.
+
+      Markup leží uvnitř `#root`, takže ho React při prvním renderu zahodí sám --
+      `createRoot()` kontejner před mountem vyprázdní. Úklid v index.jsx tedy netřeba.
+    -->
+    <!--
+      Uložená volba světlého / tmavého režimu (přepínač v liště, src/tools/color-mode.js) se
+      musí uplatnit ještě před prvním vykreslením, jinak by boot screen problikl v barvě
+      systému. Bez volby nenastaví nic a platí systém (CSS níž). Klíč je jméno balíčku klienta
+      + `.colorMode`; MUSÍ sedět s `STORAGE_KEY` v tools/color-mode.js.
+    -->
+    <script>
+      try {
+        var mode = localStorage.getItem("afkbratcice-client.colorMode");
+        if (mode === "light" || mode === "dark") document.documentElement.dataset.colorMode = mode;
+      } catch (e) {}
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        background-color: #faf6f4;
+        color: #1c1312;
+      }
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        background: #faf6f4;
+        color: #1c1312;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-color-mode="light"]) {
+          color-scheme: dark;
+        }
+        :root:not([data-color-mode="light"]) body,
+        :root:not([data-color-mode="light"]) #app-loading {
+          background-color: #070404;
+          color: #f3efed;
+        }
+      }
+      :root[data-color-mode="dark"] {
+        color-scheme: dark;
+      }
+      :root[data-color-mode="dark"] body,
+      :root[data-color-mode="dark"] #app-loading {
+        background-color: #070404;
+        color: #f3efed;
+      }
+      #app-loading .mark {
+        position: relative;
+        display: grid;
+        place-items: center;
+        inline-size: min(252px, 70vw);
+        aspect-ratio: 1;
+        color: #d01319;
+      }
+      #app-loading .ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: linear-gradient(currentColor, rgba(208, 19, 25, 0.3));
+        /* Z plného kruhu nechá jen mezikruží 6 px u okraje. */
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px));
+        animation: app-loading-spin 1s linear infinite;
+      }
+      #app-loading .logo {
+        inline-size: 60%;
+        block-size: auto;
+      }
+      #app-loading .name {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        line-height: 1.15;
+      }
+      @media (max-width: 480px) {
+        #app-loading {
+          gap: 16px;
+        }
+        #app-loading .name {
+          font-size: 24px;
+        }
+      }
+      @keyframes app-loading-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      /* Točení je dekorace, ne informace -- komu vadí pohyb, tomu stačí pomalejší. */
+      @media (prefers-reduced-motion: reduce) {
+        #app-loading .ring {
+          animation-duration: 3s;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="app-loading">
+        <!-- alt="" schválně: vedle je název klubu, takže obrázek nic nedoplňuje. -->
+        <div class="mark">
+          <div class="ring"></div>
+          <img class="logo" src="/assets/icon-192-transparent.png" width="192" height="192" alt="" />
+        </div>
+        <div class="name">AFK Bratčice</div>
+      </div>
+    </div>
+    <script type="module" src="./index.jsx"></script>
+  </body>
+</html>

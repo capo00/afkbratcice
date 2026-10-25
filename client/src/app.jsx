@@ -1,76 +1,54 @@
 import { useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiApp, UiAuth } from "caio-ui";
+import { UiApp, UiAuth } from "./tools/caio-ui.js";
 import Config from "./config/config.js";
 import importLsi from "./lsi/import-lsi.js";
 import Router from "./router.jsx";
 import Footer from "./components/layout/footer.jsx";
+import ClubName from "./components/layout/club-name.jsx";
 import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
-import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "./admin/menu.js";
+import { useAdminHint } from "./tools/admin-hint.js";
+import { useColorModeItem } from "./tools/color-mode.js";
+import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
 
 const { theme } = Config;
 
 const LANGUAGE_LIST = ["cs"];
 
-/** Název klubu vedle erbu — dva řádky sázené GDS tokeny, ale klubovým písmem. */
-function ClubName({ name, since }) {
-  return (
-    // Dva řádky nalepené na sebe, vycentrované na výšku lišty: `rowGap={0}` je tu proto,
-    // že výchozí mezera `Grid` (24 px z `loose`) je mezera mezi dlaždicemi, ne mezi řádky
-    // jednoho popisku.
-    <Uu5Elements.Grid alignContent="center" rowGap={0}>
-      <Uu5Elements.Text category="interface" segment="title" type="minor">
-        {({ style }) => (
-          <span
-            className={Config.Css.css({
-              ...style,
-              ...theme.typography.display,
-              letterSpacing: "0.04em",
-              lineHeight: 1.1,
-            })}
-          >
-            {name}
-          </span>
-        )}
-      </Uu5Elements.Text>
-      <Uu5Elements.Text category="interface" segment="highlight" type="small" colorScheme="primary">
-        {({ style }) => (
-          <span
-            className={Config.Css.css({
-              ...style,
-              ...theme.typography.eyebrow,
-            })}
-          >
-            {since}
-          </span>
-        )}
-      </Uu5Elements.Text>
-    </Uu5Elements.Grid>
-  );
-}
-
-// Administrace v liště. Nabídne se **jen tomu, kdo na ni má** — a s podpoložkami jen na ty
-// obrazovky, které smí otevřít; zašedlé položky se v tomhle webu nepoužívají (frontend.md, 2.2).
-// Nepřihlášenému nebo běžnému členovi se položka nevykreslí vůbec (`undefined` v `itemList`
-// uu5 přeskočí).
+/**
+ * Odkaz do administrace (vzor z caio_propertyman `tools/use-web-menu.jsx`). Ukáže se, když se
+ * v tomhle prohlížeči někdo přihlásil do administrace (tools/admin-hint.js), nebo když je na
+ * webu přihlášený někdo s právem do ní — tedy i ten, kdo se přihlásil z odkazu v e-mailu
+ * (`/login.html?invite=…` končí na `/`, ne v administraci) a značku ještě nemá.
+ *
+ * Administrace je jiný dokument (/admin/, vlastní UVE), ale `Top` ho za „mimo appku“
+ * nepovažuje: app base webu je `/`, takže `/admin/` pod ni spadá a `href` by skončil na
+ * `setRoute` (jen změna adresy, administrace by se nenačetla). Proto místo `href` vlastní
+ * `onClick`, který chování odkazu napodobí: ctrl/cmd-klik a klik kolečkem (Button ho posílá
+ * do `onClick` s `button === 1`) otevřou nový panel, obyčejný klik přejde do administrace.
+ *
+ * Jen ikona, nikdy v hamburgeru. `uugds-settings`, ne `uugds-account` jako v propertymanu: vedle
+ * stojí identita přihlášeného, a dvě postavičky by se pletly. Bez `children` si ActionGroup tooltip sám nevezme, proto
+ * `tooltip` — zároveň přístupný název tlačítka.
+ */
 function useAdminItem() {
+  const hint = useAdminHint();
   const session = UiAuth.useSession();
+  const isAdmin = hint || UiAuth.hasProfile(session.identity, ANY_ADMIN_PROFILE);
   const adminLabel = useLsi(importLsi, ["header", "nav", "admin"]);
-  const menuLsi = useLsi(importLsi, ["admin", "menu"]);
-
-  if (!UiAuth.hasProfile(session.identity, ANY_ADMIN_PROFILE)) return undefined;
+  if (!isAdmin) return undefined;
 
   return {
-    href: "admin",
-    children: adminLabel.toUpperCase(),
+    icon: "uugds-settings",
+    tooltip: adminLabel,
+    collapsed: "never",
+    onClick: (e) => {
+      const newTab = e?.ctrlKey || e?.metaKey || e?.button === 1;
+      window.open("/admin/", newTab ? "_blank" : "_self", "noopener");
+    },
     significance: "subdued",
     colorScheme: "building",
-    itemList: ADMIN_MENU.filter((item) => UiAuth.hasProfile(session.identity, item.profileList)).map((item) => ({
-      href: item.route,
-      icon: item.icon,
-      children: menuLsi[item.code]?.header ?? item.code,
-    })),
   };
 }
 
@@ -80,11 +58,10 @@ function useAdminItem() {
 // mužstva vedle sebe s logem, soutěží a trenérem. Přehled mužstev tuhle volbu udělá líp
 // než menu, takže se na něj jen proklikne (rozhodnuto 8. 9. 2026).
 //
-// Jediná položka, která si podpoložky nechává, je administrace — tam jsou to opravdu různé
-// obrazovky, ne jeden seznam.
+// Podpoložky má jen Klub (obsahové stránky). Administrace je vlastní UVE s vlastní lištou,
+// web na ni jen odkazuje ikonou (`useAdminItem`).
 function useTop() {
-  const clubName = useLsi(importLsi, ["club", "name"]);
-  const clubSince = useLsi(importLsi, ["club", "since"]);
+  const { state } = UiAuth.useSession();
   const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
   const galleryLabel = useLsi(importLsi, ["header", "nav", "gallery"]);
@@ -92,29 +69,22 @@ function useTop() {
   const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
   const pageLsi = useLsi(importLsi, ["page", "name"]);
   const adminItem = useAdminItem();
+  const colorModeItem = useColorModeItem(useLsi(importLsi, ["header", "colorMode"]));
 
   return {
     logo: { imageSrc: Config.asset.logoTransparent, href: "/", significance: "subdued" },
-    // Dvouřádkový název vedle erbu. `children` Topu je jeho volný obsah.
-    //
-    // Skládá se **z vlastních elementů, ne z `Uu5Elements.Header`**. Header nemá token pro
-    // font a title i subtitle si renderuje jako `Uu5Elements.Text` s explicitní
-    // `font-family`, takže zdědění z rodiče nestačí — jediná cesta k němu vedla přes
-    // selektor `[data-name="Uu5Elements.Text"]`. A ten **v produkčním buildu neexistuje**:
-    // `data-name` je vývojová pomůcka, kterou uu5 v produkci nevypisuje, takže erb měl
-    // v ostrém provozu vedle sebe Barlow místo Bebasu (nalezeno 7. 9. 2026).
-    //
-    // Velikost dál počítá GDS přes `Uu5Elements.Text` a jeho `children` jako funkci —
-    // stejný postup jako `components/layout/heading.jsx`. Přebíjí se jen to, co token nemá:
-    // rodina písma, prostrkání a verzálky.
-    children: <ClubName name={clubName} since={clubSince} />,
-    // GDS paleta `building` je bílá a nepřenastaví se, takže tmavá lišta jde přes
-    // cssBackground/cssColor.
-    cssBackground: theme.color.bg,
-    cssColor: theme.color.fg,
+    // Dvouřádkový název vedle erbu (components/layout/club-name.jsx, sdílený s administrací).
+    // `children` Topu je jeho volný obsah.
+    children: <ClubName />,
+    // Lišta je tmavá v obou režimech (Caio 2026-10-25), jako hero pod ní. GDS paleta
+    // `building` je bílá a nepřenastaví se, takže barvy jdou přes cssBackground/cssColor --
+    // a schválně jako hex tmavé palety, ne `var(--afk-bg)`: `Top` z hexu pozná, že stojí na
+    // tmavém, a uu5 položkám menu nastaví tmavý podklad i ve světlém režimu.
+    cssBackground: theme.palette.dark.bg,
+    cssColor: theme.palette.dark.fg,
     menu: {
-      // `.filter(Boolean)`: položka administrace je `undefined`, dokud se nepřihlásí někdo,
-      // kdo na ni má.
+      // `.filter(Boolean)`: odkaz do administrace je `undefined`, dokud se v tomhle prohlížeči
+      // nepřihlásí někdo, kdo na ni má.
       itemList: [
         {
           href: "novinky",
@@ -149,13 +119,16 @@ function useTop() {
           colorScheme: "building",
         },
         adminItem,
+        // Přepínač světlého a tmavého režimu: jen ikona, v liště i na telefonu (canvas
+        // světlé verze, varianta A, 2026-10-25).
+        colorModeItem,
       ].filter(Boolean),
     },
-    // Položka identity, odhlášení i správa rolí jsou z caio-ui: `authorities` je role
-    // celého stacku, takže obrazovka vypadá ve všech appkách stejně. Role klubu se
-    // konfigurují až na obrazovce (`routes/admin/identities.jsx`), protože rozsahová
-    // `teamEditor:<id>` potřebuje seznam mužstev ze serveru.
-    displayIdentity: true,
+    // Přihlásit se na webu nejde, přihlašuje se v administraci (admin/top.jsx). Session ale
+    // web má (SpaProvider), takže editor přihlášený v administraci zapíše výsledek i z dlaždice
+    // zápasu (match-tile.jsx). Proto **přihlášenému** lišta ukáže identitu s odhlášením — kdo
+    // zapisuje pod svým jménem, musí vidět pod jakým a umět se odhlásit (sdílený počítač).
+    displayIdentity: state === "authenticated",
   };
 }
 

@@ -24,7 +24,9 @@ client/
     assets/meta/        manifest.json, icon-192/512, icon-maskable, apple-touch-icon, og-image
     assets/fonts/       bebas-neue-400-{latin,latin-ext}.woff2, barlow-{400,600,700}-{latin,latin-ext}.woff2
   src/
-    main.jsx            createRoot(...).render(<App />)
+    main.jsx            setupTheme() + createRoot(...).render(<App />)
+    admin/              vlastní UVE administrace (index.html, index.jsx, app.jsx, top.jsx, screens/)
+    tools/              theme-setup.js, caio-ui.js (caio-ui pro web po modulech), admin-hint.js
     app.jsx             UiApp.SpaProvider > UiApp.Spa(top, footer, main) > Router
     router.jsx          useRouter(routeMap) + Suspense + ErrorBoundary
     fonts.css           @font-face pro Bebas Neue a Barlow
@@ -76,9 +78,44 @@ a – dostane-li `top`/`footer` – i celý rám stránky (`UiApp.Page`: lišta 
 Sbalení menu do hamburgeru na mobilu řeší `Uu5Elements.ActionGroup` uvnitř `Top` sám – nic se
 nenastavuje. Aktivní položka se zvýrazní `significance: "highlighted"`.
 
-**Tlačítko identity si přidává aplikace** (`Top` ho sám nepřidává, viz [README.md](./README.md),
-riziko #13): nepřihlášenému položka *Přihlásit se* volající `UiAuth.useSession().login()`,
-přihlášenému `UiAuth.IdentityItem` s dropdownem *Profil* / *Odhlásit se*.
+**Přihlášení na webu v liště není** (od 2026-10-24, vzor z caio_propertyman). Přihlašuje se
+v administraci (`/admin/`, lišta s `displayIdentity`, stará adresa `/prihlaseni` vede tam);
+administrace po přihlášení s rolí, která otevře aspoň jednu obrazovku, zapíše do localStorage
+značku `afkbratcice-client.admin` (`tools/admin-hint.js`, `admin/use-admin-hint-sync.js`)
+a web pak v liště ukáže ikonu do správy (`uugds-settings`, nikdy v hamburgeru). Přihlášený
+bez práva značku smaže. Ikona se ukáže i bez značky, když je na webu přihlášený někdo s právem
+(přihlášení z e-mailu přes `/login.html` končí na `/`). Je to jen nápověda pro zobrazení —
+přístup hlídá guard a server. Session web má (`SpaProvider`), takže editor přihlášený
+v administraci zapíše výsledek i z dlaždice zápasu; **přihlášenému proto lišta webu ukáže
+identitu s odhlášením** (`displayIdentity` jen při `authenticated`), nepřihlášenému nic.
+
+### 1.2.1 Administrace jako vlastní UVE
+
+Od 2026-10-24 je administrace vlastní UVE (`client/src/admin/index.html`,
+`data-uu-app-base="/admin/"`, bundle `admin.js`), ne lazy routa webu. Adresy se nezměnily
+(`/admin/clubs`), uvnitř UVE jsou routy bez prefixu (`clubs`). Obrazovky jsou
+v `admin/screens/`, rám v `admin/app.jsx`, lišta v `admin/top.jsx` (erb, „Administrace“,
+rozbalovací seznam obrazovek podle rolí, odkaz *Web*). Sdílí `config/`, `lsi/`, `core/`,
+`tools/` a primitiva z `components/`.
+
+Web bere caio-ui po modulech přes `tools/caio-ui.js`, ne z barrelu `caio-ui`, aby
+`index.js` webu neměl mezi statickými závislostmi tabulky ani editor kódu. Hlídá to
+`client/src/lazy-libs.test.js` (spouští `npm test`). `uu5g05-forms` ve webu zatím zůstává:
+táhne ho `caio-ui-app` přes barrel `caio-ui-auth` (bod 14 úklidu caio stacku, oprava patří
+do caio-ui).
+
+### 1.2.2 Boot screen
+
+`client/index.html` i `admin/index.html` mají inline úvodní načítání: erb v otáčivém
+prstenci klubové červené a název pod ním (vzor caio_propertyman a caio-apps). Pozadí je
+světlé, nebo tmavé podle systému a uložené volby (inline skript nastaví `<html
+data-color-mode>` ještě před vykreslením). Barvy jsou v HTML opsané z `config/theme.js` —
+při změně palety je přepiš i tam.
+
+### 1.2.3 Světlý a tmavý režim
+
+Přepínač v liště webu i administrace (`tools/color-mode.js`, vzor caio-apps), výchozí je
+režim systému. Podrobně design/ux-design-system.md, 1.1.
 
 ### 1.3 Router
 
@@ -141,7 +178,7 @@ a `page?code=contact` jeho `/kontakt`; zbytek předloha nemá.
 ### 2.2 Správcovské
 
 **Hotovo 7. 9. 2026** — všech jedenáct obrazovek. Rozcestník je `admin`; seznam obrazovek,
-jejich ikony a role drží `client/src/admin/menu.js`, aby se rozcestník, položka v liště
+jejich ikony a role drží `client/src/config/admin-menu.js`, aby se rozcestník, položka v liště
 a `withRoute` guard nemohly rozejít.
 
 | Routa | Obsah |

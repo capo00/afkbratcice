@@ -1,6 +1,6 @@
 import { createComponent, useDataObject, useMemo, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiElements } from "caio-ui";
+import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 
 const { theme } = Config;

@@ -1,6 +1,6 @@
 import { createVisualComponent, useRoute, useState, Suspense, Utils, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiAuth } from "caio-ui";
+import { UiAuth } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Card from "./layout/card.jsx";

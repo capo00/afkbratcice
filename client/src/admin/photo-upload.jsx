@@ -6,8 +6,6 @@ import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 import { prepareImage } from "./image.js";
 
-const { theme } = Config;
-
 // Hromadný upload fotek do alba.
 //
 // **Sekvenčně, ne paralelně** — a ne kvůli šetrnosti k serveru: `gallery/addPhoto` posílá na
@@ -85,7 +83,7 @@ const PhotoUpload = createVisualComponent({
             category="interface"
             segment="content"
             type="medium"
-            className={Config.Css.css({ color: theme.color.destructive })}
+            colorScheme="negative"
           >
             <Lsi import={importLsi} path={[...LSI_PATH, "failed"]} params={{ list: failed.join(", ") }} />
           </Uu5Elements.Text>

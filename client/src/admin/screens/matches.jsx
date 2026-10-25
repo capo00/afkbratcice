@@ -3,9 +3,9 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { EntitySelect, EnumText, enumItemList, dateTimeField, seasonLabel, teamLabel } from "../../admin/fields.jsx";
-import { ResultModal, LineupModal } from "../../admin/match-modals.jsx";
+import AdminScreen from "../screen.jsx";
+import { EntitySelect, EnumText, enumItemList, dateTimeField, seasonLabel, teamLabel } from "../fields.jsx";
+import { ResultModal, LineupModal } from "../match-modals.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import { mergeItemHandler } from "../../core/item-merge.js";
 
@@ -21,7 +21,7 @@ import { mergeItemHandler } from "../../core/item-merge.js";
 // `useDataList` napřímo, ne `CrudContext`: ten umí položkové handlery jen pro `update`
 // a `delete` (caio-ui, `crud-context.jsx`), takže „zapsat výsledek" a „zapsat sestavu" by
 // se musely dohánět přenačtením celého rozpisu sezóny. Takhle si seznam aktualizuje právě
-// ten jeden řádek tím, co vrátil server — stejně jako `admin/identities.jsx`.
+// ten jeden řádek tím, co vrátil server — stejně jako `screens/identities.jsx`.
 //
 // `createMany` **tady být má** — `match` je jediná entita, která ho na serveru má; hromadný
 // import rozlosování je celý důvod jeho existence.

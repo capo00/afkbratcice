@@ -4,8 +4,8 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { dateField } from "../../admin/fields.jsx";
+import AdminScreen from "../screen.jsx";
+import { dateField } from "../fields.jsx";
 import { useApp } from "../../core/app-context.jsx";
 
 // Soubory ke stažení.

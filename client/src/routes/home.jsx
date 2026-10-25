@@ -25,8 +25,10 @@ function Hero() {
   const [, setRoute] = useRoute();
 
   return (
+    // Hero je tmavé v obou režimech (canvas světlé verze, 2026-10-25): později pod ním bude
+    // fotka mužstva s tmavým překryvem.
     <Section
-      variant="plain"
+      variant="dark"
       padTop={96}
       padBottom={96}
       className={Config.Css.css({

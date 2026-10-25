@@ -3,11 +3,11 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { EnumText, enumItemList, dateTimeField } from "../../admin/fields.jsx";
-import FormSectionList from "../../admin/form-section-list.jsx";
-import { prepareImage } from "../../admin/image.js";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { EnumText, enumItemList, dateTimeField } from "../fields.jsx";
+import FormSectionList from "../form-section-list.jsx";
+import { prepareImage } from "../image.js";
 
 // Novinky.
 //

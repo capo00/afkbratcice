@@ -3,14 +3,14 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
-import AdminScreen from "../../admin/screen.jsx";
-import { nameField } from "../../admin/fields.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { prepareImage } from "../../admin/image.js";
+import AdminScreen from "../screen.jsx";
+import { nameField } from "../fields.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { prepareImage } from "../image.js";
 import { useApp } from "../../core/app-context.jsx";
 
 // Klub nese erb a jméno reálného klubu -- víc věkových kategorií (Chotusice muži, dorost,
-// žáci, ...) na něj odkazuje stejným `clubId` (`admin/teams.jsx`), takže se logo nahrává
+// žáci, ...) na něj odkazuje stejným `clubId` (`screens/teams.jsx`), takže se logo nahrává
 // jednou, ne za každou kategorii zvlášť (design/data-model.md, 1.2).
 
 const [ClubProvider] = UiElements.CrudContext.create("club");

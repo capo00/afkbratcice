@@ -3,10 +3,10 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { EntitySelect, EnumText, enumItemList, personLabel } from "../../admin/fields.jsx";
-import FormMembership from "../../admin/form-membership.jsx";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { EntitySelect, EnumText, enumItemList, personLabel } from "../fields.jsx";
+import FormMembership from "../form-membership.jsx";
 
 // Trenéři a funkcionáři. Stejná stavba jako hráči — role osoby s členstvím v čase —,
 // jen místo postu a čísla dresu je `role` z číselníku `COACH_ROLE`.

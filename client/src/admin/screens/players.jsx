@@ -3,13 +3,13 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { EntitySelect, EnumText, enumItemList, noteField, personLabel } from "../../admin/fields.jsx";
-import FormMembership from "../../admin/form-membership.jsx";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { EntitySelect, EnumText, enumItemList, noteField, personLabel } from "../fields.jsx";
+import FormMembership from "../form-membership.jsx";
 
 // Hráči. Hráč není osoba — je to **role osoby**: číslo dresu, post a členství v týmech
-// v čase. Osoba musí existovat dřív (`admin/persons`), proto je tu jen výběr, ne zakládání.
+// v čase. Osoba musí existovat dřív (`screens/persons.jsx`), proto je tu jen výběr, ne zakládání.
 
 const [PlayerProvider] = UiElements.CrudContext.create("player");
 // Bez `createMany`/`deleteMany` -- `player` je na serveru nemá (admin/crud-calls.js).

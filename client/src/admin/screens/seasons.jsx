@@ -3,9 +3,9 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { ageField, boolField, teamLabel } from "../../admin/fields.jsx";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { ageField, boolField, teamLabel } from "../fields.jsx";
 
 // Sezóny — ročník soutěže jedné kategorie a její účastníci.
 //

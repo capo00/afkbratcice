@@ -4,7 +4,7 @@
   "short_name": "AFK Bratčice",
   "description": "Fotbalový klub AFK Bratčice",
   "theme_color": "#8b0000",
-  "background_color": "#070404",
+  "background_color": "#FAF6F4",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",

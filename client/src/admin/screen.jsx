@@ -9,9 +9,9 @@ const { theme } = Config;
 
 // Rám obrazovky administrace: nadpis, zpátky na rozcestník a obsah.
 //
-// Administrace **nemá vlastní layout** — jede v témže rámu jako web (lišta, patička,
-// sekce), jen bez hero a šrafování. Dvojí kostra by znamenala dvakrát řešit lištu, přihlášení
-// i mobilní chování, a to všechno kvůli deseti tabulkám.
+// Administrace je vlastní UVE (admin/app.jsx), ale obrazovky stojí na týchž sekcích
+// a nadpisech jako web, jen bez hero a šrafování -- vlastní vizuál by kvůli deseti tabulkám
+// znamenal druhou sadu primitiv.
 //
 // Tabulky `uu5tilesg02` sázejí text vlastní typografií a na tmavém podkladu potřebují vědět,
 // že je tmavý — o to se stará `BackgroundProvider` uvnitř `Section`.
@@ -29,7 +29,7 @@ const AdminScreen = createVisualComponent({
             icon="uugds-chevron-left"
             significance="subdued"
             colorScheme="building"
-            onClick={() => setRoute("admin")}
+            onClick={() => setRoute("")}
             tooltip="Zpět na administraci"
           />
           <Heading eyebrow={lsi("admin", "eyebrow")} lsi={titleLsi} />

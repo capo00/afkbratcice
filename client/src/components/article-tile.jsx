@@ -1,6 +1,6 @@
 import { createVisualComponent, useRoute } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiElements } from "caio-ui";
+import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 import Card from "./layout/card.jsx";
 import DateText from "./date-text.jsx";

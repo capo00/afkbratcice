@@ -1,5 +1,5 @@
 import { createVisualComponent, useState } from "uu5g05";
-import { UiElements } from "caio-ui";
+import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 
 const { theme } = Config;

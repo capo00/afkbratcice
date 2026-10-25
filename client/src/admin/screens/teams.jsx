@@ -4,9 +4,9 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { nameField, ageField, boolField, EntitySelect, clubLabel } from "../../admin/fields.jsx";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { nameField, ageField, boolField, EntitySelect, clubLabel } from "../fields.jsx";
 
 // Správa týmů — vlastních i soupeřů.
 //
@@ -14,7 +14,7 @@ import { nameField, ageField, boolField, EntitySelect, clubLabel } from "../../a
 // a `team/list?own=true`. Není to příznak k odvození: soupeř se stejným názvem jako naše
 // mužstvo je běžná věc a z dat by to nikdo nepoznal.
 //
-// Logo se tady nenahrává — patří klubu (`admin/clubs.jsx`), na který se tým odkazuje
+// Logo se tady nenahrává — patří klubu (`screens/clubs.jsx`), na který se tým odkazuje
 // přes `clubId`. Víc věkových kategorií stejného klubu tak sdílí jedno logo, ne tři
 // nahrané kopie (design/data-model.md, 1.2).
 

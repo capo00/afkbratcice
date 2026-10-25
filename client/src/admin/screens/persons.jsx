@@ -3,10 +3,10 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { entityCalls } from "../../admin/crud-calls.js";
-import { noteField, dateField } from "../../admin/fields.jsx";
-import { prepareImage } from "../../admin/image.js";
+import AdminScreen from "../screen.jsx";
+import { entityCalls } from "../crud-calls.js";
+import { noteField, dateField } from "../fields.jsx";
+import { prepareImage } from "../image.js";
 
 // Osoby. Jedna osoba = jeden člověk; hráčství i trenérství jsou samostatné role nad ní
 // (`player`, `coach`), takže trenér, který si občas zahraje, není v databázi dvakrát.

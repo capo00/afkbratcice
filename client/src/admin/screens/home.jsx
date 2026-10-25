@@ -6,7 +6,7 @@ import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../../components/layout/section.jsx";
 import Heading from "../../components/layout/heading.jsx";
 import Card from "../../components/layout/card.jsx";
-import { ADMIN_MENU } from "../../admin/menu.js";
+import { ADMIN_MENU } from "../../config/admin-menu.js";
 
 const { theme } = Config;
 

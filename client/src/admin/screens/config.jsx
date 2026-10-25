@@ -4,8 +4,8 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
-import AdminScreen from "../../admin/screen.jsx";
-import { enumItemList } from "../../admin/fields.jsx";
+import AdminScreen from "../screen.jsx";
+import { enumItemList } from "../fields.jsx";
 
 const { theme } = Config;
 

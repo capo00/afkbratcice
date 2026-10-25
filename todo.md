@@ -82,15 +82,17 @@ Seed je pryč (2026-09-07): tři vymyšlená alba i šestnáct vymyšlených nov
 
 ## 3. Administrace — hotová (11 obrazovek)
 
-Rozcestník `/admin` + jedenáct obrazovek; `admin/pages` **nevzniká**, protože obsahové
+Rozcestník `/admin/` + jedenáct obrazovek; `admin/pages` **nevzniká**, protože obsahové
 stránky jsou natvrdo v kódu a čekají na ECC. Seznam obrazovek, ikon a rolí drží
-`client/src/admin/menu.js` — rozcestník, položka v liště i `withRoute` guard čtou totéž.
+`client/src/config/admin-menu.js` — rozcestník, lišta administrace i `withRoute` guard čtou totéž.
+Od 2026-10-24 je administrace **vlastní UVE** a web má jen ikonu do správy podle značky
+v localStorage (design/frontend.md, 1.2 a 1.2.1).
 
 Ověřeno v prohlížeči včetně **založení článku proklikáním formuláře** (ne přes API).
 
 Co zbývá dodělat uvnitř administrace:
 
-- **Rozsahová role `teamEditor:*`** je v guardu (`admin/menu.js`), ale obrazovky ještě
+- **Rozsahová role `teamEditor:*`** je v guardu (`config/admin-menu.js`), ale obrazovky ještě
   **nefiltrují data podle `UiAuth.getScopeList()`** — editor jednoho mužstva tak vidí
   v tabulce i cizí týmy. Server ho k zápisu nepustí (ověřeno smoke testem), takže je to
   UX, ne díra.

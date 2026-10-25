@@ -41,7 +41,7 @@ nejsou vůbec. Předloha tedy určuje **vzhled a tón**, ne rozsah — ten drž�
 
 ## 1. Barvy
 
-Předloha je **tmavá** (dark-only) a jede v `oklch`. Ukládám obojí — `oklch` je zdroj pravdy,
+Předloha je **tmavá** a jede v `oklch` (světlý režim přibyl 2026-10-25, viz 1.1). Ukládám obojí — `oklch` je zdroj pravdy,
 hex je bezpečný fallback pro místa, kde `uu5g05` `oklch` nezvládne.
 
 | Token | oklch | hex | Kde se používá |
@@ -57,7 +57,7 @@ hex je bezpečný fallback pro místa, kde `uu5g05` `oklch` nezvládne.
 | **`primary` / `clubRed`** | `oklch(54.5% .215 27.56)` | **`#D01319`** | klubová červená: CTA, eyebrow, aktivní nav, skóre |
 | `clubRedBright` | `oklch(63% .24 28)` | `#F92725` | světlejší varianta (hover, CTA pruh) — zatím se nikde nepoužívá |
 | `primaryForeground` | `oklch(98% .01 60)` | `#FEF7F2` | text na červené |
-| `destructive` | `oklch(57.7% .245 27.325)` | `#E7000B` | chyby |
+| ~~`destructive`~~ | — | — | **zrušené 2026-10-25**, viz 1.1: chyby a mazání jsou `colorScheme="negative"` z uuGds, přemapované na oranžovou |
 
 **Pravidlo, které drží celý vzhled:** nikde není čistá černá ani čistá bílá. Všechno je posunuté
 do teplé (hue 25–30). Když se v implementaci objeví `#000000` nebo `#FFFFFF`, je to chyba.
@@ -69,6 +69,39 @@ do teplé (hue 25–30). Když se v implementaci objeví `#000000` nebo `#FFFFFF
 > v pořádku, a `onRed` na ní má **5,2 : 1** (dřív 9,6 : 1) — pořád nad AA pro běžný text.
 > Tím padá i tehdejší úkol „najít světlejší odstín pro text": `clubRedBright` (`#F92725`)
 > zůstává jen pro hover a CTA pruh.
+
+### 1.1 Světlý režim (od 2026-10-25)
+
+Web má světlý i tmavý režim. **Výchozí je režim systému**, přepínač (slunce/měsíc) je ikona
+v liště webu i administrace, na telefonu taky v liště, ne v hamburgeru. Volba se ukládá do
+localStorage `afkbratcice-client.colorMode` a platí pro web i administraci. Schválený návrh je
+canvas „AFK Bratčice – světlý režim“ (https://claude.ai/artifact/QmFSXXr3yEypv2hGs5AsRC).
+
+| Token | světlý | tmavý |
+|---|---|---|
+| `bg` | `#FAF6F4` | `#070404` |
+| `card` | `#FFFCFA` | `#120D0C` |
+| `muted` | `#F1EAE7` | `#1D1716` |
+| `accent` | `#FBE3DF` | `#2A1B19` |
+| `border` | `#E3D8D5` | `#2C2423` |
+| `input` | `#C9BCB8` | `#362E2D` |
+| `fg` | `#1C1312` | `#F3EFED` |
+| `mutedFg` | `#6B5E5B` | `#99908E` |
+| `clubRed`, `clubRedBright`, `onRed` | beze změny | beze změny |
+
+Kontrasty světlé palety: fg/bg 16,98 : 1, mutedFg/bg 5,79 : 1, clubRed/bg 5,16 : 1,
+clubRed/accent 4,53 : 1, onRed/clubRed 5,23 : 1 — všechno AA.
+
+**Horní lišta (web i administrace), hero a červený CTA pruh jsou tmavé v obou režimech**
+(lišta: Caio 2026-10-25, po schválení canvasu; `cssBackground` je hex tmavé palety, aby
+`Top` uu5 položkám nastavil tmavý podklad). Hero a pruh (`Section variant="dark"` / `"red"`
+přenastaví barevné proměnné na tmavou paletu). V kódu jsou `theme.color.*` CSS proměnné
+(`var(--afk-bg)`), hodnoty pro oba režimy zakládá `client/src/tools/theme-setup.js`.
+
+**Destruktivní barva je oranžová z uuGds** (rozhodl Caio 2026-10-25): klubová červená by
+s červenou chybou splývala. `theme-setup.js` přemapuje význam `negative` na
+`ColorPalette.meaning.warning.main`, takže oranžové jsou i koše v tabulkách caio-ui a chyby
+ve formulářích. Vlastní hex na chyby se nepoužívá.
 
 Rytmus stránky: sekce se střídají `background` → `background` s **diagonálním šrafováním**
 (velmi jemný opakovaný pruh v `card`/`secondary`) a jednou za stránku to přeruší **plný červený

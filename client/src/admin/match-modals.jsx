@@ -1,7 +1,7 @@
 import { createVisualComponent, useDataObject, useState, useMemo, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
-import { UiElements } from "caio-ui";
+import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 import { enumItemList, personLabel } from "./fields.jsx";
@@ -106,7 +106,7 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
                 category="interface"
                 segment="content"
                 type="medium"
-                className={Config.Css.css({ color: theme.color.destructive })}
+                colorScheme="negative"
               >
                 {error}
               </Uu5Elements.Text>
