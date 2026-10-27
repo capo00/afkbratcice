@@ -406,3 +406,30 @@ nestačí `npm install`: verze se nemění, takže npm vezme balíček z cache. 
 5. Doběh migrace delty (články a zápasy vzniklé mezitím).
 6. Přesměrovat doménu na v2, zapnout `legacy-redirect`.
 7. v0 ponechat 3 měsíce jako zálohu offline (databázový dump + archiv souborů).
+
+## 8. Migrace celé historie (`tools/migrate-v0.js`, 2026-10-26)
+
+Nahrazuje `tools/migrate-2026.js` (jeden ročník, bez klubů a kategorií; je zablokovaný).
+Pořadí: `npm run migrate:categories`, pak `npm run migrate:v0 -- --dry` a `npm run migrate:v0`.
+Zdroj: SQL dump `~/Documents/caio-share/d27814_afk_2026-10-26.sql` (mimo git, časy v UTC;
+JSON export z phpMyAdminu má časy v Europe/Prague, proto se nepoužívá).
+
+Rozhodnutí (Caio, 2026-10-25 a 26):
+
+| Téma | Rozhodnutí |
+|---|---|
+| Rozsah | celá historie od 2012/13; články, fotogalerie, soubory a kasa ne |
+| Klub | jméno týmu bez koncového „ B“/„ C“; rezerva sdílí klub (a erb) s áčkem. „Ronov“ → Ronov nad Doubravou, „Zruč“ → Zruč nad Sázavou, „FK Čáslav (ženy)“ → Čáslav, „Sparta Kutná Hora (ženy)“ → Kutná Hora. Existující kluby Chotusice B, Paběnice B, Tupadly B se sloučí do áčka (logo Chotusic B se smaže), Malešov B a Čáslav B se přejmenují |
+| Tým | celé jméno z v0, kategorie: M → `men-a`/`men-b`/`men-c` podle koncovky, D → `u19`, Z → `u15` (rezerva `u15-b`), S → `old`, ženské týmy `women`; `logoUri` kopie z klubu |
+| Sezóna | ročník (hranice 30. 6.) × věková skupina, jen s mistrovskými zápasy; `hasPenalties: true` |
+| Soutěže | muži 2012–2013 a 2021–2026 „III. třída“, 2014–2020 „IV. třída“; žáci 2012, 2025, 2026 „5. liga - Starší žáci“; dorost 2026 „6. liga - Dorost“ |
+| Přáteláky | patří do sezóny vlastního týmu v tom ročníku; kde žádná není (stará garda 2012/13 a 2014/15, žáci 2017/18), zmigrují se bez sezóny |
+| Chybná data | zápasy 1010, 1021, 1037 se přeskočí (duplicity 1052, 1053, 1055 s týmem žáků Štrampouchu místo mužů) |
+| Osoby | párují se podle loginu z v0, ne podle jména (dva různí „Vladimír Kupera“) |
+| `puro00` | není v `hrac`; v zápasech 1857, 1863, 1870 je to duplicitní záznam za `shpo00` (stejný post) -- řádek se vynechá, góly a karty se připíší `shpo00` |
+| Post v sestavě | `ucast.role` -> přesný post s anglickým kódem (`positionDetail`, 28 postů, převodní tabulka `LINEUP_POSITION_BY_V0` v `server/services/lineup-position.js`); `STR` je střídání, ne post |
+| Hráč | členství v týmech AFK z účasti v zápasech (první až poslední zápas); aktivní hráč má otevřené členství v týmu podle `hrac.tym` |
+
+Unikátní index zápasu má od téhle migrace i kolo (`server/match/dao.js`): okresní soutěže
+se hrají i trojkolově a stejná dvojice se stejným domácím se v sezóně potká dvakrát
+(šest případů v datech, např. Chotusice B – AFK Bratčice v 5. a 18. kole 2022/23).

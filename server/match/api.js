@@ -1,4 +1,5 @@
 import Config from "../config.js";
+import { LINEUP_POSITION_LIST } from "../services/lineup-position.js";
 import crud from "./crud.js";
 import dao from "./dao.js";
 import { validate, shape, string, mongoId, oneOf, array, integer, boolean, any, pageInfo }
@@ -24,6 +25,8 @@ const idDtoIn = shape({ id: mongoId().isRequired() });
 const lineupEntry = shape({
   playerId: mongoId().isRequired(),
   position: oneOf(Config.POSITION_LIST),
+  // Přesný post (services/lineup-position.js); `position` se z něj dopočítá.
+  positionDetail: oneOf(LINEUP_POSITION_LIST),
   substitute: boolean(),
   goals: integer(),
   yellowCard: boolean(),

@@ -22,10 +22,12 @@ const asset = {
 // Číselníky. Drží se tu jen **kódy a pořadí**, popisky jsou v LSI (`enum.age.*`,
 // `enum.position.*`) — jinak by web uměl česky na dvou různých místech.
 //
-// `AGE_LIST` je úplný výčet možných kategorií, ne seznam těch, které klub má. Které
+// `AGE_LIST` je úplný výčet věkových skupin, ne seznam kategorií, které klub má. Které
 // existují v daném ročníku, říká `season/listCurrent`; složení mužstev se mění rok od roku
 // (design/frontend.md, 2.5).
-const AGE_LIST = ["men", "u18", "u16", "u14", "u12", "u10", "u6", "old"];
+// Věkové skupiny (`category.age`), stejné jako `server/config.js`. Konkrétní kategorie
+// (A/B/C týmy, U15 B…) jsou v kolekci `afk_category` a spravují se v administraci.
+const AGE_LIST = ["men", "u19", "u17", "u15", "u13", "u11", "u9", "women", "old"];
 const POSITION_LIST = ["GK", "DF", "MF", "FW"];
 const MATCH_STATE_LIST = ["planned", "played", "postponed", "canceled"];
 const COACH_ROLE_LIST = ["headCoach", "assistant", "manager", "board"];

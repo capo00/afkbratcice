@@ -73,7 +73,7 @@ const WeekendProgram = createVisualComponent({
     // Kategorie podle týmu, aby dlaždice věděla, jestli je to A-tým nebo žáci. Mapa se
     // staví jednou, ne hledáním v poli pro každý zápas.
     const categoryByTeamId = useMemo(
-      () => new Map(categoryList.map((c) => [c.teamId, c.age])),
+      () => new Map(categoryList.map((c) => [c.teamId, c.categoryName])),
       [categoryList],
     );
 

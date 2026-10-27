@@ -14,6 +14,13 @@
 // a jen se k němu doplní `Z`. design/migration.md tvrdil "Europe/Prague → UTC" -- to by
 // tenhle dump posunulo o dvě hodiny (ověřeno proti webu: 15:00 v dumpu = 17:00 na v0).
 
+// Do přepisu na kategorie (afk_category, 2026-10-26) se nepouští: zakládá týmy s `age`
+// a hledá je klíčem { name, age }, takže by vedle převedených týmů vyrobil duplicity.
+if (!process.argv.includes("--legacy-age")) {
+  console.error("migrate-2026.js ještě nezná kategorie týmů; použij tools/migrate-v0.js (design/migration.md, sekce 8).");
+  process.exit(1);
+}
+
 import fs from "fs";
 import path from "path";
 import "caio-server/src/caio-server-app/config/env.js";

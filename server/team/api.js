@@ -1,10 +1,12 @@
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, oneOf, array, boolean, any, pageInfo, truthy } from "../services/validators.js";
-import { teamScoped, roleAuth } from "../services/authorize.js";
+import { teamScoped, roleAuth, hasRole } from "../services/authorize.js";
 
 const listDtoIn = shape({
+  // Věková skupina (všechny kategorie, které do ní patří), nebo jedna konkrétní kategorie.
   age: oneOf(Config.AGE_LIST),
+  category: string(),
   own: any(),
   idList: array(mongoId()),
   pageInfo: pageInfo(),
@@ -16,7 +18,8 @@ const writeDtoIn = shape({
   id: mongoId(),
   name: string(),
   shortName: string(),
-  age: oneOf(Config.AGE_LIST),
+  // Kód kategorie (`afk_category.code`), např. men-a, u15-b.
+  category: string(),
   own: boolean(),
   clubId: mongoId(),
 });
@@ -48,7 +51,13 @@ export default {
     method: "post",
     auth: teamScoped(async (dtoIn) => [dtoIn?.id], Config.CONTENT, "all"),
     validator: validate(writeDtoIn),
-    fn: ({ dtoIn }) => crud.update(dtoIn),
+    // Kategorii mění jen CONTENT: editor týmu by přepnutím na starou gardu obešel pravidlo,
+    // kdo proti komu smí hrát (services/category.js).
+    fn: ({ dtoIn, identity }) => {
+      if (hasRole(identity, Config.CONTENT)) return crud.update(dtoIn);
+      const { category, ...rest } = dtoIn;
+      return crud.update(rest);
+    },
   },
 
   "team/delete": {

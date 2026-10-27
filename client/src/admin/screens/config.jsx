@@ -5,7 +5,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { enumItemList } from "../fields.jsx";
+import { enumItemList, EntitySelect, categoryLabel } from "../fields.jsx";
 
 const { theme } = Config;
 
@@ -67,7 +67,7 @@ const AdminConfig = createVisualComponent({
           initialValue={{
             notice: data?.notice ?? "",
             founded: data?.founded ?? 1932,
-            categoryOrder: data?.categoryOrder ?? Config.AGE_LIST,
+            categoryOrder: data?.categoryOrder ?? [],
             hideNamesAgeList: data?.hideNamesAgeList ?? [],
             address: contact.address ?? "",
             email: contact.email ?? "",
@@ -100,10 +100,13 @@ const AdminConfig = createVisualComponent({
                 max={new Date().getFullYear()}
                 step={1}
               />
-              <Uu5Forms.FormSelect
+              {/* Kódy kategorií (afk_category), ne věkové skupiny: v menu jsou mužstva. */}
+              <EntitySelect
                 name="categoryOrder"
                 label={<Lsi import={importLsi} path={[...LSI_PATH, "categoryOrder"]} />}
-                itemList={enumItemList("age", Config.AGE_LIST)}
+                useCase="/category/list"
+                valueKey="code"
+                getLabel={categoryLabel}
                 multiple
               />
               <Uu5Forms.FormCheckboxes

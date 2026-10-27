@@ -71,25 +71,25 @@ console.log("\n== health a konfigurace ==");
 const health = await get("sys/health");
 ok("sys/health hlásí mongo", health.body?.mongoConfigured === true, health.body);
 const cfg = await get("appConfig/get");
-ok("appConfig má výchozí pořadí kategorií", cfg.body?.categoryOrder?.[0] === "men", cfg.body?.categoryOrder);
+ok("appConfig má výchozí pořadí kategorií", cfg.body?.categoryOrder?.[0] === "men-a", cfg.body?.categoryOrder);
 ok("appConfig skrývá jména u žáků, ne u dorostu",
-  cfg.body?.hideNamesAgeList?.includes("u14") && !cfg.body?.hideNamesAgeList?.includes("u18"),
+  cfg.body?.hideNamesAgeList?.includes("u15") && !cfg.body?.hideNamesAgeList?.includes("u19"),
   cfg.body?.hideNamesAgeList);
 
 console.log("\n== autorizace ==");
-const anon = await post("team/create", { name: "Anonym", age: "men" });
+const anon = await post("team/create", { name: "Anonym", category: "men-a" });
 ok("nepřihlášený nezaloží tým (401)", anon.status === 401, anon.status);
 const publicList = await get("team/list");
 ok("veřejné čtení funguje bez přihlášení", publicList.status === 200, publicList.status);
 
 console.log("\n== týmy a sezóna ==");
-const own = await post("team/create", { name: "AFK Bratčice SMOKE", shortName: "AFK", age: "men", own: true }, cookie);
+const own = await post("team/create", { name: "AFK Bratčice SMOKE", shortName: "AFK", category: "men-a", own: true }, cookie);
 ok("založení vlastního týmu", own.status === 200 && own.body?.id, own.body);
-const rival1 = await post("team/create", { name: "SMOKE Rival A", age: "men" }, cookie);
-const rival2 = await post("team/create", { name: "SMOKE Rival B", age: "men" }, cookie);
+const rival1 = await post("team/create", { name: "SMOKE Rival A", category: "men-a" }, cookie);
+const rival2 = await post("team/create", { name: "SMOKE Rival B", category: "men-a" }, cookie);
 const teamIds = [own.body.id, rival1.body.id, rival2.body.id];
 
-const badTeam = await post("team/create", { name: "AFK Bratčice SMOKE", age: "men" }, cookie);
+const badTeam = await post("team/create", { name: "AFK Bratčice SMOKE", category: "men-a" }, cookie);
 ok("duplicitní tým v kategorii neprojde", badTeam.status >= 400, badTeam.status);
 
 const year = String(new Date().getMonth() + 1 < 8 ? new Date().getFullYear() - 1 : new Date().getFullYear());
@@ -128,6 +128,31 @@ ok("druhý přátelák stejné dvojice projde (částečný index)", friendly2.s
 
 const sameTeams = await mk(teamIds[0], teamIds[0], 1, 0, "9");
 ok("tým nesmí hrát sám se sebou", sameTeams.status >= 400, sameTeams.status);
+
+// Kategorie a věkové skupiny (services/category.js): soutěž jen v jedné skupině, přátelák
+// napříč, stará garda proti komukoli.
+const youth = await post("team/create", { name: "SMOKE Dorost", category: "u19" }, cookie);
+const veterans = await post("team/create", { name: "SMOKE Stará garda", category: "old" }, cookie);
+const reserve = await post("team/create", { name: "SMOKE Rival B", category: "men-b" }, cookie);
+ok("tým s neznámou kategorií neprojde",
+  (await post("team/create", { name: "SMOKE Bez kategorie", category: "neni" }, cookie)).body?.code?.endsWith("invalidCategory"));
+const ageMismatch = await mk(teamIds[0], youth.body.id, 1, 0, "10");
+ok("soutěžní zápas mužů s dorostem neprojde", ageMismatch.body?.code?.endsWith("ageMismatch"), ageMismatch.body);
+const reserveMatch = await mk(teamIds[0], reserve.body.id, 1, 0, "11");
+ok("A tým proti B týmu mužů v soutěži projde", reserveMatch.status === 200, reserveMatch.body);
+const youthFriendly = await mk(teamIds[0], youth.body.id, 3, 3, "");
+ok("přátelák mužů s dorostem projde", youthFriendly.status === 200, youthFriendly.body);
+const veteransMatch = await mk(veterans.body.id, teamIds[1], 2, 2, "12");
+ok("stará garda smí hrát proti mužům", veteransMatch.status === 200, veteransMatch.body);
+const categoryList = await get("category/list");
+const u19 = categoryList.body?.itemList?.find((c) => c.code === "u19");
+ok("category/list je veřejný a obsahuje u19", Boolean(u19), categoryList.body);
+const deleteUsed = await post("category/delete", { id: u19?.id }, cookie);
+ok("použitou kategorii nejde smazat", deleteUsed.body?.code?.endsWith("category/inUse"), deleteUsed.body);
+const changeCode = await post("category/update", { id: u19?.id, code: "u19x" }, cookie);
+ok("kód kategorie nejde změnit", changeCode.body?.code?.endsWith("codeImmutable"), changeCode.body);
+// Zápasy navíc z tabulky ven, ať se nepočítají do kontrol bodů níž.
+for (const m of [reserveMatch, youthFriendly, veteransMatch]) if (m.body?.id) await post("match/delete", { id: m.body.id }, cookie);
 
 const table = await get("stats/getTable", { seasonId: season.body.id });
 const rows = table.body?.table ?? [];

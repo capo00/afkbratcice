@@ -6,7 +6,7 @@ import { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
-import { nameField, ageField, boolField, EntitySelect, clubLabel } from "../fields.jsx";
+import { nameField, categoryField, boolField, EntitySelect, clubLabel } from "../fields.jsx";
 
 // Správa týmů — vlastních i soupeřů.
 //
@@ -34,7 +34,7 @@ const CONFIG = {
     label: lsi("admin", "field", "shortName"),
     input: { Component: Uu5Forms.FormText, props: { maxLength: 30 } },
   },
-  age: ageField,
+  category: categoryField,
   own: boolField(lsi("admin", "field", "own")),
   clubId: {
     label: lsi("admin", "field", "clubId"),

@@ -4,6 +4,7 @@ import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import DateText from "../components/date-text.jsx";
+import { useApp } from "../core/app-context.jsx";
 
 // Stavební kameny konfigurací pro `UiElements.Crud`.
 //
@@ -35,15 +36,19 @@ function EnumText({ enumName, code }) {
 const EntitySelect = createVisualComponent({
   uu5Tag: Config.TAG + "EntitySelect",
 
-  render({ useCase, dtoIn, getLabel, ...props }) {
+  // `valueKey`: co se ukládá -- `id` (výchozí), nebo jiný klíč entity (kategorie se
+  // odkazují kódem, `afk_category.code`).
+  render({ useCase, dtoIn, getLabel, valueKey = "id", ...props }) {
+    // `getLabel(item, app)`: popisek může sáhnout do app-contextu (kategorie týmu).
+    const app = useApp();
     const { state, data } = useDataObject(
       { handlerMap: { load: () => UiElements.Call.cmdGet(useCase, dtoIn ?? {}) } },
       [useCase, JSON.stringify(dtoIn ?? {})],
     );
 
     const itemList = useMemo(
-      () => (data?.itemList ?? []).map((item) => ({ value: item.id, children: getLabel(item) })),
-      [data, getLabel],
+      () => (data?.itemList ?? []).map((item) => ({ value: item[valueKey], children: getLabel(item, app) })),
+      [data, getLabel, valueKey, app],
     );
 
     // `pending` místo prázdného seznamu: prázdný select vypadá jako „není z čeho vybrat",
@@ -52,10 +57,12 @@ const EntitySelect = createVisualComponent({
   },
 });
 
-// Jen `name`: kategorie je v názvu týmu stejně vidět („AFK Bratčice — stará garda") a
-// popisek číselníku by sem musel přes LSI komponentu, což by z jednoduchého selectu
-// udělalo asynchronní.
-const teamLabel = (team) => team.name;
+// Jméno + kategorie: „AFK Bratčice“ je v men-a, u19 i u15 a ve výběru týmu zápasu by se
+// jinak nedaly rozlišit. Kategorie z app-contextu (bez něj jen jméno).
+const teamLabel = (team, app) => {
+  const category = app?.getCategory?.(team.category)?.name;
+  return category ? `${team.name} (${category})` : team.name;
+};
 const clubLabel = (club) => club.name;
 const personLabel = (person) => [person.surname, person.name].filter(Boolean).join(" ") || person.id;
 const seasonLabel = (season) => `${season.competition} ${season.yearFrom}/${String(Number(season.yearFrom) + 1).slice(-2)}`;
@@ -71,6 +78,26 @@ const noteField = {
   label: lsi("admin", "field", "note"),
   output: false,
   input: { Component: Uu5Forms.FormTextArea, props: { maxLength: 500, autoResize: true } },
+};
+
+/** Název kategorie podle kódu; kategorie načítá app-context. */
+function CategoryText({ code }) {
+  const { getCategory } = useApp();
+  return getCategory(code)?.name ?? code ?? "";
+}
+
+const categoryLabel = (category) => category.name;
+
+// Kategorie týmu (`team.category` = `afk_category.code`). Seznam kategorií se spravuje na
+// obrazovce Kategorie, proto výběr ze serveru, ne pevný číselník.
+const categoryField = {
+  label: lsi("admin", "field", "category"),
+  sort: true,
+  output: (value) => <CategoryText code={value} />,
+  input: {
+    Component: EntitySelect,
+    props: { required: true, useCase: "/category/list", valueKey: "code", getLabel: categoryLabel },
+  },
 };
 
 const ageField = {
@@ -127,6 +154,9 @@ export {
   nameField,
   noteField,
   ageField,
+  categoryField,
+  categoryLabel,
+  CategoryText,
   dateField,
   dateTimeField,
   boolField,

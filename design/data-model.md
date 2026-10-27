@@ -30,6 +30,7 @@ Společné vlastnosti všech kolekcí (zajišťuje `Dao`):
 erDiagram
     SYS_BINARY   ||--o{ CLUB        : "logoId"
     CLUB         ||--o{ TEAM        : "clubId"
+    CATEGORY     ||--o{ TEAM        : "category (code)"
     SYS_BINARY   ||--o{ PERSON      : "photoId"
     SYS_BINARY   ||--o{ ARTICLE     : "photographId"
     SYS_BINARY   }o--|| GALLERY     : "refId (fotky alba)"
@@ -60,11 +61,17 @@ erDiagram
         string logoId FK "sys_binary, kolekce club"
         string logoUri "denormalizace"
     }
+    CATEGORY {
+        string id PK
+        string code "unique, neměnný"
+        string name
+        enum   age "AGE_MAP"
+    }
     TEAM {
         string id PK
-        string name "unique s age"
+        string name "unique s category"
         string shortName "pro tabulku na mobilu"
-        enum   age "AGE_MAP"
+        string category "afk_category.code"
         string clubId FK "club -- odkud se bere logo"
         string logoUri "denormalizace club.logoUri; fallback klubový erb"
         bool   own "true = mužstvo AFK"
@@ -290,7 +297,7 @@ erDiagram
 | `id` | string | ✓ | |
 | `name` | string | ✓ | Název týmu, např. `AFK Bratčice` |
 | `shortName` | string | | Zkratka pro tabulku a mobil (max 12 znaků) |
-| `age` | enum | ✓ | Klíč z `AGE_MAP` (viz sekce 13) |
+| `category` | string | ✓ | Kód kategorie (`afk_category.code`, viz 2.3), např. `men-a`, `u15-b` |
 | `clubId` | string | ✓ | FK na `club` – odkud se bere logo |
 | `logoUri` | string | | Denormalizace `club.logoUri`; udržuje ji `club/update`, ne `team` (viz 2.1) |
 | `own` | boolean | | `true` = tým AFK Bratčice; usnadní filtrování a zvýraznění |
@@ -302,16 +309,17 @@ erDiagram
 **Indexy**
 
 ```
-{ name: 1, age: 1 }  unique
-{ age: 1, name: 1 }
+{ name: 1, category: 1 }  unique
+{ category: 1, name: 1 }
 { clubId: 1 }
 ```
 
 Poznámky:
 
 - Soupeři jsou plnohodnotné `team` dokumenty – jinak by nešlo počítat tabulku.
-- Stejný klub ve dvou kategoriích = dva dokumenty (proto je `age` v unikátním indexu),
-  ale se stejným `clubId`.
+- Stejný klub ve dvou kategoriích = dva dokumenty (proto je `category` v unikátním indexu),
+  ale se stejným `clubId`. Rezerva („Chotusice B“, kategorie `men-b`) má **celé jméno
+  z v0** a sdílí klub s áčkem (rozhodnutí 2026-10-25).
 - `name` na `team` **není spolehlivý klíč ke sloučení klubů** – dva různé reálné kluby se
   stejným jménem (běžné u „Sokol", „TJ" apod.) nejsou vyloučené, a appka to z dat nepozná
   (`client/src/routes/admin/teams.jsx`). Sloučení dvou `team` na jeden `club` je proto vždy
@@ -325,6 +333,49 @@ Poznámky:
 - **`desc` je perex, `photoDesc` popisek fotky** – dvě různé věci, dvě pole. Perex se jmenuje
   `desc` všude v modelu (`page.desc`, `season.desc`), takže tady taky.
 
+### 2.3 `afk_category` (od 2026-10-26)
+
+Kategorie týmu: A/B/C týmy mužů, rezervy mládeže, ženy, stará garda. Spravuje se na obrazovce
+administrace Kategorie, výchozí sadu zakládá `npm run migrate:categories`.
+
+| Pole | Typ | Povinné | Popis |
+|---|---|---|---|
+| `id` | string | ✓ | |
+| `code` | string | ✓ | Klíč, na který odkazuje `team.category`; `a-z`, `0-9`, `-`; **po založení se nemění** |
+| `name` | string | ✓ | Popisek, např. `A (Muži)`, `U15 B (Žáci - starší)` |
+| `age` | enum | ✓ | Věková skupina z `AGE_MAP` (sekce 13) |
+
+**Indexy:** `{ code: 1 } unique`, `{ age: 1 }`. Kategorii, kterou používá tým, nejde smazat.
+
+**Kdo proti komu smí hrát** (`server/services/category.js`, hlídá `match/create`/`update`):
+
+- mistrovský zápas (má kolo): oba týmy stejné věkové skupiny a stejné jako `season.age` –
+  A, B a C týmy mužů spolu hrát můžou, muži s dorostem ne,
+- stará garda (`old`) smí hrát proti komukoli,
+- přátelský zápas (bez kola) jde napříč věkovými skupinami.
+
+Sezóna patří věkové skupině (`season.age`), tým kategorii. Když klub v jedné soutěži hraje
+s A i B týmem, vrátí `season/listCurrent` dvě položky (jednu na tým) s `category`
+a `categoryName`.
+
+**Převod z v0:** `M` → `men-a`, jméno končící „ B“/„ C“ → `men-b`/`men-c`; `D` → `u19`;
+`Z` → `u15` (rezerva `u15-b`); `S` → `old`, ženské týmy `women`.
+
+| code | name | age |
+|---|---|---|
+| `men-a` | A (Muži) | `men` |
+| `men-b` | B (Muži) | `men` |
+| `men-c` | C (Muži) | `men` |
+| `u19` | U19 (Dorost - starší) | `u19` |
+| `u17` | U17 (Dorost - mladší) | `u17` |
+| `u15` | U15 (Žáci - starší) | `u15` |
+| `u15-b` | U15 B (Žáci - starší) | `u15` |
+| `u13` | U13 (Žáci - mladší) | `u13` |
+| `u11` | U11 (Přípravka - starší) | `u11` |
+| `u9` | U9 (Přípravka - mladší) | `u9` |
+| `women` | Ženy | `women` |
+| `old` | Stará garda | `old` |
+
 ---
 
 ## 3. `afk_season`
@@ -334,7 +385,7 @@ Poznámky:
 | `id` | string | ✓ | |
 | `competition` | string | ✓ | Např. `III. třída sk. B` |
 | `yearFrom` | string | ✓ | `"2025"` = ročník 2025/26 |
-| `age` | enum | ✓ | Kategorie soutěže |
+| `age` | enum | ✓ | Věková skupina soutěže (`AGE_MAP`, sekce 13); hrají v ní týmy kategorií téže skupiny |
 | `desc` | string | | Poznámka (změny v rozlosování apod.) |
 | `teamList` | string[] | ✓ | `id` účastnických týmů |
 | `hasPenalties` | boolean | | Hraje se na penaltový rozstřel? Rozhoduje o bodování tabulky |
@@ -401,6 +452,7 @@ nezměnil bodování celé tabulky.
 |---|---|---|
 | `playerId` | string | FK `player` |
 | `position` | enum | `GK` \| `DF` \| `MF` \| `FW` (viz sekce 13) |
+| `positionDetail` | enum | Přesný post (28 kódů, `server/services/lineup-position.js`, od 2026-10-26); `position` se z něj dopočítá. Střídající hráč ho nemá |
 | `substitute` | boolean | `true` = střídající (odpovídá roli `STR` v v0) |
 | `goals` | number | Vstřelené góly |
 | `yellowCard` | boolean | Žlutá karta |
@@ -409,7 +461,7 @@ nezměnil bodování celé tabulky.
 **Indexy**
 
 ```
-{ seasonId: 1, homeTeamId: 1, guestTeamId: 1 }  unique, partialFilterExpression: { round: { $exists: true } }
+{ seasonId: 1, homeTeamId: 1, guestTeamId: 1, round: 1 }  unique, partialFilterExpression: { round: { $type: "string" } }
 { time: -1 }
 { seasonId: 1, round: 1 }
 { homeTeamId: 1, time: -1 }
@@ -658,8 +710,8 @@ Singleton (jediný dokument v kolekci) – převzato z v1 `app-dao` / `app-abl`.
 
 | Pole | Typ | Popis |
 |---|---|---|
-| `categoryOrder` | string[] | Pořadí kategorií v menu, např. `["men", "u18", "u14", "old"]` – **jen seřazení, ne výčet** |
-| `hideNamesAgeList` | string[] | Kategorie, kde se u soupisky neukazují jména (mládež) |
+| `categoryOrder` | string[] | Pořadí mužstev v menu podle **kódů kategorií**, např. `["men-a", "men-b", "u19", "old"]` – **jen seřazení, ne výčet** |
+| `hideNamesAgeList` | string[] | **Věkové skupiny**, kde se u soupisky neukazují jména (`u15`, `u13`, `u11`, `u9`) |
 | `notice` | string | Text proužku „Upozornění“ pod horní lištou; prázdné = proužek se nezobrazí |
 | `contact` | object | `{ address, gps, email, phone, ico, bankAccount, mapUrl }` |
 | `socialList` | object[] | `{ code, uri }` – odkazy na FB/IG |
@@ -737,18 +789,20 @@ Definované v `server/config.js` a zrcadlené v `client/src/config/config.js`.
 Popisky číselníků na klientu **nejsou v `config.js`**, ale v LSI (`client/src/lsi/cs.json`)
 – konfigurace drží jen kódy a pořadí.
 
-**`AGE_MAP`** (převzato z v1)
+**`AGE_MAP`** – věkové skupiny (od 2026-10-26; dřív `men`, `u18`, `u16`, `u14`, `u12`,
+`u10`, `u6`, `old` z v1). Konkrétní kategorie týmů jsou v `afk_category` (sekce 2.3).
 
 | Kód | Název |
 |---|---|
-| `old` | Stará garda |
 | `men` | Muži |
-| `u18` | Starší dorost |
-| `u16` | Mladší dorost |
-| `u14` | Starší žáci |
-| `u12` | Mladší žáci |
-| `u10` | Starší přípravka |
-| `u6` | Mladší přípravka |
+| `u19` | Dorost - starší |
+| `u17` | Dorost - mladší |
+| `u15` | Žáci - starší |
+| `u13` | Žáci - mladší |
+| `u11` | Přípravka - starší |
+| `u9` | Přípravka - mladší |
+| `women` | Ženy |
+| `old` | Stará garda (smí hrát proti komukoli) |
 
 **`POSITION_MAP`** (náhrada v0 tabulky `post`)
 

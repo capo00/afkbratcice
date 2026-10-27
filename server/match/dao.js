@@ -11,8 +11,12 @@ class MatchDao extends Dao {
       // zápasů. Ty proto mají `round: null` -- crud.js prázdný řetězec normalizuje --
       // a $type: "string" je z indexu vynechá. ($ne tady použít nejde, Mongo ho
       // v partialFilterExpression nepodporuje.)
+      //
+      // Kolo je v klíči od 2026-10-26: okresní soutěže se hrají i trojkolově, takže stejná
+      // dvojice se stejným domácím týmem se v jedné sezóně potká dvakrát (v0: Chotusice B –
+      // AFK Bratčice v 5. a 18. kole 2022/23). Starý index bez kola maže tools/migrate-v0.js.
       super.createIndex(
-        { seasonId: 1, homeTeamId: 1, guestTeamId: 1 },
+        { seasonId: 1, homeTeamId: 1, guestTeamId: 1, round: 1 },
         { unique: true, partialFilterExpression: { round: { $type: "string" } } },
       ),
       super.createIndex({ time: -1 }),

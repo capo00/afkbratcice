@@ -18,6 +18,8 @@ const ADMIN_MENU = [
   // (design/roles.md, 5.2).
   { code: "clubs", route: "clubs", icon: "uugdsstencil-navigation-flag", ready: true, profileList: Config.CONTENT },
   { code: "teams", route: "teams", icon: "uugds-shield", ready: true, profileList: [...Config.CONTENT, ...Config.TEAM_SCOPED] },
+  // Kategorie týmů (A/B/C, rezervy mládeže, ženy, stará garda) -- jen správce (2026-10-26).
+  { code: "categories", route: "categories", icon: "uugds-tag", ready: true, profileList: Config.ADMIN },
   { code: "seasons", route: "seasons", icon: "uugds-calendar", ready: true, profileList: Config.CONTENT },
   { code: "matches", route: "matches", icon: "uugds-sprint", ready: true, profileList: [...Config.MATCH, ...Config.TEAM_SCOPED] },
   { code: "persons", route: "persons", icon: "uugds-account", ready: true, profileList: [...Config.CONTENT, ...Config.TEAM_SCOPED] },

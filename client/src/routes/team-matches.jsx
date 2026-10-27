@@ -107,7 +107,7 @@ function MatchList({ teamId, seasonId, category }) {
       ) : (
         <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
           {itemList.map((match) => (
-            <MatchTile key={match.id} match={match} ownTeamId={teamId} category={category?.age} />
+            <MatchTile key={match.id} match={match} ownTeamId={teamId} category={category?.categoryName} />
           ))}
         </Uu5Elements.Grid>
       )}

@@ -23,6 +23,7 @@ const SCREEN = {
   "": Utils.Component.lazy(() => import("./screens/home.jsx")),
   clubs: Utils.Component.lazy(() => import("./screens/clubs.jsx")),
   teams: Utils.Component.lazy(() => import("./screens/teams.jsx")),
+  categories: Utils.Component.lazy(() => import("./screens/categories.jsx")),
   seasons: Utils.Component.lazy(() => import("./screens/seasons.jsx")),
   matches: Utils.Component.lazy(() => import("./screens/matches.jsx")),
   persons: Utils.Component.lazy(() => import("./screens/persons.jsx")),

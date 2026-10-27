@@ -18,14 +18,14 @@ function formatSeason(yearFrom) {
 }
 
 /**
- * Seřadí kategorie podle appConfig.categoryOrder; co v pořadí není, jde na konec
- * (abecedně, ať je výsledek stabilní).
+ * Seřadí položky podle appConfig.categoryOrder (kódy kategorií, `item.category`); co
+ * v pořadí není, jde na konec (abecedně, ať je výsledek stabilní).
  */
 function sortByCategoryOrder(itemList, categoryOrder = []) {
   return [...itemList].sort((a, b) => {
-    const ia = categoryOrder.indexOf(a.age);
-    const ib = categoryOrder.indexOf(b.age);
-    if (ia === ib) return String(a.age).localeCompare(String(b.age), "cs");
+    const ia = categoryOrder.indexOf(a.category);
+    const ib = categoryOrder.indexOf(b.category);
+    if (ia === ib) return String(a.category).localeCompare(String(b.category), "cs");
     if (ia === -1) return 1;
     if (ib === -1) return -1;
     return ia - ib;

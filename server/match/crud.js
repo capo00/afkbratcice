@@ -3,8 +3,12 @@ import dao from "./dao.js";
 import teamDao from "../team/dao.js";
 import playerDao from "../player/dao.js";
 import personDao from "../person/dao.js";
+import seasonDao from "../season/dao.js";
+import categoryDao from "../category/dao.js";
 import Config from "../config.js";
 import { hasRole, myTeamIdList } from "../services/authorize.js";
+import { checkMatchAges, isFriendly } from "../services/category.js";
+import { withLineupPositions } from "../services/lineup-position.js";
 
 class MatchCrud extends Crud {
   constructor() {
@@ -67,11 +71,12 @@ class MatchCrud extends Crud {
     return playerList.map((entry) => {
       const player = players.find((p) => p.id === entry.playerId);
       const person = player ? persons.find((x) => x.id === player.personId) : null;
-      // Veřejná sestava nese jen jméno -- kontakty osoby sem nepatří.
+      // Veřejná sestava nese jen jméno a fotku -- kontakty osoby sem nepatří. Fotka se do
+      // zápasu neukládá, bere se z osoby až tady (hřiště v detailu zápasu na webu).
       return {
         ...entry,
         player: player ? { id: player.id, position: player.position, number: player.number, teamList: player.teamList } : null,
-        person: person ? { id: person.id, name: person.name, surname: person.surname } : null,
+        person: person ? { id: person.id, name: person.name, surname: person.surname, photoUri: person.photoUri ?? null } : null,
       };
     });
   }
@@ -82,18 +87,22 @@ class MatchCrud extends Crud {
    * stejné dvojice v jedné sezóně kolidovaly.
    */
   _normalize(data) {
-    if (!("round" in data)) return data;
-    return { ...data, round: data.round === "" || data.round === undefined ? null : data.round };
+    let out = data;
+    if ("playerList" in out) out = { ...out, playerList: withLineupPositions(out.playerList) };
+    if (!("round" in out)) return out;
+    return { ...out, round: out.round === "" || out.round === undefined ? null : out.round };
   }
 
   async create(data, identity) {
     this._checkTeams(data);
+    await this._checkAges(data);
     const item = this._normalize(data);
     return this._forIdentity(await super.create({ ...item, state: item.state ?? this._deriveState(item) }), identity);
   }
 
   async createMany(dataList) {
     for (const item of dataList) this._checkTeams(item);
+    await this._checkAgesMany(dataList);
     return super.createMany(
       dataList.map((item) => {
         const normalized = this._normalize(item);
@@ -111,12 +120,16 @@ class MatchCrud extends Crud {
 
     if (scopedOnly) {
       const { homeTeamId, guestTeamId, ...rest } = data;
+      // Ani editor týmu nesmí z přáteláku napříč věkovými skupinami udělat mistrovský zápas
+      // (doplnit kolo, přehodit sezónu).
+      if (rest.seasonId || "round" in rest) await this._checkAges({ ...(await this._get(data.id)), ...rest });
       return this._forIdentity(await super.update(this._normalize(rest)), identity);
     }
 
-    if (data.homeTeamId || data.guestTeamId) {
+    if (data.homeTeamId || data.guestTeamId || data.seasonId || "round" in data) {
       const current = await this._get(data.id);
       this._checkTeams({ ...current, ...data });
+      await this._checkAges({ ...current, ...data });
     }
     return this._forIdentity(await super.update(this._normalize(data)), identity);
   }
@@ -204,7 +217,7 @@ class MatchCrud extends Crud {
     // tranzitivní data nemusí: klient si současnou položku doplní o to, co přišlo
     // (viz `routes/admin/matches.jsx`), takže `homeTeam`/`guestTeam` z `get` zůstanou
     // zachované a nemusí se kvůli jednomu zápisu načítat znovu.
-    return this._forIdentity(await super.update({ id, playerList: nextPlayerList }), identity);
+    return this._forIdentity(await super.update({ id, playerList: withLineupPositions(nextPlayerList) }), identity);
   }
 
   _deriveState(data) {
@@ -215,6 +228,53 @@ class MatchCrud extends Crud {
     if (data.homeTeamId && data.guestTeamId && data.homeTeamId === data.guestTeamId) {
       throw this._error("sameTeams", "A team cannot play against itself", { teamId: data.homeTeamId });
     }
+  }
+
+  /**
+   * Věkové skupiny týmů a sezóny (services/category.js). Tým bez kategorie nebo kategorie,
+   * která neexistuje, pravidlo nezastaví -- to hlídá `team/create`/`update`.
+   */
+  async _checkAges(data) {
+    return this._checkAgesMany([data]);
+  }
+
+  /**
+   * Týmy, sezóny a kategorie se načtou jedním dotazem pro celou dávku (hromadné zakládání
+   * rozlosování má stovky zápasů). Chyba nese pořadí položky (`index`).
+   */
+  async _checkAgesMany(dataList) {
+    const withTeams = dataList.filter((data) => data.homeTeamId && data.guestTeamId);
+    if (!withTeams.length) return;
+
+    const teamIdList = [...new Set(withTeams.flatMap((data) => [data.homeTeamId, data.guestTeamId]))];
+    const seasonIdList = [...new Set(withTeams.map((data) => data.seasonId).filter(Boolean))];
+    const [teams, seasons] = await Promise.all([
+      teamDao.listByIdList(teamIdList).catch(() => []),
+      seasonIdList.length ? seasonDao.listByIdList(seasonIdList).catch(() => []) : [],
+    ]);
+    const codeList = [...new Set(teams.map((team) => team.category).filter(Boolean))];
+    const categories = codeList.length ? await categoryDao.listByCodeList(codeList) : [];
+    const ageOfTeam = (id) => categories.find((c) => c.code === teams.find((t) => t.id === id)?.category)?.age;
+
+    dataList.forEach((data, index) => {
+      if (!data.homeTeamId || !data.guestTeamId) return;
+      const homeAge = ageOfTeam(data.homeTeamId);
+      const guestAge = ageOfTeam(data.guestTeamId);
+      if (!homeAge || !guestAge) return;
+      const seasonAge = seasons.find((season) => season.id === data.seasonId)?.age;
+
+      const problem = checkMatchAges({ homeAge, guestAge, seasonAge, friendly: isFriendly(data.round) });
+      if (problem) {
+        throw this._error(problem, "Teams of these categories cannot play this match", {
+          index,
+          homeTeamId: data.homeTeamId,
+          guestTeamId: data.guestTeamId,
+          homeAge,
+          guestAge,
+          seasonAge,
+        });
+      }
+    });
   }
 
   _error(code, message, paramMap) {

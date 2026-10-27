@@ -3,6 +3,7 @@ import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
+import { LINEUP_POSITION_LIST, LINEUP_POSITION_MAP } from "../config/lineup-position.js";
 import importLsi from "../lsi/import-lsi.js";
 import { enumItemList, personLabel } from "./fields.jsx";
 
@@ -119,7 +120,7 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
 }
 
 // Sloupce sestavy drží hlavička i řádky — jeden zdroj, aby se nemohly rozejít.
-const LINEUP_COLUMNS = "minmax(140px, 2fr) 110px 90px 70px 70px 70px";
+const LINEUP_COLUMNS = "minmax(140px, 2fr) 220px 90px 70px 70px 70px";
 
 /** Řádek sestavy — jeden hráč a co v zápase udělal. */
 function LineupRow({ player, entry, onChange }) {
@@ -138,11 +139,13 @@ function LineupRow({ player, entry, onChange }) {
         {player.number ? <span className={Config.Css.css({ color: theme.color.mutedFg })}> · {player.number}</span> : null}
       </div>
 
+      {/* Přesný post (28 postů, Caio 2026-10-26); linii `position` dopočítá server. Starý
+          zápis bez přesného postu ukáže prázdný výběr. */}
       <Uu5Forms.Select
-        value={entry?.position ?? player.position ?? undefined}
-        itemList={enumItemList("position", Config.POSITION_LIST)}
+        value={entry?.positionDetail ?? undefined}
+        itemList={enumItemList("lineupPosition", LINEUP_POSITION_LIST)}
         disabled={!entry}
-        onChange={(e) => set({ position: e.data.value })}
+        onChange={(e) => set({ positionDetail: e.data.value, position: LINEUP_POSITION_MAP[e.data.value] })}
       />
 
       <Uu5Forms.Number

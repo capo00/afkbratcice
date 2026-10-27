@@ -51,7 +51,9 @@ const LastResults = createVisualComponent({
                     .catch(() => null),
                 ),
             );
-            return { itemList: matchList.filter((match) => match?.id) };
+            // Derby A proti B vrátí `getLast` pro oba týmy tentýž zápas -- jen jednou.
+            const seen = new Set();
+            return { itemList: matchList.filter((match) => match?.id && !seen.has(match.id) && seen.add(match.id)) };
           },
         },
         itemHandlerMap: {
@@ -93,7 +95,7 @@ const LastResults = createVisualComponent({
                     key={match.id}
                     matchData={item}
                     ownTeamId={category?.teamId}
-                    category={category?.age}
+                    category={category?.categoryName}
                   />
                 );
               })}

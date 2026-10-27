@@ -3,18 +3,24 @@
 
 const ERROR_PREFIX = "afkbratcice";
 
-// Věkové kategorie. Které z nich klub v daném ročníku má, se NEODVOZUJE odsud, ale ze
-// sezón (season/listCurrent) -- složení mužstev se mění rok od roku.
+// Věkové skupiny. Konkrétní kategorie (A/B/C týmy, U15 B…) jsou v kolekci `afk_category`
+// a každá z nich patří do jedné skupiny (`category.age`). Mistrovský zápas smí hrát jen týmy
+// stejné skupiny, stará garda může hrát proti komukoli a přátelské zápasy jdou napříč
+// (match/crud.js). Které kategorie klub v daném ročníku má, se NEODVOZUJE odsud, ale ze sezón
+// (season/listCurrent) -- složení mužstev se mění rok od roku.
 const AGE_MAP = {
-  old: "Stará garda",
   men: "Muži",
-  u18: "Starší dorost",
-  u16: "Mladší dorost",
-  u14: "Starší žáci",
-  u12: "Mladší žáci",
-  u10: "Starší přípravka",
-  u6: "Mladší přípravka",
+  u19: "Dorost - starší",
+  u17: "Dorost - mladší",
+  u15: "Žáci - starší",
+  u13: "Žáci - mladší",
+  u11: "Přípravka - starší",
+  u9: "Přípravka - mladší",
+  women: "Ženy",
+  old: "Stará garda",
 };
+// Věková skupina, která smí hrát proti komukoli.
+const AGE_ANY_OPPONENT = "old";
 const AGE_LIST = Object.keys(AGE_MAP);
 
 const POSITION_MAP = { GK: "Brankář", DF: "Obránce", MF: "Záložník", FW: "Útočník" };
@@ -84,6 +90,7 @@ export default {
   ERROR_PREFIX,
   AGE_MAP,
   AGE_LIST,
+  AGE_ANY_OPPONENT,
   POSITION_MAP,
   POSITION_LIST,
   MATCH_STATE,
@@ -105,10 +112,11 @@ export default {
   BINARY_TYPE,
   // Výchozí obsah app_config, když je kolekce prázdná (chování z v1).
   DEFAULT_APP_CONFIG: {
-    // Od nejstarších; stará garda je výjimka na konci.
-    categoryOrder: ["men", "u18", "u16", "u14", "u12", "u10", "u6", "old"],
-    // U dorostu se jména ukazují, u žáků a mladších ne.
-    hideNamesAgeList: ["u14", "u12", "u10", "u6"],
+    // Kódy kategorií (`afk_category.code`), od nejstarších; stará garda je výjimka na konci.
+    // Kategorie, která v pořadí není, jde na konec (services/season.js).
+    categoryOrder: ["men-a", "men-b", "men-c", "u19", "u17", "u15", "u15-b", "u13", "u11", "u9", "women", "old"],
+    // Věkové skupiny (`category.age`): u dorostu se jména ukazují, u žáků a mladších ne.
+    hideNamesAgeList: ["u15", "u13", "u11", "u9"],
     notice: "",
     contact: {},
     socialList: [],

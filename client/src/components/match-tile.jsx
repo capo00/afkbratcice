@@ -142,7 +142,7 @@ const MatchTile = createVisualComponent({
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" })}>
         {category ? (
           <Uu5Elements.Tag colorScheme="primary" significance="highlighted" size="s">
-            <Lsi import={importLsi} path={["enum", "age", category]} />
+            {category}
           </Uu5Elements.Tag>
         ) : null}
         <Uu5Elements.Text

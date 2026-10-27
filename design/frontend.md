@@ -449,6 +449,17 @@ poznámka z předlohy („stará garda hraje svoji soutěž bez tabulky“).
 - **Fotogalerie** – `gallery/list?matchId`.
 - Pro `members` navíc odjezd; pro `operatives` akce **Zapsat výsledek** a **Zapsat sestavu**.
 
+#### 3.7.1 Sestava na hřišti (od 2026-10-27)
+
+Sestava se ukazuje jen u týmu, který ji má vyplněnou (v praxi tým AFK), jako hřiště s hráči
+na přesných postech (`components/lineup-pitch/`, varianta C z canvasu „AFK Bratčice – posty
+v sestavě“). Kruh s fotkou je `Uu5Elements.RichIcon` (bez fotky iniciály), pod ním „Příjmení I.“ (na hřišti užším než 400 px jen příjmení)
+v `Text` s `autoFit`; post jen v tooltipu, v jazyce webu. Góly jsou odznak vpravo nahoře, karty
+vlevo nahoře. Hřiště drží poměr 68 : 105 (nejvýš 520 px), hráči stojí v procentech
+(`layout.js`, souřadnice 28 postů hlídá test proti překryvu) a velikost kruhu se volí podle
+změřené šířky hřiště. Náhradníci a hráči bez postu jsou pod hřištěm. Fotku do sestavy dává
+`match/get` z osoby, v zápase se neukládá. Barvy hřiště jsou konstanty v komponentě.
+
 ### 3.8 Profil hráče
 
 Osobní karta (jméno, foto, post, číslo, roky v klubu) + statistiky po sezónách

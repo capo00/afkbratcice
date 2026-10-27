@@ -23,10 +23,13 @@ const Round = createVisualComponent({
 
   render() {
     const [route, setRoute] = useRoute();
-    const { seasonId, round } = route?.params ?? {};
+    const { seasonId, round, teamId } = route?.params ?? {};
     const { categoryList } = useApp();
 
-    const category = categoryList.find((item) => item.seasonId === seasonId);
+    // V jedné sezóně může hrát A i B tým klubu; `teamId` z odkazu rozhodne, čí je to pohled.
+    const category =
+      categoryList.find((item) => item.seasonId === seasonId && (!teamId || item.teamId === teamId)) ??
+      categoryList.find((item) => item.seasonId === seasonId);
 
     const dataObject = useDataObject(
       {

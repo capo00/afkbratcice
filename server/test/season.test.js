@@ -34,24 +34,24 @@ test("formatSeason nepadá na nesmyslu", () => {
   assert.equal(formatSeason(undefined), "");
 });
 
-test("sortByCategoryOrder řadí podle konfigurace", () => {
-  const order = ["men", "u18", "u14", "old"];
-  const itemList = [{ age: "old" }, { age: "u14" }, { age: "men" }, { age: "u18" }];
+test("sortByCategoryOrder řadí podle konfigurace (kódy kategorií)", () => {
+  const order = ["men-a", "men-b", "u19", "old"];
+  const itemList = [{ category: "old" }, { category: "u19" }, { category: "men-a" }, { category: "men-b" }];
 
-  assert.deepEqual(sortByCategoryOrder(itemList, order).map((x) => x.age), ["men", "u18", "u14", "old"]);
+  assert.deepEqual(sortByCategoryOrder(itemList, order).map((x) => x.category), ["men-a", "men-b", "u19", "old"]);
 });
 
 test("kategorie mimo pořadí jdou na konec, abecedně", () => {
-  const order = ["men", "u18"];
-  const itemList = [{ age: "u6" }, { age: "u18" }, { age: "u12" }, { age: "men" }];
+  const order = ["men-a", "u19"];
+  const itemList = [{ category: "u9" }, { category: "u19" }, { category: "u15-b" }, { category: "men-a" }];
 
-  assert.deepEqual(sortByCategoryOrder(itemList, order).map((x) => x.age), ["men", "u18", "u12", "u6"]);
+  assert.deepEqual(sortByCategoryOrder(itemList, order).map((x) => x.category), ["men-a", "u19", "u15-b", "u9"]);
 });
 
 test("sortByCategoryOrder nemění vstupní pole a snese chybějící pořadí", () => {
-  const itemList = [{ age: "u18" }, { age: "men" }];
+  const itemList = [{ category: "u19" }, { category: "men-a" }];
   const sorted = sortByCategoryOrder(itemList);
 
-  assert.deepEqual(itemList.map((x) => x.age), ["u18", "men"]);
-  assert.deepEqual(sorted.map((x) => x.age), ["men", "u18"]); // bez pořadí abecedně
+  assert.deepEqual(itemList.map((x) => x.category), ["u19", "men-a"]);
+  assert.deepEqual(sorted.map((x) => x.category), ["men-a", "u19"]); // bez pořadí abecedně
 });

@@ -41,7 +41,7 @@ function TeamCard({ category, coach }) {
       <TeamLogo uri={team?.logoUri} size={40} alt="" />
       <div className={Config.Css.css({ minInlineSize: 0 })}>
         <Uu5Elements.Tag colorScheme="primary" significance="highlighted" size="s">
-          <Lsi import={importLsi} path={["enum", "age", category.age]} />
+          {category.categoryName ?? <Lsi import={importLsi} path={["enum", "age", category.age]} />}
         </Uu5Elements.Tag>
         <div className={Config.Css.css({ ...theme.typography.display, fontSize: 22, marginBlockStart: 4 })}>
           {team?.name ?? "—"}
@@ -142,7 +142,7 @@ const Teams = createVisualComponent({
           ) : (
             <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))">
               {categoryList.map((category) => (
-                <TeamCard key={category.seasonId} category={category} coach={coachByTeamId[category.teamId]} />
+                <TeamCard key={`${category.seasonId}:${category.teamId}`} category={category} coach={coachByTeamId[category.teamId]} />
               ))}
             </Uu5Elements.Grid>
           )}

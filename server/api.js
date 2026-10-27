@@ -3,6 +3,7 @@ import { Authentication, BinaryStore } from "caio-server";
 
 import Config from "./config.js";
 import clubApi from "./club/api.js";
+import categoryApi from "./category/api.js";
 import teamApi from "./team/api.js";
 import seasonApi from "./season/api.js";
 import matchApi from "./match/api.js";
@@ -57,6 +58,7 @@ const binaryCollectionMap = {
 export default {
   ...sysApi,
   ...clubApi,
+  ...categoryApi,
   ...teamApi,
   ...seasonApi,
   ...matchApi,

@@ -25,16 +25,18 @@ const { theme } = Config;
 const [Context, useApp] = Utils.Context.create();
 
 async function load() {
-  const [appConfig, seasonList, teamList] = await Promise.all([
+  const [appConfig, seasonList, teamList, teamCategoryList] = await Promise.all([
     UiElements.Call.cmdGet("/appConfig/get"),
     UiElements.Call.cmdGet("/season/listCurrent"),
     UiElements.Call.cmdGet("/team/list"),
+    UiElements.Call.cmdGet("/category/list"),
   ]);
 
   return {
     appConfig,
     categoryList: seasonList?.itemList ?? [],
     teamList: teamList?.itemList ?? [],
+    teamCategoryList: teamCategoryList?.itemList ?? [],
   };
 }
 
@@ -46,8 +48,9 @@ const AppProvider = createComponent({
     const { state, data, errorData } = dataObject;
 
     const value = useMemo(() => {
-      const { appConfig, categoryList = [], teamList = [] } = data ?? {};
+      const { appConfig, categoryList = [], teamList = [], teamCategoryList = [] } = data ?? {};
       const teamMap = new Map(teamList.map((team) => [team.id, team]));
+      const teamCategoryMap = new Map(teamCategoryList.map((category) => [category.code, category]));
 
       return {
         appConfig: appConfig ?? {},
@@ -57,6 +60,10 @@ const AppProvider = createComponent({
         // Tým podle id, nebo `undefined`. Volá se z každé dlaždice zápasu, takže se drží
         // v kontextu, ne aby si ho každá komponenta hledala v poli.
         getTeam: (id) => teamMap.get(id),
+        // Kategorie týmu (`afk_category`) podle kódu. Pozor na jména: `categoryList` výš jsou
+        // mužstva klubu v aktuálním ročníku (season/listCurrent), ne číselník kategorií.
+        teamCategoryList,
+        getCategory: (code) => teamCategoryMap.get(code),
         // Skrývají se u téhle kategorie jména? Filtruje sice server (jména mládeže nechodí
         // v API vůbec), ale klient to musí vědět taky, aby místo prázdného jména vykreslil
         // číslo dresu a post, ne prázdno.

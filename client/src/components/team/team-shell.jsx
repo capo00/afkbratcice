@@ -62,7 +62,7 @@ const TeamShell = createVisualComponent({
             <div className={Config.Css.css({ flexGrow: 1, minInlineSize: 0 })}>
               {category ? (
                 <Uu5Elements.Tag colorScheme="primary" significance="highlighted" size="s">
-                  <Lsi import={importLsi} path={["enum", "age", category.age]} />
+                  {category.categoryName ?? <Lsi import={importLsi} path={["enum", "age", category.age]} />}
                 </Uu5Elements.Tag>
               ) : null}
               <div className={Config.Css.css({ ...theme.typography.display, fontSize: 32, marginBlockStart: 4 })}>

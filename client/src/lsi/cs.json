@@ -34,6 +34,10 @@
         "header": "Mužstva a soupeři",
         "desc": "Týmy a kategorie"
       },
+      "categories": {
+        "header": "Kategorie",
+        "desc": "A, B a C týmy, mládež, ženy, stará garda"
+      },
       "seasons": {
         "header": "Sezóny",
         "desc": "Ročníky soutěží a jejich účastníci"
@@ -80,7 +84,7 @@
       "shortName": "Zkráceně",
       "firstName": "Jméno",
       "surname": "Příjmení",
-      "age": "Kategorie",
+      "age": "Věková skupina",
       "own": "Naše",
       "logo": "Logo",
       "clubId": "Klub",
@@ -126,7 +130,9 @@
       "season": "Sezóna",
       "round": "Kolo",
       "place": "Hřiště",
-      "departureTime": "Odjezd"
+      "departureTime": "Odjezd",
+      "code": "Kód",
+      "teamCount": "Týmů"
     },
     "membership": {
       "add": "Přidat tým",
@@ -166,8 +172,13 @@
     },
     "config": {
       "categoryOrder": "Pořadí kategorií v menu",
-      "hideNames": "Skrýt jména u kategorií",
+      "hideNames": "Skrýt jména u věkových skupin",
       "saved": "Uloženo."
+    },
+    "category": {
+      "codeHint": "Malá písmena, číslice a pomlčky, např. men-b nebo u15-b. Po založení se nemění.",
+      "codeLocked": "Kód se nemění, odkazují na něj týmy.",
+      "ageHint": "Mistrovský zápas spolu hrají jen týmy stejné věkové skupiny. Stará garda smí hrát proti komukoli, přátelák jde napříč."
     }
   },
   "home": {
@@ -235,7 +246,14 @@
     "h2h": "Vzájemné zápasy",
     "h2hEyebrow": "Historie dvojice",
     "missing": "Zápas se nepodařilo najít.",
-    "wholeRound": "Celé kolo"
+    "wholeRound": "Celé kolo",
+    "pitch": {
+      "goals": "Góly",
+      "yellowCard": "Žlutá karta",
+      "redCard": "Červená karta",
+      "noPosition": "Bez postu"
+    },
+    "lineup": "Sestava"
   },
   "footer": {
     "about": "Fotbalový klub AFK Bratčice, od roku ${founded}.",
@@ -251,12 +269,13 @@
   "enum": {
     "age": {
       "men": "Muži",
-      "u18": "Starší dorost",
-      "u16": "Mladší dorost",
-      "u14": "Starší žáci",
-      "u12": "Mladší žáci",
-      "u10": "Starší přípravka",
-      "u6": "Mladší přípravka",
+      "u19": "Dorost - starší",
+      "u17": "Dorost - mladší",
+      "u15": "Žáci - starší",
+      "u13": "Žáci - mladší",
+      "u11": "Přípravka - starší",
+      "u9": "Přípravka - mladší",
+      "women": "Ženy",
       "old": "Stará garda"
     },
     "position": {
@@ -308,6 +327,36 @@
       "DF": "Obránci",
       "MF": "Záložníci",
       "FW": "Útočníci"
+    },
+    "lineupPosition": {
+      "GK": "Brankář",
+      "RB": "Pravá obrana",
+      "LB": "Levá obrana",
+      "CB": "Stoper",
+      "FCB": "Předstoper",
+      "RCB": "Pravá střední obrana",
+      "LCB": "Levá střední obrana",
+      "RM": "Pravá záloha",
+      "LM": "Levá záloha",
+      "CM": "Střední záloha",
+      "RCM": "Pravá střední záloha",
+      "LCM": "Levá střední záloha",
+      "CDM": "Střední defenzivní záloha",
+      "RDM": "Pravá defenzivní záloha",
+      "LDM": "Levá defenzivní záloha",
+      "RCDM": "Pravá střední defenzivní záloha",
+      "LCDM": "Levá střední defenzivní záloha",
+      "CAM": "Střední ofenzivní záloha",
+      "RAM": "Pravá ofenzivní záloha",
+      "LAM": "Levá ofenzivní záloha",
+      "RCAM": "Pravá střední ofenzivní záloha",
+      "LCAM": "Levá střední ofenzivní záloha",
+      "RF": "Pravý útok",
+      "LF": "Levý útok",
+      "CF": "Střední útok",
+      "ST": "Hrotový útok",
+      "RS": "Pravý hrotový útok",
+      "LS": "Levý hrotový útok"
     }
   },
   "table": {
@@ -405,5 +454,14 @@
     "empty": "Kontaktní údaje zatím nejsou vyplněné.",
     "noMap": "Mapa se ukáže, jakmile budou v konfiguraci vyplněné souřadnice hřiště.",
     "showOnMap": "Zobrazit na mapě"
+  },
+  "errors": {
+    "afkbratcice/category/inUse": "Kategorii nejde smazat, používají ji týmy. Nejdřív je převeďte do jiné kategorie.",
+    "afkbratcice/category/codeImmutable": "Kód kategorie se po založení nemění.",
+    "afkbratcice/category/codeExists": "Kategorie s tímto kódem už existuje.",
+    "afkbratcice/category/invalidCode": "Kód smí obsahovat jen malá písmena, číslice a pomlčky.",
+    "afkbratcice/category/nameRequired": "Vyplňte název kategorie.",
+    "afkbratcice/category/invalidAge": "Vyberte věkovou skupinu.",
+    "afkbratcice/category/ageInUse": "Věkovou skupinu nejde změnit, kategorii používají týmy."
   }
 }

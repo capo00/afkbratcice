@@ -62,7 +62,8 @@ function cellValue(row, code) {
 const StandingsTable = createVisualComponent({
   uu5Tag: Config.TAG + "StandingsTable",
 
-  render({ table = [], ownTeamId, hasPenalties = false }) {
+  // `ownTeamIdList`: víc vlastních týmů v jedné soutěži (A a B tým), jinak `ownTeamId`.
+  render({ table = [], ownTeamId, ownTeamIdList, hasPenalties = false }) {
     const [screenSize] = useScreenSize();
     const isCompact = screenSize === "xs" || screenSize === "s";
     const columns = useColumns({ hasPenalties, isCompact });
@@ -85,7 +86,7 @@ const StandingsTable = createVisualComponent({
 
         <tbody>
           {table.map((row) => {
-            const isOwn = row.team?.id === ownTeamId;
+            const isOwn = ownTeamIdList ? ownTeamIdList.includes(row.team?.id) : row.team?.id === ownTeamId;
 
             return (
               <tr

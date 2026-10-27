@@ -34,7 +34,21 @@ const TablesSection = createVisualComponent({
     // Popisky jako řetězce kvůli `toUpperCase()` — viz team-shell.jsx.
     const ageLsi = useLsi(importLsi, ["enum", "age"]);
 
-    const withTable = useMemo(() => categoryList.filter((category) => category.hasTable), [categoryList]);
+    // Jedna záložka na sezónu: když v jedné soutěži hraje A i B tým klubu, je to pořád jedna
+    // tabulka, jen se v ní zvýrazní oba týmy (`ownTeamIdList`) a záložka nese obě kategorie.
+    const withTable = useMemo(() => {
+      const bySeason = new Map();
+      for (const category of categoryList.filter((c) => c.hasTable)) {
+        const group = bySeason.get(category.seasonId);
+        if (group) {
+          group.ownTeamIdList.push(category.teamId);
+          group.nameList.push(category.categoryName);
+        } else {
+          bySeason.set(category.seasonId, { ...category, ownTeamIdList: [category.teamId], nameList: [category.categoryName] });
+        }
+      }
+      return [...bySeason.values()];
+    }, [categoryList]);
     const withoutTable = useMemo(() => categoryList.filter((category) => !category.hasTable), [categoryList]);
 
     const [activeSeasonId, setActiveSeasonId] = useState();
@@ -70,7 +84,7 @@ const TablesSection = createVisualComponent({
             onChange={(e) => setActiveSeasonId(e.data.activeCode)}
             itemList={withTable.map((category) => ({
               code: category.seasonId,
-              label: (ageLsi[category.age] ?? category.age).toUpperCase(),
+              label: (category.nameList.filter(Boolean).join(" · ") || ageLsi[category.age] || category.age).toUpperCase(),
             }))}
             className={Config.Css.css({ marginBlockStart: 16 })}
           />
@@ -95,7 +109,7 @@ const TablesSection = createVisualComponent({
                   {active.competition}
                 </Uu5Elements.Text>
               ) : null}
-              <StandingsTable table={data.table} ownTeamId={active.teamId} hasPenalties={active.hasPenalties} />
+              <StandingsTable table={data.table} ownTeamIdList={active.ownTeamIdList} hasPenalties={active.hasPenalties} />
             </>
           )}
         </div>

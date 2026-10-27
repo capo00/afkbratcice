@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useRoute, useMemo, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useRoute, useMemo, useScreenSize, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
@@ -10,6 +10,7 @@ import TeamLogo from "../components/team-logo.jsx";
 import DateText from "../components/date-text.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import LineupPitch from "../components/lineup-pitch/lineup-pitch.jsx";
 import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
@@ -124,84 +125,6 @@ function MatchHeader({ match }) {
   );
 }
 
-function LineupColumn({ team, entryList }) {
-  const starters = entryList.filter((entry) => !entry.substitute);
-  const substitutes = entryList.filter((entry) => entry.substitute);
-
-  function Row({ entry }) {
-    const name = personName(entry);
-    return (
-      <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 8, paddingBlock: 4 })}>
-        <span
-          className={Config.Css.css({
-            inlineSize: 24,
-            textAlign: "center",
-            color: theme.color.mutedFg,
-            fontVariantNumeric: "tabular-nums",
-          })}
-        >
-          {entry.player?.number ?? "–"}
-        </span>
-        <span className={Config.Css.css({ flexGrow: 1, minInlineSize: 0 })}>
-          {name ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}
-        </span>
-        {entry.goals ? (
-          <span title="Góly">
-            {"⚽".repeat(Math.min(entry.goals, 5))}
-            {entry.goals > 5 ? ` ×${entry.goals}` : null}
-          </span>
-        ) : null}
-        {entry.yellowCard ? (
-          <span className={Config.Css.css({ inlineSize: 9, blockSize: 13, backgroundColor: "#E9C500", borderRadius: 2 })} />
-        ) : null}
-        {entry.redCard ? (
-          <span
-            className={Config.Css.css({ inlineSize: 9, blockSize: 13, backgroundColor: theme.color.clubRed, borderRadius: 2 })}
-          />
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <Card header={<span className={Config.Css.css({ ...theme.typography.display })}>{team?.name ?? "—"}</span>}>
-      {entryList.length === 0 ? (
-        <Uu5Elements.Text
-          category="interface"
-          segment="content"
-          type="medium"
-          className={Config.Css.css({ color: theme.color.mutedFg })}
-        >
-          <Lsi import={importLsi} path={["match", "noLineup"]} />
-        </Uu5Elements.Text>
-      ) : (
-        <>
-          {starters.map((entry, index) => (
-            <Row key={entry.playerId ?? index} entry={entry} />
-          ))}
-          {substitutes.length ? (
-            <>
-              <div
-                className={Config.Css.css({
-                  ...theme.typography.eyebrow,
-                  fontSize: 11,
-                  marginBlockStart: 12,
-                  marginBlockEnd: 4,
-                })}
-              >
-                <Lsi import={importLsi} path={["match", "substitutes"]} />
-              </div>
-              {substitutes.map((entry, index) => (
-                <Row key={entry.playerId ?? index} entry={entry} />
-              ))}
-            </>
-          ) : null}
-        </>
-      )}
-    </Card>
-  );
-}
-
 function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant, action }) {
   const dataObject = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/match/list", dtoIn) } }, [
     JSON.stringify(dtoIn),
@@ -251,6 +174,7 @@ function MatchDetail({ matchId }) {
   );
 
   const { state, data: match } = dataObject;
+  const [screenSize] = useScreenSize();
 
   const { homeLineup, guestLineup, scorers } = useMemo(() => {
     const entryList = match?.playerList ?? [];
@@ -295,32 +219,42 @@ function MatchDetail({ matchId }) {
 
       {hasLineup ? (
         <Section variant="hatched">
-          <Heading lsi={lsi("match", "lineups")} />
-          {/* Sestavy jsou dvě a mají si šířku rozdělit napůl — proto `auto-fit`; na úzkém
-              okně se poskládají pod sebe. */}
-          <Uu5Elements.Grid
-            templateColumns="repeat(auto-fit, minmax(280px, 1fr))"
-            className={Config.Css.css({ marginBlockStart: 24 })}
+          <Heading lsi={lsi("match", "lineup")} />
+          {/* Sestava na hřišti (components/lineup-pitch/) jen u týmu, který ji má vyplněnou --
+              u nás tým AFK, soupeř sestavu nemá (Caio 2026-10-27). Na desktopu hřiště vlevo,
+              střelci vedle; na mobilu pod sebou. */}
+          <div
+            className={Config.Css.css({
+              display: "grid",
+              gap: 24,
+              marginBlockStart: 24,
+              gridTemplateColumns: ["xs", "s"].includes(screenSize) ? "minmax(0, 1fr)" : "minmax(0, 520px) minmax(0, 1fr)",
+              alignItems: "start",
+            })}
           >
-            <LineupColumn team={match.homeTeam} entryList={homeLineup} />
-            <LineupColumn team={match.guestTeam} entryList={guestLineup} />
-          </Uu5Elements.Grid>
-
-          {scorers.length ? (
-            <div className={Config.Css.css({ marginBlockStart: 24 })}>
-              <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 8 })}>
-                <Lsi import={importLsi} path={["match", "scorers"]} />
-              </div>
-              <div className={Config.Css.css({ display: "flex", gap: 12, flexWrap: "wrap" })}>
-                {scorers.map((entry, index) => (
-                  <Uu5Elements.Tag key={entry.playerId ?? index} colorScheme="building" significance="distinct">
-                    {personName(entry) ?? "?"}
-                    {entry.goals > 1 ? ` (${entry.goals})` : null}
-                  </Uu5Elements.Tag>
-                ))}
-              </div>
+            {[homeLineup, guestLineup]
+              .filter((lineup) => lineup.length > 0)
+              .map((lineup, index) => (
+                <LineupPitch key={index} entryList={lineup} />
+              ))}
+            <div>
+              {scorers.length ? (
+                <div>
+                  <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 8 })}>
+                    <Lsi import={importLsi} path={["match", "scorers"]} />
+                  </div>
+                  <div className={Config.Css.css({ display: "flex", gap: 12, flexWrap: "wrap" })}>
+                    {scorers.map((entry, index) => (
+                      <Uu5Elements.Tag key={entry.playerId ?? index} size="m" colorScheme="building" significance="distinct">
+                        {personName(entry) ?? "?"}
+                        {entry.goals > 1 ? ` (${entry.goals})` : null}
+                      </Uu5Elements.Tag>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
-          ) : null}
+          </div>
         </Section>
       ) : null}
 
@@ -336,7 +270,14 @@ function MatchDetail({ matchId }) {
           action={
             <Uu5Elements.Button
               significance="subdued"
-              onClick={() => setRoute("kolo", { seasonId: match.seasonId, round: match.round })}
+              onClick={() =>
+                setRoute("kolo", {
+                  seasonId: match.seasonId,
+                  round: match.round,
+                  // Vlastní tým zápasu, ať kolo ví, jestli jde o A, nebo B tým (round.jsx).
+                  ...(ownTeamId ? { teamId: ownTeamId } : null),
+                })
+              }
             >
               <Lsi import={importLsi} path={["match", "wholeRound"]} />
             </Uu5Elements.Button>

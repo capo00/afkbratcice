@@ -7,17 +7,18 @@ class TeamDao extends Dao {
 
   createIndexes() {
     return Promise.all([
-      // Stejný klub ve dvou kategoriích jsou dva dokumenty, proto je age v klíči.
-      super.createIndex({ name: 1, age: 1 }, { unique: true }),
-      super.createIndex({ age: 1, name: 1 }),
+      // Stejný klub ve dvou kategoriích jsou dva dokumenty, proto je kategorie v klíči.
+      super.createIndex({ name: 1, category: 1 }, { unique: true }),
+      super.createIndex({ category: 1, name: 1 }),
       super.createIndex({ own: 1 }),
       super.createIndex({ clubId: 1 }),
     ]);
   }
 
-  listByFilter({ age, own, idList } = {}, pageInfo) {
+  /** `categoryList` = kódy kategorií (věková skupina se na ně převádí v crud.js). */
+  listByFilter({ categoryList, own, idList } = {}, pageInfo) {
     const filter = {};
-    if (age) filter.age = age;
+    if (categoryList) filter.category = { $in: categoryList };
     if (own !== undefined) filter.own = own;
     if (idList) return this.listByIdList(idList);
     return this.find(filter, pageInfo, { name: 1 });
@@ -25,6 +26,14 @@ class TeamDao extends Dao {
 
   listOwn() {
     return this.find({ own: true }, undefined, { name: 1 });
+  }
+
+  /** `[{ category, count }]` -- kolik týmů má která kategorie. */
+  async countByCategory() {
+    const rows = await this._exec(() =>
+      this.coll.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]).toArray(),
+    );
+    return (rows ?? []).map((row) => ({ category: row._id, count: row.count }));
   }
 
   listByClub(clubId) {
