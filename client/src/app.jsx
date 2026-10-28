@@ -10,6 +10,7 @@ import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import { useAdminHint } from "./tools/admin-hint.js";
 import { useColorModeItem } from "./tools/color-mode.js";
+import { useScrollTopOnRouteChange } from "./tools/scroll.js";
 import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
 
 const { theme } = Config;
@@ -138,6 +139,8 @@ function useTop() {
 // stejně nemá co zobrazit.
 function Shell() {
   const top = useTop();
+  // Nová stránka začíná nahoře; uu5g05 to samo nedělá (tools/scroll.js).
+  useScrollTopOnRouteChange();
 
   return (
     <UiApp.Spa

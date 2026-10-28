@@ -45,6 +45,9 @@ const DEFAULT_DUMP = path.join(HOME, "Documents", "caio-share", "d27814_afk_2026
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const DUMP = args.find((a) => !a.startsWith("--")) ?? DEFAULT_DUMP;
+// Den exportu z názvu dumpu (`..._YYYY-MM-DD.sql`); bez něj dnešek. Končí jím členství
+// neaktivního hráče, o kterém v0 neví, kdy z týmu odešel.
+const EXPORT_DATE = path.basename(DUMP).match(/(\d{4}-\d{2}-\d{2})\.sql$/)?.[1] ?? new Date().toISOString().slice(0, 10);
 
 const SKIP_MATCH = new Set([1010, 1021, 1037]);
 
@@ -358,7 +361,9 @@ for (const [key, v0TeamIdSet] of [...seasonTeams].sort()) {
 // --- 5. osoby a hráči ----------------------------------------------------------------
 // Členství v týmech z účasti v zápasech: tým AFK, za který hráč nastoupil, od prvního do
 // posledního zápasu. Aktivní hráč (`aktivni = 1`) má otevřené členství ve svém týmu
-// (`hrac.tym`: M muži, Z žáci, S stará garda).
+// (`hrac.tym`: M muži, Z žáci, S stará garda). Neaktivní hráč, který za svůj tým nenastoupil,
+// v něm má členství bez začátku, uzavřené dnem exportu (Caio 2026-10-28) -- jinak by bez
+// data konce stál v aktuální soupisce.
 
 const v0MatchById = Object.fromEntries(v0Matches.map((z) => [z.id, z]));
 const membership = {}; // login -> v0 team id -> { from, to }
@@ -395,7 +400,7 @@ for (const h of v0Players) {
     return {
       id: teamIdByV0[v0TeamId],
       dateFrom: range ? range.from.slice(0, 10) : null,
-      dateTo: open ? null : range ? range.to.slice(0, 10) : null,
+      dateTo: open ? null : range ? range.to.slice(0, 10) : EXPORT_DATE,
     };
   });
 

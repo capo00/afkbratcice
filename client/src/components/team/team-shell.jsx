@@ -1,5 +1,6 @@
-import { createVisualComponent, useRoute, useLsi, Lsi } from "uu5g05";
+import { createVisualComponent, useRoute, useLsi, useDataObject, useMemo, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
+import { UiElements } from "../../tools/caio-ui.js";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../layout/section.jsx";
@@ -17,6 +18,12 @@ const { theme } = Config;
 //
 // Záložky vedou jen na **hotové** routy. `Tabulka` navíc odpadá u soutěží bez tabulky
 // (`hasTable: false`, typicky stará garda) — prázdná záložka by jen mátla.
+//
+// **Sezónu určuje shell, ne záložky** (Caio 2026-10-28). Bez `seasonId` v adrese platí
+// letošní sezóna mužstva (`category.seasonId` z app-contextu), u archivního mužstva bez
+// letošní kategorie jeho nejnovější sezóna -- tatáž, kterou ukazuje přepínač. Záložky
+// dostanou vždy konkrétní `seasonId`; dřív si ji tabulka a statistiky dohledávaly na
+// serveru, ale zápasy ne, a bez sezóny v adrese ukazovaly celou historii.
 
 const TAB_LIST = [
   { route: "muzstvo", code: "roster" },
@@ -36,12 +43,34 @@ const TeamShell = createVisualComponent({
     const tabLsi = useLsi(importLsi, ["team", "tab"]);
 
     const teamId = route?.params?.id;
-    const seasonId = route?.params?.seasonId;
+    const routeSeasonId = route?.params?.seasonId;
     const team = getTeam(teamId);
     // Kategorie aktuálního ročníku; v archivu (jiná sezóna) nemusí existovat, a to je
     // v pořádku — routa je klíčovaná `teamId`, ne kategorií, takže odkazy přežijí i to,
     // že mužstvo letos není.
     const category = categoryList.find((item) => item.teamId === teamId);
+
+    // Sezóny, ve kterých mužstvo hrálo -- pro přepínač i pro výchozí sezónu archivu.
+    const seasonDataObject = useDataObject(
+      {
+        handlerMap: {
+          load: () =>
+            teamId ? UiElements.Call.cmdGet("/season/list", { teamId }) : Promise.resolve({ itemList: [] }),
+        },
+      },
+      [teamId],
+    );
+    const seasonList = useMemo(() => {
+      const list = [...(seasonDataObject.data?.itemList ?? [])];
+      // Nejnovější první — archiv se prochází odzadu.
+      list.sort((a, b) => String(b.yearFrom ?? "").localeCompare(String(a.yearFrom ?? "")));
+      return list;
+    }, [seasonDataObject.data]);
+
+    const seasonId = routeSeasonId ?? category?.seasonId ?? seasonList[0]?.id;
+    // Archivní mužstvo bez sezóny v adrese: dokud se seznam sezón nenačte, záložky by se
+    // ptaly bez sezóny, tedy na celou historii.
+    const seasonPending = !seasonId && seasonDataObject.state === "pendingNoData";
 
     if (!teamId) {
       return (
@@ -81,7 +110,7 @@ const TeamShell = createVisualComponent({
             </div>
 
             <SeasonSelect
-              teamId={teamId}
+              seasonList={seasonList}
               seasonId={seasonId}
               onChange={(season) => setRoute(activeRoute, { id: teamId, seasonId: season.id })}
             />
@@ -104,7 +133,7 @@ const TeamShell = createVisualComponent({
             type="line"
             displayBottomLine={false}
             colorScheme="primary"
-            onChange={(e) => setRoute(e.data.activeCode, { id: teamId, seasonId })}
+            onChange={(e) => setRoute(e.data.activeCode, { id: teamId, seasonId: routeSeasonId })}
             itemList={tabList.map((tab) => ({
               code: tab.route,
               label: (tabLsi[tab.code] ?? tab.code).toUpperCase(),
@@ -113,7 +142,13 @@ const TeamShell = createVisualComponent({
           />
         </Section>
 
-        {children({ teamId, seasonId, team, category })}
+        {seasonPending ? (
+          <Section>
+            <Uu5Elements.Skeleton height={200} />
+          </Section>
+        ) : (
+          children({ teamId, seasonId, team, category })
+        )}
       </>
     );
   },

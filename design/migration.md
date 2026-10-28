@@ -428,7 +428,7 @@ Rozhodnutí (Caio, 2026-10-25 a 26):
 | Osoby | párují se podle loginu z v0, ne podle jména (dva různí „Vladimír Kupera“) |
 | `puro00` | není v `hrac`; v zápasech 1857, 1863, 1870 je to duplicitní záznam za `shpo00` (stejný post) -- řádek se vynechá, góly a karty se připíší `shpo00` |
 | Post v sestavě | `ucast.role` -> přesný post s anglickým kódem (`positionDetail`, 28 postů, převodní tabulka `LINEUP_POSITION_BY_V0` v `server/services/lineup-position.js`); `STR` je střídání, ne post |
-| Hráč | členství v týmech AFK z účasti v zápasech (první až poslední zápas); aktivní hráč má otevřené členství v týmu podle `hrac.tym` |
+| Hráč | členství v týmech AFK z účasti v zápasech (první až poslední zápas); aktivní hráč má otevřené členství v týmu podle `hrac.tym`; neaktivní hráč, který za tým podle `hrac.tym` nenastoupil, v něm má členství bez `dateFrom`, uzavřené dnem exportu z názvu dumpu (Caio 2026-10-28) |
 
 Unikátní index zápasu má od téhle migrace i kolo (`server/match/dao.js`): okresní soutěže
 se hrají i trojkolově a stejná dvojice se stejným domácím se v sezóně potká dvakrát

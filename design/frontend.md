@@ -417,7 +417,7 @@ a nesahá po klubovém erbu; erb je fallback loga, ne fotky.
 - Přepínač sezóny (`season/list?teamId`).
 - Sekce **Hráči** – `player/list?teamId&active=true`, dlaždice s fotem, číslem, postem
   a základní statistikou v sezóně; skupiny podle postu (brankáři, obránci, …).
-- Sekce **Realizační tým** – `coach/list?teamId`.
+- **Realizační tým** – `coach/list?teamId`; poslední skupina soupisky, stejná dlaždice jako hráč (fotka nebo iniciály, pod jménem funkce), ne zvláštní sekce (2026-10-28).
 - U mládeže **jména nechodí ze serveru** (`appConfig.hideNamesAgeList`, rozhodnuto
   2026-09-06). Klient tedy nic neschovává — jen musí umět vykreslit dlaždici hráče **bez
   jména**: číslo dresu, post, foto se nepoužije. Totéž platí pro sestavu na detailu zápasu
@@ -579,8 +579,8 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 | `core/app-context.jsx` | `appConfig/get`, `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů**; po přihlášení jednou zavolá `person/linkSelf` |
 | `core/with-team-route.jsx` | Guard s prefixovou shodou nad `teamEditor:<teamId>` (`withRoute` to neumí) |
 | `empty-state.jsx` | Jednotný prázdný stav seznamu – ikona, text z LSI, volitelná akce |
-| `team-logo.jsx` | Logo z `binary.uri` + fallback na erb klubu |
-| `match-tile.jsx` | Dlaždice zápasu (loga, skóre, datum) – použitá na home i v seznamech |
+| `team-logo.jsx` | Logo z `team.logoUri`, bez něj neutrální štít `uugds-shield` (ne erb AFK, 2026-10-28) |
+| `match-tile.jsx` | Dlaždice zápasu jako výsledková tabule (domácí vlevo, hosté vpravo, skóre nebo čas uprostřed; kolo vlevo a kategorie vpravo nahoře; varianta B z 2026-10-28) – použitá na home i v seznamech |
 | `match-result.jsx` | Formátování výsledku včetně poločasu a penalt + výsledkový odznak |
 | `standings-table.jsx` | Tabulka soutěže (kompaktní i plná varianta) |
 | `season-select.jsx` | `Uu5Forms.Select` sezón pro daný tým/kategorii |

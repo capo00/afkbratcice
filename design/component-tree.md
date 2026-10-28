@@ -156,7 +156,7 @@ flowchart TD
   uuimg["UiElements.Image (img + referrerPolicy)<br/>loading=lazy, objectFit=cover"]:::caio
 
   dt["DateText value, format<br/>jednotné cs-CZ formátování, Intl"]:::own
-  logo2["TeamLogo uri, size<br/>fallback na klubový erb"]:::own
+  logo2["TeamLogo uri, size<br/>bez loga štít uugds-shield"]:::own
 
   empty["EmptyState icon, lsi, action?<br/>kategorie bez sezóny, sezóna bez zápasů,<br/>soutěž bez tabulky, album bez fotek"]:::own
   uuempty["Uu5Elements.Text + Uu5Elements.Icon<br/>uvnitř Card"]:::uu5

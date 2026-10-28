@@ -171,7 +171,17 @@ const Player = createVisualComponent({
     const { player, stats, matchList } = data;
     // Kategorie, ve které hráč aktuálně je — kvůli tomu, jestli se skrývají jména.
     const category = categoryList.find((item) => (player?.teamList ?? []).some((m) => m.id === item.teamId));
-    const bySeasonList = stats?.bySeasonList ?? [];
+    // Od poslední sezóny do historie (Caio 2026-10-28); server je vrací v pořadí agregace.
+    // Ve stejném ročníku podle soutěže, řádek bez dohledané sezóny na konec.
+    const bySeasonList = [...(stats?.bySeasonList ?? [])].sort((a, b) => {
+      const seasonA = seasonMap.get(a.seasonId);
+      const seasonB = seasonMap.get(b.seasonId);
+      if (!seasonA || !seasonB) return (seasonA ? 0 : 1) - (seasonB ? 0 : 1);
+      return (
+        String(seasonB.yearFrom ?? "").localeCompare(String(seasonA.yearFrom ?? "")) ||
+        String(seasonA.competition ?? "").localeCompare(String(seasonB.competition ?? ""), "cs")
+      );
+    });
 
     return (
       <>

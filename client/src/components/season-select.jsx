@@ -1,13 +1,13 @@
-import { createVisualComponent, useDataObject, useMemo, useLsi } from "uu5g05";
+import { createVisualComponent, useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiElements } from "../tools/caio-ui.js";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 
 const { theme } = Config;
 
-// Přepínač sezóny — archiv. Sezóny se berou `season/list?teamId`, takže nabídka obsahuje
-// jen ročníky, ve kterých tým opravdu hrál; prázdná sezóna se nikde neobjeví.
+// Přepínač sezóny — archiv. Sezóny (`season/list?teamId`, nejnovější první) načítá
+// `team/team-shell.jsx`, protože z nich určuje i výchozí sezónu záložek; nabídka tak
+// obsahuje jen ročníky, ve kterých tým opravdu hrál.
 //
 // Je to `Uu5Elements.Dropdown` (`label` + `itemList`), ne řada tlačítek jako u kategorií:
 // sezón přibývá každý rok a po pár letech by se do lišty nevešly.
@@ -24,25 +24,8 @@ function seasonLabel(season) {
 const SeasonSelect = createVisualComponent({
   uu5Tag: Config.TAG + "SeasonSelect",
 
-  render({ teamId, seasonId, onChange }) {
+  render({ seasonList = [], seasonId, onChange }) {
     const label = useLsi(importLsi, ["team", "season"]);
-
-    const dataObject = useDataObject(
-      {
-        handlerMap: {
-          load: () =>
-            teamId ? UiElements.Call.cmdGet("/season/list", { teamId }) : Promise.resolve({ itemList: [] }),
-        },
-      },
-      [teamId],
-    );
-
-    const seasonList = useMemo(() => {
-      const list = [...(dataObject.data?.itemList ?? [])];
-      // Nejnovější první — archiv se prochází odzadu.
-      list.sort((a, b) => String(b.yearFrom ?? "").localeCompare(String(a.yearFrom ?? "")));
-      return list;
-    }, [dataObject.data]);
 
     // Jediná sezóna není z čeho vybírat; přepínač by byl jen ozdoba.
     if (seasonList.length < 2) return null;

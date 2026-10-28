@@ -27,40 +27,84 @@ function playerName(player, isNameHidden) {
   return isNameHidden && player.number ? `#${player.number}` : null;
 }
 
-function PlayerTile({ player, isNameHidden }) {
-  const [, setRoute] = useRoute();
-  const name = playerName(player, isNameHidden);
-
+// Dlaždice osoby na soupisce -- hráč i člen realizačního týmu (Caio 2026-10-28: trenér má
+// stejnou dlaždici jako hráč, s funkcí místo postu, ne zvláštní box).
+function PersonTile({ person, fallbackText, name, subtitle, onClick }) {
   return (
-    <Card onClick={() => setRoute("hrac", { id: player.id })}>
+    <Card onClick={onClick}>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12 })}>
         {/* Portrét i náhrada za něj je `RichIcon` — kolečko s obrázkem nebo s textem je
-            přesně to, na co je (`size="xl"` = 48 px z GDS). Hráč bez fotky je běžný stav,
-            u mládeže dokonce pravidlo, takže se místo portrétu ukáže číslo dresu.
+            přesně to, na co je (`size="xl"` = 48 px z GDS). Osoba bez fotky je běžný stav,
+            u mládeže dokonce pravidlo, takže se místo portrétu ukáže číslo dresu nebo iniciály.
             `text` se nesmí předat spolu s `imageSrc` — vykreslilo by se přes fotku. */}
         <Uu5Elements.RichIcon
           size="xl"
           significance="distinct"
-          imageSrc={player.person?.photoUri}
-          text={player.person?.photoUri ? undefined : String(player.number ?? "?")}
+          imageSrc={person?.photoUri}
+          text={person?.photoUri ? undefined : fallbackText}
         />
 
         <div className={Config.Css.css({ minInlineSize: 0 })}>
-          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>
-            {name ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}
-          </div>
+          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>{name}</div>
           <Uu5Elements.Text
             category="interface"
             segment="content"
             type="medium"
             className={Config.Css.css({ color: theme.color.mutedFg })}
           >
-            {player.position ? <Lsi import={importLsi} path={["enum", "position", player.position]} /> : null}
-            {player.number && name ? ` · #${player.number}` : null}
+            {subtitle}
           </Uu5Elements.Text>
         </div>
       </div>
     </Card>
+  );
+}
+
+function PlayerTile({ player, isNameHidden }) {
+  const [, setRoute] = useRoute();
+  const name = playerName(player, isNameHidden);
+
+  return (
+    <PersonTile
+      person={player.person}
+      fallbackText={String(player.number ?? "?")}
+      name={name ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}
+      subtitle={
+        <>
+          {player.position ? <Lsi import={importLsi} path={["enum", "position", player.position]} /> : null}
+          {player.number && name ? ` · #${player.number}` : null}
+        </>
+      }
+      onClick={() => setRoute("hrac", { id: player.id })}
+    />
+  );
+}
+
+// Trenér nemá číslo dresu ani detail, takže bez fotky iniciály a dlaždice se nerozklikává.
+function CoachTile({ coach }) {
+  const name = [coach.person?.name, coach.person?.surname].filter(Boolean).join(" ");
+  const initials = [coach.person?.name, coach.person?.surname]
+    .map((part) => part?.trim()?.[0])
+    .filter(Boolean)
+    .join("");
+
+  return (
+    <PersonTile
+      person={coach.person}
+      fallbackText={initials || "?"}
+      name={name || "—"}
+      subtitle={<Lsi import={importLsi} path={["enum", "coachRole", coach.role ?? "assistant"]} />}
+    />
+  );
+}
+
+// Skupina soupisky: eyebrow nadpis a mřížka dlaždic.
+function RosterGroup({ title, children }) {
+  return (
+    <div className={Config.Css.css({ marginBlockEnd: 24 })}>
+      <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>{title}</div>
+      <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))">{children}</Uu5Elements.Grid>
+    </div>
   );
 }
 
@@ -114,57 +158,44 @@ function Roster({ teamId, category }) {
 
   const coachList = data?.coachList ?? [];
 
+  // Realizační tým je poslední skupina soupisky, stejné dlaždice jako hráči (Caio 2026-10-28).
   return (
-    <>
-      <Section>
-        <Heading level={2} lsi={lsi("team", "players")} />
-        <div className={Config.Css.css({ marginBlockStart: 24 })}>
-          {groups.length === 0 ? (
-            <EmptyState lsi={lsi("team", "noPlayers")} icon="uugds-account-multi" />
-          ) : (
-            groups.map((group) => (
-              <div key={group.code ?? "other"} className={Config.Css.css({ marginBlockEnd: 24 })}>
-                <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>
-                  {group.code ? (
+    <Section>
+      <Heading level={2} lsi={lsi("team", "players")} />
+      <div className={Config.Css.css({ marginBlockStart: 24 })}>
+        {groups.length === 0 && coachList.length === 0 ? (
+          <EmptyState lsi={lsi("team", "noPlayers")} icon="uugds-account-multi" />
+        ) : (
+          <>
+            {groups.map((group) => (
+              <RosterGroup
+                key={group.code ?? "other"}
+                title={
+                  group.code ? (
                     // Nadpis skupiny je v množném čísle ("Obránci"), post jednoho hráče
                     // v jednotném ("Obránce") -- proto dva různé číselníky.
                     <Lsi import={importLsi} path={["enum", "positionGroup", group.code]} />
                   ) : (
                     <Lsi import={importLsi} path={["team", "otherPlayers"]} />
-                  )}
-                </div>
-                <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))">
-                  {group.list.map((player) => (
-                    <PlayerTile key={player.id} player={player} isNameHidden={nameHidden} />
-                  ))}
-                </Uu5Elements.Grid>
-              </div>
-            ))
-          )}
-        </div>
-      </Section>
-
-      {coachList.length ? (
-        <Section variant="hatched">
-          <Heading level={2} lsi={lsi("team", "staff")} />
-          <Uu5Elements.Grid
-            templateColumns="repeat(auto-fill, minmax(240px, 1fr))"
-            className={Config.Css.css({ marginBlockStart: 24 })}
-          >
-            {coachList.map((coach) => (
-              <Card key={coach.id}>
-                <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 11 })}>
-                  <Lsi import={importLsi} path={["enum", "coachRole", coach.role ?? "assistant"]} />
-                </div>
-                <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18, marginBlockStart: 4 })}>
-                  {[coach.person?.name, coach.person?.surname].filter(Boolean).join(" ") || "—"}
-                </div>
-              </Card>
+                  )
+                }
+              >
+                {group.list.map((player) => (
+                  <PlayerTile key={player.id} player={player} isNameHidden={nameHidden} />
+                ))}
+              </RosterGroup>
             ))}
-          </Uu5Elements.Grid>
-        </Section>
-      ) : null}
-    </>
+            {coachList.length ? (
+              <RosterGroup title={<Lsi import={importLsi} path={["team", "staff"]} />}>
+                {coachList.map((coach) => (
+                  <CoachTile key={coach.id} coach={coach} />
+                ))}
+              </RosterGroup>
+            ) : null}
+          </>
+        )}
+      </div>
+    </Section>
   );
 }
 

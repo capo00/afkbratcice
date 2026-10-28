@@ -89,6 +89,8 @@ const StandingsTable = createVisualComponent({
             const isOwn = ownTeamIdList ? ownTeamIdList.includes(row.team?.id) : row.team?.id === ownTeamId;
 
             return (
+              // Vlastní tým se pozná jen podle pozadí řádku a tučného písma; pořadí a body
+              // mají barvu jako u ostatních (Caio 2026-10-28).
               <tr
                 key={row.team?.id ?? row.rank}
                 className={Config.Css.css({
@@ -96,13 +98,7 @@ const StandingsTable = createVisualComponent({
                   fontWeight: isOwn ? 700 : 400,
                 })}
               >
-                <DataTable.Td
-                  align="center"
-                  className={Config.Css.css({
-                    color: isOwn ? theme.color.clubRed : theme.color.mutedFg,
-                    fontWeight: 700,
-                  })}
-                >
+                <DataTable.Td align="center" className={Config.Css.css({ color: theme.color.mutedFg, fontWeight: 700 })}>
                   {row.rank}
                 </DataTable.Td>
 
@@ -119,10 +115,7 @@ const StandingsTable = createVisualComponent({
                   <DataTable.Td
                     key={column.code}
                     align={column.numeric ? "center" : "start"}
-                    className={Config.Css.css({
-                      fontWeight: column.strong ? 700 : "inherit",
-                      color: column.strong && isOwn ? theme.color.clubRed : "inherit",
-                    })}
+                    className={Config.Css.css({ fontWeight: column.strong ? 700 : "inherit" })}
                   >
                     {cellValue(row, column.code)}
                   </DataTable.Td>
