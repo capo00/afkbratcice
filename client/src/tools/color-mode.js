@@ -12,8 +12,8 @@
 // vykreslením, aby boot screen neproblikl v barvě systému.
 //
 // STORAGE_KEY MUSÍ sedět s inline skriptem v client/index.html a src/admin/index.html.
-// Přihlašovací stránka caio-ui 0.4.5 volbu nečte (je světlá); nevydaná verze stacku má číst
-// `<prefix úložiště = jméno balíčku klienta>.colorMode`, proto ten tvar klíče.
+// Přihlašovací stránka otevřená bez appky (odkaz z e-mailu) čte od caio-ui 0.4.6 a caio-devkit
+// 0.4.6 `<prefix úložiště = jméno balíčku klienta>.colorMode`, proto ten tvar klíče.
 import { useAppBackground, useEffect } from "uu5g05";
 import Config from "../config/config.js";
 

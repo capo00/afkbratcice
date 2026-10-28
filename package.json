@@ -22,11 +22,11 @@
     "migrate:v0": "node tools/migrate-v0.js"
   },
   "dependencies": {
-    "caio-server": "npm:@capo00/caio-server@^0.4.3",
+    "caio-server": "npm:@capo00/caio-server@^0.4.4",
     "uu_appdatatypesg02": "~0.2.1"
   },
   "devDependencies": {
-    "caio-devkit": "npm:@capo00/caio-devkit@^0.4.5",
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.4.6",
     "nodemon": "^3.1.14"
   }
 }
