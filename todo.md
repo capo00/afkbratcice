@@ -16,12 +16,12 @@ uživatele, resetu hesla e-mailem (SMTP), hero fotky a chybějících log klubů
 | Krok | Stav |
 |---|---|
 | Jména dětí skrývá server (4.3) | hotovo 2026-10-28 |
-| Týmové fotky do webp (5.5) | čeká — převod potřebuje nástroj (`sharp`/`cwebp`), který na stroji není |
+| Týmové fotky do webp (5.5) | hotovo 2026-10-28 (7,4 -> 1,7 MB) |
 | Kontrola připravenosti: verze, proklik webu a administrace (360/768/1280, světlý i tmavý), staré adresy z v0, `npm test`, `npm run smoke` | čeká |
 | Regresní test tabulky proti v0 za poslední tři sezóny | čeká |
 | Verze 0.6.0, sloučení `feature/caio` do `master` a `development` | čeká |
-| GCP projekt `afkbratcice`: App Engine, bucket `afkbratcice-binary` (veřejné čtení, 5.1), oprávnění | čeká na Caiovo „ano“ (gcloud) |
-| Atlas `afkbratcice`: síťový přístup z GAE, uživatel | čeká na Caiovo „ano“ |
+| GCP projekt `afkbratcice`: App Engine, bucket `afkbratcice-binary` (veřejné čtení, 5.1), oprávnění | ověřeno 2026-10-28: App Engine `europe-west6` běží (testovací deploy 0.1.0 z 2026-09-28, prázdná prod DB), bucket `us-central1` je prázdný, `allUsers` = objectViewer, účet App Engine = objectAdmin; doménové mapování žádné |
+| Atlas `afkbratcice`: síťový přístup z GAE, uživatel | funguje (testovací deploy z GAE do DB čte) |
 | Google OAuth: produkční redirect URI | čeká na Caiovo „ano“ |
 | Čerstvý SQL export z v0, migrace na prod DB podle `design/migration.md` § 8 (záloha, `migrate:categories`, `migrate:v0`), erby do prod bucketu | čeká na Caiovo „ano“ před každým krokem |
 | `npm run deploy`, `/sys/health`, proklik na adrese GAE, role správce | čeká na Caiovo „ano“ |
@@ -234,7 +234,11 @@ Rozhodnuto, že se **neřeší**: odkaz na reset hesla nebude nikde jinde než n
 stránce, takže `/zapomenute-heslo` končí na `/login.html` a uživatel klikne ještě jednou.
 Zapsáno, ať se to znovu neotvírá.
 
-### 5.5 Týmové fotky do webp
+### 5.5 Týmové fotky do webp — **hotovo 2026-10-28**
+
+Převedeno v prohlížeči (canvas, webp 0,8), 35 souborů 7,4 MB -> 1,7 MB; JPEGy smazané.
+Původní zadání:
+
 
 `client/src/assets/teams/` má 35 JPEGů za 7,5 MB — náhledy z v0 (600 px) uložené
 neúsporně. Ve webp z toho bude zhruba pětina. Není to na běhu appky: klient převádí do webp
