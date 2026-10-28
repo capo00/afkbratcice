@@ -9,6 +9,8 @@ import Config from "../config.js";
 import { hasRole, myTeamIdList } from "../services/authorize.js";
 import { checkMatchAges, isFriendly } from "../services/category.js";
 import { withLineupPositions } from "../services/lineup-position.js";
+import { personForIdentity } from "../services/hidden-names.js";
+import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
 
 class MatchCrud extends Crud {
   constructor() {
@@ -34,16 +36,19 @@ class MatchCrud extends Crud {
 
   async get(id, identity) {
     const match = this._getData(await this._get(id));
-    const [homeTeam, guestTeam] = await Promise.all([
+    const [homeTeam, guestTeam, hiddenTeamIdSet] = await Promise.all([
       teamDao.get(match.homeTeamId).catch(() => null),
       teamDao.get(match.guestTeamId).catch(() => null),
+      loadHiddenTeamIdSet(),
     ]);
+    // Sestava zápasu dětí jde bez jmen a fotek (services/hidden-names.js).
+    const hidden = hiddenTeamIdSet.has(match.homeTeamId) || hiddenTeamIdSet.has(match.guestTeamId);
 
     return {
       ...this._forIdentity(match, identity),
       homeTeam,
       guestTeam,
-      playerList: await this._expandPlayerList(match.playerList),
+      playerList: await this._expandPlayerList(match.playerList, { hidden, identity }),
     };
   }
 
@@ -58,7 +63,7 @@ class MatchCrud extends Crud {
   }
 
   /** Sestava se vrací i s osobami, aby klient nemusel dotahovat každého hráče zvlášť. */
-  async _expandPlayerList(playerList) {
+  async _expandPlayerList(playerList, { hidden = false, identity } = {}) {
     if (!playerList?.length) return [];
 
     const playerIdList = [...new Set(playerList.map((p) => p.playerId).filter(Boolean))];
@@ -70,7 +75,9 @@ class MatchCrud extends Crud {
 
     return playerList.map((entry) => {
       const player = players.find((p) => p.id === entry.playerId);
-      const person = player ? persons.find((x) => x.id === player.personId) : null;
+      const found = player ? persons.find((x) => x.id === player.personId) : null;
+      // O skrytí rozhoduje celá osoba (i `identity` kvůli výjimce pro ni samu), ořízne se až potom.
+      const person = found ? personForIdentity(found, identity, hidden) : null;
       // Veřejná sestava nese jen jméno a fotku -- kontakty osoby sem nepatří. Fotka se do
       // zápasu neukládá, bere se z osoby až tady (hřiště v detailu zápasu na webu).
       return {

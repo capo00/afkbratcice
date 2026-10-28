@@ -5,6 +5,7 @@ import { computeTable } from "../services/table.js";
 import { listPlayerStats, getPlayerStats } from "../services/stats.js";
 import { validate, shape, mongoId } from "../services/validators.js";
 import { getYearFrom } from "../services/season.js";
+import { loadHiddenAgeList, loadHiddenTeamIdSet } from "../services/hidden-teams.js";
 
 /** Sezónu lze zadat přímo, nebo ji dohledáme podle týmu v aktuálním ročníku. */
 async function resolveSeason({ seasonId, teamId }) {
@@ -33,9 +34,13 @@ export default {
   "stats/listPlayerStats": {
     method: "get",
     validator: validate(shape({ seasonId: mongoId(), teamId: mongoId() })),
-    fn: async ({ dtoIn }) => {
+    fn: async ({ dtoIn, identity }) => {
       const season = await resolveSeason(dtoIn);
-      const itemList = await listPlayerStats({ seasonId: season?.id, teamId: dtoIn.teamId });
+      // Statistiky dětí bez jmen: rozhoduje věk sezóny, nebo tým, na který se ptá.
+      const hiddenAgeList = await loadHiddenAgeList();
+      const hiddenTeamIdSet = await loadHiddenTeamIdSet(hiddenAgeList);
+      const hidden = hiddenAgeList.includes(season?.age) || (dtoIn.teamId ? hiddenTeamIdSet.has(dtoIn.teamId) : false);
+      const itemList = await listPlayerStats({ seasonId: season?.id, teamId: dtoIn.teamId, hidden, identity });
       return { itemList };
     },
   },

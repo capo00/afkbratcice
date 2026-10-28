@@ -18,15 +18,20 @@ const writeDtoIn = shape({
   photo: any(),
 });
 
+// Číst osoby smí jen správa (a editor týmu, který z nich skládá soupisku). Web je nepotřebuje
+// -- jména hráčů dostává se soupiskou, sestavou a statistikami, kde se u dětí skrývají
+// (services/hidden-names.js). Veřejný `person/list` by ten filtr obešel (2026-10-28).
 export default {
   "person/list": {
     method: "get",
+    auth: anyTeamEditor(Config.CONTENT),
     validator: validate(listDtoIn),
     fn: ({ dtoIn, identity }) => crud.list(dtoIn, identity).then((itemList) => ({ itemList })),
   },
 
   "person/get": {
     method: "get",
+    auth: anyTeamEditor(Config.CONTENT),
     validator: validate(idDtoIn),
     fn: ({ dtoIn, identity }) => crud.get(dtoIn.id, identity),
   },

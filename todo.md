@@ -1,20 +1,41 @@
 # TODO — co zbývá do hotového webu
 
-Stav k **2026-09-12**, větev `feature/caio`.
+Stav k **2026-10-28**, větev `feature/caio`.
 
 Zadání vlastní [`design/`](./design/) — tenhle soubor jen říká, **co z něj ještě není
 udělané** a v jakém pořadí to dává smysl dělat. Když si odporují, vyhrává `design/`.
 
 ---
 
+## 0. Vydání 0.6.0 (první nasazení, náhrada v0)
+
+Rozsah odsouhlasil Caio 2026-10-28: **bez** uzavírání sezón, „Ke stažení“, profilu
+uživatele, resetu hesla e-mailem (SMTP), hero fotky a chybějících log klubů. Vydává se do
+`master` i `development`.
+
+| Krok | Stav |
+|---|---|
+| Jména dětí skrývá server (4.3) | hotovo 2026-10-28 |
+| Týmové fotky do webp (5.5) | čeká — převod potřebuje nástroj (`sharp`/`cwebp`), který na stroji není |
+| Kontrola připravenosti: verze, proklik webu a administrace (360/768/1280, světlý i tmavý), staré adresy z v0, `npm test`, `npm run smoke` | čeká |
+| Regresní test tabulky proti v0 za poslední tři sezóny | čeká |
+| Verze 0.6.0, sloučení `feature/caio` do `master` a `development` | čeká |
+| GCP projekt `afkbratcice`: App Engine, bucket `afkbratcice-binary` (veřejné čtení, 5.1), oprávnění | čeká na Caiovo „ano“ (gcloud) |
+| Atlas `afkbratcice`: síťový přístup z GAE, uživatel | čeká na Caiovo „ano“ |
+| Google OAuth: produkční redirect URI | čeká na Caiovo „ano“ |
+| Čerstvý SQL export z v0, migrace na prod DB podle `design/migration.md` § 8 (záloha, `migrate:categories`, `migrate:v0`), erby do prod bucketu | čeká na Caiovo „ano“ před každým krokem |
+| `npm run deploy`, `/sys/health`, proklik na adrese GAE, role správce | čeká na Caiovo „ano“ |
+| Doména `afkbratcice.cz` (dnes Wedos/v0): mapování na GAE, DNS, certifikát, kontrola starých adres | čeká na Caiovo „ano“ |
+
 ## Kde to stojí
 
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
-| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **`article`**, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, **`/rss`**, přihlášení z knihovny, **jednotkové testy (`npm test`)** | uzavírání sezón (`season/close`), ID-based přesměrování na zápasy (čeká na migraci) |
-| Klient — veřejná část | rám, 11 primitivů, self-hostovaná písma, **české adresy**, home vč. **aktualit**, **novinky a detail článku**, mužstva, soupiska, zápasy, tabulka, statistiky, detail zápasu, kolo, profil hráče, fotogalerie s lightboxem, obsahové stránky **s textem z v0**, kontakt, 404 | ke stažení, profil uživatele |
-| Klient — administrace | rozcestník + **12 obrazovek** (**kluby**, týmy, sezóny, zápasy vč. výsledku a sestavy, osoby, hráči, trenéři, novinky, galerie, soubory, identity, konfigurace), **upload ověřený proti GCS** | filtrování dat podle `teamEditor:*` |
-| Provoz | dev proti lokálnímu Mongu **s reálnými daty sezóny 2026**, dev GCS bucket | produkční GCS bucket, OAuth, SMTP, migrace historie, deploy |
+| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **kategorie**, `article`, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, `/rss`, přihlášení z knihovny, **skrytí jmen dětí**, jednotkové testy | uzavírání sezón (`season/close`) — po vydání |
+| Klient — veřejná část | rám, české adresy, home vč. aktualit, novinky, mužstva, soupiska vč. realizačního týmu, zápasy, tabulka, statistiky, detail zápasu se sestavou na hřišti, kolo, profil hráče, fotogalerie, obsahové stránky s textem z v0, kontakt, 404, světlý a tmavý režim | ke stažení, profil uživatele, SEO za běhu — po vydání |
+| Klient — administrace | vlastní UVE, rozcestník a 13 obrazovek (vč. **kategorií**), upload ověřený proti GCS | filtrování dat podle `teamEditor:*`, filtr týmů podle kategorie |
+| Data | celá historie z v0 v lokální DB (2 519 zápasů, 132 hráčů, 78 týmů, 19 sezón), erby 35 klubů v dev bucketu | prod DB, prod bucket |
+| Provoz | dev proti lokálnímu Mongu, dev GCS bucket, produkční `.env` (Atlas, bucket `afkbratcice-binary`, Google, Facebook) | viz 0 |
 
 Rozpad po obrazovkách je v [`design/frontend.md`](./design/frontend.md), sekce 12.
 
@@ -121,9 +142,11 @@ Karta mužstva v přehledu je bez nich neúplná (dnes se vykreslují podmíněn
 doplnění polí se rozsvítí samy). Server: `team/api.js` + `crud.js` stejnou cestou jako logo,
 jen `type: "photo"`.
 
-### 4.3 Skrytí jmen mládeže na serveru
+### 4.3 Skrytí jmen mládeže na serveru — **hotovo 2026-10-28**
 
-`appConfig.hideNamesAgeList` je dnes jen klientský příznak, takže **jména dětí jsou
+Implementace a upřesnění pravidla: [`api.md`](./design/api.md), 1.2
+(`server/services/hidden-names.js`, `hidden-teams.js`). Původní zadání:
+`appConfig.hideNamesAgeList` byl jen klientský příznak, takže **jména dětí byla
 v odpovědi API**. Filtr patří do `crud` vrstvy stejně jako kontakty a `departureTime`:
 `player`/`coach` u kategorie z `hideNamesAgeList` vrací `person` bez `name` a `surname`
 každému bez role z `CONTENT` (a mimo `self`); týká se i sestavy v `match/get`
@@ -194,7 +217,10 @@ jeho závislosti tedy nemá smysl a zbývá jediná cesta — **vyřadit z impor
 `uu_uubmldraw_iconsg04`** přes `client/uu5-imports.json`. Dvě věci k tomu: override dnes
 mění jen mapu, ne kopírování (`copies` v `caio-devkit/src/vite/uu5-libs.js` se staví ještě
 před ním, takže by se to muselo rozšířit), a je to sázka — když si o balíček někdo za běhu
-řekne, spadne to až na té obrazovce. Řešit až u deploye.
+řekne, spadne to až na té obrazovce.
+
+**Vyřešeno pro deploy:** `.gcloudignore` balíček z uploadu na App Engine vyřazuje (1 129
+souborů v jednom adresáři by překročilo limit GAE). Lokálně v `public/libs` zůstává.
 
 ### 5.3 Hero bez fotky
 
@@ -210,7 +236,7 @@ Zapsáno, ať se to znovu neotvírá.
 
 ### 5.5 Týmové fotky do webp
 
-`client/public/assets/teams/` má 35 JPEGů za 7,5 MB — náhledy z v0 (600 px) uložené
+`client/src/assets/teams/` má 35 JPEGů za 7,5 MB — náhledy z v0 (600 px) uložené
 neúsporně. Ve webp z toho bude zhruba pětina. Není to na běhu appky: klient převádí do webp
 `uu5imagingg01-tools` v prohlížeči, tohle je jednorázový převod souborů (`sharp`, `cwebp`),
 a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
@@ -219,6 +245,9 @@ a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
 
 ## 6. Migrace a nasazení
 
+- **Celá historie je zmigrovaná** (2026-10-26, `tools/migrate-v0.js`, postup a rozhodnutí
+  v [`migration.md`](./design/migration.md), § 8; kategorie `tools/migrate-categories.js`).
+  `migrate-2026.js` níž je překonaný a zablokovaný (`--legacy-age`).
 - **Sezóna 2026 je zmigrovaná** (2026-09-07) — `node tools/migrate-2026.js [dump] [--dry]
   [--reset] [--v0]` nad `caio-share/d27814_afk.sql`. Naveze 34 týmů, 3 sezóny (**9. liga**
   muži, **6. liga** dorost, **5. liga** starší žáci), **184 zápasů**, soupisku mužů
@@ -249,6 +278,8 @@ a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
   třech místech — pole v `season` (server: `crud.js`, `api.js`, validace), krok v migraci,
   a v administraci tlačítko na obrazovce sezón. **Zbývá potvrdit**, jestli má archiv
   vlastní obrazovku, nebo je to jen ročník navíc v přepínači.
+  **Odloženo za vydání 0.6.0** (Caio 2026-10-28): historie je zmigrovaná bez uzavření
+  a tabulky se počítají ze zápasů.
 - **Etapa 12 — deploy na GAE.** GCP projekty existují (prod + dev), env se doplní později.
 - **Regresní test tabulky** proti v0 `/api/getTable` za poslední tři sezóny — podle plánu
   je to součást etapy, ne dodatek. Jde udělat teprve s migrovanými daty.
@@ -260,7 +291,7 @@ a měl by proběhnout dřív, než se 7,5 MB dostane do produkčního buildu.
 Dvě vrstvy, každá na něco jiného:
 
 - **`npm test`** — jednotkové testy (`node --test`, bez závislostí) v `server/test/`.
-  Běží bez databáze i bez běžícího serveru, **70 testů, 0 fail**. Pokrývají čistou logiku:
+  Běží bez databáze i bez běžícího serveru, **93 testů, 0 fail** (2026-10-28, včetně klientských v `client/src`). Pokrývají čistou logiku:
   `services/table.js` (bodování 3/2/1/0 i 3/1/0, `hasPenalties`, forma, všechna čtyři
   kritéria pořadí), `services/season.js` (`yearFrom` přes 1. srpen i přes přelom roku),
   `services/authorize.js` (rozsahová role `teamEditor:*`, režimy `any`/`all`),
@@ -269,7 +300,7 @@ Dvě vrstvy, každá na něco jiného:
   a publikační okno novinek.
 - **`npm run smoke`** — smoke test proti běžícímu serveru a reálnému Mongu (bodování
   tabulky, autorizace včetně rozsahové role, pohledy na zápasy, ochrana osobních údajů,
-  novinky vč. publikačního okna a RSS, přesměrování, iCal, sitemap). **64 ok / 0 fail.**
+  novinky vč. publikačního okna a RSS, přesměrování, iCal, sitemap). **72 ok / 0 fail** (2026-10-28).
   Je to náhrada za integrační testy, ne za ně.
 
 Jak psát další: dao se instanciuje při importu modulu a v konstruktoru se rovnou připojí
@@ -291,12 +322,6 @@ a build ani konzole na to neupozorní (viz [`component-tree.md`](./design/compon
 
 ## Doporučené pořadí
 
-1. ~~**GCS**~~ — dev bucket hotový a upload ověřený (5.1). Produkční bucket patří k deploy etapě.
-2. ~~**Text obsahových stránek** z v0~~ — hotovo (1.1).
-3. ~~**Data sezóny 2026**~~ — hotovo, appka běží na reálném rozlosování (kapitola 6).
-4. **Zbytek veřejné části** — „Ke stažení", profil uživatele, SEO za běhu (kapitola 2).
-5. **Hero fotka** — poslední kus vizuálu. Fotky jsou teď na Facebooku, takže i tuhle je
-   potřeba vybrat ručně.
-6. **Uzavírání sezón** (`season.state`, `finalTable`) — patří před migraci historie, protože
-   ta ho rovnou použije na dvacet ročníků (kapitola 6).
-7. **Migrace zápasů + deploy.**
+1. **Vydání 0.6.0** — kapitola 0.
+2. Po vydání: uzavírání sezón (6), „Ke stažení“, profil uživatele a SEO za běhu (2),
+   filtrování administrace podle `teamEditor:*` (3), hero fotka a loga klubů, až budou.

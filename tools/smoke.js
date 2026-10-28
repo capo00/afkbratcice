@@ -198,7 +198,7 @@ const player = await post("player/create", {
 ok("založení hráče", player.status === 200, player.body);
 
 const anonPerson = await get("person/get", { id: person.body.id });
-ok("nepřihlášený nevidí e-mail osoby", anonPerson.body?.email === undefined, anonPerson.body);
+ok("nepřihlášený osoby nečte (401)", anonPerson.status === 401, anonPerson.status);
 const adminPerson = await get("person/get", { id: person.body.id }, cookie);
 ok("správce e-mail vidí", adminPerson.body?.email === "jan@smoke.cz", adminPerson.body?.email);
 const anonRoster = await get("player/list", { teamId: teamIds[0], active: "true" });
@@ -320,6 +320,12 @@ const gone = await fetch(`${BASE}/pokladna`, { redirect: "manual" });
 ok("/pokladna je 410 Gone", gone.status === 410, gone.status);
 const news = await fetch(`${BASE}/home-3`, { redirect: "manual" });
 ok("/home-3 -> stránkování novinek", news.headers.get("location") === "/novinky?pageIndex=2", news.headers.get("location"));
+const oldMatch = await fetch(`${BASE}/informace-o-zapase-999999999`, { redirect: "manual" });
+ok("neznámý zápas z v0 -> seznam mužstev", oldMatch.status === 301 && oldMatch.headers.get("location") === "/muzstva",
+  { status: oldMatch.status, loc: oldMatch.headers.get("location") });
+const oldTable = await fetch(`${BASE}/tabulka-muzi`, { redirect: "manual" });
+ok("/tabulka-muzi -> tabulka mužstva", oldTable.status === 301 && /^\/muzstvo\/tabulka\?id=/.test(oldTable.headers.get("location") ?? ""),
+  { status: oldTable.status, loc: oldTable.headers.get("location") });
 
 console.log("\n== iCal a sitemap ==");
 const ics = await fetch(`${BASE}/calendar/team?teamId=${teamIds[0]}`);

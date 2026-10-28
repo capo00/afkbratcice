@@ -148,10 +148,21 @@ stejným způsobem, jako to dělá `Identity._getPublicData` v `caio-server-auth
 **Jména mládeže odstraňuje server, ne klient** (rozhodnuto 2026-09-06). `appConfig.hideNamesAgeList`
 původně jen říkalo klientovi, aby jméno nevykreslil — jenže pak jsou jména dětí pořád
 v odpovědi API a stačí otevřít network tab. Filtr proto patří do stejné vrstvy jako
-kontakty a `departureTime`: `player`/`coach` u týmu, jehož `age` je v `hideNamesAgeList`,
-vrací `person` bez `name` a `surname` každému bez role z `CONTENT` (a mimo `self`).
-Týká se to i sestavy v `match/get` a řádků ve `stats/listPlayerStats` — jinak by filtr
-šlo obejít druhým endpointem. Klient místo jména ukazuje číslo dresu a post.
+kontakty a `departureTime`: `player` u týmu, jehož kategorie má věk z `hideNamesAgeList`,
+vrací `person` bez `name`, `surname` a fotky každému, kdo nemá roli z `MATCH` ani
+nespravuje žádný tým (a mimo `self`). Týká se to i sestavy v `match/get` a řádků ve
+`stats/listPlayerStats` — jinak by filtr šlo obejít druhým endpointem. Klient místo jména
+ukazuje číslo dresu a post.
+
+Zavedeno 2026-10-28 (`server/services/hidden-names.js`, `hidden-teams.js`), s upřesněním:
+- **Kontext rozhoduje.** Soupiska týmu podle toho týmu, sestava podle týmů zápasu,
+  statistiky podle věku sezóny nebo dotazovaného týmu, detail hráče podle jeho otevřeného
+  členství ve skrytém týmu. Bývalý žák, dnes muž, má v detailu i na soupisce mužů jméno,
+  v sestavě starého zápasu žáků ne.
+- **Jména vidí i `MATCH` a editor týmu**, ne jen `CONTENT`: oba skládají sestavy.
+- **Trenéři se neskrývají** — jsou dospělí.
+- **`person/list` a `person/get` nejsou veřejné** (`anyTeamEditor(CONTENT)`); web je
+  nepotřebuje a veřejně by filtr obcházely.
 
 ---
 

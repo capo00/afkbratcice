@@ -2,25 +2,36 @@ import { Crud } from "caio-server";
 import dao from "./dao.js";
 import personDao from "../person/dao.js";
 import { PersonCrud } from "../person/crud.js";
+import { personForIdentity, isPlayerHidden } from "../services/hidden-names.js";
+import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
 
 class PlayerCrud extends Crud {
   constructor() {
     super("player", dao);
   }
 
-  /** Seznam i detail vrací vloženou osobu -- soupiska by jinak byla n+1 dotazů. */
-  async _withPerson(playerList, identity) {
+  /**
+   * Seznam i detail vrací vloženou osobu -- soupiska by jinak byla n+1 dotazů.
+   *
+   * Jména dětí (services/hidden-names.js): na soupisce týmu (`teamId`) rozhoduje ten tým,
+   * jinde otevřené členství hráče ve skrytém týmu.
+   */
+  async _withPerson(playerList, identity, { teamId } = {}) {
     const personIdList = [...new Set(playerList.map((p) => p.personId).filter(Boolean))];
-    const persons = personIdList.length ? await personDao.listByIdList(personIdList) : [];
-    return playerList.map((player) => ({
-      ...player,
-      person: PersonCrud.forIdentity(persons.find((x) => x.id === player.personId) ?? null, identity),
-    }));
+    const [persons, hiddenTeamIdSet] = await Promise.all([
+      personIdList.length ? personDao.listByIdList(personIdList) : [],
+      loadHiddenTeamIdSet(),
+    ]);
+    return playerList.map((player) => {
+      const hidden = teamId ? hiddenTeamIdSet.has(teamId) : isPlayerHidden(player, hiddenTeamIdSet);
+      const person = persons.find((x) => x.id === player.personId) ?? null;
+      return { ...player, person: personForIdentity(PersonCrud.forIdentity(person, identity), identity, hidden) };
+    });
   }
 
   async list({ teamId, active, idList, pageInfo } = {}, identity) {
     const itemList = (await dao.listByFilter({ teamId, active, idList }, pageInfo)).map((i) => this._getData(i));
-    return this._withPerson(itemList, identity);
+    return this._withPerson(itemList, identity, { teamId });
   }
 
   async get(id, identity) {

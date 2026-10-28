@@ -430,6 +430,20 @@ Rozhodnutí (Caio, 2026-10-25 a 26):
 | Post v sestavě | `ucast.role` -> přesný post s anglickým kódem (`positionDetail`, 28 postů, převodní tabulka `LINEUP_POSITION_BY_V0` v `server/services/lineup-position.js`); `STR` je střídání, ne post |
 | Hráč | členství v týmech AFK z účasti v zápasech (první až poslední zápas); aktivní hráč má otevřené členství v týmu podle `hrac.tym`; neaktivní hráč, který za tým podle `hrac.tym` nenastoupil, v něm má členství bez `dateFrom`, uzavřené dnem exportu z názvu dumpu (Caio 2026-10-28) |
 
+**Staré adresy s id (2026-10-28, `server/legacy-redirect.js`):** `/informace-o-zapase-<n>`
+-> detail zápasu přes `afk_migration_map` (neznámý -> `/muzstva`), `/zapasy` -> zápasy
+mužů, `/zapasy-<id týmu v0>` -> zápasy toho mužstva, `/muzi`, `/zaci`, `/dorost`,
+`/stara-garda` a `/tabulka-*` -> mužstvo a jeho tabulka podle kategorie, `/novinka-<n>` ->
+`/novinky` (zná jen zmigrovaný článek), `/fotogalerie-<n>` -> `/fotogalerie`,
+`/ke-stazeni` dočasně (302) na úvod.
+
+**Regresní kontrola tabulek (2026-10-28):** aktuální tabulka mužů i žáků porovnaná s živým
+v0 (`/tabulka-muzi`, `/tabulka-zaci`): muži 14/14 řádků beze rozdílu v zápasech, výhrách,
+remízách (u nás VP + PP), prohrách, skóre i bodech. Žáci 10/10 stejně, jen v0 má navíc
+Chotusice s nulou zápasů — tým bez zápasu se do sezóny nemigruje, protože týmy sezóny
+bere migrace ze zápasů. Starší sezóny v0 nezobrazuje, takže s jeho výstupem srovnat nejdou;
+počítá je tentýž kód z dat migrovaných stejnou cestou.
+
 Unikátní index zápasu má od téhle migrace i kolo (`server/match/dao.js`): okresní soutěže
 se hrají i trojkolově a stejná dvojice se stejným domácím se v sezóně potká dvakrát
 (šest případů v datech, např. Chotusice B – AFK Bratčice v 5. a 18. kole 2022/23).

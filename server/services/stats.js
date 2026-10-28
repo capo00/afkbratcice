@@ -2,6 +2,7 @@ import matchDao from "../match/dao.js";
 import playerDao from "../player/dao.js";
 import personDao from "../person/dao.js";
 import { countsTowardsTable } from "./table.js";
+import { personForIdentity } from "./hidden-names.js";
 
 // Statistiky hráčů se agregují v Mongu ($unwind nad playerList), ne v paměti -- sezóna
 // má stovky zápasů a načítat je všechny kvůli součtu by bylo zbytečné.
@@ -28,8 +29,11 @@ const SUM_STAGE = {
   },
 };
 
-/** Doplní k agregovaným řádkům hráče a osobu (bez kontaktů -- statistiky jsou veřejné). */
-async function decorate(rowList) {
+/**
+ * Doplní k agregovaným řádkům hráče a osobu (bez kontaktů -- statistiky jsou veřejné).
+ * `hidden`: statistiky dětí jdou bez jmen (services/hidden-names.js).
+ */
+async function decorate(rowList, { hidden = false, identity } = {}) {
   const playerIdList = rowList.map((r) => r.playerId).filter(Boolean);
   if (!playerIdList.length) return [];
 
@@ -39,7 +43,9 @@ async function decorate(rowList) {
 
   return rowList.map((row) => {
     const player = players.find((p) => p.id === row.playerId) ?? null;
-    const person = player ? persons.find((x) => x.id === player.personId) : null;
+    const found = player ? persons.find((x) => x.id === player.personId) : null;
+    // O skrytí rozhoduje celá osoba (i `identity` kvůli výjimce pro ni samu), ořízne se až potom.
+    const person = found ? personForIdentity(found, identity, hidden) : null;
     return {
       ...row,
       player: player ? { id: player.id, position: player.position, number: player.number } : null,
@@ -48,7 +54,7 @@ async function decorate(rowList) {
   });
 }
 
-async function listPlayerStats({ seasonId, teamId } = {}) {
+async function listPlayerStats({ seasonId, teamId, hidden = false, identity } = {}) {
   const rows = await matchDao.aggregate([
     { $match: buildMatchFilter({ seasonId, teamId }) },
     { $unwind: "$playerList" },
@@ -60,7 +66,7 @@ async function listPlayerStats({ seasonId, teamId } = {}) {
     .filter((r) => r.playerId)
     .sort((a, b) => b.goals - a.goals || b.appearances - a.appearances);
 
-  return decorate(rowList);
+  return decorate(rowList, { hidden, identity });
 }
 
 /** Kariérní součet jednoho hráče plus rozpad po sezónách. */
