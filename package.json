@@ -18,6 +18,7 @@
     "seed:admin": "node tools/seed-admin.js",
     "test": "node --test \"server/test/**/*.test.js\" \"client/src/**/*.test.js\"",
     "smoke": "node tools/smoke.js",
+    "grant-role": "node tools/grant-role.js",
     "migrate:categories": "node tools/migrate-categories.js",
     "migrate:v0": "node tools/migrate-v0.js"
   },
