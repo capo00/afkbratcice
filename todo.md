@@ -17,9 +17,9 @@ uživatele, resetu hesla e-mailem (SMTP), hero fotky a chybějících log klubů
 |---|---|
 | Jména dětí skrývá server (4.3) | hotovo 2026-10-28 |
 | Týmové fotky do webp (5.5) | hotovo 2026-10-28 (7,4 -> 1,7 MB) |
-| Kontrola připravenosti: verze, proklik webu a administrace (360/768/1280, světlý i tmavý), staré adresy z v0, `npm test`, `npm run smoke` | čeká |
-| Regresní test tabulky proti v0 za poslední tři sezóny | čeká |
-| Verze 0.6.0, sloučení `feature/caio` do `master` a `development` | čeká |
+| Kontrola připravenosti: verze, proklik webu a administrace (360/768/1280, světlý i tmavý), staré adresy z v0, `npm test`, `npm run smoke` | web: 21 rout bez chyb, staré adresy, test 93/93, smoke 74/74; **administrace čeká na přihlášení Caia** |
+| Regresní test tabulky proti v0 za poslední tři sezóny | aktuální sezóna mužů a žáků sedí (migration.md § 8); starší v0 nezobrazuje |
+| Verze 0.6.0, sloučení `feature/caio` do `master` a `development` | hotovo 2026-10-28 (tag `0.6.0`) |
 | GCP projekt `afkbratcice`: App Engine, bucket `afkbratcice-binary` (veřejné čtení, 5.1), oprávnění | ověřeno 2026-10-28: App Engine `europe-west6` běží (testovací deploy 0.1.0 z 2026-09-28, prázdná prod DB), bucket `us-central1` je prázdný, `allUsers` = objectViewer, účet App Engine = objectAdmin; doménové mapování žádné |
 | Atlas `afkbratcice`: síťový přístup z GAE, uživatel | funguje (testovací deploy z GAE do DB čte) |
 | Google OAuth: produkční redirect URI | čeká na Caiovo „ano“ |
