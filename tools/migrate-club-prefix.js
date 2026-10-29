@@ -15,7 +15,7 @@
 // Pouští se JEDNOU. Druhý běh nic nerozbije: přejmenování se přeskočí, když cíl už má
 // dokumenty, a `team.clubId` skript nepřepisuje týmům, které ho už mají (viz níž).
 
-import "caio-server/src/caio-server-app/config/env.js";
+import "caio-server/env";
 import { MongoClient } from "mongodb";
 import { BinaryStore } from "caio-server";
 

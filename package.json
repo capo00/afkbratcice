@@ -7,20 +7,37 @@
     "deploy": {
       "project": "afkbratcice",
       "keepVersions": 3
+    },
+    "boot": {
+      "logo": "/assets/icon-192-transparent.png",
+      "name": "AFK Bratčice",
+      "nameUppercase": true,
+      "logoSize": "60%",
+      "light": {
+        "background": "#faf6f4",
+        "color": "#1c1312",
+        "accent": "#d01319"
+      },
+      "dark": {
+        "background": "#070404",
+        "color": "#f3efed",
+        "accent": "#d01319"
+      }
     }
   },
   "scripts": {
     "start": "node server/index.js",
     "dev": "caio-devkit start",
-    "sync": "node ../caio-architecture/caio-devkit/tools/link-local.js .",
+    "sync": "caio-devkit link-local",
     "build": "caio-devkit build",
     "deploy": "caio-devkit deploy",
     "seed:admin": "node tools/seed-admin.js",
-    "test": "node --test \"server/test/**/*.test.js\" \"client/src/**/*.test.js\"",
+    "test": "node --test --import caio-server/test-setup \"server/test/**/*.test.js\" \"client/src/**/*.test.js\"",
     "smoke": "node tools/smoke.js",
-    "grant-role": "node tools/grant-role.js",
+    "grant-role": "caio-devkit grant-role",
     "migrate:categories": "node tools/migrate-categories.js",
-    "migrate:v0": "node tools/migrate-v0.js"
+    "migrate:v0": "node tools/migrate-v0.js",
+    "qa-accounts": "caio-devkit qa-accounts"
   },
   "dependencies": {
     "caio-server": "npm:@capo00/caio-server@^0.4.4",

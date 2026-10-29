@@ -1,9 +1,9 @@
 // Titulky a popisy stránek pro vyhledávače a náhledy sdílení (Caio 2026-10-29, vzor
 // z caio_propertyman `config/seo.js`).
 //
-// Bez uu5 importů schválně: čte ho i `client/vite.config.js` při buildu (statický popis
-// a `og:*` v index.html pro roboty, kteří nespouštějí JS -- Facebook, WhatsApp, Seznam)
-// a jeho test v node. Zápis do `<head>` za běhu dělá `tools/page-meta.js`.
+// Bez uu5 importů schválně: čte ho jeho test v node. Zápis do `<head>` za běhu dělá
+// `tools/page-meta.js`; statický popis pro roboty bez JS je v `assets/meta/manifest.json`
+// (description) -- při změně HOME_DESCRIPTION ho přepiš i tam.
 //
 // Stránky s daty (mužstvo, zápas, hráč, novinka, album, kolo) mají tady jen výchozí
 // titulek; konkrétní („A (Muži) – Soupiska", „AFK Bratčice – Chotusice") si doplní samy

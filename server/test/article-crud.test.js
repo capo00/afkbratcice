@@ -1,4 +1,3 @@
-import "./no-db.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import crud from "../article/crud.js";

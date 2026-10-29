@@ -10,7 +10,7 @@
 // identity (caio-server docs/auth.md, kapitola 10). Zápis do `identity.profileList` by
 // server ignoroval.
 
-import "caio-server/src/caio-server-app/config/env.js";
+import "caio-server/env";
 import { Authentication } from "caio-server";
 
 const email = process.argv[2];

@@ -23,7 +23,7 @@ if (!process.argv.includes("--legacy-age")) {
 
 import fs from "fs";
 import path from "path";
-import "caio-server/src/caio-server-app/config/env.js";
+import "caio-server/env";
 import { Dao } from "caio-server";
 import teamDao from "../server/team/dao.js";
 import seasonDao from "../server/season/dao.js";

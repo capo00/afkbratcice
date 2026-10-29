@@ -1,4 +1,3 @@
-import "./no-db.js";
 import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import dao from "../match/dao.js";

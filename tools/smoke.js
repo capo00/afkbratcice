@@ -6,7 +6,7 @@
 // role s rozsahem, pohledy na zápasy, ochranu osobních údajů, legacy přesměrování,
 // iCal a sitemap -- a po sobě uklidí. Je to náhrada za neexistující integrační testy,
 // ne za ně: běží proti reálnému Mongu, takže odhalí i chyby v indexech a v dotazech.
-import "caio-server/src/caio-server-app/config/env.js";
+import "caio-server/env";
 import { Authentication } from "caio-server";
 
 const { Identity, Member } = Authentication;

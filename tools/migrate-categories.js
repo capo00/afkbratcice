@@ -16,7 +16,7 @@
 //    před migrací, nebo po ní (TeamDao by unikátní index nad týmy bez kategorie nezaložil).
 //
 // Pouští se opakovaně: co už je převedené, přeskočí.
-import "caio-server/src/caio-server-app/config/env.js";
+import "caio-server/env";
 import { MongoClient } from "mongodb";
 import Config from "../server/config.js";
 

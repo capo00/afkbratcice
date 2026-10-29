@@ -2,10 +2,13 @@ import matchDao from "../match/dao.js";
 import teamDao from "../team/dao.js";
 import galleryDao from "../gallery/dao.js";
 import articleDao from "../article/dao.js";
+import { Seo } from "caio-server";
 import { buildCalendar } from "../services/ical.js";
 
 // Netypové trasy. Registrují se jako běžný use case, který si odpověď pošle sám přes
-// `res` a vrátí `false` -- App.init pak nic dalšího neodesílá.
+// `res` a vrátí `false` -- App.init pak nic dalšího neodesílá. `robots.txt` a `sitemap.xml`
+// odpovídá caio-server (Disallow počítá z use casů); obsah sitemapy je `sitemap` níž,
+// předaný do `App.init({ seo })` v server/index.js.
 
 // Obsahové stránky jsou natvrdo v klientu (`client/src/content/pages.js`) a serveru se
 // odsud nedají naimportovat -- do nasazení jde build v `public/`, ne zdrojáky. Duplicitní
@@ -14,61 +17,42 @@ const CONTENT_PAGE_LIST = ["historie", "hymna", "vybor", "treninky", "tymove-fot
 
 const RSS_ITEM_COUNT = 20;
 
-/**
- * Adresa webu: `APP_URL` z `.env`, jinak z požadavku. App Engine končí TLS na proxy a do
- * appky jde `http`, takže protokol se bere z `X-Forwarded-Proto` -- jinak by sitemapa
- * v produkci nabízela `http://` adresy (2026-10-29).
- */
-function getBaseUrl(req) {
-  const appUrl = process.env.APP_URL?.replace(/\/+$/, "");
-  if (appUrl) return appUrl;
-  const proto = req.get("x-forwarded-proto")?.split(",")[0].trim() || req.protocol;
-  return `${proto}://${req.get("host")}`;
-}
-
-// Co do vyhledávání nepatří: administrace, přihlášení a prefixy use casů (`server/*/api.js`
-// a z caio-serveru `auth`, `sys`, `binary`, `member`). Na ty host odkazem nikdy nepřijde.
-// Že tu žádný prefix appky nechybí, hlídá server/test/seo.test.js.
-const DISALLOWED_PATH_LIST = [
-  "/admin",
-  "/login.html",
-  "/auth/",
-  "/sys/",
-  "/binary/",
-  "/member/",
-  "/appConfig/",
-  "/article/",
-  "/calendar/",
-  "/category/",
-  "/club/",
-  "/coach/",
-  "/file/",
-  "/gallery/",
-  "/match/",
-  "/person/",
-  "/player/",
-  "/season/",
-  "/stats/",
-  "/team/",
-];
-
-function buildRobotsTxt(base) {
-  return ["User-agent: *", ...DISALLOWED_PATH_LIST.map((p) => `Disallow: ${p}`), "", `Sitemap: ${base}/sitemap.xml`, ""].join("\n");
-}
-
-/** XML nesnese holé `&`, `<` ani `>`; do atributů se hodí i uvozovky. */
-function xml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+const { getBaseUrl, escapeXml: xml } = Seo;
 
 /** RSS 2.0 chce RFC 822, ne ISO. `toUTCString()` je přesně ten tvar. */
 function rfc822(isoTime) {
   const date = isoTime ? new Date(isoTime) : null;
   return date && !Number.isNaN(date.getTime()) ? date.toUTCString() : new Date().toUTCString();
+}
+
+/**
+ * Obsah `sitemap.xml` (caio-server ho obalí do XML, adresy doplní o základ webu). Adresy jsou
+ * české a shodné s klientským `router.jsx` -- sitemapa s anglickými cestami by vyhledávačům
+ * nabízela samá 404.
+ */
+export async function sitemap() {
+  const [ownTeams, galleries, articles] = await Promise.all([
+    teamDao.listOwn(),
+    galleryDao.listByFilter({ state: "published" }, { pageSize: 200 }),
+    articleDao
+      .listPageByFilter({ state: "published", publishedBefore: new Date().toISOString() }, { pageSize: 500 })
+      .then(({ itemList }) => itemList),
+  ]);
+
+  return [
+    { path: "/", priority: "1.0" },
+    { path: "/novinky", priority: "0.9" },
+    { path: "/muzstva", priority: "0.8" },
+    { path: "/fotogalerie", priority: "0.6" },
+    ...CONTENT_PAGE_LIST.map((code) => ({ path: `/${code}`, priority: "0.5" })),
+    ...ownTeams.flatMap((team) => [
+      { path: `/muzstvo?id=${team.id}`, priority: "0.7" },
+      { path: `/muzstvo/zapasy?id=${team.id}`, priority: "0.7" },
+      { path: `/muzstvo/tabulka?id=${team.id}`, priority: "0.6" },
+    ]),
+    ...articles.map((a) => ({ path: `/novinka?id=${a.id}`, priority: "0.5" })),
+    ...galleries.map((g) => ({ path: `/fotogalerie/album?id=${g.id}`, priority: "0.4" })),
+  ];
 }
 
 export default {
@@ -160,57 +144,5 @@ export default {
       return false;
     },
   },
-
-  "robots.txt": {
-    method: "get",
-    fn: async ({ req, res }) => {
-      res.set("Content-Type", "text/plain; charset=utf-8");
-      res.send(buildRobotsTxt(getBaseUrl(req)));
-      return false;
-    },
-  },
-
-  "sitemap.xml": {
-    method: "get",
-    fn: async ({ req, res }) => {
-      const base = getBaseUrl(req);
-
-      // Adresy jsou české a shodné s klientským `router.jsx` -- sitemapa s anglickými
-      // cestami by vyhledávačům nabízela samá 404.
-      const [ownTeams, galleries, articles] = await Promise.all([
-        teamDao.listOwn(),
-        galleryDao.listByFilter({ state: "published" }, { pageSize: 200 }),
-        articleDao
-          .listPageByFilter({ state: "published", publishedBefore: new Date().toISOString() }, { pageSize: 500 })
-          .then(({ itemList }) => itemList),
-      ]);
-
-      const urlList = [
-        { loc: `${base}/`, priority: "1.0" },
-        { loc: `${base}/novinky`, priority: "0.9" },
-        { loc: `${base}/muzstva`, priority: "0.8" },
-        { loc: `${base}/fotogalerie`, priority: "0.6" },
-        ...CONTENT_PAGE_LIST.map((code) => ({ loc: `${base}/${code}`, priority: "0.5" })),
-        ...ownTeams.flatMap((team) => [
-          { loc: `${base}/muzstvo?id=${team.id}`, priority: "0.7" },
-          { loc: `${base}/muzstvo/zapasy?id=${team.id}`, priority: "0.7" },
-          { loc: `${base}/muzstvo/tabulka?id=${team.id}`, priority: "0.6" },
-        ]),
-        ...articles.map((a) => ({ loc: `${base}/novinka?id=${a.id}`, priority: "0.5" })),
-        ...galleries.map((g) => ({ loc: `${base}/fotogalerie/album?id=${g.id}`, priority: "0.4" })),
-      ];
-
-      const body =
-        '<?xml version="1.0" encoding="UTF-8"?>\n' +
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-        urlList.map((u) => `  <url><loc>${xml(u.loc)}</loc><priority>${u.priority}</priority></url>`).join("\n") +
-        "\n</urlset>\n";
-
-      res.set("Content-Type", "application/xml; charset=utf-8");
-      res.send(body);
-      return false;
-    },
-  },
 };
 
-export { DISALLOWED_PATH_LIST, buildRobotsTxt, getBaseUrl };

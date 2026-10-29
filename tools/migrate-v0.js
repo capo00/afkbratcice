@@ -24,7 +24,7 @@
 // různí „Vladimír Kupera“. Časy: dump má `SET time_zone = "+00:00"`, takže `datum` už je UTC.
 import fs from "fs";
 import path from "path";
-import "caio-server/src/caio-server-app/config/env.js";
+import "caio-server/env";
 import { Dao, BinaryStore } from "caio-server";
 import { MongoClient } from "mongodb";
 import teamDao from "../server/team/dao.js";
