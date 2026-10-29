@@ -14,8 +14,46 @@ const CONTENT_PAGE_LIST = ["historie", "hymna", "vybor", "treninky", "tymove-fot
 
 const RSS_ITEM_COUNT = 20;
 
+/**
+ * Adresa webu: `APP_URL` z `.env`, jinak z požadavku. App Engine končí TLS na proxy a do
+ * appky jde `http`, takže protokol se bere z `X-Forwarded-Proto` -- jinak by sitemapa
+ * v produkci nabízela `http://` adresy (2026-10-29).
+ */
 function getBaseUrl(req) {
-  return process.env.APP_URL?.replace(/\/+$/, "") ?? `${req.protocol}://${req.get("host")}`;
+  const appUrl = process.env.APP_URL?.replace(/\/+$/, "");
+  if (appUrl) return appUrl;
+  const proto = req.get("x-forwarded-proto")?.split(",")[0].trim() || req.protocol;
+  return `${proto}://${req.get("host")}`;
+}
+
+// Co do vyhledávání nepatří: administrace, přihlášení a prefixy use casů (`server/*/api.js`
+// a z caio-serveru `auth`, `sys`, `binary`, `member`). Na ty host odkazem nikdy nepřijde.
+// Že tu žádný prefix appky nechybí, hlídá server/test/seo.test.js.
+const DISALLOWED_PATH_LIST = [
+  "/admin",
+  "/login.html",
+  "/auth/",
+  "/sys/",
+  "/binary/",
+  "/member/",
+  "/appConfig/",
+  "/article/",
+  "/calendar/",
+  "/category/",
+  "/club/",
+  "/coach/",
+  "/file/",
+  "/gallery/",
+  "/match/",
+  "/person/",
+  "/player/",
+  "/season/",
+  "/stats/",
+  "/team/",
+];
+
+function buildRobotsTxt(base) {
+  return ["User-agent: *", ...DISALLOWED_PATH_LIST.map((p) => `Disallow: ${p}`), "", `Sitemap: ${base}/sitemap.xml`, ""].join("\n");
 }
 
 /** XML nesnese holé `&`, `<` ani `>`; do atributů se hodí i uvozovky. */
@@ -123,6 +161,15 @@ export default {
     },
   },
 
+  "robots.txt": {
+    method: "get",
+    fn: async ({ req, res }) => {
+      res.set("Content-Type", "text/plain; charset=utf-8");
+      res.send(buildRobotsTxt(getBaseUrl(req)));
+      return false;
+    },
+  },
+
   "sitemap.xml": {
     method: "get",
     fn: async ({ req, res }) => {
@@ -143,10 +190,9 @@ export default {
         { loc: `${base}/novinky`, priority: "0.9" },
         { loc: `${base}/muzstva`, priority: "0.8" },
         { loc: `${base}/fotogalerie`, priority: "0.6" },
-        { loc: `${base}/ke-stazeni`, priority: "0.4" },
         ...CONTENT_PAGE_LIST.map((code) => ({ loc: `${base}/${code}`, priority: "0.5" })),
         ...ownTeams.flatMap((team) => [
-          { loc: `${base}/muzstvo?id=${team.id}&seasonId=`, priority: "0.7" },
+          { loc: `${base}/muzstvo?id=${team.id}`, priority: "0.7" },
           { loc: `${base}/muzstvo/zapasy?id=${team.id}`, priority: "0.7" },
           { loc: `${base}/muzstvo/tabulka?id=${team.id}`, priority: "0.6" },
         ]),
@@ -166,3 +212,5 @@ export default {
     },
   },
 };
+
+export { DISALLOWED_PATH_LIST, buildRobotsTxt, getBaseUrl };

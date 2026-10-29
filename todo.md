@@ -81,9 +81,12 @@ Co u toho zůstalo otevřené:
 - **Profil přihlášeného uživatele** (`profile`) — vlastní údaje, spárovaná osoba, role.
 - **Odběr kalendáře** — `GET /calendar/team-<id>.ics` server umí, klient na něj zatím
   nikde neodkazuje (patří k zápasům mužstva).
-- **SEO za běhu** — `document.title` a OG tagy na detailu zápasu, článku a alba
-  ([`frontend.md`](./design/frontend.md), 10). Sitemapa i RSS už české adresy vypisují
-  správně, tohle je poslední kus SEO, který chybí.
+- ~~**SEO za běhu**~~ — **hotovo 2026-10-29** (0.6.1): titulek, popis, canonical a `og:*`
+  podle routy (`client/src/config/seo.js`, `tools/page-meta.js`), detailní stránky z dat
+  (`usePageTitle`), 404 a dítě bez jména `noindex`; statický popis, `og:locale` a absolutní
+  `og:image` v index.html pro roboty bez JS (`client/vite.config.js`); `robots.txt` a sitemapa
+  s `https` za proxy (`server/seo/api.js`). Adresa webu `APP_URL=https://afkbratcice.cz`
+  v `.env`; `CANONICAL_HOST` až po přepnutí DNS.
 
 ### 2.1 Fotogalerie — kód zůstává, obsah ne (2026-09-07)
 

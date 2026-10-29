@@ -9,6 +9,7 @@ import SeasonSelect from "../season-select.jsx";
 import NoticeBar from "../layout/notice-bar.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
+import { usePageTitle } from "../../tools/page-meta.js";
 
 const { theme } = Config;
 
@@ -71,6 +72,14 @@ const TeamShell = createVisualComponent({
     // Archivní mužstvo bez sezóny v adrese: dokud se seznam sezón nenačte, záložky by se
     // ptaly bez sezóny, tedy na celou historii.
     const seasonPending = !seasonId && seasonDataObject.state === "pendingNoData";
+
+    // „A (Muži) – Soupiska"; archivní mužstvo bez letošní kategorie jménem týmu.
+    const activeTab = TAB_LIST.find((tab) => tab.route === route?.uu5Route);
+    const teamLabel = category?.categoryName ?? team?.name;
+    usePageTitle({
+      title: teamLabel ? [teamLabel, activeTab ? tabLsi[activeTab.code] : null].filter(Boolean).join(" – ") : null,
+      description: category?.competition ? `${teamLabel} AFK Bratčice – ${category.competition}.` : null,
+    });
 
     if (!teamId) {
       return (

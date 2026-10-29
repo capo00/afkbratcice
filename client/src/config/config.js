@@ -78,9 +78,14 @@ const MEMBER = [ROLE.MEMBERS, ...CONTENT];
 // Obrazovky, na které smí i editor jednoho mužstva.
 const TEAM_SCOPED = [ROLE.TEAM_EDITOR + ":*"];
 
+// Adresa webu pro canonical a `og:url` (tools/page-meta.js). Dosazuje ji `client/vite.config.js`
+// z `APP_URL` v kořenovém `.env` (tentýž soubor čte server pro sitemapu); bez ní null.
+const appUrl = (process.env.APP_URL || "").replace(/\/+$/, "") || null;
+
 const Config = {
   TAG,
   asset,
+  appUrl,
   theme,
 
   AGE_LIST,

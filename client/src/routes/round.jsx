@@ -8,6 +8,7 @@ import Heading from "../components/layout/heading.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { usePageTitle } from "../tools/page-meta.js";
 
 const { theme } = Config;
 
@@ -45,6 +46,9 @@ const Round = createVisualComponent({
 
     const { state, data } = dataObject;
     const itemList = data?.itemList ?? [];
+    usePageTitle({
+      title: round ? [`${round}. kolo`, category?.competition].filter(Boolean).join(" – ") : null,
+    });
 
     if (!seasonId || !round) {
       return (

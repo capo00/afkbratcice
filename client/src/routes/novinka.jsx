@@ -10,6 +10,7 @@ import TeamLogo from "../components/team-logo.jsx";
 import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { usePageTitle } from "../tools/page-meta.js";
 
 const { theme } = Config;
 
@@ -77,6 +78,7 @@ const Novinka = createVisualComponent({
     );
 
     const { state, data } = dataObject;
+    usePageTitle({ title: data?.name, description: data?.desc });
 
     if (state === "pendingNoData") {
       return (

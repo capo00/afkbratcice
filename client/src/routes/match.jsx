@@ -12,6 +12,7 @@ import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import LineupPitch from "../components/lineup-pitch/lineup-pitch.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { usePageTitle } from "../tools/page-meta.js";
 
 const { theme } = Config;
 
@@ -186,6 +187,17 @@ function MatchDetail({ matchId }) {
       scorers: entryList.filter((entry) => entry.goals > 0).sort((a, b) => b.goals - a.goals),
     };
   }, [match]);
+
+  // „AFK Bratčice – Chotusice 3:4" do titulku a náhledu sdílení.
+  const pairName = match?.id ? `${match.homeTeam?.name ?? "?"} – ${match.guestTeam?.name ?? "?"}` : null;
+  const score = Number.isFinite(match?.homeGoals) ? ` ${match.homeGoals}:${match.guestGoals}` : "";
+  const date = match?.time ? new Date(match.time).toLocaleDateString("cs-CZ") : null;
+  usePageTitle({
+    title: pairName ? pairName + score : null,
+    description: pairName
+      ? `${pairName}${score}${match.round ? `, ${match.round}. kolo` : ""}${date ? `, ${date}` : ""}. Sestava a střelci.`
+      : null,
+  });
 
   if (state === "pendingNoData") {
     return (

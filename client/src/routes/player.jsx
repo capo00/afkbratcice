@@ -11,6 +11,7 @@ import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { seasonLabel } from "../components/season-select.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { usePageTitle } from "../tools/page-meta.js";
 
 const { theme } = Config;
 
@@ -151,6 +152,14 @@ const Player = createVisualComponent({
       () => new Map((data?.seasonList ?? []).map((season) => [season.id, season])),
       [data],
     );
+
+    // Jméno hráče do titulku. Dítě (jméno server neposlal) do vyhledávání nepatří vůbec.
+    const playerName = [data?.player?.person?.name, data?.player?.person?.surname].filter(Boolean).join(" ");
+    usePageTitle({
+      title: data?.player ? playerName || "Hráč" : null,
+      description: playerName ? `${playerName} – profil a statistiky hráče AFK Bratčice.` : null,
+      noindex: Boolean(data?.player) && !playerName,
+    });
 
     if (!playerId || state === "errorNoData") {
       return (

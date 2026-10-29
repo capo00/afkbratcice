@@ -11,6 +11,7 @@ import { PAGE_CODE_LIST } from "./content/pages.js";
 import { useAdminHint } from "./tools/admin-hint.js";
 import { useColorModeItem } from "./tools/color-mode.js";
 import { useScrollTopOnRouteChange } from "./tools/scroll.js";
+import { usePageMeta } from "./tools/page-meta.js";
 import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
 
 const { theme } = Config;
@@ -141,6 +142,8 @@ function Shell() {
   const top = useTop();
   // Nová stránka začíná nahoře; uu5g05 to samo nedělá (tools/scroll.js).
   useScrollTopOnRouteChange();
+  // Titulek, popis, canonical a `og:*` podle routy (tools/page-meta.js, config/seo.js).
+  usePageMeta();
 
   return (
     <UiApp.Spa

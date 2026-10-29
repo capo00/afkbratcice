@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import { usePageTitle } from "../tools/page-meta.js";
 
 const { theme } = Config;
 
@@ -98,6 +99,7 @@ const GalleryDetail = createVisualComponent({
     );
 
     const { state, data } = dataObject;
+    usePageTitle({ title: data?.gallery?.name, description: data?.gallery?.desc });
 
     if (!galleryId || state === "errorNoData") {
       return (
