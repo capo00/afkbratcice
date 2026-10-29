@@ -51,9 +51,15 @@ const EntitySelect = createVisualComponent({
       [data, getLabel, valueKey, app],
     );
 
-    // `pending` místo prázdného seznamu: prázdný select vypadá jako „není z čeho vybrat",
-    // což je jiná informace než „ještě se to načítá".
-    return <Uu5Forms.FormSelect {...props} itemList={itemList} pending={state === "pendingNoData"} />;
+    // While the list loads, a plain `Select` (no `name`, no validation, not part of the form value).
+    // `FormSelect` validates its initial value against `itemList` once, on mount: with an empty list it
+    // reports `mismatch`, does not revalidate when the list arrives, and the error disables Submit --
+    // editing any record with an entity select was impossible. `className` carries the grid area that
+    // `Form.View` assigns to this component; `pending` says "loading", not "nothing to choose from".
+    if (state === "pendingNoData") {
+      return <Uu5Forms.Select label={props.label} className={props.className} required={props.required} pending disabled />;
+    }
+    return <Uu5Forms.FormSelect {...props} itemList={itemList} />;
   },
 });
 
@@ -139,7 +145,16 @@ const boolField = (labelPath) => ({
   sort: true,
   output: (value) => (value ? "✓" : ""),
   columnProps: { maxWidth: 72, horizontalAlignment: "center" },
-  input: { Component: Uu5Forms.FormSwitchSelect, props: { itemList: [{ value: false }, { value: true }] } },
+  input: {
+    Component: Uu5Forms.FormSwitchSelect,
+    // Without `children` the switch prints the raw `false` / `true`.
+    props: {
+      itemList: [false, true].map((value) => ({
+        value,
+        children: <Lsi import={importLsi} path={["admin", "bool", String(value)]} />,
+      })),
+    },
+  },
 });
 //@@viewOff:sdílená pole
 

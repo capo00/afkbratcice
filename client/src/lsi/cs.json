@@ -23,6 +23,7 @@
   },
   "admin": {
     "eyebrow": "Správa obsahu",
+    "bool": { "false": "Ne", "true": "Ano" },
     "header": "Administrace",
     "empty": "Na žádnou obrazovku administrace nemáte oprávnění.",
     "menu": {

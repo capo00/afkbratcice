@@ -1,11 +1,12 @@
-import { createVisualComponent, useDataObject, useMemo } from "uu5g05";
+import { createVisualComponent } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
-import { ageField, boolField, teamLabel } from "../fields.jsx";
+import { ageField, boolField, teamLabel, EntitySelect } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 
 // Sezóny — ročník soutěže jedné kategorie a její účastníci.
 //
@@ -18,15 +19,16 @@ const [SeasonProvider] = UiElements.CrudContext.create("season");
 // Bez `createMany`/`deleteMany` -- `season` je na serveru nemá (admin/crud-calls.js).
 const CALLS = entityCalls("season");
 
-/** Účastníci soutěže — víceřádkový výběr týmů. */
-function TeamListInput(props) {
-  const { data } = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/team/list", {}) } }, []);
-  const itemList = useMemo(
-    () => (data?.itemList ?? []).map((team) => ({ value: team.id, children: teamLabel(team) })),
-    [data],
-  );
+// Name only: all participants share the season's category, so `teamLabel` with app context
+// would repeat it on every tag.
+const teamName = (team) => teamLabel(team);
 
-  return <Uu5Forms.FormSelect {...props} itemList={itemList} multiple />;
+/**
+ * Competition participants -- multi-select of teams. Through `EntitySelect`, which mounts the
+ * validating `FormSelect` only once the list is loaded (fields.jsx).
+ */
+function TeamListInput(props) {
+  return <EntitySelect {...props} useCase="/team/list" getLabel={teamName} multiple />;
 }
 
 const CONFIG = {
@@ -75,7 +77,7 @@ const AdminSeasons = createVisualComponent({
               filterDefinitionList={filterList}
               initialSorterList={[{ key: "yearFrom", ascending: false }]}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["competition", "yearFrom"], ["age", "hasPenalties"]]} />}
             </UiElements.Crud>
           )}
         </SeasonProvider>
