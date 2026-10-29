@@ -10,6 +10,7 @@ const { theme } = Config;
 // (podklad + 1px rámeček). `common` by přidalo `elevationGround`, tedy stín, který předloha
 // nikde nemá — plochy tu odděluje barva a linka, ne elevace. `borderRadius="moderate"` = 8 px,
 // přesně `theme.radius`. Padding dává `SpacingProvider type="loose"` z app.jsx.
+// The match tile narrows it to `normal` with its own SpacingProvider (match-tile.jsx).
 //
 // `topStripe` je **červený proužek 3 px nahoře** — v předloze ho má karta zápasu, aby
 // v mřížce odlišila to nejsledovanější. Kreslí se pseudoelementem, ne dalším elementem

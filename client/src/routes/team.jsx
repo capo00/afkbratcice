@@ -33,12 +33,13 @@ function PersonTile({ person, fallbackText, name, subtitle, onClick }) {
   return (
     <Card onClick={onClick}>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12 })}>
-        {/* Portrét i náhrada za něj je `RichIcon` — kolečko s obrázkem nebo s textem je
-            přesně to, na co je (`size="xl"` = 48 px z GDS). Osoba bez fotky je běžný stav,
-            u mládeže dokonce pravidlo, takže se místo portrétu ukáže číslo dresu nebo iniciály.
-            `text` se nesmí předat spolu s `imageSrc` — vykreslilo by se přes fotku. */}
+        {/* The portrait and its fallback are a `RichIcon` -- a circle with an image or text is
+            exactly what it is for (`size="xxl"` = GDS major m, at least 60 px; Caio 2026-10-29).
+            A person without a photo is common, for youth even the rule, so the jersey number
+            or initials stand in. `text` must not be passed with `imageSrc` -- it would render
+            over the photo. */}
         <Uu5Elements.RichIcon
-          size="xl"
+          size="xxl"
           significance="distinct"
           imageSrc={person?.photoUri}
           text={person?.photoUri ? undefined : fallbackText}

@@ -36,6 +36,9 @@ function personName(entry) {
 
 function MatchHeader({ match }) {
   const played = isPlayed(match);
+  const [screenSize] = useScreenSize();
+  // Larger than in the match tile (64 px); smaller on a phone so the score fits (Caio 2026-10-29).
+  const logoSize = ["xs", "s"].includes(screenSize) ? 80 : 96;
   const penaltyWinner = match.penaltyWinnerTeamId;
 
   // Kolo, výkop, hřiště a odjezd jsou **patička dlaždice**, ne další blok v jejím těle:
@@ -96,7 +99,7 @@ function MatchHeader({ match }) {
             // Skóre je uprostřed, takže hosté musí být až za ním.
             className={Config.Css.css({ order: index === 0 ? 0 : 2 })}
           >
-            <TeamLogo uri={team?.logoUri} size={64} alt="" />
+            <TeamLogo uri={team?.logoUri} size={logoSize} alt="" />
             <div className={Config.Css.css({ ...theme.typography.display, fontSize: 20 })}>{team?.name ?? "—"}</div>
             {penaltyWinner && penaltyWinner === team?.id ? (
               <Uu5Elements.Tag colorScheme="primary" significance="distinct" size="s">

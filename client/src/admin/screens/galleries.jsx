@@ -7,6 +7,7 @@ import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { EnumText, enumItemList, dateField } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import PhotoUpload from "../photo-upload.jsx";
 
 // Fotoalba. Nahrávání fotek je **vlastní akce řádku**, ne pole formuláře: album se zakládá
@@ -105,7 +106,7 @@ const AdminGalleries = createVisualComponent({
                   },
                 ]}
               >
-                {() => UiElements.Crud.generateInputs(CONFIG)}
+                {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["date", "category"], ["state", "author"]]} />}
               </UiElements.Crud>
 
               {uploadTo ? (

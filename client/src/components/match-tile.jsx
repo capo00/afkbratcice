@@ -69,8 +69,11 @@ function canSetResult(identity, match) {
   return myTeamIdList.some((id) => id === match.homeTeamId || id === match.guestTeamId);
 }
 
-// Jedna strana výsledkové tabule: erb nad názvem, název nejvýš na dva řádky (varianta B,
-// Caio 2026-10-28; canvas „AFK Bratčice – dlaždice zápasu“).
+// Logo size in the tile (px); larger at the cost of the tile padding (Caio 2026-10-29).
+const LOGO_SIZE = 64;
+
+// One side of the scoreboard: logo above the name, name at most two lines (variant B,
+// Caio 2026-10-28; canvas "AFK Bratčice – dlaždice zápasu").
 function TeamSide({ teamId, ownTeamId }) {
   const { getTeam } = useApp();
   const team = getTeam(teamId);
@@ -82,12 +85,12 @@ function TeamSide({ teamId, ownTeamId }) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 8,
+        gap: 4,
         textAlign: "center",
         minInlineSize: 0,
       })}
     >
-      <TeamLogo uri={team?.logoUri} size={48} alt="" />
+      <TeamLogo uri={team?.logoUri} size={LOGO_SIZE} alt="" />
       <Uu5Elements.Text
         category="interface"
         segment="content"
@@ -254,37 +257,41 @@ const MatchTile = createVisualComponent({
 
     return (
       <>
-        <Card
-          topStripe
-          header={header}
-          footer={footer}
-          footerSeparator={Boolean(footer)}
-          onClick={handleClick}
-          actionList={actionList}
-        >
-          <div
-            className={Config.Css.css({
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)",
-              alignItems: "start",
-              gap: 8,
-            })}
+        {/* Tighter GDS spacing than the app's `loose` leaves room for the larger logos
+            (Caio 2026-10-29) without custom padding CSS. */}
+        <Uu5Elements.SpacingProvider type="normal">
+          <Card
+            topStripe
+            header={header}
+            footer={footer}
+            footerSeparator={Boolean(footer)}
+            onClick={handleClick}
+            actionList={actionList}
           >
-            <TeamSide teamId={match.homeTeamId} ownTeamId={ownTeamId} />
             <div
               className={Config.Css.css({
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                minBlockSize: 48,
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)",
+                alignItems: "start",
+                gap: 8,
               })}
             >
-              {center}
+              <TeamSide teamId={match.homeTeamId} ownTeamId={ownTeamId} />
+              <div
+                className={Config.Css.css({
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minBlockSize: LOGO_SIZE,
+                })}
+              >
+                {center}
+              </div>
+              <TeamSide teamId={match.guestTeamId} ownTeamId={ownTeamId} />
             </div>
-            <TeamSide teamId={match.guestTeamId} ownTeamId={ownTeamId} />
-          </div>
-        </Card>
+          </Card>
+        </Uu5Elements.SpacingProvider>
 
         {/* `ResultModal` čeká celé týmy (vypisuje jejich názvy), ale `match/list` vrací jen
             id — doplní se z mapy týmů v app-contextu, stejně jako to dělá `admin/matches`.

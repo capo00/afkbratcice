@@ -7,6 +7,7 @@ import TeamLogo from "../../components/team-logo.jsx";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { nameField, categoryField, boolField, EntitySelect, clubLabel } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 
 // Správa týmů — vlastních i soupeřů.
 //
@@ -63,7 +64,7 @@ const AdminTeams = createVisualComponent({
               sorterDefinitionList={sorterList}
               filterDefinitionList={filterList}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["name", "shortName"], ["category", "own"]]} />}
             </UiElements.Crud>
           )}
         </TeamProvider>

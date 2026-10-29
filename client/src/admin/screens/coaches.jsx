@@ -6,6 +6,7 @@ import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { EntitySelect, EnumText, enumItemList, personLabel } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import FormMembership from "../form-membership.jsx";
 
 // Trenéři a funkcionáři. Stejná stavba jako hráči — role osoby s členstvím v čase —,
@@ -68,7 +69,7 @@ const AdminCoaches = createVisualComponent({
               sorterDefinitionList={sorterList}
               filterDefinitionList={filterList}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["personId", "role"]]} />}
             </UiElements.Crud>
           )}
         </CoachProvider>

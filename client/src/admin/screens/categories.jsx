@@ -6,6 +6,7 @@ import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { nameField, ageField } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import { useApp } from "../../core/app-context.jsx";
 
 // Kategorie týmů (design/data-model.md, 2.3): A/B/C týmy mužů, rezervy mládeže, ženy, stará
@@ -89,7 +90,7 @@ const AdminCategories = createVisualComponent({
               filterDefinitionList={filterList}
               lsiError={ERROR_LSI}
             >
-              {({ type }) => UiElements.Crud.generateInputs(CONFIG, { operation: type })}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["code", "name"]]} />}
             </UiElements.Crud>
           )}
         </CategoryProvider>

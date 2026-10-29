@@ -11,6 +11,11 @@ const { theme } = Config;
 
 const LSI_PATH = ["admin", "matches"];
 
+// Home and guest side by side even on a phone -- the score reads as one row.
+const RESULT_GRID_LAYOUT = {
+  xs: "homeGoals guestGoals, homeGoalsHalf guestGoalsHalf, penaltyWinnerTeamId penaltyWinnerTeamId",
+};
+
 // Dva modaly nad zápasem: **výsledek** a **sestava**. Obojí je vlastní use case
 // (`match/setResult`, `match/setLineup`), ne `match/update` — a to schválně:
 //
@@ -83,37 +88,35 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
           </div>
         }
       >
-        <Uu5Forms.Form.View>
-          <Uu5Elements.Grid rowGap={12}>
-            <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>
-              {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
-            </div>
+        {/* The match name and the error sit outside `Form.View`: the grid places only named
+            fields into `gridLayout` areas, anything else would be auto-placed outside it. */}
+        <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18, marginBlockEnd: 16 })}>
+          {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
+        </div>
 
-            <Uu5Elements.Grid templateColumns="1fr 1fr" rowGap={12} columnGap={12}>
-              <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required />
-              <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required />
-              <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
-              <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
-            </Uu5Elements.Grid>
-
-            <Uu5Forms.FormSelect
-              name="penaltyWinnerTeamId"
-              label={<Lsi import={importLsi} path={[...LSI_PATH, "penaltyWinner"]} />}
-              itemList={teamItemList}
-            />
-
-            {error ? (
-              <Uu5Elements.Text
-                category="interface"
-                segment="content"
-                type="medium"
-                colorScheme="negative"
-              >
-                {error}
-              </Uu5Elements.Text>
-            ) : null}
-          </Uu5Elements.Grid>
+        <Uu5Forms.Form.View gridLayout={RESULT_GRID_LAYOUT}>
+          <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required />
+          <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required />
+          <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
+          <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
+          <Uu5Forms.FormSelect
+            name="penaltyWinnerTeamId"
+            label={<Lsi import={importLsi} path={[...LSI_PATH, "penaltyWinner"]} />}
+            itemList={teamItemList}
+          />
         </Uu5Forms.Form.View>
+
+        {error ? (
+          <Uu5Elements.Text
+            category="interface"
+            segment="content"
+            type="medium"
+            colorScheme="negative"
+            className={Config.Css.css({ display: "block", marginBlockStart: 16 })}
+          >
+            {error}
+          </Uu5Elements.Text>
+        ) : null}
       </Uu5Elements.Modal>
     </Uu5Forms.Form.Provider>
   );

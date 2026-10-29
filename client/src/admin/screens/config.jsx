@@ -17,6 +17,12 @@ const { theme } = Config;
 
 const LSI_PATH = ["admin", "config"];
 
+// One field per row on a phone; from `s` up the short contact fields in pairs.
+const CONFIG_GRID_LAYOUT = {
+  xs: "notice, address, email, phone, ico, gps, founded, categoryOrder, hideNamesAgeList",
+  s: "notice notice, address address, email phone, ico gps, founded founded, categoryOrder categoryOrder, hideNamesAgeList hideNamesAgeList",
+};
+
 const AdminConfig = createVisualComponent({
   uu5Tag: Config.TAG + "AdminConfig",
 
@@ -76,8 +82,8 @@ const AdminConfig = createVisualComponent({
             gps: contact.gps ?? "",
           }}
         >
-          <Uu5Forms.Form.View>
-            <Uu5Elements.Grid rowGap={16} className={Config.Css.css({ maxWidth: 720 })}>
+          <div className={Config.Css.css({ maxWidth: 720 })}>
+            <Uu5Forms.Form.View gridLayout={CONFIG_GRID_LAYOUT}>
               <Uu5Forms.FormTextArea
                 name="notice"
                 label={<Lsi import={importLsi} path={["admin", "field", "notice"]} />}
@@ -114,22 +120,23 @@ const AdminConfig = createVisualComponent({
                 label={<Lsi import={importLsi} path={[...LSI_PATH, "hideNames"]} />}
                 itemList={enumItemList("age", Config.AGE_LIST)}
               />
+            </Uu5Forms.Form.View>
 
-              <div className={Config.Css.css({ display: "flex", gap: 12, alignItems: "center" })}>
-                <Uu5Forms.SubmitButton icon="uugds-check" />
-                {saved ? (
-                  <Uu5Elements.Text
-                    category="interface"
-                    segment="content"
-                    type="medium"
-                    className={Config.Css.css({ color: theme.color.mutedFg })}
-                  >
-                    <Lsi import={importLsi} path={[...LSI_PATH, "saved"]} />
-                  </Uu5Elements.Text>
-                ) : null}
-              </div>
-            </Uu5Elements.Grid>
-          </Uu5Forms.Form.View>
+            {/* Outside `Form.View`: the submit row has no field name, so it has no grid area. */}
+            <div className={Config.Css.css({ display: "flex", gap: 12, alignItems: "center", marginBlockStart: 24 })}>
+              <Uu5Forms.SubmitButton icon="uugds-check" />
+              {saved ? (
+                <Uu5Elements.Text
+                  category="interface"
+                  segment="content"
+                  type="medium"
+                  className={Config.Css.css({ color: theme.color.mutedFg })}
+                >
+                  <Lsi import={importLsi} path={[...LSI_PATH, "saved"]} />
+                </Uu5Elements.Text>
+              ) : null}
+            </div>
+          </div>
         </Uu5Forms.Form.Provider>
       </AdminScreen>
     );

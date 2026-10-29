@@ -6,6 +6,7 @@ import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { noteField, dateField } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import { prepareImage } from "../image.js";
 
 // Osoby. Jedna osoba = jeden člověk; hráčství i trenérství jsou samostatné role nad ní
@@ -67,7 +68,7 @@ const AdminPersons = createVisualComponent({
                 if (e.data.value.photo) e.data.value.photo = await prepareImage(e.data.value.photo, "portrait");
               }}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["surname", "name"], ["email", "phone"]]} />}
             </UiElements.Crud>
           )}
         </PersonProvider>

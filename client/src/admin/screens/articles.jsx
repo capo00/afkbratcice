@@ -6,6 +6,7 @@ import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { EnumText, enumItemList, dateTimeField } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import FormSectionList from "../form-section-list.jsx";
 import { prepareImage } from "../image.js";
 
@@ -104,7 +105,7 @@ const AdminArticles = createVisualComponent({
                 }
               }}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["state", "publishTime"], ["author", "priority"]]} />}
             </UiElements.Crud>
           )}
         </ArticleProvider>

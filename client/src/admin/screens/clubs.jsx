@@ -5,6 +5,7 @@ import { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
 import AdminScreen from "../screen.jsx";
 import { nameField } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { prepareImage } from "../image.js";
 import { useApp } from "../../core/app-context.jsx";
@@ -68,7 +69,7 @@ const AdminClubs = createVisualComponent({
                 if (e.data.value.logo) e.data.value.logo = await prepareImage(e.data.value.logo, "logo");
               }}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} />}
             </UiElements.Crud>
           )}
         </ClubProvider>

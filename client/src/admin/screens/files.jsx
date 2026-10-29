@@ -6,6 +6,7 @@ import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { dateField } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import { useApp } from "../../core/app-context.jsx";
 
 // Soubory ke stažení.
@@ -107,7 +108,7 @@ const AdminFiles = createVisualComponent({
             >
               {/* `operation` musí dolů: soubor je povinný při zakládání a needitovatelný
                   při úpravě, a to se bez něj rozlišit nedá. */}
-              {({ type }) => UiElements.Crud.generateInputs(config, { operation: type })}
+              {({ type }) => <CrudFormView cfg={config} operation={type} />}
             </UiElements.Crud>
           )}
         </UiElements.BinaryProvider>

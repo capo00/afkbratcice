@@ -21,6 +21,9 @@ const PITCH_COLOR = {
   dark: { grass: "#2C6A36", stripe: "#285F31", line: "rgba(255, 255, 255, 0.55)", text: "#FFFFFF" },
 };
 const CARD_COLOR = { yellow: "#E9C500", red: "#D01319" };
+// Card size (px); the goal ball is as tall as a card (Caio 2026-10-29).
+const CARD_SIZE = { width: 8, height: 11 };
+const NAME_SHADOW = "0 1px 2px rgba(0, 0, 0, 0.6)";
 
 // Průměr kruhu (px) podle stupně `RichIcon`. Vybírá se největší, který se při dané šířce
 // hřiště vejde i se jménem do svislého rozestupu postů (PLAYER_BOX.height).
@@ -71,7 +74,7 @@ function PitchDrawing({ colors }) {
   );
 }
 
-/** Kruh s fotkou, odznaky gólu a karet a jméno pod ním. */
+/** Photo circle with goal and card marks and the name below it. */
 function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, surnameOnly }) {
   const name = shortName(entry, { surnameOnly });
   const fullName = [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || name || "?";
@@ -92,8 +95,8 @@ function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, 
         position: "absolute",
         insetBlockStart: -2,
         insetInlineStart: -4 + offset,
-        inlineSize: 8,
-        blockSize: 11,
+        inlineSize: CARD_SIZE.width,
+        blockSize: CARD_SIZE.height,
         borderRadius: 2,
         backgroundColor: color,
         boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.35)",
@@ -116,12 +119,30 @@ function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, 
         />
         {entry.yellowCard ? card(CARD_COLOR.yellow, 0) : null}
         {entry.redCard ? card(CARD_COLOR.red, entry.yellowCard ? 5 : 0) : null}
+        {/* Goal: a ball the size of a card in the top right corner, mirroring the cards, and
+            the count after it only for two or more goals. The ball's left edge is anchored so
+            the count grows outwards, not over the photo. */}
         {entry.goals ? (
-          <span className={Config.Css.css({ position: "absolute", insetBlockStart: -6, insetInlineEnd: -10, lineHeight: "normal" })}>
-            <Uu5Elements.Badge size="s" colorScheme="building" significance="highlighted">
-              {"⚽"}
-              {entry.goals > 1 ? ` ${entry.goals}` : null}
-            </Uu5Elements.Badge>
+          <span
+            aria-hidden="true"
+            className={Config.Css.css({
+              position: "absolute",
+              insetBlockStart: -2,
+              insetInlineStart: `calc(100% - ${CARD_SIZE.height - 4}px)`,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              fontSize: CARD_SIZE.height,
+              lineHeight: 1,
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+            })}
+          >
+            {"⚽"}
+            {/* The count reads like the name; the shadow only on it, on the emoji it muddies the ball. */}
+            {entry.goals > 1 ? (
+              <span className={Config.Css.css(textColor ? { color: textColor, textShadow: NAME_SHADOW } : {})}>{entry.goals}</span>
+            ) : null}
           </span>
         ) : null}
       </div>
@@ -137,8 +158,8 @@ function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, 
             display: "block",
             whiteSpace: "nowrap",
             fontWeight: 600,
-            // Na trávě bílé se stínem (barva hřiště); `Text` by jinak vzal barvu podle režimu stránky.
-            ...(textColor ? { color: textColor, textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)" } : null),
+            // White with a shadow on the grass (pitch colour); `Text` would otherwise follow the page mode.
+            ...(textColor ? { color: textColor, textShadow: NAME_SHADOW } : null),
           })}
         >
           {name ?? "?"}

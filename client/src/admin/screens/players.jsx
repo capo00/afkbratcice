@@ -6,6 +6,7 @@ import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { entityCalls } from "../crud-calls.js";
 import { EntitySelect, EnumText, enumItemList, noteField, personLabel } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import FormMembership from "../form-membership.jsx";
 
 // Hráči. Hráč není osoba — je to **role osoby**: číslo dresu, post a členství v týmech
@@ -64,7 +65,7 @@ const AdminPlayers = createVisualComponent({
               sorterDefinitionList={sorterList}
               filterDefinitionList={filterList}
             >
-              {() => UiElements.Crud.generateInputs(CONFIG)}
+              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["number", "position"]]} />}
             </UiElements.Crud>
           )}
         </PlayerProvider>

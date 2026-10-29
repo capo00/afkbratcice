@@ -5,6 +5,7 @@ import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { EntitySelect, EnumText, enumItemList, dateTimeField, seasonLabel, teamLabel } from "../fields.jsx";
+import CrudFormView from "../crud-form-view.jsx";
 import { ResultModal, LineupModal } from "../match-modals.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import { mergeItemHandler } from "../../core/item-merge.js";
@@ -166,7 +167,7 @@ const AdminMatches = createVisualComponent({
             },
           ]}
         >
-          {() => UiElements.Crud.generateInputs(CONFIG)}
+          {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["homeTeamId", "guestTeamId"], ["seasonId", "round"], ["place", "departureTime"]]} />}
         </UiElements.Crud>
 
         {resultFor ? (
