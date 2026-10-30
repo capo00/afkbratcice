@@ -60,6 +60,8 @@ const NEWS = [ROLE.NEWS_EDITOR, ...CONTENT];
 const GALLERY = [ROLE.GALLERY_EDITOR, ...CONTENT];
 const PAGES = [ROLE.CONTENT_EDITOR, ...CONTENT];
 const MEMBER = [ROLE.MEMBERS, ...CONTENT];
+// The editor of any team (`teamEditor:<teamId>` with a non-empty scope), as a `profileList` entry.
+const ANY_TEAM_EDITOR = `${ROLE.TEAM_EDITOR}:*`;
 //@@viewOff:roles
 
 //@@viewOn:binary
@@ -108,6 +110,7 @@ export default {
   GALLERY,
   PAGES,
   MEMBER,
+  ANY_TEAM_EDITOR,
   BINARY_COLLECTION,
   BINARY_TYPE,
   // Výchozí obsah app_config, když je kolekce prázdná (chování z v1).

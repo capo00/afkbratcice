@@ -1,4 +1,4 @@
-import { Crud, Error as CoreError } from "caio-server";
+import { Crud, Error as CoreError, Authorization } from "caio-server";
 import dao from "./dao.js";
 import teamDao from "../team/dao.js";
 import playerDao from "../player/dao.js";
@@ -6,7 +6,6 @@ import personDao from "../person/dao.js";
 import seasonDao from "../season/dao.js";
 import categoryDao from "../category/dao.js";
 import Config from "../config.js";
-import { hasRole, myTeamIdList } from "../services/authorize.js";
 import { checkMatchAges, isFriendly } from "../services/category.js";
 import { withLineupPositions } from "../services/lineup-position.js";
 import { personForIdentity } from "../services/hidden-names.js";
@@ -23,7 +22,7 @@ class MatchCrud extends Crud {
    * druhý endpoint, který zápas vrací, a filtr se obejde.
    */
   _forIdentity(match, identity) {
-    if (hasRole(identity, Config.MEMBER) || myTeamIdList(identity).length) return match;
+    if (Authorization.hasProfile(identity, [...Config.MEMBER, Config.ANY_TEAM_EDITOR])) return match;
     const { departureTime, ...rest } = match;
     return rest;
   }
@@ -123,7 +122,8 @@ class MatchCrud extends Crud {
    *                  přepsat soupeře -- jinak by si zápas přetáhl k sobě.
    */
   async update(data, identity) {
-    const scopedOnly = Boolean(identity) && !hasRole(identity, Config.MATCH) && myTeamIdList(identity).length > 0;
+    const scopedOnly =
+      !Authorization.hasProfile(identity, Config.MATCH) && Authorization.hasProfile(identity, [Config.ANY_TEAM_EDITOR]);
 
     if (scopedOnly) {
       const { homeTeamId, guestTeamId, ...rest } = data;
@@ -196,11 +196,12 @@ class MatchCrud extends Crud {
       }
     }
 
-    const scopedOnly = Boolean(identity) && !hasRole(identity, Config.MATCH) && myTeamIdList(identity).length > 0;
+    const scopedOnly =
+      !Authorization.hasProfile(identity, Config.MATCH) && Authorization.hasProfile(identity, [Config.ANY_TEAM_EDITOR]);
     let nextPlayerList = playerList;
 
     if (scopedOnly) {
-      const mine = myTeamIdList(identity);
+      const mine = Authorization.scopesOf(identity, Config.ROLE.TEAM_EDITOR);
       const isMine = (entry) => {
         const player = players.find((p) => p.id === entry.playerId);
         return (player?.teamList ?? []).some((t) => mine.includes(t.id));

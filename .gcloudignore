@@ -7,6 +7,7 @@ node_modules/
 
 # Návrh a dokumentace -- server je za běhu nečte a v public/ nejsou.
 design/
+docs/
 dtb-design.png
 README.md
 todo.md

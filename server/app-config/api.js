@@ -1,7 +1,7 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, array, integer, any } from "../services/validators.js";
-import { roleAuth } from "../services/authorize.js";
 
 export default {
   "appConfig/get": {
@@ -12,7 +12,7 @@ export default {
 
   "appConfig/update": {
     method: "post",
-    auth: roleAuth(Config.ADMIN),
+    auth: Authorization.auth(Config.ADMIN),
     validator: validate(shape({
       id: any(),
       categoryOrder: array(string()),

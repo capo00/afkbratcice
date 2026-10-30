@@ -231,7 +231,7 @@ const AdminMatches = UiApp.withRoute(Matches, { profileList: ["authorities", "op
 ```
 
 *Které* týmy to jsou, si obrazovka zjistí až uvnitř přes `UiAuth.getScopeList(identity,
-"teamEditor")` — vrací pole `teamId`, stejně jako `myTeamIdList()` na serveru. Obrazovky,
+"teamEditor")` — vrací pole `teamId`, stejně jako `Authorization.scopesOf()` na serveru. Obrazovky,
 které to používají: `admin/matches`, `admin/players`, `admin/coaches`, `admin/teams`.
 
 ### 2.3 Pokrytí rout současného webu

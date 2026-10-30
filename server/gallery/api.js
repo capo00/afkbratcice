@@ -1,7 +1,7 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, oneOf, any, pageInfo } from "../services/validators.js";
-import { roleAuth } from "../services/authorize.js";
 
 const idDtoIn = shape({ id: mongoId().isRequired() });
 
@@ -44,14 +44,14 @@ export default {
 
   "gallery/create": {
     method: "post",
-    auth: roleAuth(Config.GALLERY),
+    auth: Authorization.auth(Config.GALLERY),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn }) => crud.create({ photoCount: 0, state: "draft", ...dtoIn }),
   },
 
   "gallery/update": {
     method: "post",
-    auth: roleAuth(Config.GALLERY),
+    auth: Authorization.auth(Config.GALLERY),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn }) => crud.update(dtoIn),
   },
@@ -59,21 +59,21 @@ export default {
   // Dva soubory: plná verze a náhled. GCS náhledy negeneruje.
   "gallery/addPhoto": {
     method: "post",
-    auth: roleAuth(Config.GALLERY),
+    auth: Authorization.auth(Config.GALLERY),
     validator: validate(shape({ id: mongoId().isRequired(), file: any(), thumb: any(), name: string() })),
     fn: ({ dtoIn }) => crud.addPhoto(dtoIn),
   },
 
   "gallery/deletePhoto": {
     method: "post",
-    auth: roleAuth(Config.GALLERY),
+    auth: Authorization.auth(Config.GALLERY),
     validator: validate(shape({ id: mongoId().isRequired(), binaryId: mongoId().isRequired() })),
     fn: ({ dtoIn }) => crud.deletePhoto(dtoIn),
   },
 
   "gallery/delete": {
     method: "post",
-    auth: roleAuth(Config.GALLERY),
+    auth: Authorization.auth(Config.GALLERY),
     validator: validate(idDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },

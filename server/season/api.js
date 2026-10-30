@@ -1,7 +1,7 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, oneOf, array, boolean, pageInfo } from "../services/validators.js";
-import { roleAuth } from "../services/authorize.js";
 
 const listDtoIn = shape({
   age: oneOf(Config.AGE_LIST),
@@ -58,21 +58,21 @@ export default {
 
   "season/create": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn }) => crud.create(dtoIn),
   },
 
   "season/update": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn }) => crud.update(dtoIn),
   },
 
   "season/delete": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(getDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },

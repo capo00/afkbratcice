@@ -1,8 +1,8 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, oneOf, array, integer, any, pageInfo }
   from "../services/validators.js";
-import { roleAuth } from "../services/authorize.js";
 
 const idDtoIn = shape({ id: mongoId().isRequired() });
 
@@ -49,21 +49,21 @@ export default {
 
   "article/create": {
     method: "post",
-    auth: roleAuth(Config.NEWS),
+    auth: Authorization.auth(Config.NEWS),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   "article/update": {
     method: "post",
-    auth: roleAuth(Config.NEWS),
+    auth: Authorization.auth(Config.NEWS),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn }) => crud.update(dtoIn),
   },
 
   "article/setState": {
     method: "post",
-    auth: roleAuth(Config.NEWS),
+    auth: Authorization.auth(Config.NEWS),
     validator: validate(shape({
       id: mongoId().isRequired(),
       state: oneOf(Config.ARTICLE_STATE).isRequired(),
@@ -73,7 +73,7 @@ export default {
 
   "article/delete": {
     method: "post",
-    auth: roleAuth(Config.NEWS),
+    auth: Authorization.auth(Config.NEWS),
     validator: validate(idDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },

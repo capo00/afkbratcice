@@ -89,11 +89,6 @@ class MatchDao extends Dao {
   listBySeason(seasonId) {
     return this.find({ seasonId }, { pageSize: 1000 }, { time: 1 });
   }
-
-  /** Základní Dao aggregate neumí -- statistiky hráčů ho potřebují. */
-  aggregate(pipeline) {
-    return this._exec(() => this.coll.aggregate(pipeline).toArray());
-  }
 }
 
 export default new MatchDao();

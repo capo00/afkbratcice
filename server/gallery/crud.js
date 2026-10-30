@@ -1,7 +1,6 @@
-import { Crud, Error as CoreError, BinaryStore } from "caio-server";
+import { Crud, Error as CoreError, BinaryStore, Authorization } from "caio-server";
 import dao from "./dao.js";
 import Config from "../config.js";
-import { hasRole } from "../services/authorize.js";
 
 /**
  * Album a jeho fotky. Google Cloud Storage náhledy negeneruje, takže každá fotka jsou
@@ -15,7 +14,7 @@ class GalleryCrud extends Crud {
 
   async list({ state, seasonId, matchId, category, pageInfo } = {}, identity) {
     // Nepřihlášený vidí jen publikovaná alba; rozpracované jsou pro redakci.
-    const effectiveState = hasRole(identity, Config.GALLERY) ? state : "published";
+    const effectiveState = Authorization.hasProfile(identity, Config.GALLERY) ? state : "published";
     const itemList = await dao.listByFilter({ state: effectiveState, seasonId, matchId, category }, pageInfo);
     return itemList.map((item) => this._getData(item));
   }
@@ -27,7 +26,7 @@ class GalleryCrud extends Crud {
    */
   async get(id, identity) {
     const gallery = this._getData(await this._get(id));
-    if (!hasRole(identity, Config.GALLERY) && gallery.state !== "published") {
+    if (!Authorization.hasProfile(identity, Config.GALLERY) && gallery.state !== "published") {
       throw new CoreError("Gallery does not exist", {
         status: 404,
         code: `${Config.ERROR_PREFIX}/gallery/notFound`,

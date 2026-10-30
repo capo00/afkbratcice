@@ -161,7 +161,7 @@ Zavedeno 2026-10-28 (`server/services/hidden-names.js`, `hidden-teams.js`), s up
   v sestavě starého zápasu žáků ne.
 - **Jména vidí i `MATCH` a editor týmu**, ne jen `CONTENT`: oba skládají sestavy.
 - **Trenéři se neskrývají** — jsou dospělí.
-- **`person/list` a `person/get` nejsou veřejné** (`anyTeamEditor(CONTENT)`); web je
+- **`person/list` a `person/get` nejsou veřejné** (`Authorization.auth([...CONTENT, "teamEditor:*"])`); web je
   nepotřebuje a veřejně by filtr obcházely.
 
 ---

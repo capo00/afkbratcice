@@ -5,18 +5,16 @@ import Config from "../config/config.js";
 import { AppProvider } from "../core/app-context.jsx";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "../config/admin-menu.js";
 import { useAdminTop } from "./top.jsx";
-import { useAdminHintSync } from "./use-admin-hint-sync.js";
 
 // Kořen UVE administrace (admin/index.html, /admin/…). Do 2026-10-24 byla administrace lazy
 // routa `admin/*` uvnitř webu; vlastní UVE je podle caio_propertyman: vlastní dokument,
 // vlastní bundle a vlastní kus URL. Návštěvník webu tak kód administrace ani její knihovny
 // (`uu5tilesg02*`, `uu5codekitg01-forms`) nestahuje vůbec, ne jen líně. Web o administraci
-// neví, jen v liště ukáže odkaz, když se tu někdo přihlásil (tools/admin-hint.js).
+// neví, jen v liště ukáže odkaz, když se tu někdo přihlásil (caio-ui `useAdminMarkerSync`).
 //
 // Adresy se nezměnily: `/admin/clubs` je dál `/admin/clubs`, jen routa uvnitř je `clubs`
 // (`data-uu-app-base="/admin/"`).
 
-const LANGUAGE_LIST = ["cs"];
 
 // Obrazovky se načítají lazy -- kdo jde zapsat výsledek, nemá stahovat galerii.
 const SCREEN = {
@@ -73,8 +71,9 @@ const FALLBACK = (
 
 function AdminFrame() {
   const top = useAdminTop();
-  // Značka pro web: v tomhle prohlížeči se někdo přihlásil do administrace.
-  useAdminHintSync();
+  // Značka pro web: v tomhle prohlížeči se někdo přihlásil do administrace. Přihlášený bez
+  // práva na jakoukoli obrazovku ji smaže.
+  UiApp.useAdminMarkerSync(ANY_ADMIN_PROFILE);
   const element = useRouter(ROUTE_MAP);
   const [route] = useRoute();
 
@@ -96,7 +95,7 @@ function AdminApp() {
     // Stejné `loose` mezery jako na webu: obrazovky administrace stojí na týchž sekcích
     // a kartách, takže by se jinak lišily jen hustotou.
     <Uu5Elements.SpacingProvider type="loose">
-      <UiApp.SpaProvider languageList={LANGUAGE_LIST}>
+      <UiApp.SpaProvider>
         {/* Konfigurace a mapa týmů jako na webu: obrazovky z ní berou názvy a loga týmů
             a po zápisu ji obnovují (`useApp().reload`). */}
         <AppProvider>

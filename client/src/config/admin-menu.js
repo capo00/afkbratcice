@@ -33,7 +33,7 @@ const ADMIN_MENU = [
 ].filter((item) => item.ready);
 
 // Role, která otevře aspoň jednu obrazovku administrace — podle ní admin zapíše značku pro
-// web (tools/admin-hint.js) a web pak ukáže v liště odkaz do správy.
+// web (caio-ui `useAdminMarkerSync`) a web pak ukáže v liště odkaz do správy.
 const ANY_ADMIN_PROFILE = [...new Set(ADMIN_MENU.flatMap((item) => item.profileList))];
 
 export { ADMIN_MENU, ANY_ADMIN_PROFILE };

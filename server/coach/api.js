@@ -1,8 +1,8 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import dao from "./dao.js";
 import { validate, shape, mongoId, oneOf, array, any, pageInfo, truthy } from "../services/validators.js";
-import { roleAuth, teamScoped } from "../services/authorize.js";
 
 const membership = shape({ id: mongoId().isRequired(), dateFrom: any(), dateTo: any() });
 const idDtoIn = shape({ id: mongoId().isRequired() });
@@ -22,7 +22,7 @@ const writeDtoIn = shape({
   teamList: array(membership),
 });
 
-async function teamsOfCoach(dtoIn) {
+async function teamsOfCoach({ dtoIn }) {
   if (dtoIn?.teamList?.length) return dtoIn.teamList.map((t) => t.id);
   if (!dtoIn?.id) return [];
   const coach = await dao.get(dtoIn.id).catch(() => null);
@@ -45,21 +45,33 @@ export default {
 
   "coach/create": {
     method: "post",
-    auth: teamScoped(teamsOfCoach, Config.CONTENT, "all"),
+    auth: Authorization.auth(Config.CONTENT, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: teamsOfCoach,
+      mode: "all",
+    }),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   "coach/update": {
     method: "post",
-    auth: teamScoped(teamsOfCoach, Config.CONTENT, "all"),
+    auth: Authorization.auth(Config.CONTENT, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: teamsOfCoach,
+      mode: "all",
+    }),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 
   "coach/delete": {
     method: "post",
-    auth: teamScoped(teamsOfCoach, Config.CONTENT, "all"),
+    auth: Authorization.auth(Config.CONTENT, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: teamsOfCoach,
+      mode: "all",
+    }),
     validator: validate(idDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },

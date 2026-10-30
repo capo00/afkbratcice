@@ -1,7 +1,7 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, oneOf, array, boolean, any, pageInfo, truthy } from "../services/validators.js";
-import { teamScoped, roleAuth, hasRole } from "../services/authorize.js";
 
 const listDtoIn = shape({
   // Věková skupina (všechny kategorie, které do ní patří), nebo jedna konkrétní kategorie.
@@ -40,7 +40,7 @@ export default {
 
   "team/create": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn }) => crud.create(dtoIn),
   },
@@ -49,12 +49,16 @@ export default {
   // `club/update` (jen CONTENT) -- TE ho spravovat nemá, viz design/roles.md, 5.2.
   "team/update": {
     method: "post",
-    auth: teamScoped(async (dtoIn) => [dtoIn?.id], Config.CONTENT, "all"),
+    auth: Authorization.auth(Config.CONTENT, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: ({ dtoIn }) => [dtoIn?.id],
+      mode: "all",
+    }),
     validator: validate(writeDtoIn),
     // Kategorii mění jen CONTENT: editor týmu by přepnutím na starou gardu obešel pravidlo,
     // kdo proti komu smí hrát (services/category.js).
     fn: ({ dtoIn, identity }) => {
-      if (hasRole(identity, Config.CONTENT)) return crud.update(dtoIn);
+      if (Authorization.hasProfile(identity, Config.CONTENT)) return crud.update(dtoIn);
       const { category, ...rest } = dtoIn;
       return crud.update(rest);
     },
@@ -62,7 +66,7 @@ export default {
 
   "team/delete": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(getDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },

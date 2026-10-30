@@ -84,40 +84,31 @@ Jeden člověk může mít i víc týmů (`teamEditor:A`, `teamEditor:B`). Vyhod
 `auth`, protože rozhodnutí závisí na `dtoIn`:
 
 ```js
-// server/services/authorize.js
-const PREFIX = "teamEditor:";
+// Authorization je z caio-server (stejná pravidla jako caio-ui na klientu)
+import { Authorization } from "caio-server";
 
-function myTeamIdList(identity) {
-  return (identity?.profileList ?? [])
-    .filter((p) => p.startsWith(PREFIX))
-    .map((p) => p.slice(PREFIX.length));
-}
+// Týmy, které volající spravuje. Prázdný rozsah (`teamEditor:`) se nepočítá.
+Authorization.scopesOf(identity, Config.ROLE.TEAM_EDITOR); // ["6512ab34…", …]
 
-/**
- * @param resolveTeamIdList  async (dtoIn) => string[]  -- kterých týmů se dtoIn týká
- * @param baseRoleList       role, které projdou bez ohledu na tým
- * @param mode               "any" = stačí jeden můj tým, "all" = musí být všechny moje
- */
-function teamScoped(resolveTeamIdList, baseRoleList, mode = "all") {
-  return async ({ dtoIn, identity }) => {
-    const profileList = identity?.profileList ?? [];
-    if (profileList.some((p) => baseRoleList.includes(p))) return true;
+// `auth` use casu: plošné role projdou bez ohledu na tým, editor týmu podle `resolve`.
+// mode: "any" = stačí jeden můj tým (zápas má dva), "all" = musí být všechny moje.
+// Nic nedohledáno = nepustí; nepřihlášeného nepustí nikdy.
+auth: Authorization.auth(Config.MATCH, {
+  role: Config.ROLE.TEAM_EDITOR,
+  resolve: async ({ dtoIn }) => {
+    const match = await dao.get(dtoIn?.id).catch(() => null);
+    return match ? [match.homeTeamId, match.guestTeamId] : [];
+  },
+  mode: "any",
+}),
 
-    const mine = myTeamIdList(identity);
-    if (!mine.length) return false;
-
-    const target = await resolveTeamIdList(dtoIn);
-    if (!target.length) return false;
-    return mode === "any"
-      ? target.some((id) => mine.includes(id))
-      : target.every((id) => mine.includes(id));
-  };
-}
+// Editor *nějakého* týmu (osoby): wildcard `teamEditor:*` = Config.ANY_TEAM_EDITOR
+auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
 ```
 
 ### Jak se rozsah zjišťuje u jednotlivých use casů
 
-| Use case | `resolveTeamIdList` | `mode` |
+| Use case | `resolve` | `mode` |
 |---|---|---|
 | `match/create` | `[dtoIn.homeTeamId, dtoIn.guestTeamId]` | **`any`** — můj tým musí být jeden ze dvou |
 | `match/update`, `setResult`, `delete` | načíst zápas podle `dtoIn.id` → jeho dva týmy | `any` |
@@ -158,7 +149,8 @@ profil** („je v JWT, nestojí to dotaz“) — od 7. 9. 2026 už neplatí: ide
 z kolekce při každém requestu, protože role v tokenu byly zbytečné bezpečnostní riziko.
 Zůstává jediný rozdíl, a ten je pořád ve prospěch profilu: jeden dotaz místo dvou.
 Kdyby rozsahů přibylo (podle sezóny, podle soutěže), je přechod na kolekci `grant`
-přímočarý: změní se jen `myTeamIdList()`.
+přímočarý: změní se jen místa, která rozsah čtou (`Authorization.scopesOf()` a `resolve`
+v `auth`).
 
 Administrace v `admin/identities` musí `teamEditor:<id>` **zobrazovat jako název týmu**,
 ne jako holé id, a nabízet výběr týmu — jinak to nikdo nenastaví správně.
@@ -386,7 +378,8 @@ Na klientu se stejná pravidla duplikují — jde o UX, **ne o bezpečnostní hr
 
 - ochrana rout: `UiApp.withRoute(Component, { profileList: [...] })`,
 - podmíněné `actionList` u tabulek a detailů,
-- `teamEditor` potřebuje na klientu tutéž funkci `myTeamIdList()`, aby se v menu
+- `teamEditor` potřebuje na klientu totéž co `Authorization.scopesOf()` na serveru
+  (`UiAuth.getScopeList()`), aby se v menu
   `admin/*` ukázaly jen jeho týmy.
 
 Pravidlo pro každou obrazovku: **co uživatel nesmí, se nemá ukazovat zašedlé — nemá se

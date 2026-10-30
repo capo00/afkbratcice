@@ -18,7 +18,7 @@ export function setupTheme() {
   Config.Css.injectGlobal({
     // Barvy webu jsou CSS proměnné (config/theme.js). Světlá paleta je základ, tmavá platí
     // podle systému, nebo podle uložené volby z přepínače (`<html data-color-mode>`,
-    // tools/color-mode.js). Stejné pravidlo pro boot screen opisuje index.html.
+    // přepínač z caio-ui). Stejné pravidlo pro boot screen píše caio-devkit z package.json `caio.boot`.
     ":root": theme.paletteVars("light"),
     "@media (prefers-color-scheme: dark)": {
       ":root:not([data-color-mode='light'])": theme.paletteVars("dark"),

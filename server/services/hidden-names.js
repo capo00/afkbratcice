@@ -1,5 +1,5 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
-import { hasRole, myTeamIdList } from "./authorize.js";
 
 // Jména dětí odstraňuje server, ne klient (design/api.md, 1.2; rozhodnuto 2026-09-06,
 // zavedeno 2026-10-28). U týmu, jehož kategorie má věk z `appConfig.hideNamesAgeList`,
@@ -19,7 +19,7 @@ const HIDDEN_FIELD_LIST = ["name", "surname", "photoId", "photoUri"];
 
 /** Vidí volající jména dětí kdekoli? */
 function canSeeHiddenNames(identity) {
-  return Boolean(identity) && (hasRole(identity, Config.MATCH) || myTeamIdList(identity).length > 0);
+  return Authorization.hasProfile(identity, [...Config.MATCH, Config.ANY_TEAM_EDITOR]);
 }
 
 function isSelf(identity, person) {

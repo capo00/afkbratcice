@@ -1,7 +1,7 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, array, any, pageInfo } from "../services/validators.js";
-import { roleAuth, anyTeamEditor } from "../services/authorize.js";
 
 const listDtoIn = shape({ query: string(), idList: array(mongoId()), pageInfo: pageInfo() });
 const idDtoIn = shape({ id: mongoId().isRequired() });
@@ -24,14 +24,14 @@ const writeDtoIn = shape({
 export default {
   "person/list": {
     method: "get",
-    auth: anyTeamEditor(Config.CONTENT),
+    auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
     validator: validate(listDtoIn),
     fn: ({ dtoIn, identity }) => crud.list(dtoIn, identity).then((itemList) => ({ itemList })),
   },
 
   "person/get": {
     method: "get",
-    auth: anyTeamEditor(Config.CONTENT),
+    auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
     validator: validate(idDtoIn),
     fn: ({ dtoIn, identity }) => crud.get(dtoIn.id, identity),
   },
@@ -40,28 +40,28 @@ export default {
   // osoba může hrát za víc týmů a patří tak celému klubu.
   "person/create": {
     method: "post",
-    auth: anyTeamEditor(Config.CONTENT),
+    auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
   "person/update": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 
   "person/delete": {
     method: "post",
-    auth: roleAuth(Config.CONTENT),
+    auth: Authorization.auth(Config.CONTENT),
     validator: validate(idDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },
 
   "person/linkIdentity": {
     method: "post",
-    auth: roleAuth(Config.ADMIN),
+    auth: Authorization.auth(Config.ADMIN),
     validator: validate(shape({ id: mongoId().isRequired(), identity: string().isRequired() })),
     fn: ({ dtoIn, identity }) => crud.linkIdentity(dtoIn, identity),
   },

@@ -9,7 +9,7 @@ const { theme } = Config;
 // šrafování** (`hatched`) a jednou za stránku ho přeruší plná červená plocha (`red`), která je
 // vizuální těžiště. Viz design/ux-design-system.md, 1 a 4.
 //
-// Web má světlý i tmavý režim (tools/color-mode.js). `plain` a `hatched` jdou s ním, `dark`
+// Web má světlý i tmavý režim (přepínač v liště z caio-ui). `plain` a `hatched` jdou s ním, `dark`
 // (hero) a `red` jsou tmavé v obou: přenastaví si barevné proměnné na tmavou paletu
 // (`theme.darkScope`), takže všechno uvnitř, i `mutedFg` perexu, vychází z tmavé.
 

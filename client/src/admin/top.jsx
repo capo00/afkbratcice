@@ -4,7 +4,6 @@ import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 import ClubName from "../components/layout/club-name.jsx";
 import { ADMIN_MENU } from "../config/admin-menu.js";
-import { useColorModeItem } from "../tools/color-mode.js";
 
 const { theme } = Config;
 
@@ -19,7 +18,8 @@ const { theme } = Config;
  * položky se v tomhle webu nepoužívají (design/frontend.md, 2.2). Nepřihlášený nevidí žádnou,
  * guard na routě mu ukáže přihlášení.
  *
- * Přihlášeného uživatele, odhlášení i správu identit dodává `Top` sám přes `displayIdentity`
+ * Přepínač režimu (společný s webem) dodává `Top` sám. Přihlášeného uživatele, odhlášení
+ * i správu identit taky, přes `displayIdentity`
  * (caio-ui README, *Identita v liště*). Role klubu se přidělují na obrazovce
  * `screens/identities.jsx`, protože rozsahová `teamEditor:<id>` potřebuje seznam mužstev.
  */
@@ -28,8 +28,6 @@ export function useAdminTop() {
   const adminLabel = useLsi(importLsi, ["header", "nav", "admin"]);
   const webLabel = useLsi(importLsi, ["header", "nav", "web"]);
   const menuLsi = useLsi(importLsi, ["admin", "menu"]);
-  // Režim je společný s webem (tools/color-mode.js), přepínač je proto i tady.
-  const colorModeItem = useColorModeItem(useLsi(importLsi, ["header", "colorMode"]));
 
   const itemList = ADMIN_MENU.filter((item) => UiAuth.hasProfile(session.identity, item.profileList)).map(
     (item) => ({
@@ -62,7 +60,6 @@ export function useAdminTop() {
           significance: "subdued",
           colorScheme: "building",
         },
-        colorModeItem,
       ].filter(Boolean),
     },
     displayIdentity: true,

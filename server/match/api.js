@@ -1,10 +1,10 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import { LINEUP_POSITION_LIST } from "../services/lineup-position.js";
 import crud from "./crud.js";
 import dao from "./dao.js";
 import { validate, shape, string, mongoId, oneOf, array, integer, boolean, any, pageInfo }
   from "../services/validators.js";
-import { teamScoped, roleAuth } from "../services/authorize.js";
 
 const listDtoIn = shape({
   seasonId: mongoId(),
@@ -53,7 +53,7 @@ const writeDtoIn = shape({
 });
 
 /** Týmy zápasu podle uloženého záznamu -- dtoIn u update nese jen `id`. */
-async function teamsOfMatch(dtoIn) {
+async function teamsOfMatch({ dtoIn }) {
   const match = await dao.get(dtoIn?.id).catch(() => null);
   return match ? [match.homeTeamId, match.guestTeamId] : [];
 }
@@ -86,7 +86,11 @@ export default {
   // Editor týmu smí založit zápas, ve kterém jeho tým hraje -- proto "any" ze dvou.
   "match/create": {
     method: "post",
-    auth: teamScoped(async (dtoIn) => [dtoIn?.homeTeamId, dtoIn?.guestTeamId], Config.MATCH, "any"),
+    auth: Authorization.auth(Config.MATCH, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: ({ dtoIn }) => [dtoIn?.homeTeamId, dtoIn?.guestTeamId],
+      mode: "any",
+    }),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
@@ -94,14 +98,18 @@ export default {
   // Hromadný import rozlosování z OFS -- jen plošné role.
   "match/createMany": {
     method: "post",
-    auth: roleAuth(Config.MATCH),
+    auth: Authorization.auth(Config.MATCH),
     validator: validate(shape({ itemList: array(writeDtoIn).isRequired() })),
     fn: ({ dtoIn }) => crud.createMany(dtoIn.itemList).then((itemList) => ({ itemList })),
   },
 
   "match/update": {
     method: "post",
-    auth: teamScoped(teamsOfMatch, Config.MATCH, "any"),
+    auth: Authorization.auth(Config.MATCH, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: teamsOfMatch,
+      mode: "any",
+    }),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
@@ -109,7 +117,11 @@ export default {
   // Výsledek smí zapsat editor kteréhokoli z obou týmů -- byli u toho oba.
   "match/setResult": {
     method: "post",
-    auth: teamScoped(teamsOfMatch, Config.MATCH, "any"),
+    auth: Authorization.auth(Config.MATCH, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: teamsOfMatch,
+      mode: "any",
+    }),
     validator: validate(shape({
       id: mongoId().isRequired(),
       homeGoals: integer().isRequired(),
@@ -123,7 +135,11 @@ export default {
 
   "match/setLineup": {
     method: "post",
-    auth: teamScoped(teamsOfMatch, Config.MATCH, "any"),
+    auth: Authorization.auth(Config.MATCH, {
+      role: Config.ROLE.TEAM_EDITOR,
+      resolve: teamsOfMatch,
+      mode: "any",
+    }),
     validator: validate(shape({ id: mongoId().isRequired(), playerList: array(lineupEntry) })),
     fn: ({ dtoIn, identity }) => crud.setLineup(dtoIn, identity),
   },
@@ -131,14 +147,14 @@ export default {
   // Mazání zápasu je zásah do soutěže, ne do vlastního týmu -- teamEditor ne.
   "match/delete": {
     method: "post",
-    auth: roleAuth(Config.MATCH),
+    auth: Authorization.auth(Config.MATCH),
     validator: validate(idDtoIn),
     fn: ({ dtoIn }) => crud.delete(dtoIn.id).then(() => ({})),
   },
 
   "match/deleteMany": {
     method: "post",
-    auth: roleAuth(Config.MATCH),
+    auth: Authorization.auth(Config.MATCH),
     validator: validate(shape({ idList: array(mongoId()).isRequired() })),
     fn: ({ dtoIn }) => crud.deleteMany(dtoIn.idList).then(() => ({})),
   },

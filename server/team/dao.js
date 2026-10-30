@@ -30,9 +30,7 @@ class TeamDao extends Dao {
 
   /** `[{ category, count }]` -- kolik týmů má která kategorie. */
   async countByCategory() {
-    const rows = await this._exec(() =>
-      this.coll.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]).toArray(),
-    );
+    const rows = await this.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]);
     return (rows ?? []).map((row) => ({ category: row._id, count: row.count }));
   }
 
@@ -46,9 +44,7 @@ class TeamDao extends Dao {
    * kategoriích, ne jen na tom týmu, který logo zrovna edituje (design/data-model.md, 1.2).
    */
   async updateLogoUriByClub(clubId, logoUri) {
-    await this._exec(() =>
-      this.coll.updateMany({ clubId }, { $set: { logoUri, "sys.mts": new Date().toISOString() } }),
-    );
+    await this.updateMany({ clubId }, { logoUri });
   }
 }
 

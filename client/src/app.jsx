@@ -8,51 +8,12 @@ import Footer from "./components/layout/footer.jsx";
 import ClubName from "./components/layout/club-name.jsx";
 import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
-import { useAdminHint } from "./tools/admin-hint.js";
-import { useColorModeItem } from "./tools/color-mode.js";
 import { useScrollTopOnRouteChange } from "./tools/scroll.js";
 import { usePageMeta } from "./tools/page-meta.js";
 import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
 
 const { theme } = Config;
 
-const LANGUAGE_LIST = ["cs"];
-
-/**
- * Odkaz do administrace (vzor z caio_propertyman `tools/use-web-menu.jsx`). Ukáže se, když se
- * v tomhle prohlížeči někdo přihlásil do administrace (tools/admin-hint.js), nebo když je na
- * webu přihlášený někdo s právem do ní — tedy i ten, kdo se přihlásil z odkazu v e-mailu
- * (`/login.html?invite=…` končí na `/`, ne v administraci) a značku ještě nemá.
- *
- * Administrace je jiný dokument (/admin/, vlastní UVE), ale `Top` ho za „mimo appku“
- * nepovažuje: app base webu je `/`, takže `/admin/` pod ni spadá a `href` by skončil na
- * `setRoute` (jen změna adresy, administrace by se nenačetla). Proto místo `href` vlastní
- * `onClick`, který chování odkazu napodobí: ctrl/cmd-klik a klik kolečkem (Button ho posílá
- * do `onClick` s `button === 1`) otevřou nový panel, obyčejný klik přejde do administrace.
- *
- * Jen ikona, nikdy v hamburgeru. `uugds-settings`, ne `uugds-account` jako v propertymanu: vedle
- * stojí identita přihlášeného, a dvě postavičky by se pletly. Bez `children` si ActionGroup tooltip sám nevezme, proto
- * `tooltip` — zároveň přístupný název tlačítka.
- */
-function useAdminItem() {
-  const hint = useAdminHint();
-  const session = UiAuth.useSession();
-  const isAdmin = hint || UiAuth.hasProfile(session.identity, ANY_ADMIN_PROFILE);
-  const adminLabel = useLsi(importLsi, ["header", "nav", "admin"]);
-  if (!isAdmin) return undefined;
-
-  return {
-    icon: "uugds-settings",
-    tooltip: adminLabel,
-    collapsed: "never",
-    onClick: (e) => {
-      const newTab = e?.ctrlKey || e?.metaKey || e?.button === 1;
-      window.open("/admin/", newTab ? "_blank" : "_self", "noopener");
-    },
-    significance: "subdued",
-    colorScheme: "building",
-  };
-}
 
 // Menu je **plochý seznam rout**, ne strom. Mužstva mívala rozbalovací podpoložky
 // s kategoriemi aktuálního ročníku, ale byla to práce navíc pro obě strany: návštěvník
@@ -61,7 +22,9 @@ function useAdminItem() {
 // než menu, takže se na něj jen proklikne (rozhodnuto 8. 9. 2026).
 //
 // Podpoložky má jen Klub (obsahové stránky). Administrace je vlastní UVE s vlastní lištou,
-// web na ni jen odkazuje ikonou (`useAdminItem`).
+// web na ni jen odkazuje ikonou (`adminLink`): `Top` ji ukáže, když se v tomhle prohlížeči
+// někdo přihlásil do administrace (značku zapisuje admin/app.jsx), nebo když je na webu
+// přihlášený někdo s právem do ní. Přepínač světlého a tmavého režimu přidává `Top` sám.
 function useTop() {
   const { state } = UiAuth.useSession();
   const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
@@ -70,8 +33,6 @@ function useTop() {
   const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
   const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
   const pageLsi = useLsi(importLsi, ["page", "name"]);
-  const adminItem = useAdminItem();
-  const colorModeItem = useColorModeItem(useLsi(importLsi, ["header", "colorMode"]));
 
   return {
     logo: { imageSrc: Config.asset.logoTransparent, href: "/", significance: "subdued" },
@@ -85,8 +46,6 @@ function useTop() {
     cssBackground: theme.palette.dark.bg,
     cssColor: theme.palette.dark.fg,
     menu: {
-      // `.filter(Boolean)`: odkaz do administrace je `undefined`, dokud se v tomhle prohlížeči
-      // nepřihlásí někdo, kdo na ni má.
       itemList: [
         {
           href: "novinky",
@@ -120,12 +79,9 @@ function useTop() {
           significance: "subdued",
           colorScheme: "building",
         },
-        adminItem,
-        // Přepínač světlého a tmavého režimu: jen ikona, v liště i na telefonu (canvas
-        // světlé verze, varianta A, 2026-10-25).
-        colorModeItem,
-      ].filter(Boolean),
+      ],
     },
+    adminLink: { profileList: ANY_ADMIN_PROFILE },
     // Přihlásit se na webu nejde, přihlašuje se v administraci (admin/top.jsx). Session ale
     // web má (SpaProvider), takže editor přihlášený v administraci zapíše výsledek i z dlaždice
     // zápasu (match-tile.jsx). Proto **přihlášenému** lišta ukáže identitu s odhlášením — kdo
@@ -168,7 +124,7 @@ function App() {
     // 16, `gap` v `Grid` z 16 na 24) bez jediného řádku CSS. Obaluje všechno včetně lišty
     // a patičky, ne jednotlivé sekce.
     <Uu5Elements.SpacingProvider type="loose">
-      <UiApp.SpaProvider languageList={LANGUAGE_LIST}>
+      <UiApp.SpaProvider>
         <AppProvider>
           <Shell />
         </AppProvider>

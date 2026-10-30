@@ -1,8 +1,7 @@
-import { Crud, Error as CoreError, BinaryStore } from "caio-server";
+import { Crud, Error as CoreError, BinaryStore, Authorization } from "caio-server";
 import dao from "./dao.js";
 import matchDao from "../match/dao.js";
 import Config from "../config.js";
-import { hasRole } from "../services/authorize.js";
 
 /**
  * Novinka. Obsah je `sectionList` -- pole objektů sekcí, zatím s jediným klíčem `content`
@@ -21,7 +20,7 @@ class ArticleCrud extends Crud {
 
   /** Redakce vidí i rozpracované a naplánované; kdokoli jiný jen to, co je venku. */
   _isEditor(identity) {
-    return hasRole(identity, Config.NEWS);
+    return Authorization.hasProfile(identity, Config.NEWS);
   }
 
   async list({ state, matchId, tag, pageInfo } = {}, identity) {

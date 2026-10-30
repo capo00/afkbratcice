@@ -1,9 +1,8 @@
-import { Crud, Error as CoreError, BinaryStore } from "caio-server";
+import { Crud, Error as CoreError, BinaryStore, Authorization } from "caio-server";
 import dao from "./dao.js";
 import playerDao from "../player/dao.js";
 import coachDao from "../coach/dao.js";
 import Config from "../config.js";
-import { hasRole } from "../services/authorize.js";
 
 // Kontaktní údaje jsou neveřejné. Filtruje je tahle vrstva, ne jednotlivé use casy --
 // osoba se vrací i z player/list a match/get, takže filtr v API by šel obejít.
@@ -18,7 +17,7 @@ class PersonCrud extends Crud {
   static forIdentity(person, identity) {
     if (!person) return person;
     const isSelf = Boolean(identity?.identity) && person.identity === identity.identity;
-    if (isSelf || hasRole(identity, Config.CONTENT)) return person;
+    if (isSelf || Authorization.hasProfile(identity, Config.CONTENT)) return person;
 
     const result = { ...person };
     for (const field of PRIVATE_FIELD_LIST) delete result[field];
@@ -35,7 +34,7 @@ class PersonCrud extends Crud {
   }
 
   // Zápis filtruje stejně jako čtení: `create` smí volat i `teamEditor` bez role CONTENT
-  // (`anyTeamEditor` v api.js) a ten by jinak dostal zpátky objekt s poli, která mu
+  // (`Config.ANY_TEAM_EDITOR` v api.js) a ten by jinak dostal zpátky objekt s poli, která mu
   // `person/list` odřízne -- tvar položky by se pak lišil řádek od řádku. Platí pravidlo
   // z hlavičky souboru: filtruje tahle vrstva, ne jednotlivé use casy.
   async create(data, identity) {

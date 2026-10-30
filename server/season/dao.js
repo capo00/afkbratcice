@@ -1,5 +1,4 @@
-import { Dao } from "caio-server";
-import { ObjectId } from "mongodb";
+import { Dao, ObjectId } from "caio-server";
 
 class SeasonDao extends Dao {
   constructor() {

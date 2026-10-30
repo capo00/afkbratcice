@@ -1,13 +1,13 @@
+import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
 import { validate, shape, string, mongoId, any, pageInfo } from "../services/validators.js";
-import { roleAuth } from "../services/authorize.js";
 
 // list/get jsou veřejné jako `team/list`/`team/get` -- na webu se sice pořád čte jen
 // denormalizované `team.logoUri`, ale výběr klubu ve formuláři týmu (`admin/teams.jsx`)
 // otevírá i `teamEditor:<id>`, který na `Config.CONTENT` nemá dosah (design/roles.md, 5.2).
 // Klub navíc nenese nic neveřejného -- jen jméno a erb.
-const AUTH = roleAuth(Config.CONTENT);
+const AUTH = Authorization.auth(Config.CONTENT);
 
 const listDtoIn = shape({ pageInfo: pageInfo() });
 const getDtoIn = shape({ id: mongoId().isRequired() });
