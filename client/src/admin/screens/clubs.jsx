@@ -6,7 +6,6 @@ import TeamLogo from "../../components/team-logo.jsx";
 import AdminScreen from "../screen.jsx";
 import { nameField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { prepareImage } from "../image.js";
 import { useApp } from "../../core/app-context.jsx";
 
@@ -39,7 +38,7 @@ const AdminClubs = createVisualComponent({
     // načtený při startu SPA -- bez tohohle by veřejné dlaždice i seznam týmů ukazovaly
     // staré logo až do tvrdého reloadu.
     const calls = useMemo(() => {
-      const base = entityCalls("club");
+      const base = UiElements.CrudContext.entityCalls("club");
       const withReload = (fn) => async (dtoIn) => {
         const result = await fn(dtoIn);
         await reload();

@@ -4,7 +4,6 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { EntitySelect, EnumText, enumItemList, personLabel } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import FormMembership from "../form-membership.jsx";
@@ -17,8 +16,8 @@ import FormMembership from "../form-membership.jsx";
 // `coach/list?role=board` místo ručně psaného seznamu.
 
 const [CoachProvider] = UiElements.CrudContext.create("coach");
-// Bez `createMany`/`deleteMany` -- `coach` je na serveru nemá (admin/crud-calls.js).
-const CALLS = entityCalls("coach");
+// Bez `createMany`/`deleteMany` -- `coach` je na serveru nemá (caio-ui `CrudContext.entityCalls`).
+const CALLS = UiElements.CrudContext.entityCalls("coach");
 
 const CONFIG = {
   personId: {

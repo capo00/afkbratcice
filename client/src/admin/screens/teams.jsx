@@ -5,7 +5,6 @@ import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
 import AdminScreen from "../screen.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { nameField, categoryField, boolField, EntitySelect, clubLabel } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 
@@ -20,8 +19,8 @@ import CrudFormView from "../crud-form-view.jsx";
 // nahrané kopie (design/data-model.md, 1.2).
 
 const [TeamProvider] = UiElements.CrudContext.create("team");
-// Bez `createMany`/`deleteMany` -- `team` je na serveru nemá (admin/crud-calls.js).
-const CALLS = entityCalls("team");
+// Bez `createMany`/`deleteMany` -- `team` je na serveru nemá (caio-ui `CrudContext.entityCalls`).
+const CALLS = UiElements.CrudContext.entityCalls("team");
 
 const CONFIG = {
   logo: {

@@ -5,7 +5,6 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { EnumText, enumItemList, dateField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import PhotoUpload from "../photo-upload.jsx";
@@ -19,7 +18,7 @@ import PhotoUpload from "../photo-upload.jsx";
 // si řádek vystačí sám -- stejně jako `screens/matches.jsx`.
 //
 // `createMany`/`deleteMany` se nepřidávají: `gallery` je na serveru nemá.
-const GALLERY_CALLS = entityCalls("gallery");
+const GALLERY_CALLS = UiElements.CrudContext.entityCalls("gallery");
 const GALLERY_HANDLERS = {
   handlerMap: {
     load: GALLERY_CALLS.list,

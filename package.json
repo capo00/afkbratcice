@@ -12,16 +12,41 @@
       "logo": "/assets/icon-192-transparent.png",
       "name": "AFK Bratčice",
       "nameUppercase": true,
-      "logoSize": "60%",
-      "light": {
-        "background": "#faf6f4",
-        "color": "#1c1312",
-        "accent": "#d01319"
+      "logoSize": "60%"
+    },
+    "theme": {
+      "prefix": "afk",
+      "palette": {
+        "light": {
+          "bg": "#FAF6F4",
+          "card": "#FFFCFA",
+          "muted": "#F1EAE7",
+          "accent": "#FBE3DF",
+          "border": "#E3D8D5",
+          "input": "#C9BCB8",
+          "fg": "#1C1312",
+          "mutedFg": "#6B5E5B",
+          "clubRed": "#D01319",
+          "clubRedBright": "#F92725",
+          "onRed": "#FEF7F2"
+        },
+        "dark": {
+          "bg": "#070404",
+          "card": "#120D0C",
+          "muted": "#1D1716",
+          "accent": "#2A1B19",
+          "border": "#2C2423",
+          "input": "#362E2D",
+          "fg": "#F3EFED",
+          "mutedFg": "#99908E",
+          "clubRed": "#D01319",
+          "clubRedBright": "#F92725",
+          "onRed": "#FEF7F2"
+        }
       },
-      "dark": {
-        "background": "#070404",
-        "color": "#f3efed",
-        "accent": "#d01319"
+      "meaning": {
+        "primary": "clubRed",
+        "negative": "warning"
       }
     }
   },

@@ -4,7 +4,6 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { nameField, ageField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import { useApp } from "../../core/app-context.jsx";
@@ -64,7 +63,7 @@ const AdminCategories = createVisualComponent({
 
     // Zápis obnoví app-context: z kategorií se skládají popisky týmů v administraci i na webu.
     const calls = useMemo(() => {
-      const base = entityCalls("category");
+      const base = UiElements.CrudContext.entityCalls("category");
       const withReload = (fn) => async (dtoIn) => {
         const result = await fn(dtoIn);
         await reload();

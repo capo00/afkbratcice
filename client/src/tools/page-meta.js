@@ -1,5 +1,5 @@
 import { useRoute } from "uu5g05";
-import { UiApp } from "./caio-ui.js";
+import { UiApp } from "caio-ui";
 import { OG_LOCALE, SITE_NAME, getRouteSeo } from "../config/seo.js";
 
 // Meta data stránky podle routy: titulek, popis, canonical, `og:*` a `robots`. Co která routa

@@ -1,9 +1,8 @@
 import { createVisualComponent, useDataObject, useState, useRoute, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiElements } from "../tools/caio-ui.js";
+import { UiApp, UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
-import { usePluralPath } from "../lsi/plural.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
@@ -28,7 +27,7 @@ const ALL = "all";
 function GalleryTile({ gallery, onClick }) {
   const photoCount = gallery.photoCount ?? 0;
   // Čeština má u počtu tři tvary — „1 fotka", „3 fotky", „5 fotek".
-  const photoCountPath = usePluralPath(["gallery", "photoCount"], photoCount);
+  const photoCountPath = UiApp.usePluralPath(["gallery", "photoCount"], photoCount);
 
   return (
     <Card onClick={onClick}>

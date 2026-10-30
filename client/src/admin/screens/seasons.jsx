@@ -4,7 +4,6 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { ageField, boolField, teamLabel, EntitySelect } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 
@@ -16,8 +15,8 @@ import CrudFormView from "../crud-form-view.jsx";
 // rozstřelu, by znamenalo, že se model změní podle toho, kdo co vyplnil.
 
 const [SeasonProvider] = UiElements.CrudContext.create("season");
-// Bez `createMany`/`deleteMany` -- `season` je na serveru nemá (admin/crud-calls.js).
-const CALLS = entityCalls("season");
+// Bez `createMany`/`deleteMany` -- `season` je na serveru nemá (caio-ui `CrudContext.entityCalls`).
+const CALLS = UiElements.CrudContext.entityCalls("season");
 
 // Name only: all participants share the season's category, so `teamLabel` with app context
 // would repeat it on every tag.

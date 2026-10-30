@@ -4,7 +4,6 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { entityCalls } from "../crud-calls.js";
 import { EnumText, enumItemList, dateTimeField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import FormSectionList from "../form-section-list.jsx";
@@ -19,8 +18,8 @@ import { prepareImage } from "../image.js";
 // Titulní foto se před uploadem zmenší na 1200 px a překlopí do WebP (frontend.md, 6.2).
 
 const [ArticleProvider] = UiElements.CrudContext.create("article");
-// Bez `createMany`/`deleteMany` -- `article` je na serveru nemá (admin/crud-calls.js).
-const CALLS = entityCalls("article");
+// Bez `createMany`/`deleteMany` -- `article` je na serveru nemá (caio-ui `CrudContext.entityCalls`).
+const CALLS = UiElements.CrudContext.entityCalls("article");
 
 const STATE_LIST = ["draft", "published", "archived"];
 

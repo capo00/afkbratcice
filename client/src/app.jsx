@@ -1,6 +1,6 @@
 import { useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiApp, UiAuth } from "./tools/caio-ui.js";
+import { UiApp, UiAuth } from "caio-ui";
 import Config from "./config/config.js";
 import importLsi from "./lsi/import-lsi.js";
 import Router from "./router.jsx";
@@ -8,11 +8,13 @@ import Footer from "./components/layout/footer.jsx";
 import ClubName from "./components/layout/club-name.jsx";
 import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
-import { useScrollTopOnRouteChange } from "./tools/scroll.js";
 import { usePageMeta } from "./tools/page-meta.js";
 import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
 
 const { theme } = Config;
+
+// Parametry, jejichž změna je pořád táž stránka (scroll nahoru se nedělá).
+const SAME_PAGE_PARAM_LIST = ["seasonId"];
 
 
 // Menu je **plochý seznam rout**, ne strom. Mužstva mívala rozbalovací podpoložky
@@ -96,8 +98,10 @@ function useTop() {
 // stejně nemá co zobrazit.
 function Shell() {
   const top = useTop();
-  // Nová stránka začíná nahoře; uu5g05 to samo nedělá (tools/scroll.js).
-  useScrollTopOnRouteChange();
+  // Nová stránka začíná nahoře; uu5g05 to samo nedělá (caio-ui `useScrollTopOnRouteChange`).
+  // Jinou stránkou je i jiné `id` na téže routě (z hráče na hráče); přepnutí sezóny u mužstva
+  // nechá čtenáře, kde byl.
+  UiApp.useScrollTopOnRouteChange({ ignoreParamList: SAME_PAGE_PARAM_LIST });
   // Titulek, popis, canonical a `og:*` podle routy (tools/page-meta.js, config/seo.js).
   usePageMeta();
 

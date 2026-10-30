@@ -1,6 +1,6 @@
 import { createVisualComponent, useRoute, useLsi, useDataObject, useMemo, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiElements } from "../../tools/caio-ui.js";
+import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../layout/section.jsx";

@@ -1,7 +1,7 @@
 import { createVisualComponent, useDataObject, useState, useMemo, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
-import { UiElements } from "../tools/caio-ui.js";
+import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import { LINEUP_POSITION_LIST, LINEUP_POSITION_MAP } from "../config/lineup-position.js";
 import importLsi from "../lsi/import-lsi.js";
