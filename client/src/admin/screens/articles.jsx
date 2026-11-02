@@ -21,8 +21,6 @@ const [ArticleProvider] = UiElements.CrudContext.create("article");
 // Bez `createMany`/`deleteMany` -- `article` je na serveru nemá (caio-ui `CrudContext.entityCalls`).
 const CALLS = UiElements.CrudContext.entityCalls("article");
 
-const STATE_LIST = ["draft", "published", "archived"];
-
 const CONFIG = {
   name: {
     label: lsi("admin", "field", "title"),
@@ -36,11 +34,11 @@ const CONFIG = {
     output: (value) => <EnumText enumName="articleState" code={value} />,
     input: {
       Component: Uu5Forms.FormSelect,
-      props: { required: true, itemList: enumItemList("articleState", STATE_LIST) },
+      props: { required: true, itemList: enumItemList("articleState", Config.ARTICLE_STATE_LIST) },
     },
     filterProps: {
       inputType: "select",
-      inputProps: { itemList: enumItemList("articleState", STATE_LIST) },
+      inputProps: { itemList: enumItemList("articleState", Config.ARTICLE_STATE_LIST) },
       filter: (value, filterValue) => value === filterValue,
     },
   },

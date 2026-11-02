@@ -286,7 +286,7 @@ class MatchCrud extends Crud {
   }
 
   _error(code, message, paramMap) {
-    return new CoreError(message, { status: 400, code: `${Config.ERROR_PREFIX}/match/${code}`, paramMap });
+    return new CoreError(message, { status: 400, code: CoreError.code("match", code), paramMap });
   }
 }
 

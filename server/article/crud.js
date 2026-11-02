@@ -48,7 +48,7 @@ class ArticleCrud extends Crud {
     if (!this._isEditor(identity) && !this._isPublic(article)) {
       throw new CoreError("Article does not exist", {
         status: 404,
-        code: `${Config.ERROR_PREFIX}/article/notFound`,
+        code: CoreError.code("article", "notFound"),
         paramMap: { id },
       });
     }

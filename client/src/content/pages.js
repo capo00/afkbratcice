@@ -34,7 +34,7 @@ const PAGES = {
     desc: "Kdy a kde trénují jednotlivá mužstva.",
     // v0 tabulka `trenink` končí rokem 2015, takže rozpis po mužstvech z čeho přepsat
     // není. Jediný aktuální údaj je proužek „Upozornění" na v0 — a ten se sem nekopíruje
-    // podruhé, drží ho `appConfig.notice` a vykresluje rám nad každou stránkou.
+    // podruhé, drží ho `appSettings.notice` a vykresluje rám nad každou stránkou.
   },
 
   "tymove-fotky": {

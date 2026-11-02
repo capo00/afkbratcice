@@ -3,7 +3,7 @@ import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config.js";
 import { useApp } from "../../core/app-context.jsx";
 
-// Upozornění redakce (`appConfig.notice`) — „zápas se přesouvá na neděli", „trénink
+// Upozornění redakce (`appSettings.notice`) — „zápas se přesouvá na neděli", „trénink
 // v pátek v 17:00".
 //
 // **Není to celostránkový pruh pod lištou.** Ve v0 stálo v pravém sloupci na každé
@@ -45,8 +45,8 @@ const NoticeBar = createVisualComponent({
   uu5Tag: Config.TAG + "NoticeBar",
 
   render(props) {
-    const { appConfig } = useApp();
-    const notice = appConfig?.notice?.trim();
+    const { appSettings } = useApp();
+    const notice = appSettings?.notice?.trim();
     const key = notice ? storageKey(notice) : null;
     const [dismissed, setDismissed] = useState(() => (key ? readDismissed(key) : false));
 

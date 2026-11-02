@@ -59,7 +59,7 @@ const CONFIG = {
     output: (value) => <EnumText enumName="galleryState" code={value} />,
     input: {
       Component: Uu5Forms.FormSelect,
-      props: { itemList: enumItemList("galleryState", ["draft", "published"]) },
+      props: { itemList: enumItemList("galleryState", Config.GALLERY_STATE_LIST) },
     },
   },
   author: {

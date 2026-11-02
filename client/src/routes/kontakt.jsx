@@ -12,7 +12,7 @@ import { useApp } from "../core/app-context.jsx";
 const { theme } = Config;
 
 // Kontakt je **jediná obsahová stránka, která není text v kódu** — jsou to údaje, které
-// redakce mění v konfiguraci (`appConfig.contact`), takže je nemá smysl mít natvrdo
+// správce mění v Nastavení (`appSettings.contact`), takže je nemá smysl mít natvrdo
 // a zároveň v administraci. Ostatní stránky jsou v `content/pages.js`.
 //
 // Mapa je `<iframe>` OpenStreetMap: uu5 mapovou komponentu nemá a Google Maps Embed by
@@ -60,8 +60,8 @@ const Kontakt = createVisualComponent({
   uu5Tag: Config.TAG + "Kontakt",
 
   render() {
-    const { appConfig } = useApp();
-    const contact = appConfig?.contact ?? {};
+    const { appSettings } = useApp();
+    const contact = appSettings?.contact ?? {};
     const rows = ROW.filter((row) => contact[row.code]);
     const embed = mapEmbedUrl(contact);
     const search = embed ? null : mapSearchUrl(contact);

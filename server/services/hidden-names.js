@@ -2,7 +2,7 @@ import { Authorization } from "caio-server";
 import Config from "../config.js";
 
 // Jména dětí odstraňuje server, ne klient (design/api.md, 1.2; rozhodnuto 2026-09-06,
-// zavedeno 2026-10-28). U týmu, jehož kategorie má věk z `appConfig.hideNamesAgeList`,
+// zavedeno 2026-10-28). U týmu, jehož kategorie má věk z nastavení `hideNamesAgeList`,
 // chodí osoba hráče bez jména a fotky každému, kdo nespravuje zápasy ani žádný tým.
 // Klient místo jména ukazuje číslo dresu.
 //

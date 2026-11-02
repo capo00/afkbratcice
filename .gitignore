@@ -1,6 +1,10 @@
 node_modules/
 /public/
 dist/
-.env
-.env.development
 *.tgz
+
+# Skutečná konfigurace: žádný env soubor (.env, .env.development, .env.<cíl>, *.local, zálohy)
+# do gitu nepatří. Jediná výjimka je předloha .env.example (ukázkové hodnoty, žádná tajemství);
+# `npm run check-env` hlídá, že skutečné soubory odpovídají jí.
+.env*
+!.env.example

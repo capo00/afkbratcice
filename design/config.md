@@ -1,30 +1,111 @@
-# Konfigurace — co kde bude
+# Konfigurace — co kde je
 
-Datum: 2026-09-05
+Datum: 2026-09-05, přepsáno 2026-11-02 na tři vrstvy konfigurace stacku (caio-devkit README,
+*Konfigurace appky*).
 
-Přehled všech míst, kde se appka konfiguruje, a co přesně v nich je. Hodnoty vzhledu jsou
-odečtené z předlohy — zdůvodnění a širší kontext v
-[ux-design-system.md](./ux-design-system.md).
+**Každá hodnota má jedno místo podle toho, kdo ji čte a kdo a kdy ji mění.**
 
-Pět míst, každé s jednou zodpovědností:
+| Vrstva | Soubor nebo úložiště | Co v ní je | Kdo čte | Mění se |
+|---|---|---|---|---|
+| 1. Prostředí | `.env.development` (lokálně), `.env` (produkce); v gitu jen `.env.example` | databáze, přihlášení, tajemství, porty, adresa webu, bucket, `QA_*` | server | s prostředím |
+| 2a. Build + společné | `caio.config.js` | jméno, popis, jazyk, téma, boot screen, PWA, UVE, deploy; `app`: číselníky, role, kolekce binárek, výchozí nastavení klubu | devkit, server (`AppConfig`), klient (`UiApp.AppConfig`) | s vydáním |
+| 2b. Server | `server/server.config.js` | `errorPrefix`, `auth.jwtLifetime`; `app`: typy binárek | server | s vydáním |
+| 2c. Klient | `client/client.config.js` | `tag`; `app`: písma, rozměry, statické soubory, popisky sítí | klient | s vydáním |
+| 3. Nastavení | kolekce `sys_settings` | pošta, registrace; `app`: upozornění, kontakt, sítě, pořadí kategorií, skrytá jména, rok založení, kategorie souborů | server `Settings.get()`, klient `UiApp.useSettings()` | za běhu, správce |
+| texty | `client/src/lsi/cs.json` | všechny texty včetně popisků číselníků | klient | s vydáním |
 
-| Soubor | Zodpovědnost | Kdo čte |
-|---|---|---|
-| `.env` / `.env.development` | tajemství a adresy služeb | server |
-| `server/config.js` | doménové konstanty a číselníky | server |
-| `client/src/config/config.js` | technická konfigurace klienta | klient |
-| `client/src/config/theme.js` | **designové tokeny** | klient |
-| `client/src/lsi/cs.json` | **všechny texty** | klient |
-| kolekce `app_config` (Mongo) | co mění redakce za běhu | oba |
+Pravidla: liší se podle prostředí nebo je tajemství -> vrstva 1; mění ho správce bez vydání ->
+vrstva 3; jinak vrstva 2 (stejné pro server i klienta nebo potřebné pro build -> `caio.config.js`,
+jen pro jednu stranu -> `server.config.js` / `client.config.js`). Hodnota použitá v jediném souboru
+není konfigurace, zůstává konstantou v kódu (`server/config.js`: bodování tabulky, začátek sezóny).
+Ve všech souborech vrstvy 2 jsou klíče 1. úrovně standardní (stack je validuje), hodnoty appky jen
+pod `app`.
+
+`server/config.js` a `client/src/config/config.js` zůstávají jako místo, odkud kód hodnoty čte
+pod dosavadními jmény (`Config.AGE_LIST`, `Config.ROLE.AUTHORITIES`, …) -- samy už žádnou společnou
+hodnotu nedrží. V ostatních dokumentech `design/` znamená `appConfig.<klíč>` dnes nastavení klubu
+(`sys_settings.app`, sekce 3).
 
 ---
 
-## 1. `client/src/config/theme.js` — designové tokeny
+## 1. Prostředí (`.env`, `.env.development`, `.env.example`)
 
-**Jediné místo v celé appce, kde smí být hex a velikost písma.** Když se v JSX objeví
-`"#..."` nebo `fontSize: 48`, je to chyba.
+Seznam klíčů se štítky (`[optional]`, `[required]`, `[local]`, `[production]`) je `.env.example`;
+`npm run check-env` porovná skutečné soubory s ním a s registrem klíčů caio-serveru (jen klíče,
+nikdy hodnoty). `npm run dev` jen varuje, `npm run deploy` se zastaví.
 
-### 1.1 Barvy
+| Klíč | Kde | K čemu |
+|---|---|---|
+| `PORT` | lokálně | 8082; na App Engine ho nastavuje platforma |
+| `MONGODB_URI` | všude, povinný | databáze; **bez query stringu** |
+| `JWT_SECRET` | všude, povinný | podpis přihlašovacích tokenů, v produkci jiný než lokálně |
+| `APP_URL` | produkce, povinný | sitemap, robots.txt, canonical, og:image |
+| `CANONICAL_HOST` | volitelný | hlavní host, až po přepnutí DNS |
+| `GCS_BUCKET_NAME` | všude, povinný | bucket binárek; jiný lokálně a v produkci |
+| `GOOGLE_CLIENT_ID`/`SECRET`, `FACEBOOK_APP_ID`/`SECRET` | volitelné | přihlášení přes providera |
+| `SETTINGS_SECRET_KEY` | volitelný | šifruje heslo SMTP v Nastavení (32 bajtů base64); bez něj heslo uložit nejde |
+| `CLIENT_PORT` | jen lokálně | port Vite dev serveru (dřív `VITE_PORT` v `client/.env.development`, ten soubor zanikl) |
+| `QA_ADMIN_*`, `QA_TEAMEDITOR_*` | jen lokálně | testovací účty (`npm run qa-accounts`) |
+
+Zaniklo: `JWT_LIFETIME` (-> `server.config.js`), `SMTP_*` a `MAIL_FROM` (-> Nastavení, pošta).
+`MONGODB_URI_OLD` v produkčním `.env` stack nezná (`check-env`: unknown).
+
+---
+
+## 2. Konfigurační soubory (vrstva 2)
+
+- **`caio.config.js`** -- `name`, `description` (titulek, manifest, og), `languages: ["cs"]` (jen
+  `<html lang>` a og:locale, žádné adresy `/cs/…`), `theme` (dvě palety, sekce 4), `boot`,
+  `pwa.themeColor: "clubRed"` (theme_color manifestu), `uves.admin`, `deploy`. Pod `app`:
+  `ageList`, `positionList`, `lineupPositionMap`, `matchStateList`, `articleStateList`,
+  `galleryStateList`, `galleryCategoryList`, `coachRoleList`, `role` a `roleGroup` (množiny pro
+  `auth`, [roles.md](./roles.md)), `binaryCollection` a `settingsDefaults` (sekce 3). Popisky
+  číselníků jsou v LSI; že každý kód nějaký má, hlídá `client/src/config/enum-lsi.test.js`.
+- **`server/server.config.js`** -- `errorPrefix: "afkbratcice"` (`Error.code("article", "notFound")`),
+  `auth.jwtLifetime`, `app.binaryType`. Předává se `App.init({ config })`.
+- **`client/client.config.js`** -- `tag: "Afk."`, `app.font`, `app.layout`, `app.asset`,
+  `app.socialLabel`. Předává se `<UiApp.SpaProvider config>` v obou UVE. Odkaz do administrace v liště
+  webu (`top.adminLink`) v něm není: role skládá `config/admin-menu.js` z obrazovek.
+
+---
+
+## 3. Nastavení klubu (`sys_settings.app`, vrstva 3)
+
+Co mění správce za běhu, bez vydání. Do 2026-11 kolekce `afk_config` (dřív `app_config`) s use casy
+`appConfig/get|update`; přesun dat dělá `tools/migrate-settings.js` (README, *Vydání*).
+
+- **`app.public`** (vidí kdokoli, `sys/settings/get`): `notice` (proužek s upozorněním na detailu
+  mužstva; prázdné = žádný), `founded` (rok založení pro dlaždici statistik a patičku),
+  `categoryOrder` (pořadí kategorií v menu, kódy `afk_category`; jen seřazení, ne výčet),
+  `hideNamesAgeList` (věkové skupiny, u kterých server nevydá jména dětí), `contact` (`address`,
+  `email`, `phone`, `ico`, `gps`, `mapUrl`), `socialList` (`[{ code, uri }]`), `fileCategoryList`
+  (`[{ code, name }]`, kategorie souborů ke stažení -- čte je administrace souborů a bude je číst
+  veřejná stránka „Ke stažení“).
+- **`app.private`** klub nemá (Caio 2026-11-02: nic z nastavení klubu není tajné); validátor přijme
+  jen `{}`.
+- **Výchozí hodnoty** jsou v `caio.config.js` `app.settingsDefaults` a doplňuje je server
+  (`server/app-settings/`) i klient (`core/app-context.jsx`, formulář) -- platí, dokud správce část
+  neuloží.
+- **Úpravy:** administrace -> *Nastavení* (`/admin/config`, `UiAuth.Settings` z caio-ui), záložka
+  *Klub* vedle Pošty a Registrace (`client/src/admin/settings.js`). Editují se všechny veřejné
+  hodnoty kromě `fileCategoryList` -- ten zatím jen v databázi (formulář pro seznam není); uložení
+  formuláře ho nechá, jak je.
+- **Validace** na serveru: `App.init({ settings: { validatePublic, validatePrivate } })`
+  (`server/app-settings/index.js`).
+
+**Kategorie se sem nepíšou.** Složení mužstev se mění každou sezónu, takže zdrojem pravdy je kolekce
+`season` a use case `season/listCurrent`; nastavení k tomu dodává jen pořadí a výjimky.
+
+---
+
+## 4. Designové tokeny (`client/src/config/theme.js`)
+
+`theme.js` je skládá z vrstvy 2: **barvy (hexy) jen v `caio.config.js` `theme`**, písma a rozměry
+v `client/client.config.js` `app.font` / `app.layout`. Velikost písma nikde -- dává ji uuGds. Když se
+v JSX objeví `"#..."` nebo `fontSize: 48`, je to chyba. Výčet níž je návrh z 2026-09-05; paletu
+dnes tvoří dvě sady rolí (světlá a tmavá) v `caio.config.js`.
+
+### 4.1 Barvy
 
 Tmavé schéma, hue 25–30 (teplá). Nikde není čistá černá ani čistá bílá.
 
@@ -44,7 +125,7 @@ Tmavé schéma, hue 25–30 (teplá). Nikde není čistá černá ani čistá b�
 Navíc se červená registruje jako GDS význam, aby ji uu5 komponenty braly bez explicitních
 barev: `Uu5Elements.UuGds.setMeaningColor("primary", "#D01319")`.
 
-### 1.2 Písma
+### 4.2 Písma
 
 - `font.display: '"Bebas Neue", Impact, Haettenschweiler, sans-serif'` — nadpisy, čísla,
   tlačítka. **Jen jedna váha (400)** — nikdy nepředepisovat 700, prohlížeč by ji
@@ -54,7 +135,7 @@ barev: `Uu5Elements.UuGds.setMeaningColor("primary", "#D01319")`.
 Oba fonty se **self-hostují** (`client/public/assets/fonts/*.woff2` + `@font-face`
 v `client/src/fonts.css`), ne přes `<link>` na Google Fonts — kvůli GAE a offline.
 
-### 1.3 Typografie — velikosti **vždy** z uuGds
+### 4.3 Typografie — velikosti **vždy** z uuGds
 
 **V `theme.js` není jediné `fontSize`.** Každá role je odkaz na GDS token; velikost,
 řádkování i váhu spočítá `Uu5Elements.Text` a předá jako `style`. GDS má i vlastní mobilní
@@ -82,7 +163,7 @@ Důsledek proti mockupům: hero bude **44 px místo 96**, nadpis sekce **32 mís
 Je to cena za jednotnou sazbu s uu5 komponentami; podrobně
 [ux-design-system.md](./ux-design-system.md), sekce 2.3.
 
-### 1.4 Rozměry
+### 4.4 Rozměry
 
 - `radius: 8`
 - `maxWidth: 1152` — šířka obsahu
@@ -96,33 +177,7 @@ type="loose"` obalující celou appku (`useSpacing()` → a2/b16/c24/d32).
 
 ---
 
-## 2. `client/src/config/config.js` — technická konfigurace klienta
-
-- `TAG` — prefix `data-name` atributů komponent (`"AfkBratcice"`)
-- `Css` — instance `Utils.Css.createCssModule(TAG)`, přes ni jdou všechna přebití
-- `asset` — cesty ke statice: logo (`/assets/meta/icon-192.png`), erb, placeholder fotky
-- **číselníky (jen kódy a pořadí, popisky jsou v LSI):**
-  - `AGE_LIST` — **všechny možné** kategorie; které jsou letos aktivní, říká
-    `season/listCurrent`, ne tenhle seznam
-  - `POSITION_LIST` — `GK`, `DF`, `MF`, `FW` + pořadí skupin na soupisce
-  - `MATCH_STATE_LIST`, `ARTICLE_STATE_LIST`, `COACH_ROLE_LIST`, `GALLERY_CATEGORY_LIST`
-  - `PROFILE_LIST` — `members`, `teamEditor`, `matchEditor`, `newsEditor`, `galleryEditor`,
-    `contentEditor`, `operatives`, `authorities`; `teamEditor` je parametrizovaný
-    (`teamEditor:<teamId>`) — viz [roles.md](./roles.md)
-  - množiny rolí pro `auth` (`ADMIN`, `CONTENT`, `MATCH`, `NEWS`, `GALLERY`, `PAGES`,
-    `MEMBER`) — zrcadlí `server/config.js`
-- `PAGE_SIZE` — `{ news: 10, matches: 50, photos: 40 }`
-- `IMAGE_WIDTH` — `{ logo: 400, person: 600, article: 1200, photo: 1600, thumb: 400 }`
-  (šířky pro zmenšení na klientu — GCS náhledy negeneruje)
-- `DATE_FORMAT` — locale `cs-CZ`, časová zóna `Europe/Prague`
-
-> `OUTPUT_NAME`: `caio-ui` si ho čte z `process.env`, ale `createViteConfig()` ho nedefinuje →
-> `ReferenceError: process is not defined`. Appka ho musí doplnit ve `vite.config.js`
-> přes `define` (viz [README.md](./README.md), riziko #14).
-
----
-
-## 3. `client/src/lsi/cs.json` — texty
+## 5. Texty (`client/src/lsi/cs.json`)
 
 Žádný text nepatří natvrdo do komponenty. Struktura klíčů kopíruje obrazovky:
 
@@ -154,66 +209,3 @@ takže druhý jazyk nebude znamenat migraci dat, jen doplnění jazyka do volán
 (viz [data-model.md](./data-model.md), sekce 10).
 
 Popisky tlačítek `UiElements.Crud` jdou z LSI `caio-ui`, ne z appky.
-
----
-
-## 4. `server/config.js` — doménové konstanty
-
-- `AGE_MAP` — `old`, `men`, `u18`, `u16`, `u14`, `u12`, `u10`, `u6` (převzato z v1)
-- `POSITION_MAP` — `GK`/`DF`/`MF`/`FW` + zkratky B/O/Z/Ú
-- `MATCH_STATE`, `ARTICLE_STATE`, `COACH_ROLE`, `GALLERY_CATEGORY`
-- `PROFILE` — `members`, `teamEditor`, `matchEditor`, `newsEditor`, `galleryEditor`,
-  `contentEditor`, `operatives`, `authorities` + množiny pro `auth`
-  (`ADMIN`, `CONTENT`, `MATCH`, `NEWS`, `GALLERY`, `PAGES`, `MEMBER`);
-  viz [roles.md](./roles.md)
-- `BINARY_COLLECTION` — `sys`, `team`, `person`, `article`, `gallery`, `page`, `file`;
-  každá má vlastní autorizaci (viz [roles.md](./roles.md), 5.1)
-- **`POINTS`** — bodování tabulky: `{ win: 3, penaltyWin: 2, penaltyLoss: 1, loss: 0, draw: 1 }`
-  (zachovává chování v0 `getTable.php`)
-- `SEASON_START_MONTH: 8` — sezóna začíná v srpnu; `yearFrom = měsíc < 8 ? rok - 1 : rok`
-- `LOCK_TIMEOUT_MS` — expirace ECC zámku, 8 hodin
-- `DEFAULT_PAGE_SIZE` — 1000 (výchozí `Dao.find`)
-- `ERROR_PREFIX: "afkbratcice"` — prefix aplikačních chybových kódů
-
----
-
-## 5. `.env` / `.env.development`
-
-Žádná proměnná není z pohledu startu povinná — server nastartuje i s prázdným souborem
-a chybějící schopnosti se prostě nenabídnou.
-
-| Proměnná | Prakticky nutná | K čemu |
-|---|---|---|
-| `NODE_ENV` | ne | `development` načte `.env.development` |
-| `PORT` | ne | **`8081`** — jiný než propertyman (8080), aby šly obě appky pustit vedle sebe |
-| `MONGODB_URI` | **ano** | databáze; **bez query stringu** — knihovna si `?retryWrites=…` lepí sama |
-| `GCS_BUCKET_NAME` | **ano** | bucket pro binárky; jinak se `binary/*` nezapnou. **Jiný bucket pro dev a prod** |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | volitelné | Google přihlášení |
-| `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` | volitelné | Facebook přihlášení |
-| `JWT_SECRET`, `JWT_LIFETIME` | volitelné | výchozí `GOOGLE_CLIENT_SECRET`, `1d` |
-| `GOOGLE_APPLICATION_CREDENTIALS` | ne | override ADC; lokálně stačí `gcloud auth application-default login` |
-| `BINARY_MAX_FILE_SIZE_MB`, `BINARY_MAX_FILES` | ne | výchozí 25 MB / 20 souborů |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | **ano, jakmile bude reset hesla** | odesílání e-mailu s odkazem na reset; bez nich `/auth/config` hlásí `passwordResetEnabled: false` |
-
----
-
-## 6. Kolekce `app_config` — co mění redakce za běhu
-
-Singleton v Mongu, čte se jednou při startu SPA (`appConfig/get`).
-
-- `categoryOrder` — pořadí kategorií v menu: `["men","u18","u16","u14","u12","u10","u6","old"]`
-  (od nejstarších; **stará garda je výjimka na konci**). Jen seřazení, ne výčet.
-- `hideNamesAgeList` — `["u14","u12","u10","u6"]`; u dorostu (`u18`, `u16`) se jména ukazují
-- `notice` — text proužku „Upozornění“ pod horní lištou (dnes „Trénink: pátek 17:00“);
-  prázdné = proužek se nezobrazí
-- `contact` — `{ address, gps, email, phone, ico, bankAccount, mapUrl }`
-- `socialList` — `[{ code, uri }]`, dnes jen Facebook
-- `fileCategoryList` — `[{ code, name }]`, kategorie souborů ke stažení (náhrada v0 `serial`)
-- `founded` — rok založení (1932) pro dlaždici statistik
-
-**Kategorie se sem nepíšou.** Složení mužstev se mění každou sezónu, takže zdrojem pravdy je
-kolekce `season` a use case `season/listCurrent`; `appConfig` k tomu dodává jen pořadí
-a výjimky. Původní `teams` a `homeAge` z v1 zanikly.
-
-**Hranice:** co může redakce změnit bez nasazení, patří sem. Co je designové rozhodnutí
-(barvy, písma, rozměry), patří do `theme.js` a mění se commitem.

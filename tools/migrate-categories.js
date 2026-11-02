@@ -6,7 +6,9 @@
 //    názvy se od teď mění v administraci a migrace je nemá vracet zpátky.
 // 2) Převede `afk_config`: `hideNamesAgeList` ze starých věků (u14, u12, …) na nové skupiny
 //    (u15, u13, …) a `categoryOrder` z věků na kódy kategorií. Pořadí se jen přeloží, kategorie,
-//    které v něm nebyly (B/C týmy, ženy), se přidají za ně ve výchozím pořadí.
+//    které v něm nebyly (B/C týmy, ženy), se přidají za ně ve výchozím pořadí. Od 2026-11 čte server
+//    konfiguraci z Nastavení (`sys_settings.app`), takže se tenhle krok pouští PŘED
+//    tools/migrate-settings.js, který `afk_config` do Nastavení přenese.
 // 3) Týmy se starým `age` a bez `category` dostanou kategorii podle věku a jména
 //    (design/data-model.md, 2.3): muži men-a, jméno končící „ B“/„ C“ men-b/men-c, rezerva
 //    mládeže <kategorie>-b, ženské týmy women. Sezóny starý věk přeloží na nový. Starý
@@ -18,7 +20,7 @@
 // Pouští se opakovaně: co už je převedené, přeskočí.
 import "caio-server/env";
 import { MongoClient } from "mongodb";
-import Config from "../server/config.js";
+import { DEFAULT_APP_SETTINGS } from "../server/app-settings/defaults.js";
 
 const DRY = process.argv.includes("--dry");
 
@@ -97,10 +99,10 @@ if (config) {
     // Nezměněné staré výchozí pořadí -> nové výchozí (B/C týmy hned za áčkem). Upravené
     // pořadí se přeloží a chybějící kategorie jdou za něj.
     if (config.categoryOrder.join() === OLD_DEFAULT_ORDER.join()) {
-      patch.categoryOrder = Config.DEFAULT_APP_CONFIG.categoryOrder;
+      patch.categoryOrder = DEFAULT_APP_SETTINGS.categoryOrder;
     } else {
       const translated = config.categoryOrder.map((x) => CATEGORY_BY_OLD[x] ?? x);
-      const rest = Config.DEFAULT_APP_CONFIG.categoryOrder.filter((code) => !translated.includes(code));
+      const rest = DEFAULT_APP_SETTINGS.categoryOrder.filter((code) => !translated.includes(code));
       patch.categoryOrder = [...new Set([...translated, ...rest])];
     }
   }

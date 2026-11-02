@@ -1,28 +1,15 @@
-import { Authorization } from "caio-server";
-import Config from "../config.js";
-import crud from "./crud.js";
-import { validate, shape, string, array, integer, any } from "../services/validators.js";
+import { getAppSettings } from "../app-settings/index.js";
+import { validate, shape } from "../services/validators.js";
 
+// BACKWARD-COMPAT (jedno vydání po 0.6.x, pak pryč): konfigurace klubu je od 2026-11 v Nastavení
+// (`sys_settings.app`, server/app-settings/). Klient nové verze čte `sys/settings/get`; tenhle alias
+// odpovídá klientovi, který má v prohlížeči ještě starý bundle, týmž tvarem jako dřív
+// `appConfig/get` -- všechno pro kohokoli, jako dřív (doplněné o výchozí hodnoty, bez `id` a `sys`
+// dokumentu). `appConfig/update` už není: ukládá se přes `sys/settings/update`.
 export default {
   "appConfig/get": {
     method: "get",
     validator: validate(shape({})),
-    fn: () => crud.get(),
-  },
-
-  "appConfig/update": {
-    method: "post",
-    auth: Authorization.auth(Config.ADMIN),
-    validator: validate(shape({
-      id: any(),
-      categoryOrder: array(string()),
-      hideNamesAgeList: array(string()),
-      notice: string(),
-      contact: any(),
-      socialList: any(),
-      fileCategoryList: any(),
-      founded: integer(),
-    })),
-    fn: ({ dtoIn }) => crud.update(dtoIn),
+    fn: () => getAppSettings(),
   },
 };

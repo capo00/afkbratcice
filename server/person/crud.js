@@ -77,7 +77,7 @@ class PersonCrud extends Crud {
     if (players.length || coaches.length) {
       throw new CoreError("Person is referenced by a player or a coach", {
         status: 400,
-        code: `${Config.ERROR_PREFIX}/person/inUse`,
+        code: CoreError.code("person", "inUse"),
         paramMap: { id },
       });
     }

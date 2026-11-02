@@ -3,8 +3,7 @@ import dao from "./dao.js";
 import matchDao from "../match/dao.js";
 import teamDao from "../team/dao.js";
 import categoryDao from "../category/dao.js";
-import appConfigCrud from "../app-config/crud.js";
-import Config from "../config.js";
+import { getAppSettings } from "../app-settings/index.js";
 import { getYearFrom, sortByCategoryOrder } from "../services/season.js";
 
 class SeasonCrud extends Crud {
@@ -69,8 +68,8 @@ class SeasonCrud extends Crud {
       }));
     });
 
-    const { categoryOrder } = await appConfigCrud.get();
-    return sortByCategoryOrder(itemList, categoryOrder ?? Config.DEFAULT_APP_CONFIG.categoryOrder);
+    const { categoryOrder } = await getAppSettings();
+    return sortByCategoryOrder(itemList, categoryOrder);
   }
 
   async delete(id) {
@@ -79,7 +78,7 @@ class SeasonCrud extends Crud {
     if (matchList.length) {
       throw new CoreError("Season has matches and cannot be deleted", {
         status: 400,
-        code: `${Config.ERROR_PREFIX}/season/hasMatches`,
+        code: CoreError.code("season", "hasMatches"),
         paramMap: { id },
       });
     }

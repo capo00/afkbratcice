@@ -76,7 +76,7 @@ class ClubCrud extends Crud {
     if (inUse.length) {
       throw new CoreError("Club is referenced by a team", {
         status: 400,
-        code: `${Config.ERROR_PREFIX}/club/inUse`,
+        code: CoreError.code("club", "inUse"),
         paramMap: { id },
       });
     }

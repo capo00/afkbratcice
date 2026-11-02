@@ -31,8 +31,12 @@ import matchDao from "../server/match/dao.js";
 import personDao from "../server/person/dao.js";
 import playerDao from "../server/player/dao.js";
 import coachDao from "../server/coach/dao.js";
-import appConfigDao from "../server/app-config/dao.js";
 import articleCrud from "../server/article/crud.js";
+
+// Konfigurace klubu byla do 2026-11 v `afk_config` (server/app-config/); teď je v Nastavení
+// (`sys_settings.app`) a `afk_config` je jen zdroj pro tools/migrate-settings.js. Sekce 7 níž proto
+// zapisuje do staré kolekce -- po ní je potřeba přesun spustit znovu (a smazat uloženou část `app`).
+const appConfigDao = new Dao("afk_config");
 
 // --- parametry -----------------------------------------------------------------------
 

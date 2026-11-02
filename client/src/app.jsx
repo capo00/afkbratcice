@@ -10,6 +10,7 @@ import { AppProvider } from "./core/app-context.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import { usePageMeta } from "./tools/page-meta.js";
 import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
+import clientConfig from "../client.config.js";
 
 const { theme } = Config;
 
@@ -128,7 +129,8 @@ function App() {
     // 16, `gap` v `Grid` z 16 na 24) bez jediného řádku CSS. Obaluje všechno včetně lišty
     // a patičky, ne jednotlivé sekce.
     <Uu5Elements.SpacingProvider type="loose">
-      <UiApp.SpaProvider>
+      {/* `config`: client.config.js -- výchozí hodnoty lišty a seznamů z caio-ui. */}
+      <UiApp.SpaProvider config={clientConfig}>
         <AppProvider>
           <Shell />
         </AppProvider>

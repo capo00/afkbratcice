@@ -69,14 +69,19 @@ npm update caio-server caio-ui   # posun v rámci ^0.2.0
 
 ## Konfigurace
 
-`.env.development` se načte při `NODE_ENV=development`, jinak `.env`.
-Žádná proměnná není z pohledu startu povinná — server nastartuje i s prázdným souborem
-a chybějící schopnosti se prostě nenabídnou. Co která dělá:
-[design/config.md](./design/config.md), sekce 5.
+Tři vrstvy stacku, podrobně v [design/config.md](./design/config.md):
 
-Prakticky potřebné: `MONGODB_URI` a `GCS_BUCKET_NAME` (bez něj se `binary/*` nezapnou).
-Pro přihlášení `GOOGLE_CLIENT_ID`/`SECRET` a `FACEBOOK_APP_ID`/`SECRET`, pro reset hesla
-`SMTP_HOST`, `MAIL_FROM` a `APP_URL`.
+| Vrstva | Kde | Co |
+|---|---|---|
+| 1. Prostředí | `.env.development` (lokálně), `.env` (produkce); předloha `.env.example` | databáze, přihlášení, tajemství, porty, adresa webu, bucket, QA účty |
+| 2. Konfigurační soubory | `caio.config.js`, `server/server.config.js`, `client/client.config.js` | jméno, téma, PWA, číselníky a role (společné), `errorPrefix` a platnost přihlášení (server), tag, písma a rozměry (klient) |
+| 3. Nastavení | kolekce `sys_settings`, v administraci *Nastavení* | odchozí pošta, registrace a nastavení klubu: upozornění, kontakt, sítě, pořadí kategorií, skrytá jména, rok založení |
+
+`.env.development` se načte při `NODE_ENV=development`, jinak `.env`. Nový env soubor vznikne
+z `.env.example`; `npm run check-env` porovná skutečné soubory s předlohou a s registrem klíčů
+caio-serveru (vypisuje jen klíče). Povinné jsou `MONGODB_URI`, `JWT_SECRET`, `GCS_BUCKET_NAME`
+a v produkci `APP_URL`; přihlášení přes Google a Facebook je volitelné. Odchozí pošta (reset hesla)
+se nastavuje v administraci, ne v `.env`; heslo SMTP tam šifruje `SETTINGS_SECRET_KEY`.
 
 ### První správce
 
@@ -162,14 +167,18 @@ https://<project-id>.appspot.com/auth/facebook/callback
 
 ### 5. SMTP pro reset hesla — volitelné
 
-`SMTP_HOST`, `MAIL_FROM` a `APP_URL` do `.env`. `APP_URL` musí být ta samá finální URL
-jako v kroku 4 — jinak odkaz na reset hesla v e-mailu vede jinam než appka reálně běží.
+Server, odesílatel a přihlášení k SMTP se zadávají v administraci (*Nastavení* -> *Pošta*), ne do
+`.env`. Heslo se ukládá šifrované klíčem `SETTINGS_SECRET_KEY` z `.env`. `APP_URL` musí být ta
+samá finální URL jako v kroku 4 — jinak odkaz na reset hesla v e-mailu vede jinam než appka
+reálně běží.
 
 ### 6. Vyplnit `.env`
 
-`.env` se **nahrává spolu se zdrojáky** (`.gcloudignore` vylučuje jen
-`.env.development`) a server ho v produkci čte přímo bez `NODE_ENV=development` — žádný
-Secret Manager ani `app.yaml: env_variables`, tenhle stack drží konfiguraci takhle.
+`.env` se **nahrává spolu se zdrojáky** (`.gcloudignore` pustí z env souborů jen `.env`
+a předlohu `.env.example`) a server ho v produkci čte přímo bez `NODE_ENV=development` — žádný
+Secret Manager ani `app.yaml: env_variables`, tenhle stack drží konfiguraci takhle. Klíče
+a štítky jsou v `.env.example`; `npm run check-env` ukáže, co chybí (deploy se bez povinných
+klíčů zastaví sám).
 
 ```env
 MONGODB_URI=...          # krok 2
@@ -178,12 +187,12 @@ GOOGLE_CLIENT_ID=...     # krok 4, volitelné
 GOOGLE_CLIENT_SECRET=...
 FACEBOOK_APP_ID=...      # krok 4, volitelné
 FACEBOOK_APP_SECRET=...
-SMTP_HOST=...            # krok 5, volitelné
-MAIL_FROM=...
 APP_URL=...
 JWT_SECRET=...           # vlastní náhodný řetězec, JINÝ než v .env.development
-JWT_LIFETIME=...
+SETTINGS_SECRET_KEY=...  # krok 5; node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
+
+Platnost přihlášení je v `server/server.config.js` (`auth.jwtLifetime`), ne v `.env`.
 
 ### 7. Samotný deploy
 
@@ -238,13 +247,43 @@ gcloud app domain-mappings create afkbratcice.cz
 A stejně jako u GCS bucketu (`how-to-set-gcs.md`, krok 8) založit rozpočtový alert
 (*Billing → Budgets & alerts*) jako pojistku proti překročení free tier.
 
+## Vydání s konfigurací ve třech vrstvách (první vydání po 0.6.1)
+
+Kód čte konfiguraci klubu z Nastavení (`sys_settings.app`), ne z `afk_config`, a env soubory
+ztratily `JWT_LIFETIME`. Před nasazením proto jednou:
+
+1. **`.env` (produkce):** doplnit `SETTINGS_SECRET_KEY` (nový klíč, 32 bajtů base64, jen pro
+   produkci) a ověřit `npm run check-env` -- musí skončit bez chyby (`MONGODB_URI_OLD` je jen
+   varování). `JWT_LIFETIME` už v souboru není, platí `server/server.config.js`.
+2. **Produkční databáze -- každý krok jen po Caiově „ano“ těsně před spuštěním:**
+   1. pokud se ještě nedělalo, `npm run migrate:categories -- --env .env` (převádí `afk_config`,
+      proto před přesunem);
+   2. `npm run migrate:settings -- --env .env` (plán, nic nezapíše; vypíše jen klíče), pak
+      `npm run migrate:settings -- --env .env --commit` -- zkopíruje `afk_config` (nebo jen výchozí
+      hodnoty, když v databázi není) do `sys_settings.app`. **Zápis načte caio-server, takže
+      založí kolekci `sys_settings` a indexy jeho Dao.** `afk_config` zůstává jako záloha pro návrat
+      na předchozí verzi;
+   3. `npm run settings-import -- --env .env` (plán) -- produkční `.env` dnes SMTP nemá, takže
+      nic nepřenese; s `--commit` jen kdyby tam pošta byla.
+3. **Deploy** (`npm run release` / `npm run deploy`), pak `/sys/health`: `config.files.caio` je
+   `caio.config.js`, `config.settings.stored` obsahuje `app`, `config.env.missing` je prázdné;
+   na webu kontakt, upozornění a pořadí mužstev jako před vydáním.
+4. **Po jednom vydání** (stack vlna 4e): smazat alias `server/app-config/` a kolekci `afk_config`.
+
+Viditelná změna: barva lišty nainstalované appky (`theme_color` manifestu, `<meta name="theme-color">`
+a přihlašovací stránka) je klubová červená `#D01319` místo `#8b0000`. Administrace -> *Konfigurace* je
+teď *Nastavení* ze stacku (záložky Pošta, Registrace, Klub).
+
 ## Struktura serveru
 
 ```
 server/
-  index.js          App.init({ api, middlewareList })
-  api.js            agregátor use casů + vlastní sys/health
-  config.js         číselníky, role, kolekce binárek, bodování
+  index.js          App.init({ api, config, middlewareList, seo, settings })
+  server.config.js  errorPrefix, platnost přihlášení, typy binárek (vrstva 2, jen server)
+  api.js            agregátor use casů
+  config.js         číselníky a role z caio.config.js pod jmény pro kód + bodování, začátek sezóny
+  app-settings/     nastavení klubu (sys_settings.app): čtení s výchozími hodnotami, validátory
+  app-config/       BACKWARD-COMPAT alias appConfig/get, jedno vydání
   legacy-redirect.js  přesměrování starých URL (před SPA fallbackem)
   services/         validators, authorize, season, table, stats, ical
   <entita>/         dao.js (indexy, dotazy) + crud.js (logika) + api.js (use casy)

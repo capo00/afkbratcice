@@ -3,7 +3,6 @@ import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
-import { LINEUP_POSITION_LIST, LINEUP_POSITION_MAP } from "../config/lineup-position.js";
 import importLsi from "../lsi/import-lsi.js";
 import { enumItemList, personLabel } from "./fields.jsx";
 
@@ -146,9 +145,9 @@ function LineupRow({ player, entry, onChange }) {
           zápis bez přesného postu ukáže prázdný výběr. */}
       <Uu5Forms.Select
         value={entry?.positionDetail ?? undefined}
-        itemList={enumItemList("lineupPosition", LINEUP_POSITION_LIST)}
+        itemList={enumItemList("lineupPosition", Config.LINEUP_POSITION_LIST)}
         disabled={!entry}
-        onChange={(e) => set({ positionDetail: e.data.value, position: LINEUP_POSITION_MAP[e.data.value] })}
+        onChange={(e) => set({ positionDetail: e.data.value, position: Config.LINEUP_POSITION_MAP[e.data.value] })}
       />
 
       <Uu5Forms.Number

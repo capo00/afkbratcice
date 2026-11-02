@@ -1,16 +1,17 @@
-import { createComponent, useDataObject, useMemo, Utils } from "uu5g05";
+import { createComponent, useDataObject, useMemo, useRef, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiElements } from "caio-ui";
+import { UiApp, UiElements } from "caio-ui";
 import Config from "../config/config.js";
 
 const { theme } = Config;
 
-// Konfigurace, kategorie a mapa týmů — jednou při startu SPA, pak z kontextu.
+// Nastavení klubu, kategorie a mapa týmů — jednou při startu SPA, pak z kontextu.
 //
-// Tři dotazy, protože každý odpovídá na jinou otázku:
+// Čtyři dotazy, protože každý odpovídá na jinou otázku:
 //
-//  - `appConfig/get` — co redakce nastavila za běhu (proužek s upozorněním, kontakt,
-//    pořadí kategorií, kde skrývat jména).
+//  - `sys/settings/get` (caio-ui `UiApp.useSettings()`, sdílené pod `SpaProvider`) — co správce
+//    nastavil za běhu v Nastavení (proužek s upozorněním, kontakt, sítě, rok založení, kde
+//    skrývat jména); veřejná část `sys_settings.app`. Po uložení v Nastavení se obnoví sama.
 //  - `season/listCurrent` — **které kategorie klub letos má**. Nejsou nikde vyjmenované;
 //    odvozují se ze sezón, protože složení mužstev se mění rok od roku (design/frontend.md,
 //    2.5). Z toho se staví menu i routy.
@@ -20,20 +21,18 @@ const { theme } = Config;
 //    zvlášť. Týmů jsou včetně soupeřů desítky, takže je to jeden malý dotaz.
 //
 // Načítá se paralelně: kategorie ani mapa týmů na sobě nezávisí a sériově by se čekání
-// jen sečetlo.
+// jen sečetlo. Pořadí kategorií z nastavení aplikuje server (`season/listCurrent`).
 
 const [Context, useApp] = Utils.Context.create();
 
 async function load() {
-  const [appConfig, seasonList, teamList, teamCategoryList] = await Promise.all([
-    UiElements.Call.cmdGet("/appConfig/get"),
+  const [seasonList, teamList, teamCategoryList] = await Promise.all([
     UiElements.Call.cmdGet("/season/listCurrent"),
     UiElements.Call.cmdGet("/team/list"),
     UiElements.Call.cmdGet("/category/list"),
   ]);
 
   return {
-    appConfig,
     categoryList: seasonList?.itemList ?? [],
     teamList: teamList?.itemList ?? [],
     teamCategoryList: teamCategoryList?.itemList ?? [],
@@ -45,15 +44,41 @@ const AppProvider = createComponent({
 
   render({ children }) {
     const dataObject = useDataObject({ handlerMap: { load } });
-    const { state, data, errorData } = dataObject;
+    const settings = UiApp.useSettings();
+    // Doplněné o výchozí hodnoty z caio.config.js, stejně jako na serveru (app-settings/).
+    const storedPublic = settings.app.public;
+    const appSettings = useMemo(() => ({ ...Config.SETTINGS_DEFAULTS.public, ...storedPublic }), [storedPublic]);
+    // Jednou načtené nastavení se už nečeká: `state` je pak "pending" jen při obnově a hodnoty
+    // zůstávají.
+    const settingsLoadedRef = useRef(false);
+    if (settings.state === "ready") settingsLoadedRef.current = true;
+    const settingsLoaded = settingsLoadedRef.current;
+
+    const state =
+      dataObject.state === "errorNoData" || (!settingsLoaded && settings.state === "error")
+        ? "errorNoData"
+        : dataObject.state === "pendingNoData" || !settingsLoaded
+          ? "pendingNoData"
+          : dataObject.state;
+    // `useSettings` dává chybu samotnou, `useDataObject` ji balí do `{ error }`.
+    const settingsError = !settingsLoaded && settings.errorData ? { error: settings.errorData } : undefined;
+    const errorData = dataObject.errorData ?? settingsError;
+    const { data } = dataObject;
+
+    function retry() {
+      if (dataObject.state === "errorNoData") dataObject.handlerMap.load();
+      if (settings.state === "error") settings.reload().catch(() => {});
+    }
 
     const value = useMemo(() => {
-      const { appConfig, categoryList = [], teamList = [], teamCategoryList = [] } = data ?? {};
+      const { categoryList = [], teamList = [], teamCategoryList = [] } = data ?? {};
       const teamMap = new Map(teamList.map((team) => [team.id, team]));
       const teamCategoryMap = new Map(teamCategoryList.map((category) => [category.code, category]));
 
       return {
-        appConfig: appConfig ?? {},
+        // Veřejná část nastavení klubu (`sys_settings.app.public`): `notice`, `contact`,
+        // `socialList`, `founded`, `categoryOrder`, `hideNamesAgeList`, `fileCategoryList`.
+        appSettings,
         categoryList,
         teamList,
         teamMap,
@@ -67,10 +92,10 @@ const AppProvider = createComponent({
         // Skrývají se u téhle kategorie jména? Filtruje sice server (jména mládeže nechodí
         // v API vůbec), ale klient to musí vědět taky, aby místo prázdného jména vykreslil
         // číslo dresu a post, ne prázdno.
-        isNameHidden: (age) => (appConfig?.hideNamesAgeList ?? []).includes(age),
+        isNameHidden: (age) => (appSettings.hideNamesAgeList ?? []).includes(age),
         reload: () => dataObject.handlerMap.load(),
       };
-    }, [data, dataObject]);
+    }, [data, dataObject, appSettings]);
 
     if (state === "pendingNoData") {
       return (
@@ -80,7 +105,7 @@ const AppProvider = createComponent({
       );
     }
 
-    // Bez konfigurace nejde postavit menu ani routy, takže tady se opravdu nedá pokračovat.
+    // Bez nastavení a sezón nejde postavit menu ani routy, takže tady se opravdu nedá pokračovat.
     // Chybová obrazovka je proto celostránková, ne alert kdesi v rohu.
     if (state === "errorNoData") {
       return (
@@ -89,7 +114,7 @@ const AppProvider = createComponent({
             Web se nepodařilo načíst.
           </Uu5Elements.Text>
           <div className={Config.Css.css({ marginBlockStart: 16 })}>
-            <Uu5Elements.Button onClick={() => dataObject.handlerMap.load()}>Zkusit znovu</Uu5Elements.Button>
+            <Uu5Elements.Button onClick={retry}>Zkusit znovu</Uu5Elements.Button>
           </div>
           {errorData ? (
             <pre className={Config.Css.css({ marginBlockStart: 24, fontSize: 12, opacity: 0.6 })}>

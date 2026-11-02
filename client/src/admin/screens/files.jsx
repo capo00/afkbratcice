@@ -16,8 +16,9 @@ import { useApp } from "../../core/app-context.jsx";
 // což jsou pole, která by tak nikdo nezapsal (design/frontend.md, 6.1). Skládá se proto
 // vlastní `Crud` nad `BinaryProvider` s kolekcí `download`.
 //
-// Kategorie jsou z konfigurace (`appConfig.fileCategoryList`), ne z číselníku v kódu:
-// „Rozpisy 2026/27" vzniká každý rok a nasazení kvůli tomu nikdo dělat nebude.
+// Kategorie jsou z nastavení klubu (`fileCategoryList`), ne z číselníku v kódu: „Rozpisy 2026/27"
+// vzniká každý rok a nasazení kvůli tomu nikdo dělat nebude. Veřejná část nastavení
+// (`UiApp.useSettings()` přes app-context, doplněná o výchozí hodnoty).
 
 const COLLECTION = Config.BINARY_COLLECTION_DOWNLOAD;
 
@@ -32,10 +33,10 @@ const AdminFiles = createVisualComponent({
   uu5Tag: Config.TAG + "AdminFiles",
 
   render() {
-    const { appConfig } = useApp();
+    const { fileCategoryList } = useApp().appSettings;
 
     const config = useMemo(() => {
-      const categoryItemList = (appConfig?.fileCategoryList ?? []).map((item) => ({
+      const categoryItemList = (fileCategoryList ?? []).map((item) => ({
         value: item.code,
         children: item.name,
       }));
@@ -67,7 +68,7 @@ const AdminFiles = createVisualComponent({
         category: {
           label: lsi("admin", "field", "category"),
           sort: true,
-          output: (value) => (appConfig?.fileCategoryList ?? []).find((c) => c.code === value)?.name ?? value,
+          output: (value) => (fileCategoryList ?? []).find((c) => c.code === value)?.name ?? value,
           input: { Component: Uu5Forms.FormSelect, props: { itemList: categoryItemList } },
           filterProps: {
             inputType: "select",
@@ -83,7 +84,7 @@ const AdminFiles = createVisualComponent({
           output: (value) => formatSize(value),
         },
       };
-    }, [appConfig]);
+    }, [fileCategoryList]);
 
     const { seriesList, columnList, sorterList, filterList } = useMemo(
       () => UiElements.Crud.generate(config),

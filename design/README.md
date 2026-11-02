@@ -14,7 +14,7 @@ AFK Bratčice. **Jde pouze o návrh – žádný kód se v rámci tohoto designu
 | [component-tree.md](./component-tree.md) | Rozpad obrazovek na komponenty — co je uu5, co `caio-ui`, co píšeme sami |
 | [roles.md](./roles.md) | Role, jejich rozsah a tabulka use casů — **zdroj pravdy pro autorizaci** |
 | [ux-design-system.md](./ux-design-system.md) | Barvy, typografie, rytmus a překlad předlohy do uu5 |
-| [config.md](./config.md) | Co je v `theme.js`, `config.js`, LSI, `.env` a `app_config` |
+| [config.md](./config.md) | Tři vrstvy konfigurace: `.env`, `caio.config.js` / `server.config.js` / `client.config.js`, Nastavení (`sys_settings`); tokeny a LSI |
 | [impl-plan-server.md](./impl-plan-server.md) | Postup stavby serveru po etapách |
 | [migration.md](./migration.md) | Migrace dat z MySQL (PHP) i z Mongo (v1), přesměrování URL, nasazení |
 | [mockups/](./mockups/) | Screenshoty Lovable předlohy (desktop 1536 px + mobil 390 px) |
@@ -214,7 +214,7 @@ afkbratcice/
       page/{dao,crud,api}.js
       section/{dao,crud,api}.js
     stats/api.js                 # tabulka a statistiky hráčů (bez vlastní kolekce)
-    app-config/{dao,crud,api}.js # singleton konfigurace aplikace
+    app-settings/                # nastavení klubu v sys_settings.app (do 2026-11 app-config/, afk_config)
     services/                    # sdílené výpočty (tabulka, agregace statistik)
   client/
     vite.config.js               # createViteConfig() z caio-devkit/vite

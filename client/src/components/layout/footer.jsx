@@ -8,7 +8,7 @@ const { theme } = Config;
 
 // Třísloupcová patička + spodní řádek.
 //
-// Sloupce: značka a popis · Navigace · Kontakt. Kontakt se bere z `appConfig.contact`, aby
+// Sloupce: značka a popis · Navigace · Kontakt. Kontakt se bere z `appSettings.contact`, aby
 // ho redakce mohla změnit bez nasazení — natvrdo je jen struktura, ne hodnoty. Chybějící
 // položka se **vynechá**, nezobrazí se prázdný řádek s ikonou.
 //
@@ -32,10 +32,10 @@ const CONTACT_ICON = {
   phone: "uugds-phone",
 };
 
-// Sítě drží `appConfig.socialList` jako `{ code, uri }`, takže přidat Instagram je změna
-// v administraci, ne v kódu. Popisky jsou v `Config.SOCIAL_LABEL` — a je tam i vysvětlené,
-// proč jsou to texty a ne ikony (GDS logo ikony neexistují). Neznámý `code` se vypíše tak,
-// jak přišel, aby se nová síť neztratila jen proto, že pro ni není popisek.
+// Sítě drží `appSettings.socialList` jako `{ code, uri }`, takže přidat Instagram je změna
+// v Nastavení, ne v kódu. Popisky jsou v `Config.SOCIAL_LABEL` (client.config.js) — a je tam
+// i vysvětlené, proč jsou to texty a ne ikony (GDS logo ikony neexistují). Neznámý `code` se
+// vypíše tak, jak přišel, aby se nová síť neztratila jen proto, že pro ni není popisek.
 
 function ContactLine({ icon, children, href }) {
   return (
@@ -56,12 +56,12 @@ const Footer = createVisualComponent({
   uu5Tag: Config.TAG + "Footer",
 
   render() {
-    const { appConfig } = useApp();
+    const { appSettings } = useApp();
     const [, setRoute] = useRoute();
-    const contact = appConfig?.contact ?? {};
-    const socialList = appConfig?.socialList ?? [];
+    const contact = appSettings?.contact ?? {};
+    const socialList = appSettings?.socialList ?? [];
     const clubName = useLsi(importLsi, ["club", "name"]);
-    const founded = appConfig?.founded ?? 1932;
+    const { founded } = appSettings;
 
     return (
       <footer

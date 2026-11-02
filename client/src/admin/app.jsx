@@ -5,6 +5,8 @@ import Config from "../config/config.js";
 import { AppProvider } from "../core/app-context.jsx";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "../config/admin-menu.js";
 import { useAdminTop } from "./top.jsx";
+import { APP_SETTINGS } from "./settings.js";
+import clientConfig from "../../client.config.js";
 
 // Kořen UVE administrace (admin/index.html, /admin/…). Do 2026-10-24 byla administrace lazy
 // routa `admin/*` uvnitř webu; vlastní UVE je podle caio_propertyman: vlastní dokument,
@@ -95,8 +97,10 @@ function AdminApp() {
     // Stejné `loose` mezery jako na webu: obrazovky administrace stojí na týchž sekcích
     // a kartách, takže by se jinak lišily jen hustotou.
     <Uu5Elements.SpacingProvider type="loose">
-      <UiApp.SpaProvider>
-        {/* Konfigurace a mapa týmů jako na webu: obrazovky z ní berou názvy a loga týmů
+      {/* `config`: client.config.js. `settings`: sekce klubu na obrazovce Nastavení
+          (admin/settings.js, screens/config.jsx) -- komponenta, takže nemůže být v client.config.js. */}
+      <UiApp.SpaProvider config={clientConfig} settings={{ appSection: APP_SETTINGS }}>
+        {/* Nastavení klubu a mapa týmů jako na webu: obrazovky z ní berou názvy a loga týmů
             a po zápisu ji obnovují (`useApp().reload`). */}
         <AppProvider>
           <AdminFrame />

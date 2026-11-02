@@ -14,7 +14,7 @@ const { theme } = Config;
 
 // Soupiska mužstva: hráči po postech + realizační tým.
 //
-// **Jména mládeže sem nechodí ze serveru** (`appConfig.hideNamesAgeList`): u kategorií, kde
+// **Jména mládeže sem nechodí ze serveru** (`appSettings.hideNamesAgeList`): u kategorií, kde
 // se jména skrývají, vrací API `person` bez `name` a `surname` komukoli bez role. Klient
 // tedy nic neschovává — jen musí umět dlaždici vykreslit bez jména, tedy číslem dresu
 // a postem. Kdyby se spoléhal na to, že jméno vždycky přijde, ukázal by u dětí prázdno.

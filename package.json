@@ -3,59 +3,13 @@
   "version": "0.6.1",
   "type": "module",
   "main": "server/index.js",
-  "caio": {
-    "deploy": {
-      "project": "afkbratcice",
-      "keepVersions": 3
-    },
-    "boot": {
-      "logo": "/assets/icon-192-transparent.png",
-      "name": "AFK Bratčice",
-      "nameUppercase": true,
-      "logoSize": "60%"
-    },
-    "theme": {
-      "prefix": "afk",
-      "palette": {
-        "light": {
-          "bg": "#FAF6F4",
-          "card": "#FFFCFA",
-          "muted": "#F1EAE7",
-          "accent": "#FBE3DF",
-          "border": "#E3D8D5",
-          "input": "#C9BCB8",
-          "fg": "#1C1312",
-          "mutedFg": "#6B5E5B",
-          "clubRed": "#D01319",
-          "clubRedBright": "#F92725",
-          "onRed": "#FEF7F2"
-        },
-        "dark": {
-          "bg": "#070404",
-          "card": "#120D0C",
-          "muted": "#1D1716",
-          "accent": "#2A1B19",
-          "border": "#2C2423",
-          "input": "#362E2D",
-          "fg": "#F3EFED",
-          "mutedFg": "#99908E",
-          "clubRed": "#D01319",
-          "clubRedBright": "#F92725",
-          "onRed": "#FEF7F2"
-        }
-      },
-      "meaning": {
-        "primary": "clubRed",
-        "negative": "warning"
-      }
-    }
-  },
   "scripts": {
     "start": "node server/index.js",
     "dev": "caio-devkit start",
     "sync": "caio-devkit link-local",
     "build": "caio-devkit build",
     "deploy": "caio-devkit deploy",
+    "check-env": "caio-devkit check-env",
     "release": "caio-devkit release --app",
     "seed:admin": "node tools/seed-admin.js",
     "test": "node --test --import caio-server/test-setup \"server/test/**/*.test.js\" \"client/src/**/*.test.js\"",
@@ -63,7 +17,9 @@
     "grant-role": "caio-devkit grant-role",
     "migrate:categories": "node tools/migrate-categories.js",
     "migrate:v0": "node tools/migrate-v0.js",
-    "qa-accounts": "caio-devkit qa-accounts"
+    "migrate:settings": "node tools/migrate-settings.js",
+    "qa-accounts": "caio-devkit qa-accounts",
+    "settings-import": "caio-devkit settings-import"
   },
   "dependencies": {
     "caio-server": "npm:@capo00/caio-server@^0.4.4",

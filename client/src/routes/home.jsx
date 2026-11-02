@@ -77,8 +77,8 @@ function Hero() {
 // **dopočítané z dat**, ne napsané — počet mužstev je délka `categoryList`, léta tradice
 // vychází z `founded`. Číslo, které nikdo neaktualizuje, zestárne dřív než web.
 function Stats() {
-  const { appConfig, categoryList } = useApp();
-  const founded = appConfig?.founded ?? 1932;
+  const { appSettings, categoryList } = useApp();
+  const { founded } = appSettings;
   const years = new Date().getFullYear() - founded;
 
   const items = [

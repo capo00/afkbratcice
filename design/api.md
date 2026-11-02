@@ -635,17 +635,22 @@ si proto skládá **vlastní `Crud` konfiguraci nad `UiElements.BinaryProvider`*
 navíc (`category` ze `appConfig.fileCategoryList`, `date`) — přesně tou cestou, kterou
 README `caio-ui` pro tenhle případ předepisuje. Viz [frontend.md](./frontend.md), 6.1.
 
-### 2.12 `appConfig`
+### 2.12 Nastavení klubu (dřív `appConfig`)
+
+Od 2026-11 je konfigurace klubu část `app` Nastavení nasazení (`sys_settings`, [config.md](./config.md),
+sekce 3). Use casy dodává caio-server, appka žádné vlastní pro ukládání nemá:
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `appConfig/get` | get | – | `{}` | konfigurace (bez interních polí) |
-| `appConfig/update` | post | ADMIN | `{ categoryOrder, hideNamesAgeList, notice, contact, socialList, fileCategoryList, founded }` | konfigurace |
+| `sys/settings/get` | get | – | – | `{ registration, app: { public } }` -- `notice`, `founded`, `categoryOrder`, `hideNamesAgeList`, `contact`, `socialList`, `fileCategoryList` |
+| `sys/settings/adminGet` | get | ADMIN | – | navíc `mail` a `app.private` (u klubu prázdné) |
+| `sys/settings/update` | post | ADMIN | `{ mail?, registration?, app?: { public?, private? } }` | jako `adminGet`; `app` validuje `server/app-settings/` |
+| `appConfig/get` | get | – | `{}` | **BACKWARD-COMPAT** na jedno vydání: týž plochý tvar jako dřív, pro kohokoli (bez `id` a `sys` dokumentu `afk_config`) |
 
-`appConfig/get` volá klient jednou při startu SPA (`AppProvider`). **Menu a routy se z něj
-neodvozují** – ty staví `season/listCurrent` (sekce 2.2); `appConfig` dodává jen pořadí
-kategorií a výjimky. Statický výčet `teams` / `homeAge` z v1 zanikl, protože složení mužstev
-se mění každou sezónu.
+Veřejnou část čte klient jednou při startu SPA (`AppProvider` přes `UiApp.useSettings()`). **Menu
+a routy se z ní neodvozují** – ty staví `season/listCurrent` (sekce 2.2); nastavení dodává jen
+pořadí kategorií a výjimky. Statický výčet `teams` / `homeAge` z v1 zanikl, protože složení mužstev
+se mění každou sezónu. `appConfig/update` zanikl.
 
 ### 2.13 `identity`
 

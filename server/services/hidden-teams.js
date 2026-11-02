@@ -1,4 +1,4 @@
-import appConfigCrud from "../app-config/crud.js";
+import { getAppSettings } from "../app-settings/index.js";
 import categoryDao from "../category/dao.js";
 import teamDao from "../team/dao.js";
 
@@ -6,9 +6,9 @@ import teamDao from "../team/dao.js";
 // Čte se při každém dotazu: konfigurace i kategorie se mění v administraci a týmů je
 // pár desítek, takže cache by přinesla jen otázku, kdy ji zneplatnit.
 
-/** Věkové skupiny z `appConfig.hideNamesAgeList`. */
+/** Věkové skupiny z nastavení klubu (`hideNamesAgeList`, sys_settings.app). */
 async function loadHiddenAgeList() {
-  return (await appConfigCrud.get()).hideNamesAgeList ?? [];
+  return (await getAppSettings()).hideNamesAgeList ?? [];
 }
 
 /** Id týmů, jejichž kategorie má skrytý věk. */

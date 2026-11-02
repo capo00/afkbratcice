@@ -93,8 +93,8 @@ const Gallery = createVisualComponent({
   render() {
     const [, setRoute] = useRoute();
     const [category, setCategory] = useState(ALL);
-    const { appConfig } = useApp();
-    const socialList = appConfig?.socialList ?? [];
+    const { appSettings } = useApp();
+    const socialList = appSettings?.socialList ?? [];
 
     const dataObject = useDataObject(
       {

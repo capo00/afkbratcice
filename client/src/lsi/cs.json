@@ -72,8 +72,8 @@
         "desc": "Přihlášení uživatelé a jejich role"
       },
       "config": {
-        "header": "Konfigurace",
-        "desc": "Kontakty, kategorie a proužek s upozorněním"
+        "header": "Nastavení",
+        "desc": "Kontakty, sítě, kategorie, proužek s upozorněním a odchozí pošta"
       }
     },
     "field": {
@@ -119,6 +119,7 @@
       "founded": "Založeno",
       "address": "Adresa",
       "gps": "GPS",
+      "mapUrl": "Vlastní mapa",
       "ico": "IČO",
       "time": "Termín",
       "homeTeam": "Domácí",
@@ -168,9 +169,14 @@
       "cancel": "Zrušit"
     },
     "config": {
+      "label": "Klub",
+      "header": "Web klubu",
+      "contact": "Kontakt",
+      "mapUrlInfo": "Adresa mapy pro vložení do stránky Kontakt (https://…). Prázdné = mapa podle GPS.",
+      "socialList": "Sociální sítě",
+      "socialInfo": "Odkaz na stránku klubu (https://…). Prázdné = síť se na webu neukáže.",
       "categoryOrder": "Pořadí kategorií v menu",
-      "hideNames": "Skrýt jména u věkových skupin",
-      "saved": "Uloženo."
+      "hideNames": "Skrýt jména u věkových skupin"
     },
     "category": {
       "codeHint": "Malá písmena, číslice a pomlčky, např. men-b nebo u15-b. Po založení se nemění.",

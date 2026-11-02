@@ -1,4 +1,6 @@
 import { Utils } from "uu5g05";
+import { UiApp } from "caio-ui";
+import clientConfig from "../../client.config.js";
 import theme from "./theme.js";
 
 // Config.Css.css() je stylovací primitivum celého stacku (emotion pod kapotou) a řeší pořadí
@@ -8,47 +10,21 @@ import theme from "./theme.js";
 // process.env.NAME / OUTPUT_NAME / VERSION dodává devkit přes `define:` z client/package.json.
 // Bez nich to v prohlížeči spadne na "process is not defined" — proto se vite.config.js
 // nechává prázdný (createViteConfig() bez parametrů).
+//
+// Hodnoty, které zná i server (číselníky, role, kolekce binárek), jsou v caio.config.js `app`
+// (`UiApp.AppConfig.app`), klientské, které se opakují ve víc souborech, v client.config.js `app`.
+// Tady jsou pod jmény, kterými je čte kód.
 
-const TAG = "Afk.";
+const { app } = UiApp.AppConfig;
 
-// Statické soubory z client/public/. Vite je kopíruje do build outputu 1:1, takže cesta je
-// absolutní od rootu webu — ne import, aby se obrázek nebalil do bundlu. Erb v liště je
-// tatáž ikona, kterou používá manifest.json a favicon, aby se nemohly rozejít.
-const asset = {
-  logo: "/assets/meta/icon-192.png",
-  logoTransparent: "/assets/icon-192-transparent.png",
-};
+const TAG = clientConfig.tag;
 
-// Číselníky. Drží se tu jen **kódy a pořadí**, popisky jsou v LSI (`enum.age.*`,
+// Číselníky. Drží se jen **kódy a pořadí**, popisky jsou v LSI (`enum.age.*`,
 // `enum.position.*`) — jinak by web uměl česky na dvou různých místech.
 //
-// `AGE_LIST` je úplný výčet věkových skupin, ne seznam kategorií, které klub má. Které
-// existují v daném ročníku, říká `season/listCurrent`; složení mužstev se mění rok od roku
-// (design/frontend.md, 2.5).
-// Věkové skupiny (`category.age`), stejné jako `server/config.js`. Konkrétní kategorie
-// (A/B/C týmy, U15 B…) jsou v kolekci `afk_category` a spravují se v administraci.
-const AGE_LIST = ["men", "u19", "u17", "u15", "u13", "u11", "u9", "women", "old"];
-const POSITION_LIST = ["GK", "DF", "MF", "FW"];
-const MATCH_STATE_LIST = ["planned", "played", "postponed", "canceled"];
-const COACH_ROLE_LIST = ["headCoach", "assistant", "manager", "board"];
-const GALLERY_CATEGORY_LIST = ["match", "training", "fans", "youth", "club"];
-
-// Binární kolekce, do které patří soubory ke stažení. Musí sedět se `server/config.js`
-// (`BINARY_COLLECTION.DOWNLOAD`) — podle ní `binary/*` autorizuje zápis.
-const BINARY_COLLECTION_DOWNLOAD = "download";
-
-// Popisky sítí z `appConfig.socialList`. Nejsou v LSI schválně — jsou to obchodní názvy,
-// které se nepřekládají.
-//
-// **Nejsou to ikony.** GDS stencil sada nemá skupinu `logo` (má `alert`, `arrow`, `badge`,
-// `communication`, … a to je vše), takže `uugdsstencil-logo-facebook` se vykreslí jako
-// prázdné místo se správnou šířkou — přesně ten případ z `component-tree.md`, F.2.
-// Ověřeno v prohlížeči 7. 9. 2026. Odkazy jsou proto textové.
-const SOCIAL_LABEL = {
-  facebook: "Facebook",
-  instagram: "Instagram",
-  youtube: "YouTube",
-};
+// `AGE_LIST` je úplný výčet věkových skupin (`category.age`), ne seznam kategorií, které klub
+// má. Konkrétní kategorie (A/B/C týmy, U15 B…) jsou v kolekci `afk_category` a spravují se
+// v administraci; které existují v daném ročníku, říká `season/listCurrent` (design/frontend.md, 2.5).
 
 // Kódy obsahových stránek tu **nejsou**: stránky jsou natvrdo v `content/pages.js`
 // a jeho `PAGE_CODE_LIST` je zdroj pravdy pro routu i pro menu. Dvojí seznam by se
@@ -56,50 +32,50 @@ const SOCIAL_LABEL = {
 
 // Role. Rozsahová `teamEditor:<teamId>` se v guardu píše jako "teamEditor:*" —
 // `UiApp.withRoute` prefix umí, konkrétní id vytáhne `UiAuth.getScopeList()`.
-// Množiny odpovídají `server/config.js`; role se **nedědí**, takže se vypisují celé.
+// Role se **nedědí**, takže se množiny vypisují celé (caio.config.js `app.roleGroup`).
 const ROLE = {
-  MEMBERS: "members",
-  TEAM_EDITOR: "teamEditor",
-  MATCH_EDITOR: "matchEditor",
-  NEWS_EDITOR: "newsEditor",
-  GALLERY_EDITOR: "galleryEditor",
-  CONTENT_EDITOR: "contentEditor",
-  OPERATIVES: "operatives",
-  AUTHORITIES: "authorities",
+  MEMBERS: app.role.members,
+  TEAM_EDITOR: app.role.teamEditor,
+  MATCH_EDITOR: app.role.matchEditor,
+  NEWS_EDITOR: app.role.newsEditor,
+  GALLERY_EDITOR: app.role.galleryEditor,
+  CONTENT_EDITOR: app.role.contentEditor,
+  OPERATIVES: app.role.operatives,
+  AUTHORITIES: app.role.authorities,
 };
-
-const ADMIN = [ROLE.AUTHORITIES];
-const CONTENT = [ROLE.OPERATIVES, ...ADMIN];
-const MATCH = [ROLE.MATCH_EDITOR, ...CONTENT];
-const NEWS = [ROLE.NEWS_EDITOR, ...CONTENT];
-const GALLERY = [ROLE.GALLERY_EDITOR, ...CONTENT];
-const PAGES = [ROLE.CONTENT_EDITOR, ...CONTENT];
-const MEMBER = [ROLE.MEMBERS, ...CONTENT];
-// Obrazovky, na které smí i editor jednoho mužstva.
-const TEAM_SCOPED = [ROLE.TEAM_EDITOR + ":*"];
 
 const Config = {
   TAG,
-  asset,
+  asset: clientConfig.app.asset,
   theme,
 
-  AGE_LIST,
-  POSITION_LIST,
-  MATCH_STATE_LIST,
-  COACH_ROLE_LIST,
-  GALLERY_CATEGORY_LIST,
-  BINARY_COLLECTION_DOWNLOAD,
-  SOCIAL_LABEL,
+  AGE_LIST: app.ageList,
+  POSITION_LIST: app.positionList,
+  // Přesný post v sestavě: kód -> linie (`POSITION_LIST`), v pořadí formuláře. České názvy jsou
+  // v lsi (`enum.lineupPosition`).
+  LINEUP_POSITION_MAP: app.lineupPositionMap,
+  LINEUP_POSITION_LIST: Object.keys(app.lineupPositionMap),
+  MATCH_STATE_LIST: app.matchStateList,
+  ARTICLE_STATE_LIST: app.articleStateList,
+  GALLERY_STATE_LIST: app.galleryStateList,
+  COACH_ROLE_LIST: app.coachRoleList,
+  GALLERY_CATEGORY_LIST: app.galleryCategoryList,
+  // Binární kolekce souborů ke stažení -- podle ní `binary/*` autorizuje zápis.
+  BINARY_COLLECTION_DOWNLOAD: app.binaryCollection.download,
+  SOCIAL_LABEL: clientConfig.app.socialLabel,
+  // Výchozí hodnoty nastavení klubu `{ public, private }` -- platí, dokud je správce neuloží.
+  SETTINGS_DEFAULTS: app.settingsDefaults,
 
   ROLE,
-  ADMIN,
-  CONTENT,
-  MATCH,
-  NEWS,
-  GALLERY,
-  PAGES,
-  MEMBER,
-  TEAM_SCOPED,
+  ADMIN: app.roleGroup.admin,
+  CONTENT: app.roleGroup.content,
+  MATCH: app.roleGroup.match,
+  NEWS: app.roleGroup.news,
+  GALLERY: app.roleGroup.gallery,
+  PAGES: app.roleGroup.pages,
+  MEMBER: app.roleGroup.member,
+  // Obrazovky, na které smí i editor jednoho mužstva.
+  TEAM_SCOPED: [ROLE.TEAM_EDITOR + ":*"],
 
   Css: Utils.Css.createCssModule(
     TAG.replace(/\.$/, "").toLowerCase().replace(/\./g, "-").replace(/[^a-z-]/g, ""),

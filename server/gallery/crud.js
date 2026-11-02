@@ -29,7 +29,7 @@ class GalleryCrud extends Crud {
     if (!Authorization.hasProfile(identity, Config.GALLERY) && gallery.state !== "published") {
       throw new CoreError("Gallery does not exist", {
         status: 404,
-        code: `${Config.ERROR_PREFIX}/gallery/notFound`,
+        code: CoreError.code("gallery", "notFound"),
         paramMap: { id },
       });
     }

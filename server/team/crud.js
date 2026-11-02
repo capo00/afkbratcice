@@ -2,7 +2,6 @@ import { Crud, Error as CoreError } from "caio-server";
 import dao from "./dao.js";
 import clubDao from "../club/dao.js";
 import categoryDao from "../category/dao.js";
-import Config from "../config.js";
 
 /**
  * Logo týmu je od 2026-09-11 odvozené od `club` (design/data-model.md, 1.2) -- `logoUri`
@@ -42,7 +41,7 @@ class TeamCrud extends Crud {
     if (code && (await categoryDao.findByCode(code))) return;
     throw new CoreError("Unknown category", {
       status: 400,
-      code: `${Config.ERROR_PREFIX}/team/invalidCategory`,
+      code: CoreError.code("team", "invalidCategory"),
       paramMap: { category: code },
     });
   }

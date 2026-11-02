@@ -18,7 +18,7 @@ function formatSeason(yearFrom) {
 }
 
 /**
- * Seřadí položky podle appConfig.categoryOrder (kódy kategorií, `item.category`); co
+ * Seřadí položky podle nastavení `categoryOrder` (kódy kategorií, `item.category`); co
  * v pořadí není, jde na konec (abecedně, ať je výsledek stabilní).
  */
 function sortByCategoryOrder(itemList, categoryOrder = []) {

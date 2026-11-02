@@ -70,7 +70,7 @@ class CategoryCrud extends Crud {
   }
 
   _error(code, message, paramMap) {
-    return new CoreError(message, { status: 400, code: `${Config.ERROR_PREFIX}/category/${code}`, paramMap });
+    return new CoreError(message, { status: 400, code: CoreError.code("category", code), paramMap });
   }
 }
 

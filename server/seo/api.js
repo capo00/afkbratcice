@@ -2,7 +2,7 @@ import matchDao from "../match/dao.js";
 import teamDao from "../team/dao.js";
 import galleryDao from "../gallery/dao.js";
 import articleDao from "../article/dao.js";
-import { Seo } from "caio-server";
+import { Seo, Error as CoreError } from "caio-server";
 import { buildCalendar } from "../services/ical.js";
 
 // Netypové trasy. Registrují se jako běžný use case, který si odpověď pošle sám přes
@@ -68,7 +68,7 @@ export default {
     fn: async ({ dtoIn, req, res }) => {
       const teamId = dtoIn?.teamId;
       if (!teamId) {
-        res.status(400).json({ error: { code: "afkbratcice/calendar/teamIdRequired", message: "teamId is required" } });
+        res.status(400).json({ error: { code: CoreError.code("calendar", "teamIdRequired"), message: "teamId is required" } });
         return false;
       }
 

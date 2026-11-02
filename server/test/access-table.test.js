@@ -103,8 +103,8 @@ const ANY_TEAM_EDITOR = ["editorA", "editorAB", "editorC"];
 
 // "public" = no `auth` at all; otherwise the identities the use case lets through.
 const expected = {
+  // BACKWARD-COMPAT alias for one release; the settings themselves are the stack's sys/settings/*.
   "appConfig/get": "public",
-  "appConfig/update": ADMIN,
   "article/create": NEWS,
   "article/delete": NEWS,
   "article/get": "public",

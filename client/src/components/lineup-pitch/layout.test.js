@@ -1,7 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { POSITION_POINT, layoutLineup, shortName, initials, PLAYER_BOX } from "./layout.js";
-import { LINEUP_POSITION_LIST } from "../../config/lineup-position.js";
+import caioConfig from "../../../../caio.config.js";
+
+// Číselník přesných postů je v caio.config.js (`app.lineupPositionMap`); v node bez buildu ho
+// `UiApp.AppConfig` nemá, takže ho test čte přímo.
+const LINEUP_POSITION_LIST = Object.keys(caioConfig.app.lineupPositionMap);
 
 test("každý přesný post má místo na hřišti", () => {
   assert.deepEqual(Object.keys(POSITION_POINT).sort(), [...LINEUP_POSITION_LIST].sort());
