@@ -152,6 +152,15 @@ class MatchCrud extends Crud {
       if (homeGoals !== guestGoals) {
         throw this._error("invalidPenaltyWinner", "Penalty shootout is only possible on a draw", { homeGoals, guestGoals });
       }
+      // ... a jen v soutěži, která se na penalty hraje (`season.hasPenalties`). Jinde by
+      // tabulka vítěze rozstřelu stejně nezapočítala (services/table.js) a na webu by
+      // u zápasu visel odznak, který nic neznamená. Zápas bez sezóny je přátelák bez penalt.
+      const season = current.seasonId ? await seasonDao.get(current.seasonId).catch(() => null) : null;
+      if (!season?.hasPenalties) {
+        throw this._error("invalidPenaltyWinner", "Penalty shootout is not played in this season", {
+          seasonId: current.seasonId ?? null,
+        });
+      }
     }
 
     // `_forIdentity` i tady, aby zápis vracel týž tvar jako `list` -- klient položku

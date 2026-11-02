@@ -49,3 +49,12 @@ test("chybějící sectionList se nedoplňuje", () => {
   assert.deepEqual(crud._normalize(data), data);
   assert.equal("sectionList" in crud._normalize(data), false);
 });
+
+test("zápas u reportu nepouští veřejnosti čas odjezdu", () => {
+  const match = { id: "m1", homeGoals: 2, guestGoals: 1, departureTime: "2026-11-01T08:00:00.000Z" };
+
+  assert.equal("departureTime" in crud._matchFor(match, null), false);
+  assert.equal(crud._matchFor(match, null).homeGoals, 2, "zbytek zápasu zůstane");
+  assert.equal(crud._matchFor(match, { profileList: [Config.ROLE.MEMBERS] }).departureTime, match.departureTime);
+  assert.equal(crud._matchFor(null, null), null);
+});

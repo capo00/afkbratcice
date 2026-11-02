@@ -1,6 +1,7 @@
 import { Crud, Error as CoreError, BinaryStore, Authorization } from "caio-server";
 import dao from "./dao.js";
 import matchDao from "../match/dao.js";
+import matchCrud from "../match/crud.js";
 import Config from "../config.js";
 
 /**
@@ -56,7 +57,15 @@ class ArticleCrud extends Crud {
     // Report ze zápasu ukazuje výsledek v hlavičce, takže zápas dotahujeme rovnou --
     // jinak by si ho klient musel vyžádat druhým dotazem na každém detailu.
     const match = article.matchId ? await matchDao.get(article.matchId).catch(() => null) : null;
-    return { ...article, match };
+    return { ...article, match: this._matchFor(match, identity) };
+  }
+
+  /**
+   * Zápas u reportu prochází stejným filtrem jako `match/*`: bez něj by `article/get`
+   * pouštěl veřejnosti interní `departureTime`, který `match/get` skrývá (match/crud.js).
+   */
+  _matchFor(match, identity) {
+    return match ? matchCrud._forIdentity(match, identity) : null;
   }
 
   async create(data, identity) {

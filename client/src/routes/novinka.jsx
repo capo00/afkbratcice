@@ -5,9 +5,8 @@ import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
-import Card from "../components/layout/card.jsx";
-import TeamLogo from "../components/team-logo.jsx";
 import DateText from "../components/date-text.jsx";
+import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
@@ -23,6 +22,8 @@ const { theme } = Config;
 //
 // Sekce se renderují za sebou bez oddělovače: je to jeden text rozdělený na kusy kvůli
 // editaci, ne kapitoly.
+//
+// Report ze zápasu ukazuje zápas běžnou dlaždicí `MatchTile` -- proklik vede na detail zápasu.
 
 const MAX_TEXT_WIDTH = 720;
 
@@ -37,36 +38,13 @@ const PROSE = {
   "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
 };
 
-/** Panel s výsledkem u reportu ze zápasu. Odkaz vede na detail, ne na kolo. */
-function MatchPanel({ match }) {
-  const [, setRoute] = useRoute();
-  const { getTeam } = useApp();
-  const played = Number.isFinite(match.homeGoals) && Number.isFinite(match.guestGoals);
-  const home = getTeam(match.homeTeamId);
-  const guest = getTeam(match.guestTeamId);
-
-  return (
-    <Card topStripe onClick={() => setRoute("zapas", { id: match.id })}>
-      <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" })}>
-        <TeamLogo uri={home?.logoUri} size={32} alt="" />
-        <span className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>
-          {home?.name ?? "—"} {played ? `${match.homeGoals} : ${match.guestGoals}` : "–"} {guest?.name ?? "—"}
-        </span>
-        <TeamLogo uri={guest?.logoUri} size={32} alt="" />
-        <span className={Config.Css.css({ marginInlineStart: "auto", color: theme.color.mutedFg })}>
-          <Uu5Elements.Icon icon="uugds-calendar" /> <DateText value={match.time} />
-        </span>
-      </div>
-    </Card>
-  );
-}
-
 const Novinka = createVisualComponent({
   uu5Tag: Config.TAG + "Novinka",
 
   render() {
     const [route] = useRoute();
     const id = route?.params?.id;
+    const { categoryList } = useApp();
 
     const dataObject = useDataObject(
       {
@@ -97,6 +75,12 @@ const Novinka = createVisualComponent({
     }
 
     const article = data;
+    // Vlastní tým zápasu kvůli zvýraznění v dlaždici, stejně jako na detailu zápasu.
+    const ownTeamId = article.match
+      ? categoryList.find(
+          (category) => category.teamId === article.match.homeTeamId || category.teamId === article.match.guestTeamId,
+        )?.teamId
+      : undefined;
 
     return (
       <Section>
@@ -152,7 +136,11 @@ const Novinka = createVisualComponent({
 
           {article.match ? (
             <div className={Config.Css.css({ marginBlockStart: 24 })}>
-              <MatchPanel match={article.match} />
+              <MatchTile
+                match={article.match}
+                ownTeamId={ownTeamId}
+                onResultSaved={(match) => dataObject.handlerMap.setData?.({ ...article, match })}
+              />
             </div>
           ) : null}
 

@@ -10,10 +10,54 @@ const { theme } = Config;
 
 const LSI_PATH = ["admin", "matches"];
 
-// Home and guest side by side even on a phone -- the score reads as one row.
+// Home and guest side by side even on a phone -- the score reads as one row. The penalty
+// winner row is added only while the field is shown; a grid area without its field would
+// leave an empty row behind.
 const RESULT_GRID_LAYOUT = {
-  xs: "homeGoals guestGoals, homeGoalsHalf guestGoalsHalf, penaltyWinnerTeamId penaltyWinnerTeamId",
+  xs: "homeGoals guestGoals, homeGoalsHalf guestGoalsHalf",
 };
+const RESULT_GRID_LAYOUT_WITH_PENALTY = {
+  xs: RESULT_GRID_LAYOUT.xs + ", penaltyWinnerTeamId penaltyWinnerTeamId",
+};
+
+/**
+ * Má smysl ptát se na vítěze rozstřelu? Jen v sezóně, která se na penalty hraje,
+ * a u zadané remízy. Totéž hlídá server (`match/setResult`); tady jde o to, aby se pole
+ * nenabízelo tam, kde by ho server odmítl.
+ */
+function showsPenaltyWinner(hasPenalties, value) {
+  return (
+    Boolean(hasPenalties) &&
+    Number.isFinite(value?.homeGoals) &&
+    Number.isFinite(value?.guestGoals) &&
+    value.homeGoals === value.guestGoals
+  );
+}
+
+/**
+ * Pole formuláře výsledku. Je to vlastní komponenta jen kvůli `useFormApi`: ten musí sedět
+ * pod `Form.Provider`, a vítěz rozstřelu se ukazuje živě podle toho, co je zrovna vyplněné.
+ */
+function ResultFields({ teamItemList, hasPenalties }) {
+  const { value } = Uu5Forms.useFormApi();
+  const withPenalty = showsPenaltyWinner(hasPenalties, value);
+
+  return (
+    <Uu5Forms.Form.View gridLayout={withPenalty ? RESULT_GRID_LAYOUT_WITH_PENALTY : RESULT_GRID_LAYOUT}>
+      <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required />
+      <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required />
+      <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
+      <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
+      {withPenalty ? (
+        <Uu5Forms.FormSelect
+          name="penaltyWinnerTeamId"
+          label={<Lsi import={importLsi} path={[...LSI_PATH, "penaltyWinner"]} />}
+          itemList={teamItemList}
+        />
+      ) : null}
+    </Uu5Forms.Form.View>
+  );
+}
 
 // Dva modaly nad zápasem: **výsledek** a **sestava**. Obojí je vlastní use case
 // (`match/setResult`, `match/setLineup`), ne `match/update` — a to schválně:
@@ -30,10 +74,26 @@ const RESULT_GRID_LAYOUT = {
  *                  **položkovým handlerem** seznamu, seznam si položku aktualizuje sám tím,
  *                  co server vrátil, a nemusí se přenačítat celý (viz `components/match-tile.jsx`).
  *                  Bez něj se volá use case přímo — pro obrazovky, které seznam nedrží.
+ * @param onSaved   dostane zápas, jak ho vrátil zápis (`onSubmit` nebo `match/setResult`).
  */
 function ResultModal({ match, onClose, onSaved, onSubmit }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState();
+
+  // Hraje se v sezóně zápasu na penalty? `season/get` je veřejný; zápas bez sezóny je
+  // přátelák a penalty nemá. Dokud se sezóna načítá, pole vítěze se nenabízí.
+  const { data: season } = useDataObject(
+    {
+      handlerMap: {
+        load: () =>
+          match.seasonId
+            ? UiElements.Call.cmdGet("/season/get", { id: match.seasonId }).catch(() => null)
+            : Promise.resolve(null),
+      },
+    },
+    [match.seasonId],
+  );
+  const hasPenalties = Boolean(season?.hasPenalties);
 
   const teamItemList = [
     { value: match.homeTeamId, children: match.homeTeam?.name ?? match.homeTeamId },
@@ -51,11 +111,12 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
         guestGoals: v.guestGoals,
         homeGoalsHalf: v.homeGoalsHalf ?? null,
         guestGoalsHalf: v.guestGoalsHalf ?? null,
-        penaltyWinnerTeamId: v.penaltyWinnerTeamId ?? null,
+        // Jen když se pole ukazuje; jinak `null`, i kdyby zápas měl vítěze uloženého
+        // z dřívějška (remíza se mezitím změnila na výhru, nebo sezóna penalty nehraje).
+        penaltyWinnerTeamId: showsPenaltyWinner(hasPenalties, v) ? (v.penaltyWinnerTeamId ?? null) : null,
       };
-      if (onSubmit) await onSubmit(dtoIn);
-      else await UiElements.Call.cmdPost("/match/setResult", dtoIn);
-      onSaved?.();
+      const saved = onSubmit ? await onSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setResult", dtoIn);
+      onSaved?.(saved);
       onClose();
     } catch (err) {
       // Server odmítne rozstřel u neremízy — hláška patří k formuláři, ne do konzole.
@@ -93,17 +154,7 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
           {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
         </div>
 
-        <Uu5Forms.Form.View gridLayout={RESULT_GRID_LAYOUT}>
-          <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required />
-          <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required />
-          <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
-          <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
-          <Uu5Forms.FormSelect
-            name="penaltyWinnerTeamId"
-            label={<Lsi import={importLsi} path={[...LSI_PATH, "penaltyWinner"]} />}
-            itemList={teamItemList}
-          />
-        </Uu5Forms.Form.View>
+        <ResultFields teamItemList={teamItemList} hasPenalties={hasPenalties} />
 
         {error ? (
           <Uu5Elements.Text

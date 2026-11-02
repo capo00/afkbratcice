@@ -5,9 +5,6 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
-import Card from "../components/layout/card.jsx";
-import TeamLogo from "../components/team-logo.jsx";
-import DateText from "../components/date-text.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import LineupPitch from "../components/lineup-pitch/lineup-pitch.jsx";
@@ -21,10 +18,9 @@ const { theme } = Config;
 // `match/get` vrací zápas i s oběma týmy a s **rozbalenou sestavou** (hráč + osoba), takže
 // detail je jeden dotaz, ne n+1. Ostatní výsledky kola, vzájemné zápasy a alba jsou tři
 // nezávislé dotazy navíc — každý se načítá sám a jeden neúspěch neshodí zbytek stránky.
-
-function isPlayed(match) {
-  return Number.isFinite(match?.homeGoals) && Number.isFinite(match?.guestGoals);
-}
+//
+// Zápas sám i ostatní zápasy kreslí `MatchTile` (hlavička detailu je `size="large"`). Tužkou
+// zapsaný výsledek se promítá zpátky do dat stránky (`onResultSaved`), aby se změnil i titulek.
 
 function personName(entry) {
   const name = [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ");
@@ -32,101 +28,6 @@ function personName(entry) {
   // číslo dresu je jediná identifikace, kterou v obou případech máme.
   if (name) return name;
   return entry.player?.number ? `#${entry.player.number}` : null;
-}
-
-function MatchHeader({ match }) {
-  const played = isPlayed(match);
-  const [screenSize] = useScreenSize();
-  // Larger than in the match tile (64 px); smaller on a phone so the score fits (Caio 2026-10-29).
-  const logoSize = ["xs", "s"].includes(screenSize) ? 80 : 96;
-  const penaltyWinner = match.penaltyWinnerTeamId;
-
-  // Kolo, výkop, hřiště a odjezd jsou **patička dlaždice**, ne další blok v jejím těle:
-  // `Tile` na to má `footer` a `footerSeparator`, takže oddělovací linku kreslí GDS
-  // (`Shape.line`) a nemusí se psát `borderBlockStart` s vlastní barvou.
-  const meta = (
-    <div
-      className={Config.Css.css({
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 16,
-        justifyContent: "center",
-        inlineSize: "100%",
-        color: theme.color.mutedFg,
-      })}
-    >
-      <span>
-        {match.round ? (
-          <Lsi import={importLsi} path={["match", "round"]} params={{ round: match.round }} />
-        ) : (
-          <Lsi import={importLsi} path={["match", "friendly"]} />
-        )}
-      </span>
-      <span>
-        <Uu5Elements.Icon icon="uugds-calendar" /> <DateText value={match.time} type="dateTime" />
-      </span>
-      {match.place ? (
-        <span>
-          <Uu5Elements.Icon icon="uugds-mapmarker" /> {match.place}
-        </span>
-      ) : null}
-      {/* `departureTime` je interní údaj — server ho vrací jen roli `members` a výš,
-          takže když tu je, smí se ukázat. */}
-      {match.departureTime ? (
-        <span className={Config.Css.css({ color: theme.color.clubRed })}>
-          <Uu5Elements.Icon icon="uugds-clock" />{" "}
-          <Lsi import={importLsi} path={["match", "departure"]} />: <DateText value={match.departureTime} type="time" />
-        </span>
-      ) : null}
-    </div>
-  );
-
-  return (
-    <Card topStripe footer={meta} footerSeparator footerHorizontalAlignment="center">
-      {/* Domácí – skóre – hosté. Prostřední sloupec je `auto`, aby si skóre vzalo jen
-          tolik, kolik potřebuje, a oba týmy dostaly stejnou půlku zbytku. */}
-      <Uu5Elements.Grid
-        templateColumns="1fr auto 1fr"
-        alignItems="center"
-        columnGap={16}
-        className={Config.Css.css({ textAlign: "center" })}
-      >
-        {[match.homeTeam, match.guestTeam].map((team, index) => (
-          <Uu5Elements.Grid
-            key={index}
-            justifyItems="center"
-            rowGap={8}
-            // Skóre je uprostřed, takže hosté musí být až za ním.
-            className={Config.Css.css({ order: index === 0 ? 0 : 2 })}
-          >
-            <TeamLogo uri={team?.logoUri} size={logoSize} alt="" />
-            <div className={Config.Css.css({ ...theme.typography.display, fontSize: 20 })}>{team?.name ?? "—"}</div>
-            {penaltyWinner && penaltyWinner === team?.id ? (
-              <Uu5Elements.Tag colorScheme="primary" significance="distinct" size="s">
-                <Lsi import={importLsi} path={["match", "penaltyWinner"]} />
-              </Uu5Elements.Tag>
-            ) : null}
-          </Uu5Elements.Grid>
-        ))}
-
-        <div className={Config.Css.css({ order: 1 })}>
-          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 44, lineHeight: 1 })}>
-            {played ? `${match.homeGoals} : ${match.guestGoals}` : "—"}
-          </div>
-          {played && Number.isFinite(match.homeGoalsHalf) ? (
-            <Uu5Elements.Text
-              category="interface"
-              segment="content"
-              type="medium"
-              className={Config.Css.css({ color: theme.color.mutedFg })}
-            >
-              {`(${match.homeGoalsHalf} : ${match.guestGoalsHalf})`}
-            </Uu5Elements.Text>
-          ) : null}
-        </div>
-      </Uu5Elements.Grid>
-    </Card>
-  );
 }
 
 function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant, action }) {
@@ -138,6 +39,16 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
     () => (dataObject.data?.itemList ?? []).filter((match) => match.id !== excludeId),
     [dataObject.data, excludeId],
   );
+
+  // Výsledek zapsaný tužkou v dlaždici nahradí položku seznamu, ať se nevrátí stará
+  // hodnota, až se blok překreslí. `setData` chybí, dokud se seznam načítá.
+  function replaceMatch(updated) {
+    const data = dataObject.data;
+    dataObject.handlerMap.setData?.({
+      ...data,
+      itemList: (data?.itemList ?? []).map((match) => (match.id === updated.id ? updated : match)),
+    });
+  }
 
   // Prázdný blok se nekreslí vůbec — „ostatní výsledky kola" bez ostatních výsledků je
   // jen nadpis nad prázdnem.
@@ -162,7 +73,7 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
         className={Config.Css.css({ marginBlockStart: 24 })}
       >
         {itemList.map((match) => (
-          <MatchTile key={match.id} match={match} ownTeamId={ownTeamId} />
+          <MatchTile key={match.id} match={match} ownTeamId={ownTeamId} onResultSaved={replaceMatch} />
         ))}
       </Uu5Elements.Grid>
     </Section>
@@ -226,10 +137,16 @@ function MatchDetail({ matchId }) {
 
   const hasLineup = homeLineup.length > 0 || guestLineup.length > 0;
 
+  // Zápis výsledku vrací holý zápas -- sestava v něm není rozbalená (hráč + osoba), takže
+  // se ponechá ta z `match/get`; jinak by hřiště a střelci zmizeli.
+  function handleResultSaved(updated) {
+    dataObject.handlerMap.setData?.({ ...match, ...updated, playerList: match.playerList });
+  }
+
   return (
     <>
       <Section>
-        <MatchHeader match={match} />
+        <MatchTile match={match} size="large" ownTeamId={ownTeamId} onResultSaved={handleResultSaved} />
       </Section>
 
       {hasLineup ? (
