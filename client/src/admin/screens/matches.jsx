@@ -1,4 +1,4 @@
-import { createVisualComponent, useState, useMemo, useRef, useDataList, Lsi } from "uu5g05";
+import { createVisualComponent, useState, useMemo, useRef, useEffect, useDataList, useDataObject, Lsi } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
@@ -50,23 +50,63 @@ function matchHandlers(dataRef) {
   };
 }
 
+// Filtry jdou **na server** (`match/list`): zápasů jsou tisíce a seznam se načítá po
+// stránkách, klientský filtr by prošel jen tu načtenou. Kolo platí jen spolu se sezónou
+// (server ho bez ní odmítne) -- bez vybrané sezóny se do dtoIn nepošle.
+function listDtoIn(filterDtoIn) {
+  const { round, ...rest } = filterDtoIn;
+  return { order: "desc", ...rest, ...(round && rest.seasonId ? { round } : null) };
+}
+
+// Konec rozsahu až do konce dne: `time` je ISO s časem a „do 7. 6.“ má vzít i zápas v 17:00.
+const dateRangeDtoIn = ([from, to] = []) => ({
+  ...(from ? { dateFrom: from } : null),
+  ...(to ? { dateTo: `${to}T23:59:59.999Z` } : null),
+});
+
 const AdminMatches = createVisualComponent({
   uu5Tag: Config.TAG + "AdminMatches",
 
   render() {
-    const { getTeam } = useApp();
+    const app = useApp();
+    const { getTeam, teamList } = app;
     const [resultFor, setResultFor] = useState();
     const [lineupFor, setLineupFor] = useState();
 
+    // Nabídky filtrů: týmy jsou v app-contextu, sezóny se načtou.
+    const { data: seasonData } = useDataObject(
+      { handlerMap: { load: () => UiElements.Call.cmdGet("/season/list", {}) } },
+      [],
+    );
+    const teamItemList = useMemo(
+      () =>
+        [...teamList]
+          .sort((a, b) => a.name.localeCompare(b.name, "cs"))
+          .map((team) => ({ value: team.id, children: teamLabel(team, app) })),
+      [teamList, app],
+    );
+    const seasonItemList = useMemo(
+      () => (seasonData?.itemList ?? []).map((season) => ({ value: season.id, children: seasonLabel(season) })),
+      [seasonData],
+    );
+
     const CONFIG = useMemo(
       () => ({
-        time: dateTimeField(lsi("admin", "field", "time"), { required: false }),
+        time: {
+          ...dateTimeField(lsi("admin", "field", "time"), { required: false }),
+          filterProps: { inputType: "date-range", dtoIn: dateRangeDtoIn },
+        },
         homeTeamId: {
           label: lsi("admin", "field", "homeTeam"),
           output: (value) => getTeam(value)?.name ?? value,
           input: {
             Component: EntitySelect,
             props: { required: true, useCase: "/team/list", getLabel: teamLabel },
+          },
+          filterProps: {
+            inputType: "text-select",
+            inputProps: { itemList: teamItemList },
+            dtoIn: (homeTeamId) => ({ homeTeamId }),
           },
         },
         guestTeamId: {
@@ -75,6 +115,11 @@ const AdminMatches = createVisualComponent({
           input: {
             Component: EntitySelect,
             props: { required: true, useCase: "/team/list", getLabel: teamLabel },
+          },
+          filterProps: {
+            inputType: "text-select",
+            inputProps: { itemList: teamItemList },
+            dtoIn: (guestTeamId) => ({ guestTeamId }),
           },
         },
         // Skóre je jen sloupec: mění se přes „Zapsat výsledek", který navíc hlídá rozstřel.
@@ -91,6 +136,11 @@ const AdminMatches = createVisualComponent({
             Component: EntitySelect,
             props: { required: true, useCase: "/season/list", getLabel: seasonLabel },
           },
+          filterProps: {
+            inputType: "text-select",
+            inputProps: { itemList: seasonItemList },
+            dtoIn: (seasonId) => ({ seasonId }),
+          },
         },
         round: {
           label: lsi("admin", "field", "round"),
@@ -98,6 +148,11 @@ const AdminMatches = createVisualComponent({
           columnProps: { maxWidth: 80, horizontalAlignment: "center" },
           // Prázdné kolo = přátelský zápas; server prázdný řetězec normalizuje na null.
           input: { Component: Uu5Forms.FormText, props: { maxLength: 5 } },
+          filterProps: {
+            label: lsi("admin", "matches", "roundFilter"),
+            inputType: "text",
+            dtoIn: (round) => ({ round: String(round).trim() }),
+          },
         },
         place: {
           label: lsi("admin", "field", "place"),
@@ -120,7 +175,7 @@ const AdminMatches = createVisualComponent({
           filterProps: {
             inputType: "select",
             inputProps: { itemList: enumItemList("matchState", Config.MATCH_STATE_LIST) },
-            filter: (value, filterValue) => value === filterValue,
+            dtoIn: (state) => ({ state }),
           },
         },
         note: {
@@ -129,7 +184,7 @@ const AdminMatches = createVisualComponent({
           input: { Component: Uu5Forms.FormTextArea, props: { maxLength: 300, autoResize: true } },
         },
       }),
-      [getTeam],
+      [getTeam, teamItemList, seasonItemList],
     );
 
     const { seriesList, columnList, sorterList, filterList } = useMemo(
@@ -137,19 +192,33 @@ const AdminMatches = createVisualComponent({
       [CONFIG],
     );
 
+    const filter = UiElements.Crud.useFilter({ filterDefinitionList: filterList });
+    const dtoIn = useMemo(() => listDtoIn(filter.dtoIn), [filter.dtoIn]);
+
     // Ref se plní **až za** `useDataList` — dřív `dataList` ještě neexistuje.
     const dataRef = useRef();
-    const dataList = useDataList({ ...matchHandlers(dataRef), initialDtoIn: { order: "desc" } });
+    const dataList = useDataList({ ...matchHandlers(dataRef), initialDtoIn: dtoIn });
     dataRef.current = dataList.data;
+
+    // Jiný filtr = nový výpis. `useDataList` dtoIn nesleduje (na rozdíl od `CrudContext`),
+    // takže se načte ručně; první načtení udělal `initialDtoIn`.
+    const dtoInKey = JSON.stringify(dtoIn);
+    const loadedKeyRef = useRef(dtoInKey);
+    useEffect(() => {
+      if (loadedKeyRef.current === dtoInKey || !dataList.handlerMap.load) return;
+      loadedKeyRef.current = dtoInKey;
+      dataList.handlerMap.load(dtoIn).catch(() => {});
+    }, [dtoInKey, dataList.handlerMap.load]);
 
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "matches", "header")}>
         <UiElements.Crud
-          dataList={dataList}
+          {...filter.crudProps}
+          // `dtoIn` na seznamu: `Crud` s ním donačítá další stránky (`loadNext`), jinak by šly bez filtrů.
+          dataList={{ ...dataList, dtoIn }}
           seriesList={seriesList}
           columnList={columnList}
           sorterDefinitionList={sorterList}
-          filterDefinitionList={filterList}
           // `getItemActionList` dostává `{ data }`, kde `data` je **položka seznamu**
           // (`{ data, handlerMap }`), ne samotný zápas — proto se rozbaluje na `item`.
           // Do stavu jde celá položka: modal pak ukládá jejím handlerem a seznam si ten

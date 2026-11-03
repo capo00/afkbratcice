@@ -28,8 +28,8 @@
         "desc": "Erby a názvy klubů, sdílené napříč kategoriemi"
       },
       "teams": {
-        "header": "Mužstva a soupeři",
-        "desc": "Týmy a kategorie"
+        "header": "Týmy",
+        "desc": "Naše týmy i soupeři"
       },
       "categories": {
         "header": "Kategorie",
@@ -153,6 +153,7 @@
       "close": "Zavřít"
     },
     "matches": {
+      "roundFilter": "Kolo (jen se sezónou)",
       "setResult": "Zapsat výsledek",
       "setLineup": "Zapsat sestavu",
       "resultHeader": "Výsledek zápasu",

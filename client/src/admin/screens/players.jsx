@@ -37,6 +37,11 @@ const CONFIG = {
     sort: true,
     output: (value) => <EnumText enumName="position" code={value} />,
     input: { Component: Uu5Forms.FormSelect, props: { itemList: enumItemList("position", Config.POSITION_LIST) } },
+    filterProps: {
+      inputType: "select",
+      inputProps: { itemList: enumItemList("position", Config.POSITION_LIST) },
+      filter: (value, filterValue) => value === filterValue,
+    },
   },
   teamList: {
     label: lsi("admin", "field", "teamList"),

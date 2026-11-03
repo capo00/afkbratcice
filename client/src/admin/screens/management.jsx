@@ -3,7 +3,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { enumItemList, personLabel, teamLabel } from "../fields.jsx";
+import { enumItemList, personLabel } from "../fields.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import FormMembership from "../form-membership.jsx";
@@ -25,16 +25,22 @@ const BOARD_ROLE_ITEM_LIST = enumItemList("boardRole", Config.BOARD_ROLE_LIST);
 const today = () => new Date().toISOString().slice(0, 10);
 const isActive = (m) => (!m.dateFrom || m.dateFrom <= today()) && (!m.dateTo || m.dateTo >= today());
 
-/** Trvající působení v týmech: „Muži A (Trenér), Žáci (Asistent)“. */
+/**
+ * Trvající působení v týmech: „A (Muži) – Trenér, U15 – Asistent“. Vedení je jen u našich
+ * týmů a ty se jmenují všechny „AFK Bratčice“, takže rozlišuje kategorie, ne název.
+ */
 function TeamRoles({ teamList }) {
-  const app = useApp();
-  return (teamList ?? []).filter(isActive).map((m, i) => (
-    <span key={i}>
-      {i ? ", " : ""}
-      {app.getTeam(m.id) ? teamLabel(app.getTeam(m.id), app) : m.id} (
-      <Lsi import={importLsi} path={["enum", "teamRole", m.role]} />)
-    </span>
-  ));
+  const { getTeam, getCategory } = useApp();
+  return (teamList ?? []).filter(isActive).map((m, i) => {
+    const team = getTeam(m.id);
+    return (
+      <span key={i}>
+        {i ? ", " : ""}
+        {getCategory(team?.category)?.name ?? team?.name ?? m.id} –{" "}
+        <Lsi import={importLsi} path={["enum", "teamRole", m.role]} />
+      </span>
+    );
+  });
 }
 
 function BoardRoles({ boardList }) {

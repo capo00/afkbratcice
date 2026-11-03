@@ -5,6 +5,7 @@ import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 import { teamLabel } from "./fields.jsx";
+import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
 
@@ -28,17 +29,28 @@ const LSI_PATH = ["admin", "membership"];
 const MembershipInput = createVisualComponent({
   uu5Tag: Config.TAG + "MembershipInput",
 
-  render({ value, onChange, team = true, roleItemList, showContact = false, addLsiPath, ...props }) {
+  render({ value, onChange, team = true, roleItemList, showContact = false, addLsiPath, label, required, ...props }) {
     const list = Array.isArray(value) ? value : [];
+    const app = useApp();
 
+    // Jen naše týmy: hráči i vedení jsou klubu, soupeř tu nemá co dělat.
     // Výbor tým nemá, seznam týmů pak netřeba.
     const { data } = useDataObject(
-      { handlerMap: { load: () => (team ? UiElements.Call.cmdGet("/team/list", {}) : Promise.resolve({ itemList: [] })) } },
+      {
+        handlerMap: {
+          load: () => (team ? UiElements.Call.cmdGet("/team/list", { own: true }) : Promise.resolve({ itemList: [] })),
+        },
+      },
       [team],
     );
     const teamItemList = useMemo(
-      () => (data?.itemList ?? []).map((team) => ({ value: team.id, children: teamLabel(team) })),
-      [data],
+      // Všechny se jmenují „AFK Bratčice“: v úzkém sloupci rozliší tým jen kategorie.
+      () =>
+        (data?.itemList ?? []).map((item) => ({
+          value: item.id,
+          children: app.getCategory(item.category)?.name ?? teamLabel(item, app),
+        })),
+      [data, app],
     );
 
     function change(newList, e) {
@@ -74,6 +86,8 @@ const MembershipInput = createVisualComponent({
 
     return (
       <Uu5Elements.Grid rowGap={8} {...props}>
+        {/* `withFormItem` popisek nekreslí, to dělá až vstup -- tenhle je vlastní. */}
+        {label ? <Uu5Forms.Label required={required}>{label}</Uu5Forms.Label> : null}
         {list.map((item, index) => (
           <Uu5Elements.Grid key={index} templateColumns={templateColumns} columnGap={8} alignItems="end">
             {team ? (

@@ -1,10 +1,11 @@
-import { createVisualComponent } from "uu5g05";
+import { createVisualComponent, useDataObject, useMemo } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { ageField, boolField, teamLabel, EntitySelect } from "../fields.jsx";
+import { seasonLabel } from "../../components/season-select.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 
 // Sezóny — ročník soutěže jedné kategorie a její účastníci.
@@ -30,7 +31,9 @@ function TeamListInput(props) {
   return <EntitySelect {...props} useCase="/team/list" getLabel={teamName} multiple />;
 }
 
-const CONFIG = {
+// Filtr ročníku nabízí jen ročníky, ve kterých nějaká sezóna je (`season/listYears`),
+// proto se config skládá až v komponentě.
+const getConfig = (yearList) => ({
   competition: {
     label: lsi("admin", "field", "competition"),
     sort: true,
@@ -42,6 +45,11 @@ const CONFIG = {
     sort: true,
     columnProps: { maxWidth: 100 },
     input: { Component: Uu5Forms.FormText, props: { required: true, pattern: "\\d{4}", maxLength: 4 } },
+    filterProps: {
+      inputType: "select",
+      inputProps: { itemList: yearList.map((yearFrom) => ({ value: yearFrom, children: seasonLabel({ yearFrom }) })) },
+      filter: (value, filterValue) => value === filterValue,
+    },
   },
   age: ageField,
   hasPenalties: boolField(lsi("admin", "field", "hasPenalties")),
@@ -56,14 +64,19 @@ const CONFIG = {
     output: false,
     input: { Component: Uu5Forms.FormTextArea, props: { maxLength: 300, autoResize: true } },
   },
-};
-
-const { seriesList, columnList, sorterList, filterList } = UiElements.Crud.generate(CONFIG);
+});
 
 const AdminSeasons = createVisualComponent({
   uu5Tag: Config.TAG + "AdminSeasons",
 
   render() {
+    const { data: years } = useDataObject(
+      { handlerMap: { load: () => UiElements.Call.cmdGet("/season/listYears", {}) } },
+      [],
+    );
+    const CONFIG = useMemo(() => getConfig(years?.itemList ?? []), [years]);
+    const { seriesList, columnList, sorterList, filterList } = useMemo(() => UiElements.Crud.generate(CONFIG), [CONFIG]);
+
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "seasons", "header")}>
         <SeasonProvider calls={CALLS}>
