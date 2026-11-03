@@ -55,7 +55,9 @@ const ResultModal = Utils.Component.lazy(() =>
 
 function outcome(match, ownTeamId) {
   if (!Number.isFinite(match.homeGoals) || !Number.isFinite(match.guestGoals)) return null;
-  if (!ownTeamId) return null;
+  // Vlastní tým v zápase hrát nemusí (kolo soutěže ukazuje i zápasy ostatních týmů) —
+  // pak není z čího pohledu výhru nebo prohru počítat.
+  if (!ownTeamId || (match.homeTeamId !== ownTeamId && match.guestTeamId !== ownTeamId)) return null;
 
   const isHome = match.homeTeamId === ownTeamId;
   const own = isHome ? match.homeGoals : match.guestGoals;
