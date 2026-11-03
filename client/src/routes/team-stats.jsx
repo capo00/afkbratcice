@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
+import RouteLink from "../components/route-link.jsx";
 
 const { theme } = Config;
 
@@ -71,7 +72,13 @@ function Stats({ teamId, seasonId }) {
               <tr key={row.playerId}>
                 <DataTable.Th scope="row" className={Config.Css.css({ fontWeight: 400 })}>
                   <span className={Config.Css.css({ display: "flex", alignItems: "baseline", gap: 8 })}>
-                    <span>{playerLabel(row) ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}</span>
+                    {row.playerId ? (
+                      <RouteLink route="hrac" params={{ id: row.playerId }}>
+                        {playerLabel(row) ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}
+                      </RouteLink>
+                    ) : (
+                      <span>{playerLabel(row) ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}</span>
+                    )}
                     {row.player?.position ? (
                       <span className={Config.Css.css({ color: theme.color.mutedFg, fontSize: 12 })}>
                         <Lsi import={importLsi} path={["enum", "position", row.player.position]} />
@@ -82,10 +89,8 @@ function Stats({ teamId, seasonId }) {
                 {COLUMN_LIST.map((column) => (
                   <DataTable.Td
                     key={column.code}
-                    className={Config.Css.css({
-                      fontWeight: column.strong ? 700 : 400,
-                      color: column.strong && row[column.code] ? theme.color.clubRed : "inherit",
-                    })}
+                    // Góly jen tučně (Caio 2026-11-03); červená by v tabulce plné čísel křičela.
+                    className={Config.Css.css({ fontWeight: column.strong ? 700 : 400 })}
                   >
                     {row[column.code] ?? 0}
                   </DataTable.Td>

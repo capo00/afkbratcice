@@ -10,6 +10,7 @@ import MatchTile from "../components/match-tile.jsx";
 import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { seasonLabel } from "../components/season-select.jsx";
+import { SeasonLink } from "../components/route-link.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
 
@@ -83,7 +84,11 @@ function StatsTable({ bySeasonList, total, seasonMap }) {
           return (
             <tr key={row.seasonId ?? "?"}>
               <DataTable.Th scope="row" className={Config.Css.css({ fontWeight: 400 })}>
-                {season ? `${seasonLabel(season)} · ${season.competition}` : "—"}
+                {season ? (
+                  <SeasonLink seasonId={season.id}>{`${seasonLabel(season)} · ${season.competition}`}</SeasonLink>
+                ) : (
+                  "—"
+                )}
               </DataTable.Th>
               {STAT_COLUMN_LIST.map((code) => (
                 <DataTable.Td key={code}>{row[code] ?? 0}</DataTable.Td>
@@ -98,12 +103,7 @@ function StatsTable({ bySeasonList, total, seasonMap }) {
             <Lsi import={importLsi} path={["stats", "total"]} />
           </DataTable.Th>
           {STAT_COLUMN_LIST.map((code) => (
-            <DataTable.Td
-              key={code}
-              className={Config.Css.css({ color: code === "goals" ? theme.color.clubRed : "inherit" })}
-            >
-              {total?.[code] ?? 0}
-            </DataTable.Td>
+            <DataTable.Td key={code}>{total?.[code] ?? 0}</DataTable.Td>
           ))}
         </tr>
       </tbody>

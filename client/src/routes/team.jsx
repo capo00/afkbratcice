@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useMemo, useRoute, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useEffect, useMemo, useRoute, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
@@ -206,13 +206,28 @@ function Roster({ teamId, seasonId, category }) {
   );
 }
 
+function OpponentRedirect({ teamId, seasonId }) {
+  const [, setRoute] = useRoute();
+  useEffect(() => {
+    setRoute("muzstvo/zapasy", { id: teamId, seasonId }, { replace: true });
+  }, [teamId, seasonId]);
+  return null;
+}
+
 const Team = createVisualComponent({
   uu5Tag: Config.TAG + "Team",
 
   render() {
     return (
       <TeamShell>
-        {({ teamId, seasonId, category }) => <Roster teamId={teamId} seasonId={seasonId} category={category} />}
+        {({ teamId, seasonId, category, isOpponent }) =>
+          // Soupeř soupisku nemá (team-shell.jsx): `muzstvo?id=<soupeř>` vede na jeho zápasy.
+          isOpponent ? (
+            <OpponentRedirect teamId={teamId} seasonId={seasonId} />
+          ) : (
+            <Roster teamId={teamId} seasonId={seasonId} category={category} />
+          )
+        }
       </TeamShell>
     );
   },

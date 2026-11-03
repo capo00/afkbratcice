@@ -5,7 +5,7 @@
 // `tools/page-meta.js`; statický popis pro roboty bez JS je v `assets/meta/manifest.json`
 // (description) -- při změně HOME_DESCRIPTION ho přepiš i tam.
 //
-// Stránky s daty (mužstvo, zápas, hráč, novinka, album, kolo) mají tady jen výchozí
+// Stránky s daty (mužstvo, zápas, hráč, novinka, album, sezóna) mají tady jen výchozí
 // titulek; konkrétní („A (Muži) – Soupiska", „AFK Bratčice – Chotusice") si doplní samy
 // přes `usePageTitle`, až data dorazí.
 import { PAGES } from "../content/pages.js";
@@ -27,7 +27,7 @@ const ROUTE_SEO = {
   "muzstvo/tabulka": { title: "Tabulka", description: "Tabulka soutěže, ve které hraje mužstvo AFK Bratčice." },
   "muzstvo/statistiky": { title: "Statistiky", description: "Střelci, starty a karty hráčů mužstva AFK Bratčice." },
   zapas: { title: "Zápas", description: "Výsledek, sestava a střelci zápasu AFK Bratčice." },
-  kolo: { title: "Kolo", description: "Všechny zápasy kola soutěže, ve které hraje AFK Bratčice." },
+  sezona: { title: "Sezóna", description: "Tabulka a všechna kola soutěže, ve které hraje AFK Bratčice." },
   hrac: { title: "Hráč", description: "Profil a statistiky hráče AFK Bratčice." },
   fotogalerie: { title: "Fotogalerie", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   "fotogalerie/album": { title: "Album", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },

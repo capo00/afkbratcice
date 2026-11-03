@@ -15,7 +15,7 @@ const TeamMatches = Utils.Component.lazy(() => import("./routes/team-matches.jsx
 const TeamTable = Utils.Component.lazy(() => import("./routes/team-table.jsx"));
 const TeamStats = Utils.Component.lazy(() => import("./routes/team-stats.jsx"));
 const Match = Utils.Component.lazy(() => import("./routes/match.jsx"));
-const Round = Utils.Component.lazy(() => import("./routes/round.jsx"));
+const Season = Utils.Component.lazy(() => import("./routes/season.jsx"));
 const Player = Utils.Component.lazy(() => import("./routes/player.jsx"));
 const Gallery = Utils.Component.lazy(() => import("./routes/gallery.jsx"));
 const GalleryDetail = Utils.Component.lazy(() => import("./routes/gallery-detail.jsx"));
@@ -52,7 +52,8 @@ const ROUTE_MAP = {
   "muzstvo/statistiky": <TeamStats />,
 
   zapas: <Match />,
-  kolo: <Round />,
+  // Detail sezóny: tabulka a všechna kola. Nahradil stránku `kolo` (jedno kolo), 2026-11.
+  sezona: <Season />,
   hrac: <Player />,
 
   fotogalerie: <Gallery />,

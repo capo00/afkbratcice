@@ -1,5 +1,6 @@
 import matchDao from "../match/dao.js";
 import teamDao from "../team/dao.js";
+import seasonDao from "../season/dao.js";
 import galleryDao from "../gallery/dao.js";
 import articleDao from "../article/dao.js";
 import { Seo, Error as CoreError } from "caio-server";
@@ -39,6 +40,11 @@ export async function sitemap() {
       .then(({ itemList }) => itemList),
   ]);
 
+  // Sezóny, ve kterých hrál některý z našich týmů (detail sezóny: tabulka a všechna kola).
+  const seasons = ownTeams.length
+    ? await seasonDao.find({ teamList: { $in: ownTeams.map((team) => team.id) } }, { pageSize: 500 })
+    : [];
+
   return [
     { path: "/", priority: "1.0" },
     { path: "/novinky", priority: "0.9" },
@@ -50,6 +56,7 @@ export async function sitemap() {
       { path: `/muzstvo/zapasy?id=${team.id}`, priority: "0.7" },
       { path: `/muzstvo/tabulka?id=${team.id}`, priority: "0.6" },
     ]),
+    ...seasons.map((s) => ({ path: `/sezona?id=${s.id}`, priority: "0.5" })),
     ...articles.map((a) => ({ path: `/novinka?id=${a.id}`, priority: "0.5" })),
     ...galleries.map((g) => ({ path: `/fotogalerie/album?id=${g.id}`, priority: "0.4" })),
   ];

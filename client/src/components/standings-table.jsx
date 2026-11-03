@@ -1,6 +1,7 @@
 import { createVisualComponent, useScreenSize, useMemo, Lsi } from "uu5g05";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
+import { TeamLink } from "./route-link.jsx";
 import TeamLogo from "./team-logo.jsx";
 import FormDots from "./form-dots.jsx";
 import DataTable from "./data-table.jsx";
@@ -63,7 +64,8 @@ const StandingsTable = createVisualComponent({
   uu5Tag: Config.TAG + "StandingsTable",
 
   // `ownTeamIdList`: víc vlastních týmů v jedné soutěži (A a B tým), jinak `ownTeamId`.
-  render({ table = [], ownTeamId, ownTeamIdList, hasPenalties = false }) {
+  // `seasonId`: sezóna tabulky -- název týmu vede na jeho detail v téhle sezóně.
+  render({ table = [], ownTeamId, ownTeamIdList, hasPenalties = false, seasonId }) {
     const [screenSize] = useScreenSize();
     const isCompact = screenSize === "xs" || screenSize === "s";
     const columns = useColumns({ hasPenalties, isCompact });
@@ -107,7 +109,9 @@ const StandingsTable = createVisualComponent({
                     <TeamLogo uri={row.team?.logoUri} size={20} alt="" />
                     {/* Na úzkém displeji zkratka; když ji tým nemá, plný název je pořád
                         lepší než prázdno. */}
-                    <span>{(isCompact && row.team?.shortName) || row.team?.name || "—"}</span>
+                    <TeamLink team={row.team} seasonId={seasonId}>
+                      {(isCompact && row.team?.shortName) || row.team?.name || "—"}
+                    </TeamLink>
                   </span>
                 </DataTable.Th>
 

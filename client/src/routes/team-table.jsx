@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import StandingsTable from "../components/standings-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
+import { SeasonLink } from "../components/route-link.jsx";
 
 const { theme } = Config;
 
@@ -46,10 +47,17 @@ function Table({ teamId, seasonId }) {
               type="medium"
               className={Config.Css.css({ display: "block", marginBlockEnd: 12, color: theme.color.mutedFg })}
             >
-              {data.season.competition}
+              <SeasonLink seasonId={data.season.id} colorScheme="building" significance="subdued">
+                {data.season.competition}
+              </SeasonLink>
             </Uu5Elements.Text>
           ) : null}
-          <StandingsTable table={table} ownTeamId={teamId} hasPenalties={Boolean(data?.season?.hasPenalties)} />
+          <StandingsTable
+            table={table}
+            ownTeamId={teamId}
+            hasPenalties={Boolean(data?.season?.hasPenalties)}
+            seasonId={data?.season?.id}
+          />
         </>
       )}
     </Section>

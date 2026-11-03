@@ -6,6 +6,7 @@ import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Card from "./layout/card.jsx";
 import TeamLogo from "./team-logo.jsx";
 import DateText from "./date-text.jsx";
+import { TeamLink, SeasonLink } from "./route-link.jsx";
 import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
@@ -99,8 +100,9 @@ function largeLogoSize(screenSize) {
 
 // One side of the scoreboard: logo above the name, name at most two lines (variant B,
 // Caio 2026-10-28; canvas "AFK Bratčice – dlaždice zápasu"). The penalty shootout winner
-// gets a tag under the name.
-function TeamSide({ team, isOwn, logoSize, large, penaltyWinner }) {
+// gets a tag under the name. On the large tile (match detail) the name links to the team;
+// the regular tile is clickable as a whole, a link inside it would compete with that.
+function TeamSide({ team, isOwn, logoSize, large, penaltyWinner, seasonId }) {
   return (
     <div
       className={Config.Css.css({
@@ -127,7 +129,7 @@ function TeamSide({ team, isOwn, logoSize, large, penaltyWinner }) {
           color: isOwn ? theme.color.fg : theme.color.mutedFg,
         })}
       >
-        {team?.name ?? "—"}
+        {large && team ? <TeamLink team={team} seasonId={seasonId} /> : (team?.name ?? "—")}
       </Uu5Elements.Text>
       {penaltyWinner ? (
         <Uu5Elements.Tag colorScheme="primary" significance="distinct" size="s">
@@ -153,7 +155,9 @@ function LargeFooter({ match }) {
     >
       <span>
         {match.round ? (
-          <Lsi import={importLsi} path={["match", "round"]} params={{ round: match.round }} />
+          <SeasonLink seasonId={match.seasonId} round={match.round}>
+            <Lsi import={importLsi} path={["match", "round"]} params={{ round: match.round }} />
+          </SeasonLink>
         ) : (
           <Lsi import={importLsi} path={["match", "friendly"]} />
         )}
@@ -381,6 +385,7 @@ const MatchTile = createVisualComponent({
             isOwn={match.homeTeamId === ownTeamId}
             logoSize={logoSize}
             large={large}
+            seasonId={match.seasonId}
             penaltyWinner={Boolean(penaltyWinnerTeamId) && penaltyWinnerTeamId === match.homeTeamId}
           />
           <div
@@ -399,6 +404,7 @@ const MatchTile = createVisualComponent({
             isOwn={match.guestTeamId === ownTeamId}
             logoSize={logoSize}
             large={large}
+            seasonId={match.seasonId}
             penaltyWinner={Boolean(penaltyWinnerTeamId) && penaltyWinnerTeamId === match.guestTeamId}
           />
         </div>

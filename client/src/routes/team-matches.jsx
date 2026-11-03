@@ -8,6 +8,7 @@ import Button from "../components/layout/button.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
+import { useApp } from "../core/app-context.jsx";
 
 // Zápasy mužstva v sezóně — rozpis i výsledky na jedné ose.
 //
@@ -45,6 +46,11 @@ function ButtonRow({ itemList, active, onChange, path }) {
 }
 
 function MatchList({ teamId, seasonId, category }) {
+  const { getTeam } = useApp();
+  // Z čího pohledu dlaždice ukazuje výhru/prohru: mužstvo stránky, je-li naše; u soupeře
+  // náš tým v zápase, jinak nikdo -- odznak patří jen zápasům AFK (match-tile.jsx).
+  const ownTeamOf = (match) =>
+    getTeam(teamId)?.own ? teamId : [match.homeTeamId, match.guestTeamId].find((id) => getTeam(id)?.own);
   const [filter, setFilter] = useState("all");
   const [mode, setMode] = useState(null);
 
@@ -107,7 +113,7 @@ function MatchList({ teamId, seasonId, category }) {
       ) : (
         <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
           {itemList.map((match) => (
-            <MatchTile key={match.id} match={match} ownTeamId={teamId} category={category?.categoryName} />
+            <MatchTile key={match.id} match={match} ownTeamId={ownTeamOf(match)} category={category?.categoryName} />
           ))}
         </Uu5Elements.Grid>
       )}

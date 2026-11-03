@@ -30,7 +30,7 @@ function personName(entry) {
   return entry.player?.number ? `#${entry.player.number}` : null;
 }
 
-function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant, action }) {
+function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant }) {
   const dataObject = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/match/list", dtoIn) } }, [
     JSON.stringify(dtoIn),
   ]);
@@ -56,18 +56,7 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
 
   return (
     <Section variant={variant}>
-      <div
-        className={Config.Css.css({
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: 16,
-          flexWrap: "wrap",
-        })}
-      >
-        <Heading eyebrow={eyebrowLsi} lsi={headerLsi} />
-        {action}
-      </div>
+      <Heading eyebrow={eyebrowLsi} lsi={headerLsi} />
       <Uu5Elements.Grid
         templateColumns="repeat(auto-fill, minmax(280px, 1fr))"
         className={Config.Css.css({ marginBlockStart: 24 })}
@@ -81,8 +70,7 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
 }
 
 function MatchDetail({ matchId }) {
-  const { categoryList } = useApp();
-  const [, setRoute] = useRoute();
+  const { getTeam } = useApp();
   const dataObject = useDataObject(
     { handlerMap: { load: () => UiElements.Call.cmdGet("/match/get", { id: matchId }) } },
     [matchId],
@@ -129,11 +117,10 @@ function MatchDetail({ matchId }) {
     );
   }
 
-  // Vlastní tým zápasu — kvůli zvýraznění v dlaždicích níž. Klub může hrát sám proti sobě
+  // Vlastní tým zápasu — kvůli zvýraznění v dlaždicích níž. Podle `team.own`, ne podle
+  // letošních mužstev: i zápas z archivu má vzájemné zápasy. Klub může hrát sám proti sobě
   // jen omylem, takže stačí první shoda.
-  const ownTeamId = categoryList.find(
-    (category) => category.teamId === match.homeTeamId || category.teamId === match.guestTeamId,
-  )?.teamId;
+  const ownTeamId = [match.homeTeamId, match.guestTeamId].find((id) => getTeam(id)?.own);
 
   const hasLineup = homeLineup.length > 0 || guestLineup.length > 0;
 
@@ -191,7 +178,8 @@ function MatchDetail({ matchId }) {
       ) : null}
 
       {/* Ostatní výsledky kola — převzaté ze současného webu, kde je to jeden z mála
-          důvodů, proč se na detail zápasu vůbec chodí. */}
+          důvodů, proč se na detail zápasu vůbec chodí. Jsou tu všechny zápasy kola, odkaz
+          na „celé kolo“ by nepřidal nic; celou sezónu otevře kolo v patičce dlaždice. */}
       {match.round ? (
         <RelatedMatches
           dtoIn={{ seasonId: match.seasonId, round: match.round }}
@@ -199,21 +187,6 @@ function MatchDetail({ matchId }) {
           headerLsi={lsi("match", "roundResults")}
           excludeId={match.id}
           ownTeamId={ownTeamId}
-          action={
-            <Uu5Elements.Button
-              significance="subdued"
-              onClick={() =>
-                setRoute("kolo", {
-                  seasonId: match.seasonId,
-                  round: match.round,
-                  // Vlastní tým zápasu, ať kolo ví, jestli jde o A, nebo B tým (round.jsx).
-                  ...(ownTeamId ? { teamId: ownTeamId } : null),
-                })
-              }
-            >
-              <Lsi import={importLsi} path={["match", "wholeRound"]} />
-            </Uu5Elements.Button>
-          }
         />
       ) : null}
 

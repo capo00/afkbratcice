@@ -6,6 +6,7 @@ import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../layout/section.jsx";
 import TeamLogo from "../team-logo.jsx";
 import SeasonSelect from "../season-select.jsx";
+import { SeasonLink } from "../route-link.jsx";
 import NoticeBar from "../layout/notice-bar.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
@@ -25,12 +26,15 @@ const { theme } = Config;
 // letošní kategorie jeho nejnovější sezóna -- tatáž, kterou ukazuje přepínač. Záložky
 // dostanou vždy konkrétní `seasonId`; dřív si ji tabulka a statistiky dohledávaly na
 // serveru, ale zápasy ne, a bez sezóny v adrese ukazovaly celou historii.
+//
+// **Soupeř** (`team.own: false`, proklik z tabulky nebo detailu zápasu) má jen Zápasy
+// a Tabulku: soupisku ani statistiky soupeřů neevidujeme (Caio 2026-11-03).
 
 const TAB_LIST = [
-  { route: "muzstvo", code: "roster" },
+  { route: "muzstvo", code: "roster", ownOnly: true },
   { route: "muzstvo/zapasy", code: "matches" },
   { route: "muzstvo/tabulka", code: "table", needsTable: true },
-  { route: "muzstvo/statistiky", code: "stats" },
+  { route: "muzstvo/statistiky", code: "stats", ownOnly: true },
 ];
 
 const TeamShell = createVisualComponent({
@@ -69,6 +73,9 @@ const TeamShell = createVisualComponent({
     }, [seasonDataObject.data]);
 
     const seasonId = routeSeasonId ?? category?.seasonId ?? seasonList[0]?.id;
+    const season = seasonList.find((item) => item.id === seasonId);
+    // Soutěž **vybrané** sezóny; z app-contextu (letošní kategorie), dokud se sezóny načítají.
+    const competition = season?.competition ?? (seasonId === category?.seasonId ? category?.competition : null);
     // Archivní mužstvo bez sezóny v adrese: dokud se seznam sezón nenačte, záložky by se
     // ptaly bez sezóny, tedy na celou historii.
     const seasonPending = !seasonId && seasonDataObject.state === "pendingNoData";
@@ -90,7 +97,10 @@ const TeamShell = createVisualComponent({
     }
 
     const activeRoute = route?.uu5Route;
-    const tabList = TAB_LIST.filter((tab) => !tab.needsTable || category?.hasTable !== false);
+    const isOpponent = team ? !team.own : false;
+    const tabList = TAB_LIST.filter(
+      (tab) => (!tab.needsTable || category?.hasTable !== false) && (!tab.ownOnly || !isOpponent),
+    );
 
     return (
       <>
@@ -106,14 +116,16 @@ const TeamShell = createVisualComponent({
               <div className={Config.Css.css({ ...theme.typography.display, fontSize: 32, marginBlockStart: 4 })}>
                 {team?.name ?? "—"}
               </div>
-              {category?.competition ? (
+              {competition ? (
                 <Uu5Elements.Text
                   category="interface"
                   segment="content"
                   type="medium"
                   className={Config.Css.css({ color: theme.color.mutedFg })}
                 >
-                  {category.competition}
+                  <SeasonLink seasonId={seasonId} colorScheme="building" significance="subdued">
+                    {competition}
+                  </SeasonLink>
                 </Uu5Elements.Text>
               ) : null}
             </div>
@@ -156,7 +168,7 @@ const TeamShell = createVisualComponent({
             <Uu5Elements.Skeleton height={200} />
           </Section>
         ) : (
-          children({ teamId, seasonId, team, category })
+          children({ teamId, seasonId, team, category, isOpponent })
         )}
       </>
     );

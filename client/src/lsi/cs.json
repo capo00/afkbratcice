@@ -253,7 +253,6 @@
     "h2h": "Vzájemné zápasy",
     "h2hEyebrow": "Historie dvojice",
     "missing": "Zápas se nepodařilo najít.",
-    "wholeRound": "Celé kolo",
     "pitch": {
       "goals": "Góly",
       "yellowCard": "Žlutá karta",
@@ -442,10 +441,11 @@
     "noStats": "Zatím žádné zapsané starty.",
     "missing": "Hráče se nepodařilo najít."
   },
-  "round": {
-    "eyebrow": "Kolo v soutěži",
-    "empty": "V tomhle kole nejsou žádné zápasy.",
-    "missing": "Chybí sezóna nebo číslo kola."
+  "season": {
+    "eyebrow": "Sezóna",
+    "rounds": "Kola",
+    "noMatches": "Zápasy téhle sezóny zatím nejsou zadané.",
+    "missing": "Sezónu se nepodařilo najít."
   },
   "board": {
     "members": "Ostatní členové",

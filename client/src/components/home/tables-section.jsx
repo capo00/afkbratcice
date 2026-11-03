@@ -5,6 +5,7 @@ import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../layout/section.jsx";
 import Heading from "../layout/heading.jsx";
+import { SeasonLink } from "../route-link.jsx";
 import StandingsTable from "../standings-table.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
@@ -106,10 +107,17 @@ const TablesSection = createVisualComponent({
                   type="medium"
                   className={Config.Css.css({ display: "block", marginBlockEnd: 8, color: theme.color.mutedFg })}
                 >
-                  {active.competition}
+                  <SeasonLink seasonId={active.seasonId} colorScheme="building" significance="subdued">
+                    {active.competition}
+                  </SeasonLink>
                 </Uu5Elements.Text>
               ) : null}
-              <StandingsTable table={data.table} ownTeamIdList={active.ownTeamIdList} hasPenalties={active.hasPenalties} />
+              <StandingsTable
+                table={data.table}
+                ownTeamIdList={active.ownTeamIdList}
+                hasPenalties={active.hasPenalties}
+                seasonId={active.seasonId}
+              />
             </>
           )}
         </div>
