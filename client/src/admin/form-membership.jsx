@@ -8,25 +8,34 @@ import { teamLabel } from "./fields.jsx";
 
 const { theme } = Config;
 
-// Editor členství v týmech: pole `{ id, dateFrom, dateTo }`.
+// Editor členství v čase: pole `{ id, role?, dateFrom, dateTo, showContact? }`.
 //
-// Hráč i trenér drží členství **v čase**, ne jako prosté „patří do týmu" — bez toho by
+// Hráč i vedení drží členství **v čase**, ne jako prosté „patří do týmu" — bez toho by
 // soupiska loňské sezóny ukazovala dnešní stav a odchod hráče by přepsal historii.
 // `dateTo: null` znamená aktivní.
 //
+// Tři podoby téhož editoru (propsy):
+//   hráč             týmy                         (výchozí)
+//   vedení v týmu    týmy + funkce                `roleItemList`
+//   výbor AFK        funkce + kontakt na webu     `team={false}`, `roleItemList`, `showContact`
+//
 // Je to **jeden vstup nad celým polem**, ne `player/addTeam` + `endTeam`: `update` bere celý
 // `teamList` a formulář ho stejně celý odesílá, takže dvě úzké operace navíc by znamenaly
-// druhou cestu k témuž. (Server je má, `coach` ale ne — jednotný vstup platí pro oba.)
+// druhou cestu k témuž. (Server je má, `management` ale ne — jednotný vstup platí pro oba.)
 
 const LSI_PATH = ["admin", "membership"];
 
 const MembershipInput = createVisualComponent({
   uu5Tag: Config.TAG + "MembershipInput",
 
-  render({ value, onChange, ...props }) {
+  render({ value, onChange, team = true, roleItemList, showContact = false, addLsiPath, ...props }) {
     const list = Array.isArray(value) ? value : [];
 
-    const { data } = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/team/list", {}) } }, []);
+    // Výbor tým nemá, seznam týmů pak netřeba.
+    const { data } = useDataObject(
+      { handlerMap: { load: () => (team ? UiElements.Call.cmdGet("/team/list", {}) : Promise.resolve({ itemList: [] })) } },
+      [team],
+    );
     const teamItemList = useMemo(
       () => (data?.itemList ?? []).map((team) => ({ value: team.id, children: teamLabel(team) })),
       [data],
@@ -40,20 +49,47 @@ const MembershipInput = createVisualComponent({
       change(list.map((item, i) => (i === index ? { ...item, ...patch } : item)), e);
     }
 
+    const templateColumns = [
+      team && "minmax(160px, 2fr)",
+      roleItemList && "minmax(140px, 1.5fr)",
+      "minmax(120px, 1fr)",
+      "minmax(120px, 1fr)",
+      showContact && "auto",
+      "auto",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    function newItem() {
+      // Nové členství začíná dnes a nemá konec — to je stav, kvůli kterému ho někdo
+      // přidává; datum se dá přepsat, když se dopisuje historie.
+      return {
+        ...(team ? { id: teamItemList[0]?.value } : null),
+        ...(roleItemList ? { role: roleItemList[0]?.value } : null),
+        dateFrom: new Date().toISOString().slice(0, 10),
+        dateTo: null,
+        ...(showContact ? { showContact: false } : null),
+      };
+    }
+
     return (
       <Uu5Elements.Grid rowGap={8} {...props}>
         {list.map((item, index) => (
-          <Uu5Elements.Grid
-            key={index}
-            templateColumns="minmax(160px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) auto"
-            columnGap={8}
-            alignItems="end"
-          >
-            <Uu5Forms.Select
-              value={item.id}
-              itemList={teamItemList}
-              onChange={(e) => update(index, { id: e.data.value }, e)}
-            />
+          <Uu5Elements.Grid key={index} templateColumns={templateColumns} columnGap={8} alignItems="end">
+            {team ? (
+              <Uu5Forms.Select
+                value={item.id}
+                itemList={teamItemList}
+                onChange={(e) => update(index, { id: e.data.value }, e)}
+              />
+            ) : null}
+            {roleItemList ? (
+              <Uu5Forms.Select
+                value={item.role}
+                itemList={roleItemList}
+                onChange={(e) => update(index, { role: e.data.value }, e)}
+              />
+            ) : null}
             <Uu5Forms.Date
               value={item.dateFrom ?? undefined}
               onChange={(e) => update(index, { dateFrom: e.data.value ?? null }, e)}
@@ -62,6 +98,13 @@ const MembershipInput = createVisualComponent({
               value={item.dateTo ?? undefined}
               onChange={(e) => update(index, { dateTo: e.data.value ?? null }, e)}
             />
+            {showContact ? (
+              <Uu5Forms.Checkbox
+                label={<Lsi import={importLsi} path={[...LSI_PATH, "showContact"]} />}
+                value={Boolean(item.showContact)}
+                onChange={(e) => update(index, { showContact: e.data.value }, e)}
+              />
+            ) : null}
             <Uu5Elements.Button
               icon="uugds-delete"
               colorScheme="negative"
@@ -76,13 +119,9 @@ const MembershipInput = createVisualComponent({
             icon="uugds-plus"
             significance="distinct"
             colorScheme="primary"
-            // Nové členství začíná dnes a nemá konec — to je stav, kvůli kterému ho někdo
-            // přidává; datum se dá přepsat, když se dopisuje historie.
-            onClick={(e) =>
-              change([...list, { id: teamItemList[0]?.value, dateFrom: new Date().toISOString().slice(0, 10), dateTo: null }], e)
-            }
+            onClick={(e) => change([...list, newItem()], e)}
           >
-            <Lsi import={importLsi} path={[...LSI_PATH, "add"]} />
+            <Lsi import={importLsi} path={addLsiPath ?? [...LSI_PATH, "add"]} />
           </Uu5Elements.Button>
         </div>
 

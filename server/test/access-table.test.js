@@ -9,14 +9,14 @@ import matchApi from "../match/api.js";
 import statsApi from "../stats/api.js";
 import personApi from "../person/api.js";
 import playerApi from "../player/api.js";
-import coachApi from "../coach/api.js";
+import managementApi from "../management/api.js";
 import articleApi from "../article/api.js";
 import galleryApi from "../gallery/api.js";
 import fileApi from "../file/api.js";
 import appConfigApi from "../app-config/api.js";
 import seoApi from "../seo/api.js";
 import matchDao from "../match/dao.js";
-import coachDao from "../coach/dao.js";
+import managementDao from "../management/dao.js";
 import playerDao from "../player/dao.js";
 import matchCrud from "../match/crud.js";
 import articleCrud from "../article/crud.js";
@@ -34,6 +34,7 @@ const TEAM_B = "65a0000000000000000000bb";
 const TEAM_C = "65a0000000000000000000cc";
 const MATCH_ID = "65b000000000000000000001";
 const COACH_ID = "65c000000000000000000001";
+const BOARD_ID = "65c000000000000000000002";
 const PLAYER_ID = "65d000000000000000000001";
 const MISSING_ID = "65e000000000000000000001";
 
@@ -61,13 +62,17 @@ function identityOf(name) {
 
 const api = {
   ...clubApi, ...categoryApi, ...teamApi, ...seasonApi, ...matchApi, ...statsApi, ...personApi,
-  ...playerApi, ...coachApi, ...articleApi, ...galleryApi, ...fileApi, ...appConfigApi, ...seoApi,
+  ...playerApi, ...managementApi, ...articleApi, ...galleryApi, ...fileApi, ...appConfigApi, ...seoApi,
 };
 
 // The records the scoped `auth` functions look up: a match of A at home against B, a coach
-// of A and B, a player of A.
+// of A and B, a coach of A who also sits on the board, a player of A.
 matchDao.get = async (id) => (id === MATCH_ID ? { id, homeTeamId: TEAM_A, guestTeamId: TEAM_B } : null);
-coachDao.get = async (id) => (id === COACH_ID ? { id, teamList: [{ id: TEAM_A }, { id: TEAM_B }] } : null);
+managementDao.get = async (id) => {
+  if (id === COACH_ID) return { id, teamList: [{ id: TEAM_A, role: "coach" }, { id: TEAM_B, role: "assistant" }] };
+  if (id === BOARD_ID) return { id, teamList: [{ id: TEAM_A, role: "coach" }], boardList: [{ role: "member" }] };
+  return null;
+};
 playerDao.get = async (id) => (id === PLAYER_ID ? { id, teamList: [{ id: TEAM_A }] } : null);
 
 // dtoIn per row; a row `uc#variant` runs use case `uc` with another dtoIn.
@@ -80,10 +85,13 @@ const dtoInMap = {
   "match/update#missing": { id: MISSING_ID },
   "match/setResult": { id: MATCH_ID, homeGoals: 1, guestGoals: 0 },
   "match/setLineup": { id: MATCH_ID, playerList: [] },
-  "coach/create": { teamList: [{ id: TEAM_A }] },
-  "coach/create#twoTeams": { teamList: [{ id: TEAM_A }, { id: TEAM_B }] },
-  "coach/update": { id: COACH_ID },
-  "coach/delete": { id: COACH_ID },
+  "management/create": { teamList: [{ id: TEAM_A, role: "coach" }] },
+  "management/create#twoTeams": { teamList: [{ id: TEAM_A, role: "coach" }, { id: TEAM_B, role: "coach" }] },
+  "management/create#board": { teamList: [{ id: TEAM_A, role: "coach" }], boardList: [{ role: "member" }] },
+  "management/update": { id: COACH_ID },
+  "management/update#narrowed": { id: COACH_ID, teamList: [{ id: TEAM_A, role: "coach" }] },
+  "management/update#board": { id: BOARD_ID, teamList: [{ id: TEAM_A, role: "coach" }] },
+  "management/delete": { id: COACH_ID },
   "player/create": { teamList: [{ id: TEAM_A }] },
   "player/update": { id: PLAYER_ID },
   "player/update#missing": { id: MISSING_ID },
@@ -122,13 +130,6 @@ const expected = {
   "club/get": "public",
   "club/list": "public",
   "club/update": CONTENT,
-  // "all": every team of the coach has to be the editor's
-  "coach/create": [...EDITORS_OF_A, ...CONTENT],
-  "coach/create#twoTeams": ["editorAB", ...CONTENT],
-  "coach/delete": ["editorAB", ...CONTENT],
-  "coach/get": "public",
-  "coach/list": "public",
-  "coach/update": ["editorAB", ...CONTENT],
   "file/list": "public",
   "gallery/addPhoto": GALLERY,
   "gallery/create": GALLERY,
@@ -139,6 +140,17 @@ const expected = {
   "gallery/listPhotos": "public",
   "gallery/update": GALLERY,
   // "any": the editor of either team of the match
+  // "all": every team of the record has to be the editor's -- the stored ones too, so an
+  // editor of A cannot narrow a record of A and B down to A; the board is the club's, CONTENT only
+  "management/create": [...EDITORS_OF_A, ...CONTENT],
+  "management/create#twoTeams": ["editorAB", ...CONTENT],
+  "management/create#board": CONTENT,
+  "management/delete": ["editorAB", ...CONTENT],
+  "management/get": "public",
+  "management/list": "public",
+  "management/update": ["editorAB", ...CONTENT],
+  "management/update#narrowed": ["editorAB", ...CONTENT],
+  "management/update#board": CONTENT,
   "match/create": [...EDITORS_OF_A, "editorC", ...MATCH],
   "match/create#withoutA": ["editorAB", "editorC", ...MATCH],
   "match/createMany": MATCH,

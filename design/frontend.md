@@ -189,7 +189,7 @@ a `withRoute` guard nemohly rozejít.
 | `admin/matches` | CRUD zápasů, hromadné vytvoření, zápis výsledku a sestavy |
 | `admin/persons` | CRUD osob |
 | `admin/players` | CRUD hráčů, členství v týmech |
-| `admin/coaches` | CRUD trenérů a výboru |
+| `admin/coaches` | CRUD vedení (`management`): trenéři týmů a výbor |
 | `admin/articles` | CRUD článků; `sectionList` v `uu5codekitg01-forms` |
 | `admin/galleries` | CRUD alb, hromadný upload fotek |
 | `admin/files` | Soubory ke stažení – vlastní `Crud` nad `BinaryProvider` (viz 6.1) |
@@ -249,7 +249,7 @@ vyhledávači, zůstává platné.
 | `/historie` | historie klubu (text) | `historie` | ✅ |
 | `/hymna` | text hymny „Traverza“ | `hymna` | ✅ |
 | `/kontakt` | kontakty + GPS + mapa | `kontakt` | ✅ (data z `appConfig.contact`, ne obsahová stránka) |
-| `/vybor` | Výbor AFK (7 lidí, telefony, e-maily) | `vybor` (časem `coach/list?role=board`) | ✅ |
+| `/vybor` | Výbor AFK z dat; kontakt jen se `showContact` | `management/list?board=true&active=true` (`components/board.jsx`) | ✅ |
 | `/muzi`, `/zaci`, `/stara-garda` | soupiska + týmová fotka | `muzstvo?id` | ✅ |
 | `/zapasy`, `/zapasy-15`, `/zapasy-25` | zápasy kategorie | `muzstvo/zapasy?id` | ✅ |
 | `/vsechny-zapasy-<kat>#<n>kolo` | všechny zápasy, kotva na kolo | `muzstvo/zapasy?id&round` | ✅ (doplněn parametr `round`) |
@@ -406,7 +406,7 @@ Grid: `Uu5Elements.Grid` s `templateColumns={{ xs: "1fr", m: "repeat(3, 1fr)" }}
 Karta na každou kategorii ze `season/listCurrent`: týmová fotka (`team.photoUri`) s popiskem
 (`team.photoDesc`), odznak kategorie, název, perex (`team.desc`), řádky *soutěž* (přímo
 z `season/listCurrent`, kde `competition` už je), *trenér*
-(`coach/list?teamId&role=headCoach`), *tréninky* (`appConfig`), tlačítko na `team`.
+(`management/list?teamId&role=coach&active`), *tréninky* (`appConfig`), tlačítko na `team`.
 
 `desc`, `photoUri` a `photoDesc` jsou **doplněk do entity `team`** (rozhodnuto 2026-09-06) —
 do té doby karta tahle pole předlohy neměla odkud vzít. Chybí-li fotka, karta ji vynechá
@@ -417,7 +417,7 @@ a nesahá po klubovém erbu; erb je fallback loga, ne fotky.
 - Přepínač sezóny (`season/list?teamId`).
 - Sekce **Hráči** – `player/list?teamId&active=true`, dlaždice s fotem, číslem, postem
   a základní statistikou v sezóně; skupiny podle postu (brankáři, obránci, …).
-- **Realizační tým** – `coach/list?teamId`; poslední skupina soupisky, stejná dlaždice jako hráč (fotka nebo iniciály, pod jménem funkce), ne zvláštní sekce (2026-10-28).
+- **Realizační tým** – `management/list?teamId` (s `seasonId` u starší sezóny); poslední skupina soupisky, stejná dlaždice jako hráč (fotka nebo iniciály, pod jménem funkce), ne zvláštní sekce (2026-10-28).
 - U mládeže **jména nechodí ze serveru** (`appConfig.hideNamesAgeList`, rozhodnuto
   2026-09-06). Klient tedy nic neschovává — jen musí umět vykreslit dlaždici hráče **bez
   jména**: číslo dresu, post, foto se nepoužije. Totéž platí pro sestavu na detailu zápasu
@@ -702,7 +702,7 @@ by mazání vytlačily za okraj.
 `admin/players` a `admin/coaches` neřeší členství přes `player/addTeam` / `endTeam`, ale
 **jedním vstupem nad celým `teamList`** (`admin/form-membership.jsx`). `update` bere celé pole
 a formulář ho stejně celé odesílá, takže dvě úzké operace navíc by znamenaly druhou cestu
-k témuž — a `coach` je na serveru ani nemá.
+k témuž — a `management` je na serveru ani nemá. Týž vstup edituje i výbor (`boardList`: bez týmu, s funkcí a „Kontakt na webu“).
 
 ### 6.2 Obrázky před uploadem
 
@@ -842,7 +842,7 @@ neexistujícímu endpointu.
 | Home – poslední výsledky | `match/getLast` per kategorie | ✅ |
 | Home – tabulky | `stats/getTable` | ✅ vč. bodování na penalty a sloupce `form` |
 | Home – aktuality | `article/list` | ✅ **hotovo na klientu** (3 nejnovější; blok se bez článků nevykreslí) |
-| Mužstva, soupiska, realizační tým | `season/listCurrent`, `player/list`, `coach/list` | ✅ (fotka a perex až s `team.photoUri`/`photoDesc`) |
+| Mužstva, soupiska, realizační tým | `season/listCurrent`, `player/list`, `management/list` | ✅ (fotka a perex až s `team.photoUri`/`photoDesc`) |
 | Zápasy týmu, detail zápasu (sestavy, střelci, ostatní výsledky kola, H2H) | `match/list`, `match/get` | ✅ **hotovo na klientu** |
 | Odběr kalendáře | `GET /calendar/team-<id>.ics` | ✅ |
 | Tabulka soutěže | `stats/getTable` | ✅ **hotovo na klientu**; bodovací model říká `season.hasPenalties` |

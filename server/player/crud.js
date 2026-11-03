@@ -4,6 +4,7 @@ import personDao from "../person/dao.js";
 import { PersonCrud } from "../person/crud.js";
 import { personForIdentity, isPlayerHidden } from "../services/hidden-names.js";
 import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
+import { seasonRangeOf } from "../services/membership.js";
 
 class PlayerCrud extends Crud {
   constructor() {
@@ -29,8 +30,10 @@ class PlayerCrud extends Crud {
     });
   }
 
-  async list({ teamId, active, idList, pageInfo } = {}, identity) {
-    const itemList = (await dao.listByFilter({ teamId, active, idList }, pageInfo)).map((i) => this._getData(i));
+  async list({ teamId, active, seasonId, idList, pageInfo } = {}, identity) {
+    const range = seasonId ? await seasonRangeOf(seasonId) : undefined;
+    if (range === null) return [];
+    const itemList = (await dao.listByFilter({ teamId, active, range, idList }, pageInfo)).map((i) => this._getData(i));
     return this._withPerson(itemList, identity, { teamId });
   }
 

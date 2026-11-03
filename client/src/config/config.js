@@ -58,7 +58,8 @@ const Config = {
   MATCH_STATE_LIST: app.matchStateList,
   ARTICLE_STATE_LIST: app.articleStateList,
   GALLERY_STATE_LIST: app.galleryStateList,
-  COACH_ROLE_LIST: app.coachRoleList,
+  TEAM_ROLE_LIST: app.teamRoleList,
+  BOARD_ROLE_LIST: app.boardRoleList,
   GALLERY_CATEGORY_LIST: app.galleryCategoryList,
   // Binární kolekce souborů ke stažení -- podle ní `binary/*` autorizuje zápis.
   BINARY_COLLECTION_DOWNLOAD: app.binaryCollection.download,

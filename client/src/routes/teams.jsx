@@ -107,7 +107,7 @@ const Teams = createVisualComponent({
   render() {
     const { categoryList } = useApp();
 
-    // Hlavní trenér ke každé kategorii. Jeden dotaz na tým — `coach/list` filtruje podle
+    // Trenér ke každé kategorii. Jeden dotaz na tým — `management/list` filtruje podle
     // `teamId`, ne podle seznamu, a mužstev jsou jednotky.
     const dataObject = useDataObject(
       {
@@ -117,7 +117,7 @@ const Teams = createVisualComponent({
               categoryList
                 .filter((category) => category.teamId)
                 .map((category) =>
-                  UiElements.Call.cmdGet("/coach/list", { teamId: category.teamId, role: "headCoach", active: true })
+                  UiElements.Call.cmdGet("/management/list", { teamId: category.teamId, role: "coach", active: true })
                     .then((res) => [category.teamId, res?.itemList?.[0] ?? null])
                     // Chybějící trenér nesmí shodit celý přehled.
                     .catch(() => [category.teamId, null]),

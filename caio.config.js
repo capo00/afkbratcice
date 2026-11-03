@@ -130,7 +130,9 @@ export default {
     articleStateList: ["draft", "published", "archived"],
     galleryStateList: ["draft", "published"],
     galleryCategoryList: ["match", "training", "fans", "youth", "club"],
-    coachRoleList: ["headCoach", "assistant", "manager", "board"],
+    // Vedení: funkce v týmu a funkce ve výboru AFK (design/data-model.md, sekce 7).
+    teamRoleList: ["coach", "assistant", "manager"],
+    boardRoleList: ["chairman", "viceChairman", "secretary", "member"],
 
     role: ROLE,
     // Kdo smí co (design/roles.md). Rozsahová `teamEditor:*` tu není: přidává se k množinám

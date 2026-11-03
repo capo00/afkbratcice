@@ -82,7 +82,9 @@ function PlayerTile({ player, isNameHidden }) {
 }
 
 // Trenér nemá číslo dresu ani detail, takže bez fotky iniciály a dlaždice se nerozklikává.
-function CoachTile({ coach }) {
+// Funkce je u působení v **tomhle** týmu (`teamList[].role`) -- jinde může mít jinou.
+function CoachTile({ coach, teamId }) {
+  const role = coach.teamList?.find((m) => m.id === teamId)?.role ?? "assistant";
   const name = [coach.person?.name, coach.person?.surname].filter(Boolean).join(" ");
   const initials = [coach.person?.name, coach.person?.surname]
     .map((part) => part?.trim()?.[0])
@@ -94,7 +96,7 @@ function CoachTile({ coach }) {
       person={coach.person}
       fallbackText={initials || "?"}
       name={name || "—"}
-      subtitle={<Lsi import={importLsi} path={["enum", "coachRole", coach.role ?? "assistant"]} />}
+      subtitle={<Lsi import={importLsi} path={["enum", "teamRole", role]} />}
     />
   );
 }
@@ -109,23 +111,27 @@ function RosterGroup({ title, children }) {
   );
 }
 
-function Roster({ teamId, category }) {
+// Soupiska **vybrané sezóny**: kdo byl v týmu kdykoli během ní (členství se překrývá
+// s obdobím ročníku). U běžící sezóny jen ti, kdo v týmu jsou dnes -- kdo v zimě odešel,
+// na aktuální soupisce nemá co dělat.
+function Roster({ teamId, seasonId, category }) {
   const { isNameHidden } = useApp();
   const nameHidden = isNameHidden(category?.age);
+  const period = !seasonId || seasonId === category?.seasonId ? { active: true } : { seasonId };
 
   const dataObject = useDataObject(
     {
       handlerMap: {
         load: async () => {
           const [playerRes, coachRes] = await Promise.all([
-            UiElements.Call.cmdGet("/player/list", { teamId, active: true }),
-            UiElements.Call.cmdGet("/coach/list", { teamId, active: true }),
+            UiElements.Call.cmdGet("/player/list", { teamId, ...period }),
+            UiElements.Call.cmdGet("/management/list", { teamId, ...period }),
           ]);
           return { playerList: playerRes?.itemList ?? [], coachList: coachRes?.itemList ?? [] };
         },
       },
     },
-    [teamId],
+    [teamId, JSON.stringify(period)],
   );
 
   const { state, data } = dataObject;
@@ -189,7 +195,7 @@ function Roster({ teamId, category }) {
             {coachList.length ? (
               <RosterGroup title={<Lsi import={importLsi} path={["team", "staff"]} />}>
                 {coachList.map((coach) => (
-                  <CoachTile key={coach.id} coach={coach} />
+                  <CoachTile key={coach.id} coach={coach} teamId={teamId} />
                 ))}
               </RosterGroup>
             ) : null}
@@ -204,7 +210,11 @@ const Team = createVisualComponent({
   uu5Tag: Config.TAG + "Team",
 
   render() {
-    return <TeamShell>{({ teamId, category }) => <Roster teamId={teamId} category={category} />}</TeamShell>;
+    return (
+      <TeamShell>
+        {({ teamId, seasonId, category }) => <Roster teamId={teamId} seasonId={seasonId} category={category} />}
+      </TeamShell>
+    );
   },
 });
 

@@ -58,7 +58,7 @@ Zaniklo: `JWT_LIFETIME` (-> `server.config.js`), `SMTP_*` a `MAIL_FROM` (-> Nast
   `<html lang>` a og:locale, žádné adresy `/cs/…`), `theme` (dvě palety, sekce 4), `boot`,
   `pwa.themeColor: "clubRed"` (theme_color manifestu), `uves.admin`, `deploy`. Pod `app`:
   `ageList`, `positionList`, `lineupPositionMap`, `matchStateList`, `articleStateList`,
-  `galleryStateList`, `galleryCategoryList`, `coachRoleList`, `role` a `roleGroup` (množiny pro
+  `galleryStateList`, `galleryCategoryList`, `teamRoleList`, `boardRoleList`, `role` a `roleGroup` (množiny pro
   `auth`, [roles.md](./roles.md)), `binaryCollection` a `settingsDefaults` (sekce 3). Popisky
   číselníků jsou v LSI; že každý kód nějaký má, hlídá `client/src/config/enum-lsi.test.js`.
 - **`server/server.config.js`** -- `errorPrefix: "afkbratcice"` (`Error.code("article", "notFound")`),
@@ -195,7 +195,7 @@ teams.*, team.*, match.*, player.*, gallery.*, files.*, article.*
 program.*             program víkendu, prázdný stav
 round.*               kolo soutěže
 countdown.*           „za ${days} dnů ${time}“
-enum.age.*, enum.position.*, enum.matchState.*, enum.coachRole.*, enum.galleryCategory.*
+enum.age.*, enum.position.*, enum.matchState.*, enum.teamRole.*, enum.boardRole.*, enum.galleryCategory.*
 error.*               prázdné stavy a chybové hlášky
 admin.*               nadpisy správcovských obrazovek
 ```

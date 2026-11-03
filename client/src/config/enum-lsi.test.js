@@ -16,7 +16,8 @@ const ENUM_BY_LIST = {
   articleState: app.articleStateList,
   galleryState: app.galleryStateList,
   galleryCategory: app.galleryCategoryList,
-  coachRole: app.coachRoleList,
+  teamRole: app.teamRoleList,
+  boardRole: app.boardRoleList,
   role: Object.values(app.role),
 };
 

@@ -87,3 +87,7 @@ test("pageInfo se předává beze změny", () => {
 
   assert.equal(called.at(-1)[1], pageInfo);
 });
+
+test("domácí a hosté jsou každý jen svoje strana hřiště", () => {
+  assert.deepEqual(filterOf({ homeTeamId: "t1", guestTeamId: "t2" }), { homeTeamId: "t1", guestTeamId: "t2" });
+});

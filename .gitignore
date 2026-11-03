@@ -8,3 +8,6 @@ dist/
 # `npm run check-env` hlídá, že skutečné soubory odpovídají jí.
 .env*
 !.env.example
+
+# Reporty migračních skriptů (caio-server/script `reportFile`)
+migrate-*-report.json

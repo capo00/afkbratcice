@@ -5,6 +5,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import PAGES from "../content/pages.js";
+import Board from "../components/board.jsx";
 // Text stránek se veze až s touhle obrazovkou (lazy chunk), ne v hlavním bundlu --
 // důvod je v komentáři nahoře v `content/pages.js`.
 import PAGE_CONTENT from "../content/page-content.js";
@@ -21,6 +22,11 @@ const { theme } = Config;
 //
 // Až vznikne ECC, obsah se přesune do databáze beze změny tvaru a tahle komponenta si
 // jen vymění zdroj.
+//
+// Výjimka jsou stránky, jejichž obsah už v databázi **je** (`DATA_PAGES`): `/vybor`
+// kreslí členy výboru ze záznamů vedení, ve stejné sazbě jako text.
+
+const DATA_PAGES = { vybor: Board };
 
 const Page = createVisualComponent({
   uu5Tag: Config.TAG + "Page",
@@ -28,6 +34,7 @@ const Page = createVisualComponent({
   render() {
     const [route] = useRoute();
     const page = PAGES[route?.uu5Route];
+    const DataPage = DATA_PAGES[route?.uu5Route];
 
     if (!page) {
       return (
@@ -57,7 +64,7 @@ const Page = createVisualComponent({
             "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
           })}
         >
-          <Content>{PAGE_CONTENT[route.uu5Route]}</Content>
+          {DataPage ? <DataPage /> : <Content>{PAGE_CONTENT[route.uu5Route]}</Content>}
         </div>
       </Section>
     );

@@ -10,6 +10,7 @@ const membership = shape({ id: mongoId().isRequired(), dateFrom: any(), dateTo: 
 const listDtoIn = shape({
   teamId: mongoId(),
   active: any(),
+  seasonId: mongoId(),
   idList: array(mongoId()),
   pageInfo: pageInfo(),
 });

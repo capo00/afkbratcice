@@ -30,7 +30,7 @@ import seasonDao from "../server/season/dao.js";
 import matchDao from "../server/match/dao.js";
 import personDao from "../server/person/dao.js";
 import playerDao from "../server/player/dao.js";
-import coachDao from "../server/coach/dao.js";
+import managementDao from "../server/management/dao.js";
 import articleCrud from "../server/article/crud.js";
 
 // Konfigurace klubu byla do 2026-11 v `afk_config` (server/app-config/); teď je v Nastavení
@@ -138,7 +138,7 @@ const migrationMapDao = new (class extends Dao {
   createIndexes() { return this.createIndex({ entity: 1, v0Id: 1 }, { unique: true }); }
 })();
 
-const stat = { team: [0, 0], season: [0, 0], match: [0, 0], person: [0, 0], player: [0, 0], coach: [0, 0], article: [0, 0] };
+const stat = { team: [0, 0], season: [0, 0], match: [0, 0], person: [0, 0], player: [0, 0], management: [0, 0], article: [0, 0] };
 const count = (entity, created) => stat[entity][created ? 0 : 1]++;
 
 /** Založí, nebo aktualizuje podle přirozeného klíče. Vrací uložený dokument. */
@@ -273,7 +273,7 @@ if (RESET && !DRY) {
     "afk_match",
     "afk_person",
     "afk_player",
-    "afk_coach",
+    "afk_management",
     "afk_gallery",
     "afk_article",
     "afk_migration_map",
@@ -357,7 +357,8 @@ for (const h of squad) {
       surname: h.prijmeni,
       ...(h.narozen ? { birthdate: h.narozen } : null),
       ...(h.mail ? { email: h.mail } : null),
-      ...(h.telefon ? { phone: `+420${h.telefon}` } : null),
+      // v0 má číslo už s předvolbou (`420605…`), jindy bez ní.
+      ...(h.telefon ? { phone: `+${String(h.telefon).replace(/\D/g, "").replace(/^(?!420)/, "420")}` } : null),
     },
   );
   await remember("person", h.login, person.id);
@@ -380,8 +381,8 @@ for (const h of squad) {
 
 // --- 4. trenéři ----------------------------------------------------------------------
 //
-// v0 zná jen hlavního trenéra a jen u mužů; výbor (role `board`) v datech není, drží ho
-// obsahová stránka `/vybor`.
+// v0 zná jen hlavního trenéra a jen u mužů; výbor v datech není (zakládá ho
+// migrate-management.js z dřívějšího textu stránky `/vybor`).
 
 for (const c of v0Coaches.filter((c) => !c.do && c.tym === "M")) {
   const h = v0Players.find((p) => p.login === c.login);
@@ -394,10 +395,10 @@ for (const c of v0Coaches.filter((c) => !c.do && c.tym === "M")) {
     { name: h.jmeno, surname: h.prijmeni, ...(h.mail ? { email: h.mail } : null) },
   );
   await upsert(
-    coachDao,
-    "coach",
-    { personId: person.id, role: "headCoach" },
-    { personId: person.id, role: "headCoach", teamList: [{ id: teamIdByV0[1], dateFrom: c.od, dateTo: null }] },
+    managementDao,
+    "management",
+    { personId: person.id },
+    { personId: person.id, teamList: [{ id: teamIdByV0[1], role: "coach", dateFrom: c.od, dateTo: null }] },
   );
 }
 

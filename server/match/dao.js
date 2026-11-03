@@ -31,9 +31,16 @@ class MatchDao extends Dao {
    * Jediný list se všemi filtry -- kolo v soutěži, program víkendu i vzájemné zápasy
    * jsou jen jiné kombinace parametrů, ne vlastní use casy (design/api.md, 2.3).
    */
-  listByFilter({ seasonId, teamId, teamIdList, opponentId, playerId, round, state, dateFrom, dateTo } = {}, pageInfo, order = "asc") {
+  listByFilter(
+    { seasonId, teamId, teamIdList, opponentId, homeTeamId, guestTeamId, playerId, round, state, dateFrom, dateTo } = {},
+    pageInfo,
+    order = "asc",
+  ) {
     const filter = {};
     if (seasonId) filter.seasonId = seasonId;
+    // Konkrétní strana hřiště (filtr administrace); `teamId` naopak bere obě.
+    if (homeTeamId) filter.homeTeamId = homeTeamId;
+    if (guestTeamId) filter.guestTeamId = guestTeamId;
     if (round) filter.round = round;
     if (state) filter.state = state;
     // Zápasy, v jejichž sestavě hráč je -- profil hráče. Index na `playerList.playerId`

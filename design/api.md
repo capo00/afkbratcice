@@ -140,7 +140,7 @@ je zabalené do `error`. Klient musí umět obojí.
 
 ### 1.2 Ochrana osobních údajů
 
-`person`, `player` a `coach` vrací kontaktní údaje (`birthdate`, `email`, `phone`)
+`person`, `player` a `management` vrací kontaktní údaje (`birthdate`, `email`, `phone`)
 pouze volajícímu s rolí z množiny `CONTENT`, nebo osobě samotné
 (`person.identity === identity.identity`). Pro ostatní je ABL z `dtoOut` odstraňuje –
 stejným způsobem, jako to dělá `Identity._getPublicData` v `caio-server-auth`.
@@ -374,7 +374,7 @@ Implementace přes aggregation pipeline (`$unwind: "$playerList"`), ne v paměti
 | `person/linkIdentity` | post | ADMIN | `{ id, identity }` | `person` |
 | `person/linkSelf` | post | A | `{}` | `{ linked, personId? }` |
 
-`person/delete` odmítne smazání, pokud existuje navázaný `player` nebo `coach`.
+`person/delete` odmítne smazání, pokud existuje navázaný `player` nebo `management`.
 
 #### 2.5.1 Automatické spárování osoby s identitou
 
@@ -417,17 +417,25 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
 | `player/endTeam` | post | CONTENT, **TE** | `{ id, teamId, dateTo }` | `player` |
 | `player/delete` | post | CONTENT | `{ id }` | `{}` |
 
-`active: true` filtruje hráče s otevřeným členstvím (`dateTo: null` nebo v budoucnu).
+`active: true` filtruje hráče s členstvím, které trvá dnes; `seasonId` hráče, jejichž členství
+zasahuje do období sezóny (od 1. 8. `yearFrom` do 31. 7. dalšího roku) — soupiska staré sezóny.
 
-### 2.7 `coach`
+### 2.7 `management` (do 2026-11 `coach`)
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `coach/list` | get | – | `{ teamId, role, active, pageInfo }` | `{ itemList }` (s vloženou `person`) |
-| `coach/get` | get | – | `{ id }` | `coach` + `person` |
-| `coach/create` | post | CONTENT, **TE** | `{ personId, role, teamList }` | `coach` |
-| `coach/update` | post | CONTENT, **TE** | `{ id, ... }` | `coach` |
-| `coach/delete` | post | CONTENT, **TE** | `{ id }` | `{}` |
+| `management/list` | get | – | `{ teamId, board, role, active, seasonId, idList, pageInfo }` | `{ itemList }` (s vloženou `person`) |
+| `management/get` | get | – | `{ id }` | `management` + `person` |
+| `management/create` | post | CONTENT, **TE** | `{ personId, teamList, boardList }` | `management` |
+| `management/update` | post | CONTENT, **TE** | `{ id, ... }` | `management` |
+| `management/delete` | post | CONTENT, **TE** | `{ id }` | `{}` |
+
+- `teamId` (+ `role` z `TEAM_ROLE`) hledá v `teamList`, `board: true` (+ `role` z `BOARD_ROLE`)
+  v `boardList`; `active` a `seasonId` jako u `player/list`.
+- **TE** smí jen záznam, jehož týmy (v dtoIn i uložené) jsou všechny jeho, a nikdy záznam
+  s výborem — výbor je klubový, ten edituje jen CONTENT.
+- Člen výboru se `showContact` u trvající funkce má v položce `contact: { email, phone }`
+  i pro veřejnost (stránka `/vybor`); `person` zůstává filtrovaná (1.2).
 
 ### 2.8 `article`
 
@@ -769,7 +777,7 @@ import matchApi from "./match/api.js";
 import statsApi from "./stats/api.js";
 import personApi from "./person/api.js";
 import playerApi from "./player/api.js";
-import coachApi from "./coach/api.js";
+import managementApi from "./management/api.js";
 import articleApi from "./article/api.js";
 import galleryApi from "./gallery/api.js";
 import fileApi from "./file/api.js";
@@ -800,7 +808,7 @@ const sysApi = {
 export default {
   ...sysApi,
   ...teamApi, ...seasonApi, ...matchApi, ...statsApi,
-  ...personApi, ...playerApi, ...coachApi,
+  ...personApi, ...playerApi, ...managementApi,
   ...articleApi, ...galleryApi, ...fileApi, ...pageApi,
   ...appConfigApi, ...seoApi,
   ...Authentication.createApi(),

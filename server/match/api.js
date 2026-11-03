@@ -11,6 +11,8 @@ const listDtoIn = shape({
   teamId: mongoId(),
   teamIdList: array(mongoId()),
   opponentId: mongoId(),
+  homeTeamId: mongoId(),
+  guestTeamId: mongoId(),
   playerId: mongoId(),
   round: string(),
   state: oneOf(Config.MATCH_STATE),
@@ -52,6 +54,20 @@ const writeDtoIn = shape({
   note: string(),
 });
 
+/**
+ * Kolo je číslo v rámci soutěže: „5. kolo“ bez sezóny by spojilo pátá kola všech soutěží
+ * a ročníků, což nikdo nechce. Proto jen se `seasonId`.
+ */
+function validateList(input) {
+  const dtoIn = validate(listDtoIn)(input);
+  if (dtoIn.round && !dtoIn.seasonId) {
+    const e = new Error("Invalid dtoIn: round requires seasonId");
+    e.errors = [{ path: ["round"], message: "requires seasonId" }];
+    throw e;
+  }
+  return dtoIn;
+}
+
 /** Týmy zápasu podle uloženého záznamu -- dtoIn u update nese jen `id`. */
 async function teamsOfMatch({ dtoIn }) {
   const match = await dao.get(dtoIn?.id).catch(() => null);
@@ -61,7 +77,7 @@ async function teamsOfMatch({ dtoIn }) {
 export default {
   "match/list": {
     method: "get",
-    validator: validate(listDtoIn),
+    validator: validateList,
     fn: ({ dtoIn, identity }) => crud.list(dtoIn, identity).then((itemList) => ({ itemList })),
   },
 

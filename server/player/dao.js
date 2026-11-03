@@ -1,4 +1,5 @@
 import { Dao } from "caio-server";
+import { membershipCondition } from "../services/membership.js";
 
 class PlayerDao extends Dao {
   constructor() {
@@ -13,20 +14,14 @@ class PlayerDao extends Dao {
   }
 
   /**
-   * @param active true = jen otevřená členství (dateTo prázdné nebo v budoucnu)
+   * @param active true = jen členství, která trvají dnes
+   * @param range  `{ from, to }` = jen členství zasahující do období (soupiska sezóny)
    */
-  listByFilter({ teamId, active, idList } = {}, pageInfo) {
+  listByFilter({ teamId, active, range, idList } = {}, pageInfo) {
     if (idList) return this.listByIdList(idList);
 
     const filter = {};
-    if (teamId) {
-      const membership = { id: teamId };
-      if (active) {
-        const today = new Date().toISOString().slice(0, 10);
-        membership.$or = [{ dateTo: null }, { dateTo: { $exists: false } }, { dateTo: { $gte: today } }];
-      }
-      filter.teamList = { $elemMatch: membership };
-    }
+    if (teamId) filter.teamList = { $elemMatch: membershipCondition({ id: teamId }, { active, range }) };
     return this.find(filter, pageInfo, { number: 1 });
   }
 

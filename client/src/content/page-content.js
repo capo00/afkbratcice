@@ -158,27 +158,6 @@ Obránci to odpálí, brankář góly zachraňuje.</p>
 <p><b>Traverza je nejlepší, soupeře to děsí,<br/>
 Vzhůru, vzhůru, vzhůru do Zálesí.</b></p>`,
 
-  vybor: `<uu5string/>
-<h3>Předseda</h3>
-<p><b>Jaroslav Doležal</b><br/>
-Telefon: <a href="tel:+420605907732">+420 605 907 732</a><br/>
-E-mail: <a href="mailto:dolezalj@szdc.cz">dolezalj@szdc.cz</a></p>
-
-<h3>Místopředseda</h3>
-<p><b>Luboš Říha</b><br/>
-Telefon: <a href="tel:+420605039810">+420 605 039 810</a><br/>
-E-mail: <a href="mailto:lubosriha58@seznam.cz">lubosriha58@seznam.cz</a></p>
-
-<h3>Tajemník</h3>
-<p><b>Ondřej Čapek</b><br/>
-Telefon: <a href="tel:+420737870746">+420 737 870 746</a><br/>
-E-mail: <a href="mailto:admin@afkbratcice.cz">admin@afkbratcice.cz</a></p>
-
-<h3>Ostatní členové</h3>
-<p><b>Václav Říha</b> — <a href="mailto:venda.riha@atlas.cz">venda.riha@atlas.cz</a><br/>
-<b>Petra Zajícová</b> — <a href="mailto:peta.zajicova@gmail.com">peta.zajicova@gmail.com</a><br/>
-<b>Jan Tichý</b> — <a href="mailto:jan.tichy89@gmail.com">jan.tichy89@gmail.com</a><br/>
-<b>Martin Kaňka</b> — <a href="mailto:martinkanka2@seznam.cz">martinkanka2@seznam.cz</a></p>`,
 
   treninky: `<uu5string/>
 <p>Muži trénují <b>v pátek od 17:00</b> na hřišti AFK Bratčice v Zálesí.</p>

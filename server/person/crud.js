@@ -1,7 +1,7 @@
 import { Crud, Error as CoreError, BinaryStore, Authorization } from "caio-server";
 import dao from "./dao.js";
 import playerDao from "../player/dao.js";
-import coachDao from "../coach/dao.js";
+import managementDao from "../management/dao.js";
 import Config from "../config.js";
 
 // Kontaktní údaje jsou neveřejné. Filtruje je tahle vrstva, ne jednotlivé use casy --
@@ -69,13 +69,13 @@ class PersonCrud extends Crud {
   }
 
   async delete(id) {
-    // Osoba je sdílená mezi hráčem a trenérem; smazat ji zpod nich by osiřel personId.
-    const [players, coaches] = await Promise.all([
+    // Osoba je sdílená mezi hráčem a vedením; smazat ji zpod nich by osiřel personId.
+    const [players, managers] = await Promise.all([
       playerDao.find({ personId: id }, { pageSize: 1 }),
-      coachDao.find({ personId: id }, { pageSize: 1 }),
+      managementDao.find({ personId: id }, { pageSize: 1 }),
     ]);
-    if (players.length || coaches.length) {
-      throw new CoreError("Person is referenced by a player or a coach", {
+    if (players.length || managers.length) {
+      throw new CoreError("Person is referenced by a player or the management", {
         status: 400,
         code: CoreError.code("person", "inUse"),
         paramMap: { id },

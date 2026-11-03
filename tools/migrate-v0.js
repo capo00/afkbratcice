@@ -34,7 +34,7 @@ import seasonDao from "../server/season/dao.js";
 import matchDao from "../server/match/dao.js";
 import personDao from "../server/person/dao.js";
 import playerDao from "../server/player/dao.js";
-import coachDao from "../server/coach/dao.js";
+import managementDao from "../server/management/dao.js";
 import { checkMatchAges } from "../server/services/category.js";
 import { LINEUP_POSITION_BY_V0, LINEUP_POSITION_MAP } from "../server/services/lineup-position.js";
 
@@ -156,6 +156,15 @@ let dryId = 0;
  * Založí nebo aktualizuje dokument. Nejdřív podle mapy v0 id (opakovaný běh), pak podle
  * přirozeného klíče `filter` (když ho entita má), jinak založí nový.
  */
+/**
+ * Telefon z v0: číslo bývá už s předvolbou (`420605…`), jindy bez ní. Dřívější import před
+ * něj `+420` přidával vždycky a vznikalo `+420420605…` (opravuje migrate-management.js).
+ */
+function v0Phone(telefon) {
+  const digits = String(telefon).replace(/\D/g, "");
+  return digits.length === 12 && digits.startsWith("420") ? `+${digits}` : `+420${digits}`;
+}
+
 async function upsert(entity, v0Id, dao, data, filter) {
   let existing = null;
   if (v0Id !== undefined) {
@@ -387,7 +396,7 @@ for (const h of v0Players) {
     surname: h.prijmeni,
     ...(h.narozen ? { birthdate: h.narozen } : null),
     ...(h.mail ? { email: h.mail } : null),
-    ...(h.telefon ? { phone: `+420${h.telefon}` } : null),
+    ...(h.telefon ? { phone: v0Phone(h.telefon) } : null),
   });
   personIdByLogin[h.login] = person.id;
 
@@ -415,7 +424,11 @@ for (const h of v0Players) {
 }
 
 // --- 6. trenéři ----------------------------------------------------------------------
+//
+// v0 zná jen trenéra (žádného asistenta ani výbor). Vedení má jeden záznam na osobu
+// (`afk_management`), takže se trenérství jedné osoby u víc týmů sejdou v jejím `teamList`.
 
+const coachTeamListByPerson = {};
 for (const c of v0Coaches) {
   const personId = personIdByLogin[c.login];
   const v0TeamId = ownV0TeamByVek[c.tym];
@@ -423,11 +436,15 @@ for (const c of v0Coaches) {
     warn(`trenér ${c.id} (${c.login}, ${c.tym}): osoba nebo tým nenalezen, přeskočen`);
     continue;
   }
-  await upsert("coach", c.id, coachDao, {
-    personId,
-    role: "headCoach",
-    teamList: [{ id: teamIdByV0[v0TeamId], dateFrom: c.od, dateTo: c.do ?? null }],
+  (coachTeamListByPerson[personId] = coachTeamListByPerson[personId] ?? []).push({
+    id: teamIdByV0[v0TeamId],
+    role: "coach",
+    dateFrom: c.od,
+    dateTo: c.do ?? null,
   });
+}
+for (const [personId, teamList] of Object.entries(coachTeamListByPerson)) {
+  await upsert("management", undefined, managementDao, { personId, teamList }, { personId });
 }
 
 // --- 7. zápasy -----------------------------------------------------------------------

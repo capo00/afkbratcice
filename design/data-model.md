@@ -130,11 +130,11 @@ erDiagram
         object[] teamList "členství v čase, viz TEAM_MEMBERSHIP"
         string   note
     }
-    COACH {
+    MANAGEMENT {
         string   id PK
-        string   personId FK "unique s role"
-        enum     role "headCoach|assistant|manager|board"
-        object[] teamList "viz TEAM_MEMBERSHIP"
+        string   personId FK "unique"
+        object[] teamList "viz TEAM_MEMBERSHIP + role coach|assistant|manager"
+        object[] boardList "výbor AFK: role, dateFrom, dateTo, showContact"
     }
     TEAM_MEMBERSHIP {
         string id FK "teamId"
@@ -148,14 +148,14 @@ erDiagram
     MATCH  ||--o{ MATCH_PLAYER    : "playerList[] (vnořené)"
     PLAYER ||--o{ MATCH_PLAYER    : "playerId"
     PERSON ||--o| PLAYER          : "personId"
-    PERSON ||--o| COACH           : "personId"
+    PERSON ||--o| MANAGEMENT      : "personId"
     PLAYER ||--o{ TEAM_MEMBERSHIP : "teamList[] (vnořené)"
-    COACH  ||--o{ TEAM_MEMBERSHIP : "teamList[] (vnořené)"
+    MANAGEMENT ||--o{ TEAM_MEMBERSHIP : "teamList[] (vnořené)"
     TEAM   ||--o{ TEAM_MEMBERSHIP : "id"
 ```
 
 `MATCH_PLAYER` a `TEAM_MEMBERSHIP` **nejsou kolekce** — jsou to vnořené objekty
-v `match.playerList`, resp. `player.teamList` / `coach.teamList`. V diagramu stojí zvlášť,
+v `match.playerList`, resp. `player.teamList` / `management.teamList`. V diagramu stojí zvlášť,
 protože bez nich není vidět, co sestava a členství nesou.
 
 ### 1.3 Obsah, média a systém
@@ -257,7 +257,7 @@ erDiagram
 | `afk_match` | v1 | Zápas včetně výsledku a sestavy |
 | `afk_person` | nová | Osoba (jméno, kontakt) – sdílená pro hráče i trenéry |
 | `afk_player` | nová | Hráčská role osoby, členství v týmech v čase |
-| `afk_coach` | nová | Trenérská/funkcionářská role osoby |
+| `afk_management` | nová (2026-11, dřív `afk_coach`) | Vedení: působení osoby v týmech (trenér, asistent, vedoucí) a ve výboru AFK |
 | `afk_article` | nová | Novinka; obsah je `sectionList[].content` (`uu5String`) |
 | `afk_gallery` | nová | Fotoalbum |
 | `page` | **nevzniká** | Obsahová stránka — zatím natvrdo v klientu, čeká na ECC |
@@ -539,23 +539,43 @@ Aktuální soupiska týmu = `{ "teamList": { $elemMatch: { id: teamId, $or: [ { 
 
 ---
 
-## 7. `afk_coach`
+## 7. `afk_management`
+
+Vedení klubu: trenéři, asistenti a vedoucí týmů a výbor AFK. **Jeden záznam na osobu**
+(2026-11; do té doby `afk_coach`, záznam na dvojici osoba + funkce, výbor jako funkce
+`board` bez období). Kdo trénuje dva týmy a sedí ve výboru, má jeden řádek se dvěma
+položkami `teamList` a jednou `boardList`.
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
 | `id` | string | ✓ | |
 | `personId` | string | ✓ | FK `person` |
-| `role` | enum | ✓ | `headCoach` \| `assistant` \| `manager` \| `board` |
-| `teamList` | object[] | ✓ | Stejná struktura jako u `player` |
+| `teamList` | object[] | | Působení v týmech v čase s funkcí |
+| `boardList` | object[] | | Funkce ve výboru AFK v čase |
+
+Aspoň jeden ze seznamů je neprázdný (`management/create`, `update`).
+
+**`teamList[]`**: `{ id: <teamId>, role: TEAM_ROLE, dateFrom, dateTo | null }` — jako
+`player.teamList`, jen s funkcí.
+
+**`boardList[]`**: `{ role: BOARD_ROLE, dateFrom | null, dateTo | null, showContact }` — výbor
+je klubový, tým nemá. `dateFrom: null` = začátek neznáme (členové převzatí ze stránky
+`/vybor`). `showContact: true` = telefon a e-mail osoby se ukážou na stránce `/vybor`
+(`management/list` je vrátí jako `contact`, dokud funkce trvá); jinak jsou neveřejné jako
+u každé osoby.
+
+**Sezóna** (soupiska, `seasonId` v `list`) = působení, které se překrývá s obdobím ročníku
+od 1. 8. `yearFrom` do 31. 7. dalšího roku (`server/services/membership.js`), stejně jako u hráčů.
 
 **Indexy**
 
 ```
-{ personId: 1, role: 1 }  unique
+{ personId: 1 }       unique
 { "teamList.id": 1 }
+{ "boardList.role": 1 }
 ```
 
-Role `board` (výbor klubu) pokrývá stránku „Výbor AFK“ z v0 bez nutnosti další entity.
+Převod z `afk_coach`: `tools/migrate-management.js` (`headCoach` → `coach`).
 
 ---
 
@@ -818,7 +838,8 @@ ve stejném sloupci, což znemožňovalo evidovat post střídajícího hráče)
 
 **`MATCH_STATE`**: `planned`, `played`, `postponed`, `canceled`
 **`ARTICLE_STATE`**: `draft`, `published`, `archived`
-**`COACH_ROLE`**: `headCoach`, `assistant`, `manager`, `board`
+**`TEAM_ROLE`**: `coach`, `assistant`, `manager` – funkce v týmu (`management.teamList[].role`)
+**`BOARD_ROLE`**: `chairman`, `viceChairman`, `secretary`, `member` – funkce ve výboru AFK (`management.boardList[].role`)
 **`GALLERY_CATEGORY`**: `match`, `training`, `fans`, `youth`, `club` – filtr nad fotogalerií
 (z předlohy: `ZÁPASY`, `TRÉNINK`, `FANOUŠCI`, `MLÁDEŽ`, `KLUB`)
 **`PROFILE`**: `members`, `teamEditor`, `matchEditor`, `newsEditor`, `galleryEditor`,

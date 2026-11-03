@@ -23,10 +23,8 @@ const PAGES = {
   vybor: {
     name: "Výbor AFK",
     desc: "Lidé, kteří klub vedou.",
-    // Výbor jde časem vzít z `coach/list?role=board` — jsou to osoby s rolí, ne text.
-    // Do té doby je to text: v0 ho tak má a druhý zdroj pravdy (stránka i entita) by
-    // znamenal udržovat totéž dvakrát. Migrace 2026 proto členy výboru do `coach`
-    // vědomě nezakládá.
+    // Obsah není text, ale členové výboru ze záznamů vedení (`management/list?board=true`,
+    // `components/board.jsx`); do 2026-11 to byl text v `page-content.js`.
   },
 
   treninky: {

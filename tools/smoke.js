@@ -351,7 +351,7 @@ const cleanupFilter = {
     { personId: person.body.id },
   ],
 };
-for (const c of ["afk_team", "afk_season", "afk_match", "afk_person", "afk_player", "afk_coach", "afk_article"]) {
+for (const c of ["afk_team", "afk_season", "afk_match", "afk_person", "afk_player", "afk_management", "afk_article"]) {
   await db.collection(c).deleteMany(cleanupFilter);
 }
 await Member.delete(adminIdentity.identity);

@@ -115,7 +115,7 @@ auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
 | `match/setLineup` | totéž | `any` **+ dodatečná kontrola**, viz níž |
 | `team/update` | `[dtoIn.id]` | `all` |
 | `player/create`, `update`, `addTeam`, `endTeam` | týmy z `dtoIn.teamId` / `dtoIn.teamList` | `all` |
-| `coach/create`, `update`, `delete` | týmy z `dtoIn.teamList` | `all` |
+| `management/create`, `update`, `delete` | týmy z `dtoIn.teamList` i uloženého záznamu; záznam s výborem žádné (jen CONTENT) | `all` |
 
 Tři věci, které je snadné přehlédnout a bolí později:
 
@@ -231,8 +231,8 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 | `player/create`, `update` | CONTENT, **TE** (`all`) | |
 | `player/addTeam`, `endTeam` | CONTENT, **TE** (`all`) | jen do/z vlastního týmu |
 | `player/delete` | CONTENT | |
-| `coach/list`, `get` | – | |
-| `coach/create`, `update`, `delete` | CONTENT, **TE** (`all`) | realizační tým vlastního mužstva |
+| `management/list`, `get` | – | |
+| `management/create`, `update`, `delete` | CONTENT, **TE** (`all`) | realizační tým vlastního mužstva; výbor jen CONTENT |
 
 ### Články a obsah
 

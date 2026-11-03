@@ -9,7 +9,7 @@ import matchApi from "./match/api.js";
 import statsApi from "./stats/api.js";
 import personApi from "./person/api.js";
 import playerApi from "./player/api.js";
-import coachApi from "./coach/api.js";
+import managementApi from "./management/api.js";
 import articleApi from "./article/api.js";
 import galleryApi from "./gallery/api.js";
 import fileApi from "./file/api.js";
@@ -41,7 +41,7 @@ export default {
   ...statsApi,
   ...personApi,
   ...playerApi,
-  ...coachApi,
+  ...managementApi,
   ...articleApi,
   ...galleryApi,
   ...fileApi,
