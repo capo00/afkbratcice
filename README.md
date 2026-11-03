@@ -224,6 +224,16 @@ nahoru se zdrojáky — nepatří do `.gcloudignore`.
 > deploy` proto místo něj používá a při první potřebě sám založí
 > `<project-id>-gae-staging` — žádný ruční krok navíc není potřeba.
 
+Vydání nové verze (verze z release notes, tag, `main`, GitHub Release, deploy, kontrola):
+
+```bash
+npm run release -- --url https://afkbratcice.oa.r.appspot.com
+```
+
+> **`--url` je povinné, dokud doména nevede na GAE.** Bez něj poslední krok čeká na
+> `/sys/health` na `APP_URL` (`afkbratcice.cz`), kde je pořád starý web v0. Ten odpovídá
+> 401, krok po 300 s spadne, i když nasazení proběhlo.
+
 ### 8. Po prvním deployi
 
 ```bash
@@ -262,7 +272,7 @@ spuštěním**:
 2. `npm run migrate:penalties -- --env .env` (plán), pak totéž s `--commit`. Rozstřely z v0 mají ve
    skóre gól z penalt: vítězi se o něj sníží, takže z výhry je remíza s vítězem rozstřelu.
    Sezónám bez rozstřelu se vypne `hasPenalties`. Opakovaný běh nic nezmění.
-3. **Deploy**, pak na webu `/vybor` a realizační tým mužstva; v administraci *Trenéři a výbor*.
+3. **Deploy** (`npm run release -- --url https://afkbratcice.oa.r.appspot.com`, viz §7), pak na webu `/vybor` a realizační tým mužstva; v administraci *Trenéři a výbor*.
 4. **Po jednom vydání** smazat kolekci `afk_coach`.
 
 ## Vydání s konfigurací ve třech vrstvách (první vydání po 0.6.1)
