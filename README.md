@@ -247,6 +247,21 @@ gcloud app domain-mappings create afkbratcice.cz
 A stejně jako u GCS bucketu (`how-to-set-gcs.md`, krok 8) založit rozpočtový alert
 (*Billing → Budgets & alerts*) jako pojistku proti překročení free tier.
 
+## Vydání s vedením klubu (první vydání po 0.6.3)
+
+Trenéři a výbor jsou nová entita `management` (`afk_management`, jeden záznam na osobu) a stránka
+`/vybor` se kreslí z ní. Před nasazením proto jednou, **každý krok jen po Caiově „ano“ těsně před
+spuštěním**:
+
+1. `npm run migrate:management -- --env .env` (plán), pak totéž s `--commit`:
+   - převede `afk_coach` (funkce `headCoach` -> `coach`),
+   - založí výbor z dřívějšího textu stránky (kontakt na webu jen u předsedy),
+   - opraví telefony se zdvojenou předvolbou `+420420…`.
+
+   `afk_coach` zůstává jako záloha.
+2. **Deploy**, pak na webu `/vybor` a realizační tým mužstva; v administraci *Trenéři a výbor*.
+3. **Po jednom vydání** smazat kolekci `afk_coach`.
+
 ## Vydání s konfigurací ve třech vrstvách (první vydání po 0.6.1)
 
 Kód čte konfiguraci klubu z Nastavení (`sys_settings.app`), ne z `afk_config`, a env soubory
