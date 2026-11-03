@@ -25,9 +25,10 @@ const SAME_PAGE_PARAM_LIST = ["seasonId"];
 // než menu, takže se na něj jen proklikne (rozhodnuto 8. 9. 2026).
 //
 // Podpoložky má jen Klub (obsahové stránky). Administrace je vlastní UVE s vlastní lištou,
-// web na ni jen odkazuje ikonou (`adminLink`): `Top` ji ukáže, když se v tomhle prohlížeči
-// někdo přihlásil do administrace (značku zapisuje admin/app.jsx), nebo když je na webu
-// přihlášený někdo s právem do ní. Přepínač světlého a tmavého režimu přidává `Top` sám.
+// web na ni jen odkazuje ikonou (`adminLink`), vždy. Když se v tomhle prohlížeči někdo
+// přihlásil do administrace (značku zapisuje admin/app.jsx) nebo je na webu přihlášený někdo
+// s právem do ní, `Top` ji nesbalí; jinak se při nedostatku místa sbalí jako první do menu.
+// Přepínač světlého a tmavého režimu přidává `Top` sám.
 function useTop() {
   const { state } = UiAuth.useSession();
   const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);

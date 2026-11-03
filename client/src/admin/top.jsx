@@ -11,8 +11,9 @@ const { theme } = Config;
  * Konfigurace horní lišty administrace.
  *
  * Erb a název klubu jako na webu, ať je vidět, že je to tentýž klub; druhý řádek názvu říká,
- * že jde o administraci. Logo vede na rozcestník adminu, na web vede položka „Web“ (`href`
- * mimo app base `/admin/`, takže z ní `Top` udělá obyčejný odkaz a stránka se načte znovu).
+ * že jde o administraci. Logo vede jako všude na úvodní stránku webu, stejně jako položka „Web“
+ * (`href` mimo app base `/admin/`, takže z něj `Top` udělá obyčejný odkaz a stránka se načte
+ * znovu).
  *
  * Obrazovky jsou v rozbalovací položce, a **jen ty, na které přihlášený má** — zašedlé
  * položky se v tomhle webu nepoužívají (design/frontend.md, 2.2). Nepřihlášený nevidí žádnou,
@@ -38,7 +39,7 @@ export function useAdminTop() {
   );
 
   return {
-    logo: { imageSrc: Config.asset.logoTransparent, href: "/admin/", significance: "subdued", tooltip: adminLabel },
+    logo: { imageSrc: Config.asset.logoTransparent, href: "/", significance: "subdued", tooltip: webLabel },
     children: <ClubName subtitle={adminLabel} />,
     // Stejná lišta jako na webu (app.jsx): tmavá v obou režimech, barvy jako hex tmavé palety,
     // aby `Top` uu5 položkám nastavil tmavý podklad.
