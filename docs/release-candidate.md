@@ -11,6 +11,7 @@
 
 ## Opraveno
 - Odznak výhra/remíza/prohra na dlaždici zápasu jen u zápasů našeho týmu.
+- Rozstřely z v0 (96 zápasů, muži IV. třída 2014/15–2020/21) měly ve skóre i gól z penalt, takže se v tabulce počítaly jako výhry 3/0. Teď jsou to remízy s vítězem rozstřelu (2/1). Sezóny bez rozstřelu mají vypnuté `hasPenalties`. Před nasazením `npm run migrate:penalties -- --env .env --commit`.
 - Telefony osob z importu v0 měly zdvojenou předvolbu (`+420420…`).
 - Detail zápasu z archivu má vzájemné zápasy (vlastní tým podle `team.own`, ne podle letošních mužstev).
 - Ve statistikách týmu jsou góly jen tučně, ne červeně.
@@ -18,6 +19,6 @@
 - Ikona odkazu do administrace je `uugds-apps-edit` (caio-ui).
 
 ## Breaking
-- `coach/*` -> `management/*`, kolekce `afk_coach` -> `afk_management`. Funkce v týmu `headCoach` -> `coach`, výbor je `boardList`. Před nasazením `npm run migrate:management -- --env .env --commit` (README, Vydání s vedením klubu).
+- `coach/*` -> `management/*`, kolekce `afk_coach` -> `afk_management`. Funkce v týmu `headCoach` -> `coach`, výbor je `boardList`. Před nasazením `npm run migrate:management -- --env .env --commit` (README, Vydání s vedením klubu a opravou penalt).
 - Stránka `kolo` je zrušená, nahrazuje ji `sezona`.
 - `match/list` odmítne `round` bez `seasonId`.

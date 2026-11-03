@@ -247,7 +247,7 @@ gcloud app domain-mappings create afkbratcice.cz
 A stejně jako u GCS bucketu (`how-to-set-gcs.md`, krok 8) založit rozpočtový alert
 (*Billing → Budgets & alerts*) jako pojistku proti překročení free tier.
 
-## Vydání s vedením klubu (první vydání po 0.6.3)
+## Vydání s vedením klubu a opravou penalt (první vydání po 0.6.3)
 
 Trenéři a výbor jsou nová entita `management` (`afk_management`, jeden záznam na osobu) a stránka
 `/vybor` se kreslí z ní. Před nasazením proto jednou, **každý krok jen po Caiově „ano“ těsně před
@@ -259,8 +259,11 @@ spuštěním**:
    - opraví telefony se zdvojenou předvolbou `+420420…`.
 
    `afk_coach` zůstává jako záloha.
-2. **Deploy**, pak na webu `/vybor` a realizační tým mužstva; v administraci *Trenéři a výbor*.
-3. **Po jednom vydání** smazat kolekci `afk_coach`.
+2. `npm run migrate:penalties -- --env .env` (plán), pak totéž s `--commit`. Rozstřely z v0 mají ve
+   skóre gól z penalt: vítězi se o něj sníží, takže z výhry je remíza s vítězem rozstřelu.
+   Sezónám bez rozstřelu se vypne `hasPenalties`. Opakovaný běh nic nezmění.
+3. **Deploy**, pak na webu `/vybor` a realizační tým mužstva; v administraci *Trenéři a výbor*.
+4. **Po jednom vydání** smazat kolekci `afk_coach`.
 
 ## Vydání s konfigurací ve třech vrstvách (první vydání po 0.6.1)
 

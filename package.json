@@ -19,6 +19,7 @@
     "migrate:v0": "node tools/migrate-v0.js",
     "migrate:settings": "node tools/migrate-settings.js",
     "migrate:management": "node tools/migrate-management.js",
+    "migrate:penalties": "node tools/migrate-penalties.js",
     "qa-accounts": "caio-devkit qa-accounts",
     "settings-import": "caio-devkit settings-import"
   },

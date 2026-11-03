@@ -327,6 +327,8 @@ for (const t of v0Teams) {
 // Jen ročník a věková skupina s mistrovskými zápasy. Týmy sezóny = kdo v nich hrál.
 
 const seasonTeams = new Map(); // "rok|age" -> Set(v0 team id)
+// Sezóny, ve kterých se hrál rozstřel: jen ty mají `hasPenalties` (bodování 3/2/1/0).
+const seasonKeysWithShootout = new Set();
 for (const z of v0Matches.filter(isLeague)) {
   const homeAge = ageByV0Team[z.idD];
   const guestAge = ageByV0Team[z.idH];
@@ -339,6 +341,7 @@ for (const z of v0Matches.filter(isLeague)) {
   const key = `${yearOf(z.datum)}|${homeAge}`;
   if (!seasonTeams.has(key)) seasonTeams.set(key, new Set());
   seasonTeams.get(key).add(z.idD).add(z.idH);
+  if (z.penalty) seasonKeysWithShootout.add(key);
 }
 
 const seasonIdByKey = {};
@@ -359,8 +362,9 @@ for (const [key, v0TeamIdSet] of [...seasonTeams].sort()) {
       yearFrom: String(year),
       age,
       teamList: [...v0TeamIdSet].map((id) => teamIdByV0[id]),
-      // v0 eviduje rozstřel (`zapas.penalty`) a jeho tabulka počítá 3/2/1/0.
-      hasPenalties: true,
+      // v0 eviduje rozstřel (`zapas.penalty`) a jeho tabulka počítá 3/2/1/0 -- ale jen
+      // v soutěžích, kde se rozstřel hrál; ostatní mají obyčejnou remízu (3/1/0).
+      hasPenalties: seasonKeysWithShootout.has(key),
     },
     { yearFrom: String(year), age },
   );
@@ -501,6 +505,11 @@ for (const z of v0Matches) {
     }));
 
   const played = z.golyD !== null && z.golyH !== null;
+  // v0 má ve skóre i rozhodující gól rozstřelu (2:2 vyhrané na penalty je 3:2); tady je
+  // rozstřel jen `penaltyWinnerTeamId` u remízy, takže vítězi rozstřelu o gól méně.
+  const shootout = Boolean(z.penalty) && played && Math.abs(z.golyD - z.golyH) === 1;
+  const homeShootoutGoal = shootout && z.penalty === z.idD && z.golyD > z.golyH ? 1 : 0;
+  const guestShootoutGoal = shootout && z.penalty === z.idH && z.golyH > z.golyD ? 1 : 0;
   await upsert("match", z.id, matchDao, {
     seasonId,
     round: isLeague(z) ? String(z.kolo) : null,
@@ -509,8 +518,8 @@ for (const z of v0Matches) {
     departureTime: z.odjezd ?? null,
     homeTeamId: teamIdByV0[z.idD],
     guestTeamId: teamIdByV0[z.idH],
-    homeGoals: z.golyD,
-    guestGoals: z.golyH,
+    homeGoals: played ? z.golyD - homeShootoutGoal : z.golyD,
+    guestGoals: played ? z.golyH - guestShootoutGoal : z.golyH,
     homeGoalsHalf: z.golyDP,
     guestGoalsHalf: z.golyHP,
     penaltyWinnerTeamId: z.penalty ? teamIdByV0[z.penalty] ?? null : null,

@@ -158,7 +158,7 @@ jiná cesta ke stejné stránce), nebo mít vlastní obrazovku „Archiv".
 | `hriste` | `place` | |
 | `odjezd` | `departureTime` | |
 | `idD` / `idH` | `homeTeamId` / `guestTeamId` | přes mapu týmů |
-| `golyD` / `golyH` | `homeGoals` / `guestGoals` | |
+| `golyD` / `golyH` | `homeGoals` / `guestGoals` | u rozstřelu (`penalty`) má v0 ve skóre i rozhodující gól rozstřelu (2:2 + PK = 3:2): vítězi rozstřelu o gól méně |
 | `golyDP` / `golyHP` | `homeGoalsHalf` / `guestGoalsHalf` | |
 | `penalty` | `penaltyWinnerTeamId` | `id` týmu → nové `id`; `NULL` zůstává prázdné |
 | `vek` + `datum` | `seasonId` | sezóna = rok s hranicí 1. 7.; pokud neexistuje, založí se |
@@ -421,7 +421,7 @@ Rozhodnutí (Caio, 2026-10-25 a 26):
 | Rozsah | celá historie od 2012/13; články, fotogalerie, soubory a kasa ne |
 | Klub | jméno týmu bez koncového „ B“/„ C“; rezerva sdílí klub (a erb) s áčkem. „Ronov“ → Ronov nad Doubravou, „Zruč“ → Zruč nad Sázavou, „FK Čáslav (ženy)“ → Čáslav, „Sparta Kutná Hora (ženy)“ → Kutná Hora. Existující kluby Chotusice B, Paběnice B, Tupadly B se sloučí do áčka (logo Chotusic B se smaže), Malešov B a Čáslav B se přejmenují |
 | Tým | celé jméno z v0, kategorie: M → `men-a`/`men-b`/`men-c` podle koncovky, D → `u19`, Z → `u15` (rezerva `u15-b`), S → `old`, ženské týmy `women`; `logoUri` kopie z klubu |
-| Sezóna | ročník (hranice 30. 6.) × věková skupina, jen s mistrovskými zápasy; `hasPenalties: true` |
+| Sezóna | ročník (hranice 30. 6.) × věková skupina, jen s mistrovskými zápasy; `hasPenalties` jen u sezón, kde se hrál rozstřel (muži IV. třída 2014/15–2020/21) |
 | Soutěže | muži 2012–2013 a 2021–2026 „III. třída“, 2014–2020 „IV. třída“; žáci 2012, 2025, 2026 „5. liga - Starší žáci“; dorost 2026 „6. liga - Dorost“ |
 | Přáteláky | patří do sezóny vlastního týmu v tom ročníku; kde žádná není (stará garda 2012/13 a 2014/15, žáci 2017/18), zmigrují se bez sezóny |
 | Chybná data | zápasy 1010, 1021, 1037 se přeskočí (duplicity 1052, 1053, 1055 s týmem žáků Štrampouchu místo mužů) |
