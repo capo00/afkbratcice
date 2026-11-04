@@ -159,12 +159,6 @@ Obránci to odpálí, brankář góly zachraňuje.</p>
 Vzhůru, vzhůru, vzhůru do Zálesí.</b></p>`,
 
 
-  treninky: `<uu5string/>
-<p>Muži trénují <b>v pátek od 17:00</b> na hřišti AFK Bratčice v Zálesí.</p>
-<p>Termíny tréninků mládeže se domlouvají podle rozlosování a hlásí je trenér — sledujte
-proužek s upozorněním nad stránkou a
-<a href="https://www.facebook.com/afkbratcice" target="_blank">Facebook klubu</a>.</p>`,
-
   "tymove-fotky": `<uu5string/>
 <p>Chronologie mužstev od sezóny 1943/1944. U starších fotek se dochovala jen jména,
 u novějších i to, co se ten rok povedlo.</p>

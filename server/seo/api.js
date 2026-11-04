@@ -14,7 +14,7 @@ import { buildCalendar } from "../services/ical.js";
 // Obsahové stránky jsou natvrdo v klientu (`client/src/content/pages.js`) a serveru se
 // odsud nedají naimportovat -- do nasazení jde build v `public/`, ne zdrojáky. Duplicitní
 // seznam je tady schválně: chybějící kód stojí jeden řádek v sitemapě, nic víc.
-const CONTENT_PAGE_LIST = ["historie", "hymna", "vybor", "treninky", "tymove-fotky", "kontakt"];
+const CONTENT_PAGE_LIST = ["historie", "hymna", "vybor", "tymove-fotky", "kontakt"];
 
 const RSS_ITEM_COUNT = 20;
 

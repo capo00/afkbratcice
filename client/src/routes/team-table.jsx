@@ -9,8 +9,6 @@ import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 import { SeasonLink } from "../components/route-link.jsx";
 
-const { theme } = Config;
-
 // Tabulka soutěže mužstva.
 //
 // `stats/getTable` bere `seasonId`, nebo si sezónu **dohledá podle týmu** v aktuálním
@@ -39,26 +37,19 @@ function Table({ teamId, seasonId }) {
         // Rozlišovat je nemá cenu — pro čtenáře je to v obou případech „zatím nic".
         <EmptyState lsi={lsi("team", "noTable")} icon="uugds-view-list" />
       ) : (
-        <>
-          {data?.season?.competition ? (
-            <Uu5Elements.Text
-              category="interface"
-              segment="content"
-              type="medium"
-              className={Config.Css.css({ display: "block", marginBlockEnd: 12, color: theme.color.mutedFg })}
-            >
+        <StandingsTable
+          table={table}
+          ownTeamId={teamId}
+          hasPenalties={Boolean(data?.season?.hasPenalties)}
+          seasonId={data?.season?.id}
+          header={
+            data?.season?.competition ? (
               <SeasonLink seasonId={data.season.id} colorScheme="building" significance="subdued">
                 {data.season.competition}
               </SeasonLink>
-            </Uu5Elements.Text>
-          ) : null}
-          <StandingsTable
-            table={table}
-            ownTeamId={teamId}
-            hasPenalties={Boolean(data?.season?.hasPenalties)}
-            seasonId={data?.season?.id}
-          />
-        </>
+            ) : null
+          }
+        />
       )}
     </Section>
   );

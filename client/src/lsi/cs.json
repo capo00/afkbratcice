@@ -388,7 +388,8 @@
     "losses": "P",
     "score": "Skóre",
     "points": "B",
-    "form": "Forma"
+    "form": "Forma",
+    "showFull": "Celá tabulka"
   },
   "team": {
     "season": "Sezóna",
@@ -467,7 +468,6 @@
       "historie": "Historie",
       "hymna": "Hymna",
       "vybor": "Výbor AFK",
-      "treninky": "Tréninky",
       "tymove-fotky": "Týmové fotky"
     }
   },

@@ -9,7 +9,7 @@ import teamDao from "./team/dao.js";
 // Co se v mapě nenajde, skončí na nejbližším seznamu, ne na 404.
 
 // Routy nové appky jsou **české a shodné s v0** (`/historie`, `/hymna`, `/vybor`,
-// `/treninky`, `/muzstva`, `/fotogalerie`, `/ke-stazeni`), takže se pro ně žádné pravidlo
+// `/muzstva`, `/fotogalerie`, `/ke-stazeni`), takže se pro ně žádné pravidlo
 // nepíše — adresa zůstává platná a SPA fallback ji obslouží sám. Zbývá jen to, kde se
 // adresa opravdu liší.
 const STATIC_REDIRECT = {
@@ -21,6 +21,8 @@ const STATIC_REDIRECT = {
   // ukáže odkaz do správy (client/src/tools/admin-hint.js).
   "/prihlaseni": "/admin/",
   "/zapomenute-heslo": "/login.html",
+  // Stránka tréninků zrušena 2026-11-04 (client/src/content/pages.js).
+  "/treninky": "/",
 };
 
 // Stránkování novinek: /home-2, /home-69, ...

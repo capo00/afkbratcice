@@ -99,26 +99,19 @@ const TablesSection = createVisualComponent({
           ) : (data?.table ?? []).length === 0 ? (
             <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-view-list" />
           ) : (
-            <>
-              {active.competition ? (
-                <Uu5Elements.Text
-                  category="interface"
-                  segment="content"
-                  type="medium"
-                  className={Config.Css.css({ display: "block", marginBlockEnd: 8, color: theme.color.mutedFg })}
-                >
+            <StandingsTable
+              table={data.table}
+              ownTeamIdList={active.ownTeamIdList}
+              hasPenalties={active.hasPenalties}
+              seasonId={active.seasonId}
+              header={
+                active.competition ? (
                   <SeasonLink seasonId={active.seasonId} colorScheme="building" significance="subdued">
                     {active.competition}
                   </SeasonLink>
-                </Uu5Elements.Text>
-              ) : null}
-              <StandingsTable
-                table={data.table}
-                ownTeamIdList={active.ownTeamIdList}
-                hasPenalties={active.hasPenalties}
-                seasonId={active.seasonId}
-              />
-            </>
+                ) : null
+              }
+            />
           )}
         </div>
 

@@ -27,13 +27,9 @@ const PAGES = {
     // `components/board.jsx`); do 2026-11 to byl text v `page-content.js`.
   },
 
-  treninky: {
-    name: "Tréninky",
-    desc: "Kdy a kde trénují jednotlivá mužstva.",
-    // v0 tabulka `trenink` končí rokem 2015, takže rozpis po mužstvech z čeho přepsat
-    // není. Jediný aktuální údaj je proužek „Upozornění" na v0 — a ten se sem nekopíruje
-    // podruhé, drží ho `appSettings.notice` a vykresluje rám nad každou stránkou.
-  },
+  // Stránka `treninky` (z v0) zrušena 2026-11-04: rozpis tréninků nikdo neudržuje,
+  // aktuální termíny jdou přes proužek `appSettings.notice`. Stará adresa vede na úvod
+  // (`server/legacy-redirect.js`).
 
   "tymove-fotky": {
     name: "Týmové fotky",

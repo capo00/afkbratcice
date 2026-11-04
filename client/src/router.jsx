@@ -26,8 +26,8 @@ const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
 //
 // **Adresy jsou české** (rozhodnuto 2026-09-06). Je to web českého klubu — a hlavně jsou
-// tím shodné s v0, takže `/muzstva`, `/fotogalerie`, `/historie`, `/hymna`, `/vybor`,
-// `/treninky` i `/ke-stazeni` sedí bez jediného přesměrování a co je naindexované ve
+// tím shodné s v0, takže `/muzstva`, `/fotogalerie`, `/historie`, `/hymna`, `/vybor`
+// i `/ke-stazeni` sedí bez jediného přesměrování a co je naindexované ve
 // vyhledávači, zůstane platné.
 //
 // Kanonická adresa úvodní stránky je **`/`, ne `/home`**: `server/legacy-redirect.js` posílá
