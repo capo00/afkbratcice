@@ -1,10 +1,16 @@
 import { Crud } from "caio-server";
 import dao from "./dao.js";
+import rosterDao from "../roster/dao.js";
 import personDao from "../person/dao.js";
 import { PersonCrud } from "../person/crud.js";
 import { personForIdentity, isPlayerHidden } from "../services/hidden-names.js";
 import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
 import { seasonRangeOf } from "../services/membership.js";
+import { withTeamList } from "../services/roster.js";
+
+// Hráč je **karta osoby jako hráče**: osoba, post, poznámka. Na id hráče stojí sestavy zápasů,
+// statistiky i stránka hráče, proto zůstává jeden záznam na osobu. Kdy byl v jakém týmu, je
+// soupiska (`afk_roster`, `roster/*`); `teamList` ve výstupu je z ní odvozený (services/roster.js).
 
 class PlayerCrud extends Crud {
   constructor() {
@@ -12,29 +18,46 @@ class PlayerCrud extends Crud {
   }
 
   /**
-   * Seznam i detail vrací vloženou osobu -- soupiska by jinak byla n+1 dotazů.
+   * Seznam i detail vrací vloženou osobu -- soupiska by jinak byla n+1 dotazů -- a odvozený
+   * `teamList`.
    *
    * Jména dětí (services/hidden-names.js): na soupisce týmu (`teamId`) rozhoduje ten tým,
-   * jinde otevřené členství hráče ve skrytém týmu.
+   * jinde otevřené působení hráče ve skrytém týmu.
    */
   async _withPerson(playerList, identity, { teamId } = {}) {
     const personIdList = [...new Set(playerList.map((p) => p.personId).filter(Boolean))];
-    const [persons, hiddenTeamIdSet] = await Promise.all([
+    const [withTeams, persons, hiddenTeamIdSet] = await Promise.all([
+      withTeamList(playerList),
       personIdList.length ? personDao.listByIdList(personIdList) : [],
       loadHiddenTeamIdSet(),
     ]);
-    return playerList.map((player) => {
+    return withTeams.map((player) => {
       const hidden = teamId ? hiddenTeamIdSet.has(teamId) : isPlayerHidden(player, hiddenTeamIdSet);
       const person = persons.find((x) => x.id === player.personId) ?? null;
       return { ...player, person: personForIdentity(PersonCrud.forIdentity(person, identity), identity, hidden) };
     });
   }
 
+  /** `teamId` = soupiska týmu (s `active` / `seasonId` v čase), jinak všichni hráči. */
   async list({ teamId, active, seasonId, idList, pageInfo } = {}, identity) {
     const range = seasonId ? await seasonRangeOf(seasonId) : undefined;
     if (range === null) return [];
-    const itemList = (await dao.listByFilter({ teamId, active, range, idList }, pageInfo)).map((i) => this._getData(i));
-    return this._withPerson(itemList, identity, { teamId });
+
+    let playerList;
+    if (idList) {
+      playerList = await dao.listByIdList(idList);
+    } else if (teamId) {
+      const rowList = await rosterDao.listByFilter({ teamId, active, range });
+      const playerIdList = [...new Set(rowList.map((r) => r.playerId))];
+      playerList = playerIdList.length ? await dao.listByIdList(playerIdList) : [];
+    } else {
+      playerList = await dao.find({}, pageInfo);
+    }
+    return this._withPerson(
+      playerList.map((i) => this._getData(i)),
+      identity,
+      { teamId },
+    );
   }
 
   async get(id, identity) {
@@ -58,25 +81,11 @@ class PlayerCrud extends Crud {
     return withPerson;
   }
 
-  /** Přidá členství v týmu; existující otevřené členství ve stejném týmu nechá být. */
-  async addTeam({ id, teamId, dateFrom = null }, identity) {
-    const current = await this._get(id);
-    const teamList = current.teamList ?? [];
-    // I "nic se nezměnilo" musí vrátit stejný tvar jako zápis, který proběhl.
-    if (teamList.some((t) => t.id === teamId && !t.dateTo)) {
-      const [withPerson] = await this._withPerson([this._getData(current)], identity);
-      return withPerson;
-    }
-    return this.update({ id, teamList: [...teamList, { id: teamId, dateFrom, dateTo: null }] }, identity);
-  }
-
-  /** Uzavře členství -- záznam se nemaže, aby zůstala historie soupisek. */
-  async endTeam({ id, teamId, dateTo = new Date().toISOString().slice(0, 10) }, identity) {
-    const current = await this._get(id);
-    const teamList = (current.teamList ?? []).map((t) =>
-      t.id === teamId && !t.dateTo ? { ...t, dateTo } : t,
-    );
-    return this.update({ id, teamList }, identity);
+  /** Se hráčem odchází i jeho soupiska -- záznam bez hráče by nikdo nepřečetl. */
+  async delete(id) {
+    const rowList = await rosterDao.listByFilter({ playerId: id });
+    await super.delete(id);
+    if (rowList.length) await rosterDao.deleteMany(rowList.map((r) => r.id));
   }
 }
 

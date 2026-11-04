@@ -8,7 +8,6 @@ import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
-import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
 
@@ -16,15 +15,23 @@ const { theme } = Config;
 //
 // **Jména mládeže sem nechodí ze serveru** (`appSettings.hideNamesAgeList`): u kategorií, kde
 // se jména skrývají, vrací API `person` bez `name` a `surname` komukoli bez role. Klient
-// tedy nic neschovává — jen musí umět dlaždici vykreslit bez jména, tedy číslem dresu
-// a postem. Kdyby se spoléhal na to, že jméno vždycky přijde, ukázal by u dětí prázdno.
+// tedy nic neschovává — jen musí umět dlaždici vykreslit bez jména: „Hráč“ a post. Kdyby
+// se spoléhal na to, že jméno vždycky přijde, ukázal by u dětí prázdno. (Číslo dresu, které
+// tu dřív stálo místo jména, se od 2026-11 neeviduje.)
 
-function playerName(player, isNameHidden) {
+function playerName(player) {
   const name = [player.person?.name, player.person?.surname].filter(Boolean).join(" ");
-  if (name) return name;
-  // Buď je jméno schované (mládež), nebo osoba u hráče chybí. Číslo dresu je jediná
-  // identifikace, kterou v obou případech máme.
-  return isNameHidden && player.number ? `#${player.number}` : null;
+  return name || null;
+}
+
+/** Iniciály do kruhu bez fotky („JN“), bez jména „?“. */
+function initialsOf(person) {
+  return (
+    [person?.name, person?.surname]
+      .map((part) => part?.trim()?.[0])
+      .filter(Boolean)
+      .join("") || "?"
+  );
 }
 
 // Dlaždice osoby na soupisce -- hráč i člen realizačního týmu (Caio 2026-10-28: trenér má
@@ -35,8 +42,8 @@ function PersonTile({ person, fallbackText, name, subtitle, onClick }) {
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 12 })}>
         {/* The portrait and its fallback are a `RichIcon` -- a circle with an image or text is
             exactly what it is for (`size="xxl"` = GDS major m, at least 60 px; Caio 2026-10-29).
-            A person without a photo is common, for youth even the rule, so the jersey number
-            or initials stand in. `text` must not be passed with `imageSrc` -- it would render
+            A person without a photo is common, for youth even the rule, so the initials (or
+            „?“ when the name is hidden) stand in. `text` must not be passed with `imageSrc` -- it would render
             over the photo. */}
         <Uu5Elements.RichIcon
           size="xxl"
@@ -61,44 +68,54 @@ function PersonTile({ person, fallbackText, name, subtitle, onClick }) {
   );
 }
 
-function PlayerTile({ player, isNameHidden }) {
+function PlayerTile({ player }) {
   const [, setRoute] = useRoute();
-  const name = playerName(player, isNameHidden);
+  const name = playerName(player);
 
   return (
     <PersonTile
       person={player.person}
-      fallbackText={String(player.number ?? "?")}
+      fallbackText={initialsOf(player.person)}
       name={name ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}
-      subtitle={
-        <>
-          {player.position ? <Lsi import={importLsi} path={["enum", "position", player.position]} /> : null}
-          {player.number && name ? ` · #${player.number}` : null}
-        </>
-      }
+      subtitle={player.position ? <Lsi import={importLsi} path={["enum", "position", player.position]} /> : null}
       onClick={() => setRoute("hrac", { id: player.id })}
     />
   );
 }
 
-// Trenér nemá číslo dresu ani detail, takže bez fotky iniciály a dlaždice se nerozklikává.
-// Funkce je u působení v **tomhle** týmu (`teamList[].role`) -- jinde může mít jinou.
-function CoachTile({ coach, teamId }) {
-  const role = coach.teamList?.find((m) => m.id === teamId)?.role ?? "assistant";
+// Trenér nemá detail, takže dlaždice se nerozklikává; bez fotky iniciály.
+// Záznam vedení je jedna funkce v tomhle týmu (`role`), viz `staffOf`.
+function CoachTile({ coach }) {
+  const role = coach.role ?? "assistant";
   const name = [coach.person?.name, coach.person?.surname].filter(Boolean).join(" ");
-  const initials = [coach.person?.name, coach.person?.surname]
-    .map((part) => part?.trim()?.[0])
-    .filter(Boolean)
-    .join("");
 
   return (
     <PersonTile
       person={coach.person}
-      fallbackText={initials || "?"}
+      fallbackText={initialsOf(coach.person)}
       name={name || "—"}
       subtitle={<Lsi import={importLsi} path={["enum", "teamRole", role]} />}
     />
   );
+}
+
+/**
+ * Realizační tým ze záznamů vedení. Záznam je jedna funkce v jednom období, takže kdo byl
+ * v sezóně asistentem a pak trenérem, má dva -- na soupisce je jednou, s funkcí, kterou
+ * měl naposled (trvající, jinak s nejpozdějším koncem). Pořadí podle číselníku: trenér první.
+ */
+function staffOf(itemList) {
+  const recency = (m) => `${m.dateTo ?? "9999-12-31"}|${m.dateFrom ?? ""}`;
+  const byPerson = new Map();
+  for (const m of itemList ?? []) {
+    const other = byPerson.get(m.personId);
+    if (!other || recency(m) > recency(other)) byPerson.set(m.personId, m);
+  }
+  const roleOrder = (m) => {
+    const i = Config.TEAM_ROLE_LIST.indexOf(m.role);
+    return i < 0 ? Infinity : i;
+  };
+  return [...byPerson.values()].sort((a, b) => roleOrder(a) - roleOrder(b));
 }
 
 // Skupina soupisky: eyebrow nadpis a mřížka dlaždic.
@@ -115,8 +132,6 @@ function RosterGroup({ title, children }) {
 // s obdobím ročníku). U běžící sezóny jen ti, kdo v týmu jsou dnes -- kdo v zimě odešel,
 // na aktuální soupisce nemá co dělat.
 function Roster({ teamId, seasonId, category }) {
-  const { isNameHidden } = useApp();
-  const nameHidden = isNameHidden(category?.age);
   const period = !seasonId || seasonId === category?.seasonId ? { active: true } : { seasonId };
 
   const dataObject = useDataObject(
@@ -163,7 +178,7 @@ function Roster({ teamId, seasonId, category }) {
     );
   }
 
-  const coachList = data?.coachList ?? [];
+  const coachList = staffOf(data?.coachList);
 
   // Realizační tým je poslední skupina soupisky, stejné dlaždice jako hráči (Caio 2026-10-28).
   return (
@@ -188,14 +203,14 @@ function Roster({ teamId, seasonId, category }) {
                 }
               >
                 {group.list.map((player) => (
-                  <PlayerTile key={player.id} player={player} isNameHidden={nameHidden} />
+                  <PlayerTile key={player.id} player={player} />
                 ))}
               </RosterGroup>
             ))}
             {coachList.length ? (
               <RosterGroup title={<Lsi import={importLsi} path={["team", "staff"]} />}>
                 {coachList.map((coach) => (
-                  <CoachTile key={coach.id} coach={coach} teamId={teamId} />
+                  <CoachTile key={coach.id} coach={coach} />
                 ))}
               </RosterGroup>
             ) : null}

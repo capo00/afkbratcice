@@ -49,7 +49,7 @@
       },
       "players": {
         "header": "Hráči",
-        "desc": "Soupisky, čísla dresů a posty"
+        "desc": "Soupisky týmů a karty hráčů"
       },
       "coaches": {
         "header": "Trenéři a výbor",
@@ -91,12 +91,11 @@
       "email": "E-mail",
       "phone": "Telefon",
       "person": "Osoba",
-      "number": "Číslo",
+      "player": "Hráč",
       "position": "Post",
       "role": "Funkce",
-      "teamList": "Týmů",
-      "teamRoleList": "V týmech",
-      "boardList": "Ve výboru AFK",
+      "activeTeamList": "Teď v týmech",
+      "period": "Období",
       "competition": "Soutěž",
       "yearFrom": "Ročník",
       "hasPenalties": "Rozstřel",
@@ -135,10 +134,16 @@
       "teamCount": "Týmů"
     },
     "membership": {
-      "add": "Přidat tým",
-      "addBoard": "Přidat funkci ve výboru",
       "showContact": "Kontakt na webu",
-      "hint": "Prázdné datum konce znamená aktivní členství."
+      "dateFrom": "Od",
+      "dateTo": "Do",
+      "ongoing": "dosud"
+    },
+    "management": {
+      "board": "Výbor"
+    },
+    "players": {
+      "cards": "Karty hráčů"
     },
     "sectionList": {
       "section": "Sekce ${index}",
@@ -163,6 +168,8 @@
       "homeGoalsHalf": "Poločas domácí",
       "guestGoalsHalf": "Poločas hosté",
       "penaltyWinner": "Vítěz rozstřelu",
+      "moreEdit": "Další úpravy zápasu",
+      "lessEdit": "Skrýt další úpravy",
       "player": "Hráč",
       "position": "Post",
       "goals": "Góly",
@@ -481,6 +488,13 @@
     "afkbratcice/category/invalidCode": "Kód smí obsahovat jen malá písmena, číslice a pomlčky.",
     "afkbratcice/category/nameRequired": "Vyplňte název kategorie.",
     "afkbratcice/category/invalidAge": "Vyberte věkovou skupinu.",
-    "afkbratcice/category/ageInUse": "Věkovou skupinu nejde změnit, kategorii používají týmy."
+    "afkbratcice/category/ageInUse": "Věkovou skupinu nejde změnit, kategorii používají týmy.",
+    "afkbratcice/management/overlap": "Tato osoba už má tuhle funkci v období, které se s tímto překrývá. Upravte nebo ukončete ten záznam.",
+    "afkbratcice/management/invalidRole": "Funkce nepatří k tomuto týmu, resp. k výboru.",
+    "afkbratcice/management/invalidPeriod": "Začátek funkce je po jejím konci.",
+    "afkbratcice/management/personRequired": "Vyberte osobu.",
+    "afkbratcice/roster/overlap": "Tento hráč už je v tomto týmu v období, které se s tímto překrývá. Upravte nebo ukončete ten záznam.",
+    "afkbratcice/roster/unknownPlayer": "Vyberte hráče.",
+    "afkbratcice/roster/invalidPeriod": "Začátek je po konci."
   }
 }

@@ -126,20 +126,23 @@ erDiagram
         string   id PK
         string   personId FK "unique"
         enum     position "primární post"
-        int      number "číslo dresu"
-        object[] teamList "členství v čase, viz TEAM_MEMBERSHIP"
         string   note
+    }
+    ROSTER {
+        string   id PK
+        string   playerId FK
+        string   teamId FK
+        date     dateFrom "null = neznámý"
+        date     dateTo "null = trvá"
     }
     MANAGEMENT {
         string   id PK
-        string   personId FK "unique"
-        object[] teamList "viz TEAM_MEMBERSHIP + role coach|assistant|manager"
-        object[] boardList "výbor AFK: role, dateFrom, dateTo, showContact"
-    }
-    TEAM_MEMBERSHIP {
-        string id FK "teamId"
-        date   dateFrom
-        date   dateTo "null = aktivní"
+        string   personId FK
+        string   teamId FK "null = výbor AFK"
+        enum     role "TEAM_ROLE | BOARD_ROLE"
+        date     dateFrom "null = neznámý"
+        date     dateTo "null = trvá"
+        boolean  showContact "jen výbor"
     }
 
     TEAM   ||--o{ SEASON          : "teamList[]"
@@ -148,15 +151,14 @@ erDiagram
     MATCH  ||--o{ MATCH_PLAYER    : "playerList[] (vnořené)"
     PLAYER ||--o{ MATCH_PLAYER    : "playerId"
     PERSON ||--o| PLAYER          : "personId"
-    PERSON ||--o| MANAGEMENT      : "personId"
-    PLAYER ||--o{ TEAM_MEMBERSHIP : "teamList[] (vnořené)"
-    MANAGEMENT ||--o{ TEAM_MEMBERSHIP : "teamList[] (vnořené)"
-    TEAM   ||--o{ TEAM_MEMBERSHIP : "id"
+    PERSON ||--o{ MANAGEMENT      : "personId"
+    PLAYER ||--o{ ROSTER          : "playerId"
+    TEAM   ||--o{ ROSTER          : "teamId"
+    TEAM   ||--o{ MANAGEMENT      : "teamId"
 ```
 
-`MATCH_PLAYER` a `TEAM_MEMBERSHIP` **nejsou kolekce** — jsou to vnořené objekty
-v `match.playerList`, resp. `player.teamList` / `management.teamList`. V diagramu stojí zvlášť,
-protože bez nich není vidět, co sestava a členství nesou.
+`MATCH_PLAYER` **není kolekce** — je to vnořený objekt v `match.playerList`. V diagramu stojí
+zvlášť, protože bez něj není vidět, co sestava nese.
 
 ### 1.3 Obsah, média a systém
 
@@ -256,8 +258,9 @@ erDiagram
 | `afk_season` | v1 | Ročník soutěže (soutěž + rok + kategorie + účastníci) |
 | `afk_match` | v1 | Zápas včetně výsledku a sestavy |
 | `afk_person` | nová | Osoba (jméno, kontakt) – sdílená pro hráče i trenéry |
-| `afk_player` | nová | Hráčská role osoby, členství v týmech v čase |
-| `afk_management` | nová (2026-11, dřív `afk_coach`) | Vedení: působení osoby v týmech (trenér, asistent, vedoucí) a ve výboru AFK |
+| `afk_player` | nová | Karta osoby jako hráče (post, poznámka) |
+| `afk_roster` | nová (2026-11, dřív `player.teamList`) | Soupiska: hráč v týmu v období, záznam na působení |
+| `afk_management` | nová (2026-11, dřív `afk_coach`) | Vedení: funkce osoby v týmu (trenér, asistent, vedoucí) nebo ve výboru AFK v čase, záznam na funkci |
 | `afk_article` | nová | Novinka; obsah je `sectionList[].content` (`uu5String`) |
 | `afk_gallery` | nová | Fotoalbum |
 | `page` | **nevzniká** | Obsahová stránka — zatím natvrdo v klientu, čeká na ECC |
@@ -516,66 +519,97 @@ selhalo. Pravidla a proč jsou takhle úzká: [api.md](./api.md), sekce 2.5.1.
 
 ## 6. `afk_player`
 
+**Karta osoby jako hráče.** Na její `id` stojí sestavy zápasů (`match.playerList[].playerId`),
+statistiky a stránka hráče, proto je jedna na osobu. V jakém týmu kdy hrál, je soupiska
+(6.1). Číslo dresu se od 2026-11 neeviduje (`number` i `teamList` odstranil
+`tools/migrate-player-roster.js`).
+
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
 | `id` | string | ✓ | |
 | `personId` | string | ✓ | FK `person` |
 | `position` | enum | | Primární post: `GK` \| `DF` \| `MF` \| `FW` |
-| `number` | number | | Číslo dresu |
-| `teamList` | object[] | ✓ | Členství v týmech v čase |
 | `note` | string | | |
 
-**`teamList[]`**: `{ id: <teamId>, dateFrom: "YYYY-MM-DD", dateTo: "YYYY-MM-DD" | null }`
-– `dateTo: null` znamená aktivní členství.
+API vrací u hráče i **odvozený `teamList`** `[{ id: teamId, dateFrom, dateTo }]` ze soupisky
+(`server/services/roster.js`) -- detail zápasu, sestava, stránka hráče a skrývání jmen dětí ho
+čtou jako dřív.
 
 **Indexy**
 
 ```
 { personId: 1 }        unique
-{ "teamList.id": 1 }
 ```
 
-Aktuální soupiska týmu = `{ "teamList": { $elemMatch: { id: teamId, $or: [ { dateTo: null }, { dateTo: { $gte: dnes } } ] } } }`.
+### 6.1 `afk_roster` (soupiska, od 2026-11)
+
+**Jeden záznam = jeden hráč v jednom týmu v jednom období.**
+
+| Pole | Typ | Povinné | Popis |
+|---|---|---|---|
+| `id` | string | ✓ | |
+| `playerId` | string | ✓ | FK `player` |
+| `teamId` | string | ✓ | FK `team` |
+| `dateFrom` | `YYYY-MM-DD` \| null | | `null` = začátek neznáme (import z v0) |
+| `dateTo` | `YYYY-MM-DD` \| null | | `null` = trvá |
+
+**Pravidla** (`server/roster/crud.js`): týž hráč nesmí být v témž týmu ve dvou překrývajících
+se obdobích (`roster/overlap`); `dateFrom` není po `dateTo` (`roster/invalidPeriod`); tým se
+u záznamu nemění. Smazání hráče smaže i jeho soupisku.
+
+**Aktuální soupiska týmu** = záznamy s `teamId`, které trvají dnes; **soupiska sezóny** =
+záznamy, které se překrývají s obdobím ročníku (`server/services/membership.js`). Hráč patří
+do sestavy zápasu, když byl v den zápasu na soupisce domácích nebo hostů.
+
+**Indexy**
+
+```
+{ teamId: 1 }
+{ playerId: 1 }
+```
 
 ---
 
 ## 7. `afk_management`
 
-Vedení klubu: trenéři, asistenti a vedoucí týmů a výbor AFK. **Jeden záznam na osobu**
-(2026-11; do té doby `afk_coach`, záznam na dvojici osoba + funkce, výbor jako funkce
-`board` bez období). Kdo trénuje dva týmy a sedí ve výboru, má jeden řádek se dvěma
-položkami `teamList` a jednou `boardList`.
+Vedení klubu: trenéři, asistenti a vedoucí týmů a výbor AFK. **Jeden záznam = jedna osoba
+v jedné funkci v jednom období** (od 2026-11; v0.7.0 měla záznam na osobu s vnořenými
+`teamList`/`boardList`, ještě dřív `afk_coach`). Kdo trénuje dva týmy a sedí ve výboru, má
+tři záznamy; kdo byl asistentem a pak trenérem, dva.
 
 | Pole | Typ | Povinné | Popis |
 |---|---|---|---|
 | `id` | string | ✓ | |
 | `personId` | string | ✓ | FK `person` |
-| `teamList` | object[] | | Působení v týmech v čase s funkcí |
-| `boardList` | object[] | | Funkce ve výboru AFK v čase |
+| `teamId` | string \| null | | FK `team` (náš tým); **`null` = výbor AFK** |
+| `role` | enum | ✓ | `TEAM_ROLE` u týmu, `BOARD_ROLE` u výboru |
+| `dateFrom` | `YYYY-MM-DD` \| null | | `null` = začátek neznáme (členové převzatí ze stránky `/vybor`) |
+| `dateTo` | `YYYY-MM-DD` \| null | | `null` = trvá |
+| `showContact` | boolean | | jen výbor: telefon a e-mail osoby na stránce `/vybor` |
 
-Aspoň jeden ze seznamů je neprázdný (`management/create`, `update`).
+**Pravidla** (`server/management/crud.js`):
 
-**`teamList[]`**: `{ id: <teamId>, role: TEAM_ROLE, dateFrom, dateTo | null }` — jako
-`player.teamList`, jen s funkcí.
+- funkce patří k týmu, resp. výboru (`management/invalidRole`);
+- `dateFrom` není po `dateTo` (`management/invalidPeriod`);
+- **stejná osoba nesmí mít stejnou funkci ve stejném týmu/výboru ve dvou překrývajících se
+  obdobích** (`management/overlap`). Různé osoby ve stejné funkci naráz smějí (členové výboru,
+  dva asistenti);
+- tým se u záznamu nemění (`update` `teamId` nebere) -- jiný tým je jiná funkce;
+- `showContact` má jen výbor; `management/list` pak vrátí `contact: { email, phone }`, dokud
+  funkce trvá. Jinak jsou kontakty neveřejné jako u každé osoby.
 
-**`boardList[]`**: `{ role: BOARD_ROLE, dateFrom | null, dateTo | null, showContact }` — výbor
-je klubový, tým nemá. `dateFrom: null` = začátek neznáme (členové převzatí ze stránky
-`/vybor`). `showContact: true` = telefon a e-mail osoby se ukážou na stránce `/vybor`
-(`management/list` je vrátí jako `contact`, dokud funkce trvá); jinak jsou neveřejné jako
-u každé osoby.
-
-**Sezóna** (soupiska, `seasonId` v `list`) = působení, které se překrývá s obdobím ročníku
+**Sezóna** (soupiska, `seasonId` v `list`) = funkce, která se překrývá s obdobím ročníku
 od 1. 8. `yearFrom` do 31. 7. dalšího roku (`server/services/membership.js`), stejně jako u hráčů.
 
 **Indexy**
 
 ```
-{ personId: 1 }       unique
-{ "teamList.id": 1 }
-{ "boardList.role": 1 }
+{ teamId: 1, role: 1 }
+{ personId: 1 }
 ```
 
-Převod z `afk_coach`: `tools/migrate-management.js` (`headCoach` → `coach`).
+Převody: z `afk_coach` `tools/migrate-management.js` (`headCoach` → `coach`), ze záznamu na
+osobu `tools/migrate-management-flat.js` (zahodí i dřívější unique index `personId_1`).
 
 ---
 
@@ -838,8 +872,8 @@ ve stejném sloupci, což znemožňovalo evidovat post střídajícího hráče)
 
 **`MATCH_STATE`**: `planned`, `played`, `postponed`, `canceled`
 **`ARTICLE_STATE`**: `draft`, `published`, `archived`
-**`TEAM_ROLE`**: `coach`, `assistant`, `manager` – funkce v týmu (`management.teamList[].role`)
-**`BOARD_ROLE`**: `chairman`, `viceChairman`, `secretary`, `member` – funkce ve výboru AFK (`management.boardList[].role`)
+**`TEAM_ROLE`**: `coach`, `assistant`, `manager` – funkce v týmu (`management.role` s `teamId`)
+**`BOARD_ROLE`**: `chairman`, `viceChairman`, `secretary`, `member` – funkce ve výboru AFK (`management.role` bez `teamId`)
 **`GALLERY_CATEGORY`**: `match`, `training`, `fans`, `youth`, `club` – filtr nad fotogalerií
 (z předlohy: `ZÁPASY`, `TRÉNINK`, `FANOUŠCI`, `MLÁDEŽ`, `KLUB`)
 **`PROFILE`**: `members`, `teamEditor`, `matchEditor`, `newsEditor`, `galleryEditor`,

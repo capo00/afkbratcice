@@ -37,8 +37,9 @@ const EntitySelect = createVisualComponent({
   uu5Tag: Config.TAG + "EntitySelect",
 
   // `valueKey`: co se ukládá -- `id` (výchozí), nebo jiný klíč entity (kategorie se
-  // odkazují kódem, `afk_category.code`).
-  render({ useCase, dtoIn, getLabel, valueKey = "id", ...props }) {
+  // odkazují kódem, `afk_category.code`). `searchable`: výběr s hledáním (`FormTextSelect`)
+  // pro dlouhé seznamy -- hráčů jsou stovky; popisek pak musí být řetězec.
+  render({ useCase, dtoIn, getLabel, valueKey = "id", searchable = false, ...props }) {
     // `getLabel(item, app)`: popisek může sáhnout do app-contextu (kategorie týmu).
     const app = useApp();
     const { state, data } = useDataObject(
@@ -59,7 +60,8 @@ const EntitySelect = createVisualComponent({
     if (state === "pendingNoData") {
       return <Uu5Forms.Select label={props.label} className={props.className} required={props.required} pending disabled />;
     }
-    return <Uu5Forms.FormSelect {...props} itemList={itemList} />;
+    const Select = searchable ? Uu5Forms.FormTextSelect : Uu5Forms.FormSelect;
+    return <Select {...props} itemList={itemList} />;
   },
 });
 

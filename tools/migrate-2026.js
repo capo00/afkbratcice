@@ -30,6 +30,7 @@ import seasonDao from "../server/season/dao.js";
 import matchDao from "../server/match/dao.js";
 import personDao from "../server/person/dao.js";
 import playerDao from "../server/player/dao.js";
+import rosterDao from "../server/roster/dao.js";
 import managementDao from "../server/management/dao.js";
 import articleCrud from "../server/article/crud.js";
 
@@ -138,7 +139,7 @@ const migrationMapDao = new (class extends Dao {
   createIndexes() { return this.createIndex({ entity: 1, v0Id: 1 }, { unique: true }); }
 })();
 
-const stat = { team: [0, 0], season: [0, 0], match: [0, 0], person: [0, 0], player: [0, 0], management: [0, 0], article: [0, 0] };
+const stat = { team: [0, 0], season: [0, 0], match: [0, 0], person: [0, 0], player: [0, 0], roster: [0, 0], management: [0, 0], article: [0, 0] };
 const count = (entity, created) => stat[entity][created ? 0 : 1]++;
 
 /** Založí, nebo aktualizuje podle přirozeného klíče. Vrací uložený dokument. */
@@ -273,6 +274,7 @@ if (RESET && !DRY) {
     "afk_match",
     "afk_person",
     "afk_player",
+    "afk_roster",
     "afk_management",
     "afk_gallery",
     "afk_article",
@@ -371,11 +373,16 @@ for (const h of squad) {
     {
       personId: person.id,
       ...(h.post ? { position: POSITION_BY_FORMACE[h.post] } : null),
-      // `dateFrom` v0 neeviduje; `dateTo: null` = aktivní členství.
-      teamList: [{ id: teamId, dateFrom: null, dateTo: h.aktivni === 1 ? null : `${YEAR_FROM}-06-30` }],
     },
   );
   playerIdByLogin[h.login] = player.id;
+  // Soupiska (`afk_roster`): `dateFrom` v0 neeviduje; `dateTo: null` = aktivní.
+  const rosterKey = { playerId: player.id, teamId };
+  await upsert(rosterDao, "roster", rosterKey, {
+    ...rosterKey,
+    dateFrom: null,
+    dateTo: h.aktivni === 1 ? null : `${YEAR_FROM}-06-30`,
+  });
   await remember("player", h.login, player.id);
 }
 
@@ -394,12 +401,9 @@ for (const c of v0Coaches.filter((c) => !c.do && c.tym === "M")) {
     { name: h.jmeno, surname: h.prijmeni },
     { name: h.jmeno, surname: h.prijmeni, ...(h.mail ? { email: h.mail } : null) },
   );
-  await upsert(
-    managementDao,
-    "management",
-    { personId: person.id },
-    { personId: person.id, teamList: [{ id: teamIdByV0[1], role: "coach", dateFrom: c.od, dateTo: null }] },
-  );
+  // Záznam na funkci (osoba, tým, funkce, od, do), design/data-model.md, sekce 7.
+  const key = { personId: person.id, teamId: teamIdByV0[1], role: "coach", dateFrom: c.od };
+  await upsert(managementDao, "management", key, { ...key, dateTo: null, showContact: false });
 }
 
 // --- 5. zápasy -----------------------------------------------------------------------

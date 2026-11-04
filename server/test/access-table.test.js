@@ -9,6 +9,7 @@ import matchApi from "../match/api.js";
 import statsApi from "../stats/api.js";
 import personApi from "../person/api.js";
 import playerApi from "../player/api.js";
+import rosterApi from "../roster/api.js";
 import managementApi from "../management/api.js";
 import articleApi from "../article/api.js";
 import galleryApi from "../gallery/api.js";
@@ -17,7 +18,7 @@ import appConfigApi from "../app-config/api.js";
 import seoApi from "../seo/api.js";
 import matchDao from "../match/dao.js";
 import managementDao from "../management/dao.js";
-import playerDao from "../player/dao.js";
+import rosterDao from "../roster/dao.js";
 import matchCrud from "../match/crud.js";
 import articleCrud from "../article/crud.js";
 import { PersonCrud } from "../person/crud.js";
@@ -36,6 +37,7 @@ const MATCH_ID = "65b000000000000000000001";
 const COACH_ID = "65c000000000000000000001";
 const BOARD_ID = "65c000000000000000000002";
 const PLAYER_ID = "65d000000000000000000001";
+const ROSTER_ID = "65d000000000000000000002";
 const MISSING_ID = "65e000000000000000000001";
 
 const TE = Config.ROLE.TEAM_EDITOR;
@@ -62,18 +64,20 @@ function identityOf(name) {
 
 const api = {
   ...clubApi, ...categoryApi, ...teamApi, ...seasonApi, ...matchApi, ...statsApi, ...personApi,
-  ...playerApi, ...managementApi, ...articleApi, ...galleryApi, ...fileApi, ...appConfigApi, ...seoApi,
+  ...playerApi, ...rosterApi, ...managementApi, ...articleApi, ...galleryApi, ...fileApi, ...appConfigApi, ...seoApi,
 };
 
 // The records the scoped `auth` functions look up: a match of A at home against B, a coach
-// of A and B, a coach of A who also sits on the board, a player of A.
+// of A, a board member, a player of A (one roster row).
 matchDao.get = async (id) => (id === MATCH_ID ? { id, homeTeamId: TEAM_A, guestTeamId: TEAM_B } : null);
 managementDao.get = async (id) => {
-  if (id === COACH_ID) return { id, teamList: [{ id: TEAM_A, role: "coach" }, { id: TEAM_B, role: "assistant" }] };
-  if (id === BOARD_ID) return { id, teamList: [{ id: TEAM_A, role: "coach" }], boardList: [{ role: "member" }] };
+  if (id === COACH_ID) return { id, teamId: TEAM_A, role: "coach" };
+  if (id === BOARD_ID) return { id, teamId: null, role: "member" };
   return null;
 };
-playerDao.get = async (id) => (id === PLAYER_ID ? { id, teamList: [{ id: TEAM_A }] } : null);
+rosterDao.get = async (id) => (id === ROSTER_ID ? { id, playerId: PLAYER_ID, teamId: TEAM_A } : null);
+rosterDao.listByFilter = async ({ playerId } = {}) =>
+  playerId === PLAYER_ID ? [{ id: ROSTER_ID, playerId: PLAYER_ID, teamId: TEAM_A }] : [];
 
 // dtoIn per row; a row `uc#variant` runs use case `uc` with another dtoIn.
 const dtoInMap = {
@@ -85,18 +89,20 @@ const dtoInMap = {
   "match/update#missing": { id: MISSING_ID },
   "match/setResult": { id: MATCH_ID, homeGoals: 1, guestGoals: 0 },
   "match/setLineup": { id: MATCH_ID, playerList: [] },
-  "management/create": { teamList: [{ id: TEAM_A, role: "coach" }] },
-  "management/create#twoTeams": { teamList: [{ id: TEAM_A, role: "coach" }, { id: TEAM_B, role: "coach" }] },
-  "management/create#board": { teamList: [{ id: TEAM_A, role: "coach" }], boardList: [{ role: "member" }] },
+  "management/create": { teamId: TEAM_A, role: "coach" },
+  "management/create#board": { role: "member" },
   "management/update": { id: COACH_ID },
-  "management/update#narrowed": { id: COACH_ID, teamList: [{ id: TEAM_A, role: "coach" }] },
-  "management/update#board": { id: BOARD_ID, teamList: [{ id: TEAM_A, role: "coach" }] },
+  "management/update#board": { id: BOARD_ID },
   "management/delete": { id: COACH_ID },
-  "player/create": { teamList: [{ id: TEAM_A }] },
+  "management/delete#board": { id: BOARD_ID },
+  "player/create": { personId: PLAYER_ID },
   "player/update": { id: PLAYER_ID },
   "player/update#missing": { id: MISSING_ID },
-  "player/addTeam": { id: PLAYER_ID, teamId: TEAM_A },
-  "player/endTeam": { id: PLAYER_ID, teamId: TEAM_B },
+  "roster/create": { playerId: PLAYER_ID, teamId: TEAM_A },
+  "roster/create#foreign": { playerId: PLAYER_ID, teamId: TEAM_C },
+  "roster/update": { id: ROSTER_ID },
+  "roster/update#missing": { id: MISSING_ID },
+  "roster/delete": { id: ROSTER_ID },
 };
 
 const ADMIN = ["authorities"];
@@ -143,13 +149,12 @@ const expected = {
   // "all": every team of the record has to be the editor's -- the stored ones too, so an
   // editor of A cannot narrow a record of A and B down to A; the board is the club's, CONTENT only
   "management/create": [...EDITORS_OF_A, ...CONTENT],
-  "management/create#twoTeams": ["editorAB", ...CONTENT],
   "management/create#board": CONTENT,
-  "management/delete": ["editorAB", ...CONTENT],
+  "management/delete": [...EDITORS_OF_A, ...CONTENT],
+  "management/delete#board": CONTENT,
   "management/get": "public",
   "management/list": "public",
-  "management/update": ["editorAB", ...CONTENT],
-  "management/update#narrowed": ["editorAB", ...CONTENT],
+  "management/update": [...EDITORS_OF_A, ...CONTENT],
   "management/update#board": CONTENT,
   "match/create": [...EDITORS_OF_A, "editorC", ...MATCH],
   "match/create#withoutA": ["editorAB", "editorC", ...MATCH],
@@ -170,14 +175,20 @@ const expected = {
   "person/linkIdentity": ADMIN,
   "person/list": [...ANY_TEAM_EDITOR, ...CONTENT],
   "person/update": CONTENT,
-  "player/addTeam": [...EDITORS_OF_A, ...CONTENT],
-  "player/create": [...EDITORS_OF_A, ...CONTENT],
+  // Karta hráče týmu nepatří -- založit ji smí kterýkoli editor týmu, jako osobu.
+  "player/create": [...ANY_TEAM_EDITOR, ...CONTENT],
   "player/delete": CONTENT,
-  "player/endTeam": ["editorAB", ...CONTENT],
   "player/get": "public",
   "player/list": "public",
   "player/update": [...EDITORS_OF_A, ...CONTENT],
   "player/update#missing": CONTENT,
+  "roster/create": [...EDITORS_OF_A, ...CONTENT],
+  "roster/create#foreign": ["editorC", ...CONTENT],
+  "roster/delete": [...EDITORS_OF_A, ...CONTENT],
+  "roster/get": "public",
+  "roster/list": "public",
+  "roster/update": [...EDITORS_OF_A, ...CONTENT],
+  "roster/update#missing": CONTENT,
   "rss": "public",
   "season/create": CONTENT,
   "season/delete": CONTENT,

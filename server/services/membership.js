@@ -2,9 +2,9 @@ import Config from "../config.js";
 import seasonDao from "../season/dao.js";
 
 // Členství v čase (`{ dateFrom, dateTo }`, data `YYYY-MM-DD`, `dateTo: null` = trvá) mají
-// hráči v týmech a vedení v týmech i ve výboru. Tady je jediné místo, které z nich skládá
-// Mongo podmínku pro `$elemMatch` -- „aktivní dnes“ a „v sezóně“ jsou totéž překrytí období,
-// jen s jiným intervalem.
+// hráči v týmech (`$elemMatch` nad `teamList`) a vedení (funkce je přímo záznam). Tady je
+// jediné místo, které z nich skládá Mongo podmínku -- „aktivní dnes“ a „v sezóně“ jsou totéž
+// překrytí období, jen s jiným intervalem.
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -59,4 +59,12 @@ function isActive(membership, day = today()) {
   return (!membership.dateFrom || membership.dateFrom <= day) && (!membership.dateTo || membership.dateTo >= day);
 }
 
-export { seasonRange, seasonRangeOf, membershipCondition, isActive };
+/**
+ * Překrývají se dvě období (aspoň jeden společný den)? Chybějící začátek = „odjakživa“,
+ * chybějící konec = „trvá“ -- jako v `overlapCondition`.
+ */
+function overlaps(a, b) {
+  return (!a.dateFrom || !b.dateTo || a.dateFrom <= b.dateTo) && (!a.dateTo || !b.dateFrom || a.dateTo >= b.dateFrom);
+}
+
+export { seasonRange, seasonRangeOf, membershipCondition, isActive, overlaps };

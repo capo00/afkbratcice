@@ -28,10 +28,9 @@ const COLUMN_LIST = [
   { code: "redCards", numeric: true },
 ];
 
+// Bez jména (mládež, hráč bez osoby) volající ukáže „Hráč“.
 function playerLabel(row) {
-  const name = [row.person?.name, row.person?.surname].filter(Boolean).join(" ");
-  if (name) return name;
-  return row.player?.number ? `#${row.player.number}` : null;
+  return [row.person?.name, row.person?.surname].filter(Boolean).join(" ") || null;
 }
 
 function Stats({ teamId, seasonId }) {

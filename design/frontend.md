@@ -188,8 +188,8 @@ a `withRoute` guard nemohly rozejít.
 | `admin/seasons` | CRUD sezón, přiřazení týmů, `hasPenalties` |
 | `admin/matches` | CRUD zápasů, hromadné vytvoření, zápis výsledku a sestavy |
 | `admin/persons` | CRUD osob |
-| `admin/players` | CRUD hráčů, členství v týmech |
-| `admin/coaches` | CRUD vedení (`management`): trenéři týmů a výbor |
+| `admin/players` | Hráči: záložka za každý náš tým se soupiskou (`roster`: hráč, post, období; aktuální nahoře; filtry hráč / post / období) a *Karty hráčů* (osoba, post, poznámka, týmy dnes) |
+| `admin/coaches` | CRUD vedení (`management`): záložka za každý náš tým a Výbor (`?tab=`), tabulka funkcí (osoba, funkce, období), aktuální nahoře, filtry funkce / osoba / období |
 | `admin/articles` | CRUD článků; `sectionList` v `uu5codekitg01-forms` |
 | `admin/galleries` | CRUD alb, hromadný upload fotek |
 | `admin/files` | Soubory ke stažení – vlastní `Crud` nad `BinaryProvider` (viz 6.1) |
@@ -420,7 +420,7 @@ a nesahá po klubovém erbu; erb je fallback loga, ne fotky.
 - **Realizační tým** – `management/list?teamId` (s `seasonId` u starší sezóny); poslední skupina soupisky, stejná dlaždice jako hráč (fotka nebo iniciály, pod jménem funkce), ne zvláštní sekce (2026-10-28).
 - U mládeže **jména nechodí ze serveru** (`appConfig.hideNamesAgeList`, rozhodnuto
   2026-09-06). Klient tedy nic neschovává — jen musí umět vykreslit dlaždici hráče **bez
-  jména**: číslo dresu, post, foto se nepoužije. Totéž platí pro sestavu na detailu zápasu
+  jména**: „Hráč“ a post, v kruhu „?“, foto se nepoužije (číslo dresu se od 2026-11 neeviduje). Totéž platí pro sestavu na detailu zápasu
   a pro statistiky hráčů. Redakce (`CONTENT`) a hráč sám jména vidí.
 
 ### 3.5 Zápasy týmu
@@ -699,10 +699,13 @@ nesahá; potřebuje-li jiné znění, skládá si vlastní konfiguraci.
 „…" menu vedle *Zobrazit data*, ne vedle ikon update/delete: řádek je úzký a dvě akce navíc
 by mazání vytlačily za okraj.
 
-`admin/players` a `admin/coaches` neřeší členství přes `player/addTeam` / `endTeam`, ale
-**jedním vstupem nad celým `teamList`** (`admin/form-membership.jsx`). `update` bere celé pole
-a formulář ho stejně celé odesílá, takže dvě úzké operace navíc by znamenaly druhou cestu
-k témuž — a `management` je na serveru ani nemá. Týž vstup edituje i výbor (`boardList`: bez týmu, s funkcí a „Kontakt na webu“).
+`admin/players` a `admin/coaches` mají záznam „kdo kde kdy“ jako plochý řádek (od 2026-11):
+soupiska `roster` (hráč, tým, od, do) a funkce `management` (osoba, tým / výbor, funkce, od,
+do). Obě obrazovky mají záložku za každý náš tým (`admin/team-tabs.jsx`: `useTeamTabs`,
+`?tab=`), sloupec a filtr Období s aktuálními nahoře (`periodFields`) a modal na jeden záznam
+(od–do vedle sebe přes `formGridLayout`). Hráči mají navíc záložku *Karty hráčů* (osoba,
+post, poznámka). Dřívější editor celého pole členství v jednom řádku (`form-membership.jsx`)
+je pryč.
 
 ### 6.2 Obrázky před uploadem
 
@@ -728,8 +731,17 @@ staženého ze stránek OFS.
 Samostatný modal nad detailem zápasu:
 
 - **Výsledek** – skóre, poločas, přepínač „rozhodly penalty“ + výběr vítěze rozstřelu.
+  Kdo smí i `match/update` (dnes stejná práva jako `setResult`), má pod výsledkem odkaz
+  **Další úpravy zápasu**: rozbalí termín, sezónu, kolo, hřiště, odjezd, stav a poznámku
+  (týmy jen profil MATCH -- editorovi týmu by je server zahodil). Pole jsou tatáž jako
+  v administraci (`admin/match-fields.jsx`). Uložit pošle nejdřív `match/update` se
+  změněnými poli, pak `setResult`; zápas bez výsledku jde po rozbalení uložit i bez skóre
+  (jen `update`).
 - **Sestava** – tabulka hráčů týmu s inline vstupy: post, střídající, góly, žlutá, červená
   (odpovídá formuláři v0 `editZapas.php`, ale bez ručního psaní loginů).
+
+Ve všech modalech s formulářem dostane fokus první pole, **ne na mobilu** (`xs`
+a dotykové zařízení) -- caio-ui `UiElements.useAutoFocus`, u `Crud` sám.
 
 ### 6.5 Hromadný upload fotek
 

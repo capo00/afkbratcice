@@ -48,7 +48,7 @@ async function decorate(rowList, { hidden = false, identity } = {}) {
     const person = found ? personForIdentity(found, identity, hidden) : null;
     return {
       ...row,
-      player: player ? { id: player.id, position: player.position, number: player.number } : null,
+      player: player ? { id: player.id, position: player.position } : null,
       person: person ? { id: person.id, name: person.name, surname: person.surname } : null,
     };
   });

@@ -192,10 +192,12 @@ const person = await post("person/create", {
   name: "Jan", surname: "Smoke", email: "jan@smoke.cz", phone: "+420111222333",
 }, cookie);
 ok("založení osoby", person.status === 200, person.body);
-const player = await post("player/create", {
-  personId: person.body.id, position: "MF", number: 8, teamList: [{ id: teamIds[0], dateFrom: "2026-01-01", dateTo: null }],
-}, cookie);
+const player = await post("player/create", { personId: person.body.id, position: "MF" }, cookie);
 ok("založení hráče", player.status === 200, player.body);
+const rosterRow = await post("roster/create", { playerId: player.body.id, teamId: teamIds[0], dateFrom: null, dateTo: null }, cookie);
+ok("hráč na soupisce", rosterRow.status === 200, rosterRow.body);
+const rosterClash = await post("roster/create", { playerId: player.body.id, teamId: teamIds[0], dateFrom: "2026-01-01" }, cookie);
+ok("překrývající se působení odmítnuto (400)", rosterClash.status === 400, rosterClash.body);
 
 const anonPerson = await get("person/get", { id: person.body.id });
 ok("nepřihlášený osoby nečte (401)", anonPerson.status === 401, anonPerson.status);
@@ -349,9 +351,10 @@ const cleanupFilter = {
     { surname: "Smoke" },
     { seasonId: season.body.id },
     { personId: person.body.id },
+    { playerId: player.body.id },
   ],
 };
-for (const c of ["afk_team", "afk_season", "afk_match", "afk_person", "afk_player", "afk_management", "afk_article"]) {
+for (const c of ["afk_team", "afk_season", "afk_match", "afk_person", "afk_player", "afk_roster", "afk_management", "afk_article"]) {
   await db.collection(c).deleteMany(cleanupFilter);
 }
 await Member.delete(adminIdentity.identity);

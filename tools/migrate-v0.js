@@ -34,6 +34,7 @@ import seasonDao from "../server/season/dao.js";
 import matchDao from "../server/match/dao.js";
 import personDao from "../server/person/dao.js";
 import playerDao from "../server/player/dao.js";
+import rosterDao from "../server/roster/dao.js";
 import managementDao from "../server/management/dao.js";
 import { checkMatchAges } from "../server/services/category.js";
 import { LINEUP_POSITION_BY_V0, LINEUP_POSITION_MAP } from "../server/services/lineup-position.js";
@@ -421,18 +422,23 @@ for (const h of v0Players) {
     "player",
     h.login,
     playerDao,
-    { personId: person.id, ...(POSITION_BY_FORMACE[h.post] ? { position: POSITION_BY_FORMACE[h.post] } : null), teamList },
+    { personId: person.id, ...(POSITION_BY_FORMACE[h.post] ? { position: POSITION_BY_FORMACE[h.post] } : null) },
     { personId: person.id },
   );
   playerIdByLogin[h.login] = player.id;
+  // Soupiska je samostatná kolekce (`afk_roster`): záznam na hráče v týmu v období.
+  for (const m of teamList) {
+    const key = { playerId: player.id, teamId: m.id, dateFrom: m.dateFrom };
+    await upsert("roster", undefined, rosterDao, { ...key, dateTo: m.dateTo }, key);
+  }
 }
 
 // --- 6. trenéři ----------------------------------------------------------------------
 //
-// v0 zná jen trenéra (žádného asistenta ani výbor). Vedení má jeden záznam na osobu
-// (`afk_management`), takže se trenérství jedné osoby u víc týmů sejdou v jejím `teamList`.
+// v0 zná jen trenéra (žádného asistenta ani výbor). Vedení má záznam na funkci
+// (`afk_management`: osoba, tým, funkce, od, do) -- trenérství u každého týmu je zvlášť.
+// Opakovaný běh pozná záznam podle osoby, týmu, funkce a začátku.
 
-const coachTeamListByPerson = {};
 for (const c of v0Coaches) {
   const personId = personIdByLogin[c.login];
   const v0TeamId = ownV0TeamByVek[c.tym];
@@ -440,15 +446,8 @@ for (const c of v0Coaches) {
     warn(`trenér ${c.id} (${c.login}, ${c.tym}): osoba nebo tým nenalezen, přeskočen`);
     continue;
   }
-  (coachTeamListByPerson[personId] = coachTeamListByPerson[personId] ?? []).push({
-    id: teamIdByV0[v0TeamId],
-    role: "coach",
-    dateFrom: c.od,
-    dateTo: c.do ?? null,
-  });
-}
-for (const [personId, teamList] of Object.entries(coachTeamListByPerson)) {
-  await upsert("management", undefined, managementDao, { personId, teamList }, { personId });
+  const key = { personId, teamId: teamIdByV0[v0TeamId], role: "coach", dateFrom: c.od };
+  await upsert("management", undefined, managementDao, { ...key, dateTo: c.do ?? null, showContact: false }, key);
 }
 
 // --- 7. zápasy -----------------------------------------------------------------------

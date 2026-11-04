@@ -1,11 +1,8 @@
 import { Authorization } from "caio-server";
 import Config from "../config.js";
 import crud from "./crud.js";
-import dao from "./dao.js";
-import { validate, shape, string, mongoId, oneOf, array, integer, any, pageInfo, truthy }
-  from "../services/validators.js";
-
-const membership = shape({ id: mongoId().isRequired(), dateFrom: any(), dateTo: any() });
+import rosterDao from "../roster/dao.js";
+import { validate, shape, string, mongoId, oneOf, array, any, pageInfo, truthy } from "../services/validators.js";
 
 const listDtoIn = shape({
   teamId: mongoId(),
@@ -17,22 +14,19 @@ const listDtoIn = shape({
 
 const idDtoIn = shape({ id: mongoId().isRequired() });
 
+// Karta hráče: osoba, post, poznámka. V týmech je hráč přes soupisku (`roster/*`).
 const writeDtoIn = shape({
   id: mongoId(),
   personId: mongoId(),
   position: oneOf(Config.POSITION_LIST),
-  number: integer(),
-  teamList: array(membership),
   note: string(),
 });
 
-/** Týmy, kterých se dtoIn týká -- z teamList při zápisu, ze záznamu při úpravě. */
+/** Týmy hráče ze soupisky (kdykoli) -- editor týmu smí kartu hráče, který je jen jeho. */
 async function teamsOfPlayer({ dtoIn }) {
-  if (dtoIn?.teamList?.length) return dtoIn.teamList.map((t) => t.id);
-  if (dtoIn?.teamId) return [dtoIn.teamId];
   if (!dtoIn?.id) return [];
-  const player = await dao.get(dtoIn.id).catch(() => null);
-  return (player?.teamList ?? []).map((t) => t.id);
+  const rowList = await rosterDao.listByFilter({ playerId: dtoIn.id }).catch(() => []);
+  return [...new Set(rowList.map((r) => r.teamId))];
 }
 
 export default {
@@ -49,13 +43,11 @@ export default {
     fn: ({ dtoIn, identity }) => crud.get(dtoIn.id, identity),
   },
 
+  // Karta týmu nepatří, takže ji smí založit kterýkoli editor týmu -- jako osobu (`person/create`).
+  // Do svého týmu ho pak dá přes `roster/create`.
   "player/create": {
     method: "post",
-    auth: Authorization.auth(Config.CONTENT, {
-      role: Config.ROLE.TEAM_EDITOR,
-      resolve: teamsOfPlayer,
-      mode: "all",
-    }),
+    auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
@@ -69,28 +61,6 @@ export default {
     }),
     validator: validate(writeDtoIn),
     fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
-  },
-
-  "player/addTeam": {
-    method: "post",
-    auth: Authorization.auth(Config.CONTENT, {
-      role: Config.ROLE.TEAM_EDITOR,
-      resolve: ({ dtoIn }) => [dtoIn?.teamId],
-      mode: "all",
-    }),
-    validator: validate(shape({ id: mongoId().isRequired(), teamId: mongoId().isRequired(), dateFrom: string() })),
-    fn: ({ dtoIn, identity }) => crud.addTeam(dtoIn, identity),
-  },
-
-  "player/endTeam": {
-    method: "post",
-    auth: Authorization.auth(Config.CONTENT, {
-      role: Config.ROLE.TEAM_EDITOR,
-      resolve: ({ dtoIn }) => [dtoIn?.teamId],
-      mode: "all",
-    }),
-    validator: validate(shape({ id: mongoId().isRequired(), teamId: mongoId().isRequired(), dateTo: string() })),
-    fn: ({ dtoIn, identity }) => crud.endTeam(dtoIn, identity),
   },
 
   "player/delete": {

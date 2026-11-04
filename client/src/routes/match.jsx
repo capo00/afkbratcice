@@ -22,12 +22,9 @@ const { theme } = Config;
 // Zápas sám i ostatní zápasy kreslí `MatchTile` (hlavička detailu je `size="large"`). Tužkou
 // zapsaný výsledek se promítá zpátky do dat stránky (`onResultSaved`), aby se změnil i titulek.
 
+// Prázdné jméno znamená mládež (server jména dětí nevrací) nebo hráče bez osoby.
 function personName(entry) {
-  const name = [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ");
-  // Prázdné jméno znamená mládež (server jména dětí nevrací) nebo hráče bez osoby;
-  // číslo dresu je jediná identifikace, kterou v obou případech máme.
-  if (name) return name;
-  return entry.player?.number ? `#${entry.player.number}` : null;
+  return [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || null;
 }
 
 function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant }) {

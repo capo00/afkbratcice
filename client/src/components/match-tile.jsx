@@ -14,7 +14,7 @@ const { theme } = Config;
 // Formulář výsledku se načítá **lazy**: dlaždice je součást veřejného balíku, ale modal
 // z administrace by do něj přitáhl svoje závislosti (`admin/fields.jsx`, `uu5codekitg01`)
 // kvůli tlačítku, které naprostá většina čtenářů nikdy neuvidí. Ověřeno na buildu —
-// `match-modals` sedí ve vlastním chunku (~6 kB, build 2026-11-02) a stáhne se až kliknutím na tužku.
+// `match-modals` sedí ve vlastním chunku (~10 kB i s poli rozbalovací úpravy zápasu, build 2026-11-03) a stáhne se až kliknutím na tužku.
 // (`uu5g05-forms` samotné v hlavním balíku stejně je, táhne si ho `home/tables-section.jsx`.)
 const ResultModal = Utils.Component.lazy(() =>
   import("../admin/match-modals.jsx").then((m) => ({ default: m.ResultModal })),
@@ -88,6 +88,10 @@ function canSetResult(identity, match) {
   const myTeamIdList = UiAuth.getScopeList(identity, Config.ROLE.TEAM_EDITOR);
   return myTeamIdList.some((id) => id === match.homeTeamId || id === match.guestTeamId);
 }
+
+// Smí přihlášený i `match/update` (rozbalovací sekce modalu výsledku)? Na serveru má dnes
+// stejná práva jako `setResult` (design/roles.md, 5) -- zvlášť pro případ, že se rozejdou.
+const canUpdateMatch = canSetResult;
 
 // Logo size in the tile (px); larger at the cost of the tile padding (Caio 2026-10-29).
 const LOGO_SIZE = 64;
@@ -202,6 +206,7 @@ const MatchTile = createVisualComponent({
     // `handlerMap` je prázdné, dokud se seznam celý načítá nebo je položka rozepsaná —
     // uu5g05 tím brání souběžným zápisům nad touž položkou, takže tužka v tu chvíli zmizí.
     const setResult = matchData?.handlerMap?.setResult;
+    const update = matchData?.handlerMap?.update;
 
     const played = match.state === "played" || Number.isFinite(match.homeGoals);
     const result = outcome(match, ownTeamId);
@@ -431,6 +436,10 @@ const MatchTile = createVisualComponent({
               onClose={() => setResultOpen(false)}
               onSubmit={matchData ? setResult : undefined}
               onSaved={handleResultSaved}
+              // Seznam bez handleru `update` dostane úpravu zápasu až s výsledkem (`setResult`
+              // vrací celý zápas) -- proto se sekce nabídne jen tam, kde ho seznam má.
+              canUpdate={(!matchData || Boolean(update)) && canUpdateMatch(session.identity, match)}
+              onUpdate={matchData ? update : undefined}
             />
           </Suspense>
         ) : null}

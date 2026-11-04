@@ -18,6 +18,8 @@
 // - **`afk_coach` nechává být** -- záloha pro návrat na předchozí verzi; smaže se ručně, až
 //   nová verze poběží.
 // - **Pořadí při vydání**: před nasazením verze, která čte `management/*` (README, *Vydání*).
+// - **Překonaný** tvarem „záznam na funkci“ (tools/migrate-management-flat.js, 2026-11): nad
+//   kolekcí v novém tvaru odmítne běžet, jinak by do ní zapsal záznamy na osobu.
 import { runScript } from "caio-server/script"; // FIRST import -- it loads the env file
 import { MongoClient } from "mongodb";
 import serverConfig from "../server/server.config.js";
@@ -70,6 +72,9 @@ await runScript({
     await client.connect();
     try {
       const db = client.db();
+      if (await db.collection(TARGET_COLLECTION).findOne({ role: { $exists: true } })) {
+        throw new Error(`${TARGET_COLLECTION} already has role records (migrate-management-flat ran) -- nothing to do here`);
+      }
       const now = () => new Date().toISOString();
       const sys = () => ({ cts: now(), mts: now() });
 

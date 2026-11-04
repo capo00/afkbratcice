@@ -2,6 +2,7 @@ import { Crud, Error as CoreError, Authorization } from "caio-server";
 import dao from "./dao.js";
 import teamDao from "../team/dao.js";
 import playerDao from "../player/dao.js";
+import rosterDao from "../roster/dao.js";
 import personDao from "../person/dao.js";
 import seasonDao from "../season/dao.js";
 import categoryDao from "../category/dao.js";
@@ -10,6 +11,8 @@ import { checkMatchAges, isFriendly } from "../services/category.js";
 import { withLineupPositions } from "../services/lineup-position.js";
 import { personForIdentity } from "../services/hidden-names.js";
 import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
+import { isActive } from "../services/membership.js";
+import { withTeamList } from "../services/roster.js";
 
 class MatchCrud extends Crud {
   constructor() {
@@ -68,7 +71,8 @@ class MatchCrud extends Crud {
     const playerIdList = [...new Set(playerList.map((p) => p.playerId).filter(Boolean))];
     if (!playerIdList.length) return playerList;
 
-    const players = await playerDao.listByIdList(playerIdList);
+    // `teamList` je odvozený ze soupisky -- podle něj web rozdělí sestavu na domácí a hosty.
+    const players = await withTeamList(await playerDao.listByIdList(playerIdList));
     const personIdList = [...new Set(players.map((p) => p.personId).filter(Boolean))];
     const persons = personIdList.length ? await personDao.listByIdList(personIdList) : [];
 
@@ -81,7 +85,7 @@ class MatchCrud extends Crud {
       // zápasu neukládá, bere se z osoby až tady (hřiště v detailu zápasu na webu).
       return {
         ...entry,
-        player: player ? { id: player.id, position: player.position, number: player.number, teamList: player.teamList } : null,
+        player: player ? { id: player.id, position: player.position, teamList: player.teamList } : null,
         person: person ? { id: person.id, name: person.name, surname: person.surname, photoUri: person.photoUri ?? null } : null,
       };
     });
@@ -189,16 +193,24 @@ class MatchCrud extends Crud {
     const current = await this._get(id);
     const teamIdList = [current.homeTeamId, current.guestTeamId];
 
-    const players = playerList.length
-      ? await playerDao.listByIdList([...new Set(playerList.map((p) => p.playerId))])
-      : [];
+    const playerIdList = [...new Set(playerList.map((p) => p.playerId))];
+    const players = playerList.length ? await playerDao.listByIdList(playerIdList) : [];
+    // Soupiska hráčů sestavy i hráčů dosavadní sestavy (kvůli `isMine` níž).
+    const rosterList = await rosterDao.listByPlayerIdList([
+      ...new Set([...playerIdList, ...(current.playerList ?? []).map((p) => p.playerId)]),
+    ]);
+    // Hráč patří k zápasu, když byl v den zápasu na soupisce domácích nebo hostů; zápas
+    // bez termínu bere kterékoli působení.
+    const matchDay = current.time ? String(current.time).slice(0, 10) : null;
 
     for (const entry of playerList) {
       const player = players.find((p) => p.id === entry.playerId);
       if (!player) throw this._error("unknownPlayer", "Player does not exist", { playerId: entry.playerId });
 
-      const playerTeamIdList = (player.teamList ?? []).map((t) => t.id);
-      if (!playerTeamIdList.some((teamId) => teamIdList.includes(teamId))) {
+      const inMatch = rosterList.some(
+        (r) => r.playerId === entry.playerId && teamIdList.includes(r.teamId) && (!matchDay || isActive(r, matchDay)),
+      );
+      if (!inMatch) {
         throw this._error("playerNotInMatch", "Player does not belong to either team of the match", {
           playerId: entry.playerId,
         });
@@ -211,10 +223,7 @@ class MatchCrud extends Crud {
 
     if (scopedOnly) {
       const mine = Authorization.scopesOf(identity, Config.ROLE.TEAM_EDITOR);
-      const isMine = (entry) => {
-        const player = players.find((p) => p.id === entry.playerId);
-        return (player?.teamList ?? []).some((t) => mine.includes(t.id));
-      };
+      const isMine = (entry) => rosterList.some((r) => r.playerId === entry.playerId && mine.includes(r.teamId));
       if (!playerList.every(isMine)) {
         throw this._error("foreignLineup", "A team editor may only write their own team's lineup", {});
       }

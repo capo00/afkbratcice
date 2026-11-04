@@ -55,15 +55,11 @@ const Board = createVisualComponent({
 
     if (state === "pendingNoData") return <Uu5Elements.Skeleton height={240} />;
 
-    const today = new Date().toISOString().slice(0, 10);
+    // Záznam je jedna trvající funkce ve výboru (`active: true` filtruje server).
     const groupList = Config.BOARD_ROLE_LIST.map((role) => ({
       role,
       memberList: (data?.itemList ?? [])
-        .filter((item) =>
-          (item.boardList ?? []).some(
-            (m) => m.role === role && (!m.dateFrom || m.dateFrom <= today) && (!m.dateTo || m.dateTo >= today),
-          ),
-        )
+        .filter((item) => item.role === role)
         .sort((a, b) => fullName(a.person).localeCompare(fullName(b.person), "cs")),
     })).filter((group) => group.memberList.length);
 

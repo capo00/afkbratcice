@@ -51,6 +51,6 @@ test("jméno pod kruhem a iniciály", () => {
   assert.equal(shortName(entry), "Shpuryk O.");
   assert.equal(shortName(entry, { surnameOnly: true }), "Shpuryk");
   assert.equal(initials(entry), "OS");
-  assert.equal(shortName({ player: { number: 7 } }), "#7");
+  assert.equal(shortName({ player: { position: "MF" } }), null);
   assert.equal(initials({}), "?");
 });

@@ -83,6 +83,8 @@ const AdminGalleries = createVisualComponent({
 
   render() {
     const [uploadTo, setUploadTo] = useState();
+    // Fokus do nahrávání fotek, ne na mobilu (caio-ui `useAutoFocus`).
+    const autoFocusRef = UiElements.useAutoFocus();
     const dataList = useDataList(GALLERY_HANDLERS);
 
     return (
@@ -114,11 +116,13 @@ const AdminGalleries = createVisualComponent({
                   onClose={() => setUploadTo()}
                   header={<Lsi import={importLsi} path={["admin", "photoUpload", "header"]} params={{ name: uploadTo.data.name }} />}
                 >
-                  <PhotoUpload
-                    galleryId={uploadTo.data.id}
-                    onClose={() => setUploadTo()}
-                    onUpload={uploadTo.handlerMap.addPhoto}
-                  />
+                  <div ref={autoFocusRef}>
+                    <PhotoUpload
+                      galleryId={uploadTo.data.id}
+                      onClose={() => setUploadTo()}
+                      onUpload={uploadTo.handlerMap.addPhoto}
+                    />
+                  </div>
                 </Uu5Elements.Modal>
               ) : null}
         </>

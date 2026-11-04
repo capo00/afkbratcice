@@ -114,8 +114,9 @@ auth: Authorization.auth([...Config.CONTENT, Config.ANY_TEAM_EDITOR]),
 | `match/update`, `setResult`, `delete` | načíst zápas podle `dtoIn.id` → jeho dva týmy | `any` |
 | `match/setLineup` | totéž | `any` **+ dodatečná kontrola**, viz níž |
 | `team/update` | `[dtoIn.id]` | `all` |
-| `player/create`, `update`, `addTeam`, `endTeam` | týmy z `dtoIn.teamId` / `dtoIn.teamList` | `all` |
-| `management/create`, `update`, `delete` | týmy z `dtoIn.teamList` i uloženého záznamu; záznam s výborem žádné (jen CONTENT) | `all` |
+| `player/update` | týmy hráče ze soupisky (`afk_roster`) | `all` |
+| `roster/create`, `update`, `delete` | `dtoIn.teamId` u `create`, jinak tým uloženého záznamu | `all` |
+| `management/create`, `update`, `delete` | `dtoIn.teamId` u `create`, jinak tým uloženého záznamu; výbor (`teamId: null`) žádný (jen CONTENT) | `all` |
 
 Tři věci, které je snadné přehlédnout a bolí později:
 
@@ -131,8 +132,8 @@ Tři věci, které je snadné přehlédnout a bolí později:
    use casu: `crud.js` zahodí změnu obou polí, pokud volající prošel jen rozsahovou rolí.
 3. **`person` zůstává mimo rozsah.** Osoba může hrát za víc týmů, takže `teamEditor` smí
    osobu **založit** (aby mohl doplnit soupisku), ale editovat a mazat ji smí až
-   `operatives`. Členství v týmu se řeší přes `player/addTeam` / `endTeam`, které rozsah
-   respektují.
+   `operatives`. Totéž karta hráče (`player/create`). Do týmu ho dá soupiska (`roster/*`),
+   která rozsah respektuje.
 
 ### Proč rozsah v profilu, a ne ve zvláštní kolekci
 
@@ -228,8 +229,10 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 | `person/linkIdentity` | ADMIN | ruční spojení osoby s přihlášením |
 | `person/linkSelf` | přihlášený | spáruje volajícího s jeho `person` podle **ověřeného** e-mailu; jinak nedělá nic (viz [api.md](./api.md), 2.5.1) |
 | `player/list`, `get` | – | |
-| `player/create`, `update` | CONTENT, **TE** (`all`) | |
-| `player/addTeam`, `endTeam` | CONTENT, **TE** (`all`) | jen do/z vlastního týmu |
+| `player/create` | CONTENT, kterýkoli **TE** | karta týmu nepatří, jako osoba |
+| `player/update` | CONTENT, **TE** (`all`) | hráč, jehož všechna působení jsou v jeho týmech |
+| `roster/list`, `get` | – | |
+| `roster/create`, `update`, `delete` | CONTENT, **TE** (`all`) | jen soupiska vlastního týmu |
 | `player/delete` | CONTENT | |
 | `management/list`, `get` | – | |
 | `management/create`, `update`, `delete` | CONTENT, **TE** (`all`) | realizační tým vlastního mužstva; výbor jen CONTENT |

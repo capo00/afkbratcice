@@ -152,7 +152,7 @@ kontakty a `departureTime`: `player` u týmu, jehož kategorie má věk z `hideN
 vrací `person` bez `name`, `surname` a fotky každému, kdo nemá roli z `MATCH` ani
 nespravuje žádný tým (a mimo `self`). Týká se to i sestavy v `match/get` a řádků ve
 `stats/listPlayerStats` — jinak by filtr šlo obejít druhým endpointem. Klient místo jména
-ukazuje číslo dresu a post.
+ukazuje „Hráč“ a post (číslo dresu, které tu stálo do 2026-11, se neeviduje).
 
 Zavedeno 2026-10-28 (`server/services/hidden-names.js`, `hidden-teams.js`), s upřesněním:
 - **Kontext rozhoduje.** Soupiska týmu podle toho týmu, sestava podle týmů zápasu,
@@ -405,36 +405,53 @@ vedlejší krok při přihlášení, ne operace, kterou si uživatel vyžádal.
   uložených v kolekci, takže je to bezpečné, ale kdyby `caio-server-auth` někdy začal seznam
   plnit jinak, tohle místo se musí zkontrolovat.
 
-### 2.6 `player`
+### 2.6 `player` a `roster`
+
+Hráč je karta (osoba, post, poznámka), soupiska je záznam na hráče v týmu v období
+(design/data-model.md, sekce 6 a 6.1).
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `player/list` | get | – | `{ teamId, active, idList, pageInfo }` | `{ itemList }` (s vloženou `person`) |
-| `player/get` | get | – | `{ id }` | `player` + `person` + statistiky |
-| `player/create` | post | CONTENT, **TE** | `{ personId, position, number, teamList }` | `player` |
-| `player/update` | post | CONTENT, **TE** | `{ id, ... }` | `player` |
-| `player/addTeam` | post | CONTENT, **TE** | `{ id, teamId, dateFrom }` | `player` |
-| `player/endTeam` | post | CONTENT, **TE** | `{ id, teamId, dateTo }` | `player` |
-| `player/delete` | post | CONTENT | `{ id }` | `{}` |
+| `player/list` | get | – | `{ teamId, active, seasonId, idList, pageInfo }` | `{ itemList }` (s vloženou `person` a odvozeným `teamList`) |
+| `player/get` | get | – | `{ id }` | `player` + `person` + `teamList` |
+| `player/create` | post | CONTENT, kterýkoli **TE** | `{ personId, position, note }` | `player` |
+| `player/update` | post | CONTENT, **TE** | `{ id, personId?, position?, note? }` | `player` |
+| `player/delete` | post | CONTENT | `{ id }` | `{}` (smaže i soupisku hráče) |
+| `roster/list` | get | – | `{ teamId, playerId, active, seasonId }` | `{ itemList }` (s vloženým `player` + `person`) |
+| `roster/get` | get | – | `{ id }` | záznam + `player` |
+| `roster/create` | post | CONTENT, **TE** | `{ playerId, teamId, dateFrom, dateTo }` | záznam + `player` |
+| `roster/update` | post | CONTENT, **TE** | `{ id, playerId?, dateFrom?, dateTo? }` (bez `teamId`) | záznam + `player` |
+| `roster/delete` | post | CONTENT, **TE** | `{ id }` | `{}` |
 
-`active: true` filtruje hráče s členstvím, které trvá dnes; `seasonId` hráče, jejichž členství
-zasahuje do období sezóny (od 1. 8. `yearFrom` do 31. 7. dalšího roku) — soupiska staré sezóny.
+- `player/list?teamId` je soupiska týmu: `active: true` = působení, které trvá dnes;
+  `seasonId` = působení, které zasahuje do období sezóny (od 1. 8. `yearFrom` do 31. 7.
+  dalšího roku) — soupiska staré sezóny.
+- **TE**: kartu hráče smí založit kterýkoli editor týmu (týmu nepatří, jako osoba), upravit
+  jen hráče, jehož všechna působení jsou v jeho týmech. Soupisku smí jen svého týmu (u `create`
+  z dtoIn, jinak uložený tým).
+- Chyby 400 soupisky: `roster/overlap` (týž hráč v témž týmu v překrývajícím se období),
+  `unknownPlayer`, `invalidPeriod`.
+- Do 2026-11 byly `player/addTeam` a `player/endTeam` a členství v `player.teamList`; číslo
+  dresu (`number`) se už neeviduje.
 
 ### 2.7 `management` (do 2026-11 `coach`)
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `management/list` | get | – | `{ teamId, board, role, active, seasonId, idList, pageInfo }` | `{ itemList }` (s vloženou `person`) |
+| `management/list` | get | – | `{ teamId, board, role, personId, active, seasonId, idList, pageInfo }` | `{ itemList }` (s vloženou `person`) |
 | `management/get` | get | – | `{ id }` | `management` + `person` |
-| `management/create` | post | CONTENT, **TE** | `{ personId, teamList, boardList }` | `management` |
-| `management/update` | post | CONTENT, **TE** | `{ id, ... }` | `management` |
+| `management/create` | post | CONTENT, **TE** | `{ personId, teamId?, role, dateFrom, dateTo, showContact }` | `management` + `person` |
+| `management/update` | post | CONTENT, **TE** | `{ id, personId?, role?, dateFrom?, dateTo?, showContact? }` (bez `teamId`) | `management` + `person` |
 | `management/delete` | post | CONTENT, **TE** | `{ id }` | `{}` |
 
-- `teamId` (+ `role` z `TEAM_ROLE`) hledá v `teamList`, `board: true` (+ `role` z `BOARD_ROLE`)
-  v `boardList`; `active` a `seasonId` jako u `player/list`.
-- **TE** smí jen záznam, jehož týmy (v dtoIn i uložené) jsou všechny jeho, a nikdy záznam
-  s výborem — výbor je klubový, ten edituje jen CONTENT.
-- Člen výboru se `showContact` u trvající funkce má v položce `contact: { email, phone }`
+- Záznam je jedna funkce (design/data-model.md, sekce 7); `teamId` chybí = výbor.
+- `teamId` (+ `role` z `TEAM_ROLE`) = funkce v týmu, `board: true` (+ `role` z `BOARD_ROLE`)
+  = výbor, `personId` = funkce osoby; `active` a `seasonId` jako u `player/list`.
+- **TE** smí jen funkci svého týmu (u `create` z dtoIn, jinak uložený tým), nikdy výbor —
+  výbor je klubový, ten edituje jen CONTENT.
+- Chyby 400: `management/overlap` (táž osoba, tým/výbor a funkce v překrývajícím se období),
+  `invalidRole`, `invalidPeriod`, `personRequired`.
+- Funkce ve výboru se `showContact`, která trvá, má v položce `contact: { email, phone }`
   i pro veřejnost (stránka `/vybor`); `person` zůstává filtrovaná (1.2).
 
 ### 2.8 `article`

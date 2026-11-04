@@ -91,7 +91,7 @@ const AppProvider = createComponent({
         getCategory: (code) => teamCategoryMap.get(code),
         // Skrývají se u téhle kategorie jména? Filtruje sice server (jména mládeže nechodí
         // v API vůbec), ale klient to musí vědět taky, aby místo prázdného jména vykreslil
-        // číslo dresu a post, ne prázdno.
+        // „Hráč“ a post, ne prázdno.
         isNameHidden: (age) => (appSettings.hideNamesAgeList ?? []).includes(age),
         reload: () => dataObject.handlerMap.load(),
       };

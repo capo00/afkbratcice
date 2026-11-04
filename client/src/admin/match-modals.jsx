@@ -1,10 +1,12 @@
-import { createVisualComponent, useDataObject, useState, useMemo, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useMemo, useRef, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
-import { UiElements } from "caio-ui";
+import { UiElements, UiAuth } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
 import { enumItemList, personLabel } from "./fields.jsx";
+import { getMatchConfig, MATCH_PAIR_LIST } from "./match-fields.jsx";
+import { formGridLayout } from "./form-layout.js";
 
 const { theme } = Config;
 
@@ -34,18 +36,64 @@ function showsPenaltyWinner(hasPenalties, value) {
   );
 }
 
+// Pole zápasu v rozbalovací sekci modalu výsledku, v pořadí formuláře administrace. Bez
+// skóre (to je nahoře) -- a týmy jen pro správce zápasů: editorovi týmu by je server
+// stejně zahodil (`match/crud.js`, `update`), takže by je měnil naprázdno.
+const UPDATE_FIELD_LIST = ["time", "homeTeamId", "guestTeamId", "seasonId", "round", "place", "departureTime", "state", "note"];
+const TEAM_FIELD_LIST = ["homeTeamId", "guestTeamId"];
+
+function pickConfig(cfg, nameList) {
+  return Object.fromEntries(nameList.filter((name) => cfg[name]).map((name) => [name, cfg[name]]));
+}
+
+/**
+ * Hraje se v sezóně na penalty? `season/get` je veřejný; zápas bez sezóny je přátelák
+ * a penalty nemá. Dokud se sezóna načítá, pole vítěze se nenabízí.
+ */
+function useHasPenalties(seasonId) {
+  const { data: season } = useDataObject(
+    {
+      handlerMap: {
+        load: () =>
+          seasonId ? UiElements.Call.cmdGet("/season/get", { id: seasonId }).catch(() => null) : Promise.resolve(null),
+      },
+    },
+    [seasonId],
+  );
+  return Boolean(season?.hasPenalties);
+}
+
+/**
+ * Je potřeba zapsat výsledek? Bez rozbalené sekce vždycky -- k tomu modal je. S ní jde upravit
+ * jen zápas (přesunout termín zápasu, který se ještě nehrál), dokud nemá výsledek uložený
+ * a nezačal se vyplňovat: `match/setResult` skóre bez gólů nebere.
+ */
+function needsResult(expanded, match, value) {
+  return (
+    !expanded ||
+    Number.isFinite(match.homeGoals) ||
+    Number.isFinite(value?.homeGoals) ||
+    Number.isFinite(value?.guestGoals)
+  );
+}
+
 /**
  * Pole formuláře výsledku. Je to vlastní komponenta jen kvůli `useFormApi`: ten musí sedět
- * pod `Form.Provider`, a vítěz rozstřelu se ukazuje živě podle toho, co je zrovna vyplněné.
+ * pod `Form.Provider`, a vítěz rozstřelu se ukazuje živě podle toho, co je zrovna vyplněné --
+ * i podle sezóny, kterou může změnit rozbalovací sekce. Co platí, předává `hasPenaltiesRef`
+ * zápisu v `ResultModal`, který sedí nad formulářem.
  */
-function ResultFields({ teamItemList, hasPenalties }) {
+function ResultFields({ teamItemList, hasPenaltiesRef, scoreRequired }) {
   const { value } = Uu5Forms.useFormApi();
+  const hasPenalties = useHasPenalties(value?.seasonId ?? null);
+  hasPenaltiesRef.current = hasPenalties;
   const withPenalty = showsPenaltyWinner(hasPenalties, value);
+  const required = scoreRequired(value);
 
   return (
     <Uu5Forms.Form.View gridLayout={withPenalty ? RESULT_GRID_LAYOUT_WITH_PENALTY : RESULT_GRID_LAYOUT}>
-      <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required />
-      <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required />
+      <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required={required} />
+      <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required={required} />
       <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
       <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
       {withPenalty ? (
@@ -59,6 +107,21 @@ function ResultFields({ teamItemList, hasPenalties }) {
   );
 }
 
+/**
+ * Zbytek editace zápasu pod odkazem „Další úpravy zápasu“. Pole se vykreslí až po rozbalení:
+ * výběry týmů a sezón se tak nenačítají zbytečně a skryté povinné pole neblokuje uložení.
+ */
+function UpdateSection({ cfg }) {
+  const autoFocusRef = UiElements.useAutoFocus();
+  return (
+    <div ref={autoFocusRef} className={Config.Css.css({ marginBlockStart: 16 })}>
+      <Uu5Forms.Form.View gridLayout={formGridLayout(cfg, MATCH_PAIR_LIST)}>
+        {UiElements.Crud.generateInputs(cfg, { operation: "update" })}
+      </Uu5Forms.Form.View>
+    </div>
+  );
+}
+
 // Dva modaly nad zápasem: **výsledek** a **sestava**. Obojí je vlastní use case
 // (`match/setResult`, `match/setLineup`), ne `match/update` — a to schválně:
 //
@@ -67,6 +130,12 @@ function ResultFields({ teamItemList, hasPenalties }) {
 // - `setLineup` pouští editora jednoho týmu jen k hráčům jeho týmu, i když zápas má dva.
 //
 // Formulář výsledku odpovídá v0 `editZapas.php`, jen bez ručního psaní loginů.
+//
+// Kdo smí i `match/update`, dostane v modalu výsledku rozbalovací sekci se zbytkem zápasu
+// (termín, sezóna, kolo, hřiště, odjezd, stav, poznámka). Uloží se jedním tlačítkem, ale pořád
+// dvěma use casy za sebou: nejdřív `update` se změněnými poli, pak `setResult` -- v tomhle
+// pořadí, protože změna sezóny mění `hasPenalties`, podle kterého server rozstřel kontroluje.
+// Zápas, který ještě nemá výsledek, jde po rozbalení uložit i bez skóre -- pak jen `update`.
 
 /**
  * @param onSubmit  volitelný zapisovač — dostane hotový dtoIn místo toho, aby se volal
@@ -75,25 +144,32 @@ function ResultFields({ teamItemList, hasPenalties }) {
  *                  co server vrátil, a nemusí se přenačítat celý (viz `components/match-tile.jsx`).
  *                  Bez něj se volá use case přímo — pro obrazovky, které seznam nedrží.
  * @param onSaved   dostane zápas, jak ho vrátil zápis (`onSubmit` nebo `match/setResult`).
+ * @param canUpdate smí přihlášený i `match/update` -- pak modal nabídne rozbalovací sekci
+ *                  se zbytkem zápasu.
+ * @param onUpdate  volitelný zapisovač `match/update` -- totéž co `onSubmit`, jen pro úpravu
+ *                  zápasu (položkový handler `update` seznamu).
  */
-function ResultModal({ match, onClose, onSaved, onSubmit }) {
+function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onUpdate }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState();
-
-  // Hraje se v sezóně zápasu na penalty? `season/get` je veřejný; zápas bez sezóny je
-  // přátelák a penalty nemá. Dokud se sezóna načítá, pole vítěze se nenabízí.
-  const { data: season } = useDataObject(
-    {
-      handlerMap: {
-        load: () =>
-          match.seasonId
-            ? UiElements.Call.cmdGet("/season/get", { id: match.seasonId }).catch(() => null)
-            : Promise.resolve(null),
-      },
-    },
-    [match.seasonId],
+  const [expanded, setExpanded] = useState(false);
+  const hasPenaltiesRef = useRef(false);
+  const autoFocusRef = UiElements.useAutoFocus();
+  const session = UiAuth.useSession();
+  const matchManager = UiAuth.hasProfile(session.identity, Config.MATCH);
+  const updateFieldList = useMemo(
+    () => (matchManager ? UPDATE_FIELD_LIST : UPDATE_FIELD_LIST.filter((name) => !TEAM_FIELD_LIST.includes(name))),
+    [matchManager],
   );
-  const hasPenalties = Boolean(season?.hasPenalties);
+  // Názvy týmů jen pro sloupce; filtry sekce nepotřebuje.
+  const updateCfg = useMemo(() => pickConfig(getMatchConfig({ getTeam: () => undefined }), updateFieldList), [updateFieldList]);
+
+  // Proti čemu se počítá, co rozbalovací sekce změnila. Po úspěšném `update` se posune:
+  // když pak selže `setResult`, další Uložit už úpravu zápasu neposílá znovu.
+  const savedRef = useRef();
+  if (!savedRef.current) {
+    savedRef.current = Object.fromEntries(UPDATE_FIELD_LIST.map((name) => [name, match[name] ?? undefined]));
+  }
 
   const teamItemList = [
     { value: match.homeTeamId, children: match.homeTeam?.name ?? match.homeTeamId },
@@ -102,21 +178,37 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
 
   async function submit(e) {
     const v = e.data.value;
+    const hasPenalties = hasPenaltiesRef.current;
     setPending(true);
     setError();
     try {
-      const dtoIn = {
-        id: match.id,
-        homeGoals: v.homeGoals,
-        guestGoals: v.guestGoals,
-        homeGoalsHalf: v.homeGoalsHalf ?? null,
-        guestGoalsHalf: v.guestGoalsHalf ?? null,
-        // Jen když se pole ukazuje; jinak `null`, i kdyby zápas měl vítěze uloženého
-        // z dřívějška (remíza se mezitím změnila na výhru, nebo sezóna penalty nehraje).
-        penaltyWinnerTeamId: showsPenaltyWinner(hasPenalties, v) ? (v.penaltyWinnerTeamId ?? null) : null,
-      };
-      const saved = onSubmit ? await onSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setResult", dtoIn);
-      onSaved?.(saved);
+      let saved;
+      if (expanded) {
+        // Jen změněná pole, prázdné jako `null` -- stejné porovnání jako `Crud` (caio-ui).
+        const changed = {};
+        for (const name of updateFieldList) {
+          if ((v[name] ?? undefined) !== savedRef.current[name]) changed[name] = v[name] ?? null;
+        }
+        if (Object.keys(changed).length) {
+          const updateDtoIn = { id: match.id, ...changed };
+          saved = onUpdate ? await onUpdate(updateDtoIn) : await UiElements.Call.cmdPost("/match/update", updateDtoIn);
+          savedRef.current = { ...savedRef.current, ...changed };
+        }
+      }
+      if (needsResult(expanded, match, v)) {
+        const dtoIn = {
+          id: match.id,
+          homeGoals: v.homeGoals,
+          guestGoals: v.guestGoals,
+          homeGoalsHalf: v.homeGoalsHalf ?? null,
+          guestGoalsHalf: v.guestGoalsHalf ?? null,
+          // Jen když se pole ukazuje; jinak `null`, i kdyby zápas měl vítěze uloženého
+          // z dřívějška (remíza se mezitím změnila na výhru, nebo sezóna penalty nehraje).
+          penaltyWinnerTeamId: showsPenaltyWinner(hasPenalties, v) ? (v.penaltyWinnerTeamId ?? null) : null,
+        };
+        saved = onSubmit ? await onSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setResult", dtoIn);
+      }
+      if (saved) onSaved?.(saved);
       onClose();
     } catch (err) {
       // Server odmítne rozstřel u neremízy — hláška patří k formuláři, ne do konzole.
@@ -135,6 +227,8 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
         homeGoalsHalf: match.homeGoalsHalf ?? undefined,
         guestGoalsHalf: match.guestGoalsHalf ?? undefined,
         penaltyWinnerTeamId: match.penaltyWinnerTeamId ?? undefined,
+        // Pole rozbalovací sekce; `seasonId` čte i `ResultFields` kvůli penaltám.
+        ...savedRef.current,
       }}
     >
       <Uu5Elements.Modal
@@ -150,23 +244,42 @@ function ResultModal({ match, onClose, onSaved, onSubmit }) {
       >
         {/* The match name and the error sit outside `Form.View`: the grid places only named
             fields into `gridLayout` areas, anything else would be auto-placed outside it. */}
-        <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18, marginBlockEnd: 16 })}>
-          {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
+        <div ref={autoFocusRef}>
+          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18, marginBlockEnd: 16 })}>
+            {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
+          </div>
+
+          <ResultFields
+            teamItemList={teamItemList}
+            hasPenaltiesRef={hasPenaltiesRef}
+            scoreRequired={(value) => needsResult(expanded, match, value)}
+          />
+
+          {canUpdate ? (
+            <Uu5Elements.Link
+              colorScheme="primary"
+              onClick={() => setExpanded((open) => !open)}
+              className={Config.Css.css({ display: "inline-flex", alignItems: "center", gap: 4, marginBlockStart: 16 })}
+            >
+              <Uu5Elements.Icon icon={expanded ? "uugds-chevron-up" : "uugds-chevron-down"} />
+              <Lsi import={importLsi} path={[...LSI_PATH, expanded ? "lessEdit" : "moreEdit"]} />
+            </Uu5Elements.Link>
+          ) : null}
+
+          {canUpdate && expanded ? <UpdateSection cfg={updateCfg} /> : null}
+
+          {error ? (
+            <Uu5Elements.Text
+              category="interface"
+              segment="content"
+              type="medium"
+              colorScheme="negative"
+              className={Config.Css.css({ display: "block", marginBlockStart: 16 })}
+            >
+              {error}
+            </Uu5Elements.Text>
+          ) : null}
         </div>
-
-        <ResultFields teamItemList={teamItemList} hasPenalties={hasPenalties} />
-
-        {error ? (
-          <Uu5Elements.Text
-            category="interface"
-            segment="content"
-            type="medium"
-            colorScheme="negative"
-            className={Config.Css.css({ display: "block", marginBlockStart: 16 })}
-          >
-            {error}
-          </Uu5Elements.Text>
-        ) : null}
       </Uu5Elements.Modal>
     </Uu5Forms.Form.Provider>
   );
@@ -188,8 +301,7 @@ function LineupRow({ player, entry, onChange }) {
       className={Config.Css.css({ paddingBlock: 4 })}
     >
       <div>
-        {player.person ? personLabel(player.person) : `#${player.number ?? "?"}`}
-        {player.number ? <span className={Config.Css.css({ color: theme.color.mutedFg })}> · {player.number}</span> : null}
+        {player.person ? personLabel(player.person) : "?"}
       </div>
 
       {/* Přesný post (28 postů, Caio 2026-10-26); linii `position` dopočítá server. Starý
@@ -227,6 +339,9 @@ function LineupRow({ player, entry, onChange }) {
 function LineupModal({ match, onClose, onSaved, onSubmit }) {
   const [pending, setPending] = useState(false);
   const [playerList, setPlayerList] = useState(() => match.playerList ?? []);
+  // Na seznamu hráčů, ne na modalu: ten se kreslí až po načtení, do té doby je tam skeleton.
+  // Fokus dostane „Hrál“ prvního hráče -- post je bez zaškrtnutí zakázaný.
+  const autoFocusRef = UiElements.useAutoFocus();
 
   // Nabídnou se hráči **obou** týmů: sestavu zapisuje jeden člověk pro celý zápas
   // a u přáteláků hrají za oba i lidé z klubu.
@@ -290,7 +405,7 @@ function LineupModal({ match, onClose, onSaved, onSubmit }) {
       {state === "pendingNoData" ? (
         <Uu5Elements.Skeleton height={240} />
       ) : (
-        <div>
+        <div ref={autoFocusRef}>
           <Uu5Elements.Grid
             templateColumns={LINEUP_COLUMNS}
             columnGap={8}

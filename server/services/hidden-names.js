@@ -4,7 +4,7 @@ import Config from "../config.js";
 // Jména dětí odstraňuje server, ne klient (design/api.md, 1.2; rozhodnuto 2026-09-06,
 // zavedeno 2026-10-28). U týmu, jehož kategorie má věk z nastavení `hideNamesAgeList`,
 // chodí osoba hráče bez jména a fotky každému, kdo nespravuje zápasy ani žádný tým.
-// Klient místo jména ukazuje číslo dresu.
+// Klient místo jména ukazuje „Hráč“ a post.
 //
 // Pravidla jsou tady bez přístupu k databázi, aby šla testovat (server/test/hidden-names.test.js);
 // seznam skrytých týmů načítá services/hidden-teams.js.

@@ -257,6 +257,25 @@ gcloud app domain-mappings create afkbratcice.cz
 A stejně jako u GCS bucketu (`how-to-set-gcs.md`, krok 8) založit rozpočtový alert
 (*Billing → Budgets & alerts*) jako pojistku proti překročení free tier.
 
+## Vydání s vedením po funkcích a soupiskou (první vydání po 0.7.0)
+
+Záznam vedení (`afk_management`) je nově jedna funkce (osoba, tým / výbor, funkce, od, do), ne
+osoba s vnořenými seznamy. Členství hráčů v týmech je nová kolekce `afk_roster` (hráč, tým, od,
+do) a hráč přišel o `teamList` a číslo dresu. Starý server nový tvar nepřečte a nový starý,
+takže migrace a deploy jdou hned po sobě, **každý krok jen po Caiově „ano“ těsně před
+spuštěním**:
+
+1. Záloha kolekcí `afk_management` a `afk_player` (Atlas snapshot, nebo `mongodump --collection …`)
+   -- návrat na 0.7.0 znamená je obnovit (a smazat `afk_roster`).
+2. `npm run migrate:management-flat -- --env .env` (plán), pak totéž s `--commit`: zahodí unique
+   index `personId_1` a rozloží každý záznam osoby na záznamy funkcí. Opakovaný běh nic nezmění.
+3. `npm run migrate:player-roster -- --env .env` (plán), pak totéž s `--commit`: zapíše
+   `player.teamList` do `afk_roster`, hráčům odebere `teamList` a `number` a zahodí index
+   `teamList.id_1`. Opakovaný běh nic nezmění.
+4. **Deploy** (`npm run release -- --url https://afkbratcice.oa.r.appspot.com`, viz §7), pak na webu
+   `/vybor`, soupiska a realizační tým mužstva, `/muzstva`, detail zápasu se sestavou a stránka
+   hráče; v administraci *Trenéři a výbor* a *Hráči* (záložky týmů, Výbor, Karty hráčů).
+
 ## Vydání s vedením klubu a opravou penalt (první vydání po 0.6.3)
 
 Trenéři a výbor jsou nová entita `management` (`afk_management`, jeden záznam na osobu) a stránka

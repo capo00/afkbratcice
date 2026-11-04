@@ -1,5 +1,6 @@
 import { Dao } from "caio-server";
-import { membershipCondition } from "../services/membership.js";
+
+// Karta hráče: `{ personId, position, note }`. Členství v týmech je soupiska (`roster/dao.js`).
 
 class PlayerDao extends Dao {
   constructor() {
@@ -7,22 +8,7 @@ class PlayerDao extends Dao {
   }
 
   createIndexes() {
-    return Promise.all([
-      super.createIndex({ personId: 1 }, { unique: true }),
-      super.createIndex({ "teamList.id": 1 }),
-    ]);
-  }
-
-  /**
-   * @param active true = jen členství, která trvají dnes
-   * @param range  `{ from, to }` = jen členství zasahující do období (soupiska sezóny)
-   */
-  listByFilter({ teamId, active, range, idList } = {}, pageInfo) {
-    if (idList) return this.listByIdList(idList);
-
-    const filter = {};
-    if (teamId) filter.teamList = { $elemMatch: membershipCondition({ id: teamId }, { active, range }) };
-    return this.find(filter, pageInfo, { number: 1 });
+    return super.createIndex({ personId: 1 }, { unique: true });
   }
 
   findByPersonId(personId) {

@@ -60,6 +60,8 @@ const WeekendProgram = createVisualComponent({
           // Merge proto, že zápis nemusí vracet všechno, co položka nese — viz
           // `core/item-merge.js`.
           setResult: mergeItemHandler(dataRef, (dtoIn) => UiElements.Call.cmdPost("/match/setResult", dtoIn)),
+          // Rozbalovací sekce modalu výsledku (`admin/match-modals.jsx`).
+          update: mergeItemHandler(dataRef, (dtoIn) => UiElements.Call.cmdPost("/match/update", dtoIn)),
         },
       },
       [teamIdList],

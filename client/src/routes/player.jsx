@@ -26,26 +26,30 @@ const { theme } = Config;
 
 const STAT_COLUMN_LIST = ["appearances", "starts", "goals", "yellowCards", "redCards"];
 
-function PlayerCard({ player, isNameHidden }) {
+function PlayerCard({ player }) {
   const name = [player?.person?.name, player?.person?.surname].filter(Boolean).join(" ");
+  const initials = [player?.person?.name, player?.person?.surname]
+    .map((part) => part?.trim()?.[0])
+    .filter(Boolean)
+    .join("");
 
   return (
     <Card topStripe>
       <div className={Config.Css.css({ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" })}>
         {/* Stejné kolečko jako na soupisce (`routes/team.jsx`), jen větší — `RichIcon`
-            bere výšku i číslem, když na ni není token. Bez fotky se ukáže číslo dresu;
+            bere výšku i číslem, když na ni není token. Bez fotky iniciály (bez jména „?“);
             `text` a `imageSrc` se nesmí sejít, text by se vykreslil přes fotku. */}
         <Uu5Elements.RichIcon
           height={96}
           significance="distinct"
           imageSrc={player?.person?.photoUri}
-          text={player?.person?.photoUri ? undefined : String(player?.number ?? "?")}
+          text={player?.person?.photoUri ? undefined : initials || "?"}
         />
 
         <div>
           <div className={Config.Css.css({ ...theme.typography.display, fontSize: 32 })}>
             {/* Prázdné jméno = mládež (server jména dětí nevrací) nebo hráč bez osoby. */}
-            {name || (isNameHidden && player?.number ? `#${player.number}` : null) || (
+            {name || (
               <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />
             )}
           </div>
@@ -55,7 +59,6 @@ function PlayerCard({ player, isNameHidden }) {
                 <Lsi import={importLsi} path={["enum", "position", player.position]} />
               </span>
             ) : null}
-            {player?.number ? <span>#{player.number}</span> : null}
           </div>
         </div>
       </div>
@@ -117,7 +120,7 @@ const Player = createVisualComponent({
   render() {
     const [route] = useRoute();
     const playerId = route?.params?.id;
-    const { categoryList, isNameHidden } = useApp();
+    const { categoryList } = useApp();
 
     const dataObject = useDataObject(
       {
@@ -195,7 +198,7 @@ const Player = createVisualComponent({
     return (
       <>
         <Section>
-          <PlayerCard player={player} isNameHidden={isNameHidden(category?.age)} />
+          <PlayerCard player={player} />
         </Section>
 
         <Section variant="hatched">

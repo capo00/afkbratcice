@@ -84,13 +84,13 @@ function layoutLineup(entryList = []) {
 
 /**
  * „Shpuryk O.“ -- příjmení a první písmeno jména; s `surnameOnly` jen „Shpuryk“ (hřiště na
- * mobilu, Caio 2026-10-27). Bez jména číslo dresu, jinak null.
+ * mobilu, Caio 2026-10-27). Bez příjmení (mládež, hráč bez osoby) null.
  */
 function shortName(entry, { surnameOnly = false } = {}) {
   const surname = entry.person?.surname;
   const initial = entry.person?.name?.trim()?.[0];
   if (surname) return initial && !surnameOnly ? `${surname} ${initial}.` : surname;
-  return entry.player?.number ? `#${entry.player.number}` : null;
+  return null;
 }
 
 /** Iniciály do kruhu bez fotky („OS“). */
@@ -99,7 +99,7 @@ function initials(entry) {
     .map((part) => part?.trim()?.[0])
     .filter(Boolean)
     .join("");
-  return text || (entry.player?.number ? String(entry.player.number) : "?");
+  return text || "?";
 }
 
 export { POSITION_POINT, LINE_Y, PLAYER_BOX, layoutLineup, shortName, initials };

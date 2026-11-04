@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { seasonRange, membershipCondition, isActive } from "../services/membership.js";
+import { seasonRange, membershipCondition, isActive, overlaps } from "../services/membership.js";
 import managementDao from "../management/dao.js";
 
 // Členství v čase mají hráči i vedení. „Soupiska sezóny“ je překrytí členství s obdobím
@@ -32,7 +32,14 @@ test("aktivní členství", () => {
   assert.equal(isActive({ dateTo: "2026-11-03" }, "2026-11-03"), true);
 });
 
-test("vedení: výbor, funkce v týmu a bez filtru", () => {
+test("překryv dvou období", () => {
+  assert.equal(overlaps({ dateFrom: "2019-01-01", dateTo: "2021-06-30" }, { dateFrom: "2021-06-30", dateTo: null }), true);
+  assert.equal(overlaps({ dateFrom: "2019-01-01", dateTo: "2021-06-30" }, { dateFrom: "2021-07-01", dateTo: null }), false);
+  assert.equal(overlaps({ dateFrom: null, dateTo: null }, { dateFrom: "2000-01-01", dateTo: "2000-01-01" }), true);
+  assert.equal(overlaps({ dateFrom: "2022-01-01", dateTo: null }, { dateFrom: null, dateTo: "2021-12-31" }), false);
+});
+
+test("vedení: výbor, funkce v týmu, osoba a bez filtru", () => {
   const called = [];
   managementDao.find = (...args) => {
     called.push(args[0]);
@@ -41,9 +48,11 @@ test("vedení: výbor, funkce v týmu a bez filtru", () => {
   managementDao.listByFilter({ board: true });
   managementDao.listByFilter({ board: true, role: "chairman" });
   managementDao.listByFilter({ teamId: "t1", role: "coach" });
+  managementDao.listByFilter({ personId: "p1" });
   managementDao.listByFilter({});
-  assert.deepEqual(called[0], { "boardList.0": { $exists: true } });
-  assert.deepEqual(called[1], { boardList: { $elemMatch: { role: "chairman" } } });
-  assert.deepEqual(called[2], { teamList: { $elemMatch: { id: "t1", role: "coach" } } });
-  assert.deepEqual(called[3], {});
+  assert.deepEqual(called[0], { teamId: null });
+  assert.deepEqual(called[1], { teamId: null, role: "chairman" });
+  assert.deepEqual(called[2], { teamId: "t1", role: "coach" });
+  assert.deepEqual(called[3], { personId: "p1" });
+  assert.deepEqual(called[4], {});
 });
