@@ -19,16 +19,32 @@
 
 import TEAM_PHOTOS from "./team-photos.js";
 
-/** Jeden blok týmové fotky → uu5String. Sestavy drží `content/team-photos.js`. */
-function teamPhotoBlock({ season, team, file, note, rowList }) {
+/** Jedna týmová fotka → uu5String. Sestavy drží `content/team-photos.js`. */
+function teamPhotoBlock({ season, team, file, note, rowList }, index) {
   return [
-    `<h3>${season} · ${team}</h3>`,
-    // `loading="lazy"` schválně: fotek je 35 a dohromady mají přes 7 MB, takže bez
-    // odloženého načítání by stránka stahovala celou historii klubu najednou.
-    `<img src="/assets/teams/${file}" alt="${team} ${season}" loading="lazy"/>`,
+    // `loading="lazy"` schválně: fotek je 53, takže bez odloženého načítání by stránka
+    // stahovala celou historii klubu najednou.
+    `<img src="/assets/teams/${file}" alt="${team} ${season}${index ? `, fotka ${index + 1}` : ""}" loading="lazy"/>`,
     ...(note ? [`<p><i>${note}</i></p>`] : []),
     ...rowList.map(({ label, names }) => `<p><b>${label}:</b> ${names}</p>`),
   ].join("\n");
+}
+
+/**
+ * Týmové fotky od nejnovější (Caio 2026-11-10). Řazení je stabilní, takže uvnitř sezóny
+ * zůstane pořadí z v0 (muži 1, 2, 3, pak žáci). Sousední fotky téže sezóny a mužstva mají
+ * jeden společný nadpis, ne tři stejné pod sebou.
+ */
+function teamPhotosContent(photoList) {
+  const groupList = [];
+  for (const photo of [...photoList].sort((a, b) => b.season.localeCompare(a.season))) {
+    const last = groupList.at(-1);
+    if (last && last.season === photo.season && last.team === photo.team) last.photoList.push(photo);
+    else groupList.push({ season: photo.season, team: photo.team, photoList: [photo] });
+  }
+  return groupList
+    .map(({ season, team, photoList: list }) => [`<h3>${season} · ${team}</h3>`, ...list.map(teamPhotoBlock)].join("\n"))
+    .join("\n\n");
 }
 
 const PAGE_CONTENT = {
@@ -160,10 +176,10 @@ Vzhůru, vzhůru, vzhůru do Zálesí.</b></p>`,
 
 
   "tymove-fotky": `<uu5string/>
-<p>Chronologie mužstev od sezóny 1943/1944. U starších fotek se dochovala jen jména,
-u novějších i to, co se ten rok povedlo.</p>
+<p>Chronologie mužstev od sezóny 1943/1944, nejnovější nahoře. U starších fotek se dochovala
+jen jména, u některých i to, co se ten rok povedlo.</p>
 
-${TEAM_PHOTOS.map(teamPhotoBlock).join("\n\n")}`,
+${teamPhotosContent(TEAM_PHOTOS)}`,
 };
 
 export { PAGE_CONTENT };

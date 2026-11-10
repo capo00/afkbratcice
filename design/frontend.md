@@ -536,11 +536,14 @@ z import mapy přes `client/uu5-imports.json`, až to začne vadit u deploye (`t
 
 ### 3.11.2 Týmové fotky
 
-`page?code=team-photos` — chronologie od roku 1943 po ročnících: fotka + jmenný seznam
-sestavy pod ní. Je to obsahová stránka, ne album, protože popisky jsou dlouhé a struktura
-(rok → mužstvo → dvě řady jmen) je součást obsahu. Odkazuje se z historie a patří k ní.
+`page?code=team-photos` — chronologie od roku 1943 po ročnících, **nejnovější nahoře**:
+fotka a pod ní jmenný seznam sestavy. Je to obsahová stránka, ne album, protože popisky jsou dlouhé
+a struktura (rok → mužstvo → jedna nebo víc fotek, každá s vlastními řadami jmen) je součást
+obsahu. Odkazuje se z historie a patří k ní.
 
-Fotky samotné jdou přes `BinaryStore` a do sekce se vkládají jako `UiElements.Image`.
+Data jsou `content/team-photos.js` (jedna položka = jedna fotka, 53 fotek z v0), fotky jsou
+statika v `client/src/assets/teams/` a cestují s buildem, ne přes `BinaryStore` — obsah je
+v kódu, takže odkaz do bucketu by v jiném prostředí neexistoval.
 
 ### 3.12 Bez bočního panelu
 
