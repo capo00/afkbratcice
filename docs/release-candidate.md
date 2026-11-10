@@ -1,6 +1,7 @@
 # Release candidate
 
 ## Přidáno
+- Nepřihlášenému návštěvníkovi nabízí tlačítko v liště webu přihlášení (ikona účtu); přihlášenému dál vede do administrace (caio-ui 0.4.11).
 - Zápas se na webu i v administraci upravuje v jednom okně se záložkami Info, Výsledek a Sestava.
 - Sestava našeho týmu se zadává na hřišti: klepnutím na post se vybere hráč ze soupisky, jeho post, góly a karty; pod hřištěm jsou střídající. Novou sestavu jde převzít z minulého zápasu.
 

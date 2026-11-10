@@ -25,9 +25,11 @@ const SAME_PAGE_PARAM_LIST = ["seasonId"];
 // než menu, takže se na něj jen proklikne (rozhodnuto 8. 9. 2026).
 //
 // Podpoložky má jen Klub (obsahové stránky). Administrace je vlastní UVE s vlastní lištou,
-// web na ni jen odkazuje ikonou (`adminLink`), vždy. Když se v tomhle prohlížeči někdo
-// přihlásil do administrace (značku zapisuje admin/app.jsx) nebo je na webu přihlášený někdo
-// s právem do ní, `Top` ji nesbalí; jinak se při nedostatku místa sbalí jako první do menu.
+// web na ni odkazuje ikonou (`adminLink`), vždy. Nepřihlášenému je to ikona osoby
+// a „Přihlásit se“, přihlášenému ikona administrace (caio-ui `Top`, Caio 2026-11-10). Když se
+// v tomhle prohlížeči někdo přihlásil do administrace (značku zapisuje admin/app.jsx) nebo je
+// na webu přihlášený někdo s právem do ní, `Top` ji nesbalí; jinak se při nedostatku místa
+// sbalí jako první do menu.
 // Přepínač světlého a tmavého režimu přidává `Top` sám.
 function useTop() {
   const { state } = UiAuth.useSession();
@@ -86,10 +88,11 @@ function useTop() {
       ],
     },
     adminLink: { profileList: ANY_ADMIN_PROFILE },
-    // Přihlásit se na webu nejde, přihlašuje se v administraci (admin/top.jsx). Session ale
-    // web má (SpaProvider), takže editor přihlášený v administraci zapíše výsledek i z dlaždice
-    // zápasu (match-tile.jsx). Proto **přihlášenému** lišta ukáže identitu s odhlášením — kdo
-    // zapisuje pod svým jménem, musí vidět pod jakým a umět se odhlásit (sdílený počítač).
+    // Přihlásit se na webu jde přes `adminLink` (nepřihlášenému je to „Přihlásit se“). Session
+    // web má (SpaProvider), takže editor zapíše výsledek i z dlaždice zápasu (match-tile.jsx).
+    // Identitu s odhlášením lišta ukáže jen **přihlášenému** — kdo zapisuje pod svým jménem,
+    // musí vidět pod jakým a umět se odhlásit (sdílený počítač). Nepřihlášenému ne: jinak by
+    // v liště byly dvě ikony osoby s týmž přihlášením.
     displayIdentity: state === "authenticated",
   };
 }
