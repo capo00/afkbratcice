@@ -4,7 +4,7 @@ import Uu5Forms from "uu5g05-forms";
 import { UiElements, UiAuth } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
-import { getMatchConfig, MATCH_PAIR_LIST } from "./match-fields.jsx";
+import { getMatchConfig, matchFormConfig, MATCH_FORM_FIELD_LIST, MATCH_PAIR_LIST } from "./match-fields.jsx";
 import { formGridLayout } from "./form-layout.js";
 import LineupEditor from "./lineup/lineup-editor.jsx";
 import { toEditorState, toPlayerList, fromPreviousMatch, lineupKey, playerCount } from "./lineup/lineup-state.js";
@@ -35,10 +35,10 @@ function showsPenaltyWinner(hasPenalties, value) {
   );
 }
 
-// Pole zápasu na záložce Info, v pořadí formuláře administrace. Bez skóre (to je na záložce
-// Výsledek) -- a týmy jen pro správce zápasů: editorovi týmu by je server stejně zahodil
-// (`match/crud.js`, `update`), takže by je měnil naprázdno.
-const UPDATE_FIELD_LIST = ["time", "homeTeamId", "guestTeamId", "seasonId", "round", "place", "departureTime", "state", "note"];
+// Pole zápasu na záložce Info, v pořadí formuláře nového zápasu (`MATCH_FORM_FIELD_LIST`).
+// Bez skóre (to je na záložce Výsledek) -- a týmy jen pro správce zápasů: editorovi týmu by je
+// server stejně zahodil (`match/crud.js`, `update`), takže by je měnil naprázdno.
+const UPDATE_FIELD_LIST = MATCH_FORM_FIELD_LIST;
 const TEAM_FIELD_LIST = ["homeTeamId", "guestTeamId"];
 const RESULT_FIELD_LIST = ["homeGoals", "guestGoals", "homeGoalsHalf", "guestGoalsHalf", "penaltyWinnerTeamId"];
 
@@ -47,10 +47,6 @@ const FIELD_TAB = {
   ...Object.fromEntries(UPDATE_FIELD_LIST.map((name) => [name, "info"])),
   ...Object.fromEntries(RESULT_FIELD_LIST.map((name) => [name, "result"])),
 };
-
-function pickConfig(cfg, nameList) {
-  return Object.fromEntries(nameList.filter((name) => cfg[name]).map((name) => [name, cfg[name]]));
-}
 
 /**
  * Hraje se v sezóně na penalty? `season/get` je veřejný; zápas bez sezóny je přátelák
@@ -250,7 +246,7 @@ function MatchModal({
     [matchManager],
   );
   // Názvy týmů jen pro sloupce; filtry záložka nepotřebuje.
-  const updateCfg = useMemo(() => pickConfig(getMatchConfig({ getTeam: () => undefined }), updateFieldList), [updateFieldList]);
+  const updateCfg = useMemo(() => matchFormConfig(getMatchConfig({ getTeam: () => undefined }), updateFieldList), [updateFieldList]);
 
   // Proti čemu se počítá, co se změnilo. Po úspěšném zápisu se posune: když selže další krok,
   // druhé Uložit už to, co prošlo, neposílá znovu.
@@ -275,7 +271,9 @@ function MatchModal({
   // Edits and the saved key belong to one team: should `lineupTeamId` change while the modal is
   // open (the session or the team map arriving late), they start over with the new team.
   const [edited, setEdited] = useState(null);
-  const lineup = edited?.teamId === lineupTeamId ? edited.lineup : initialLineup;
+  // `edited &&` first: a match without our team has no `lineupTeamId`, and `undefined === undefined`
+  // would read the lineup of a `null`.
+  const lineup = edited && edited.teamId === lineupTeamId ? edited.lineup : initialLineup;
   const setEditedLineup = useCallback((next) => setEdited({ teamId: lineupTeamId, lineup: next }), [lineupTeamId]);
   const savedLineupKeyRef = useRef(null);
   if (initialLineup && savedLineupKeyRef.current?.teamId !== lineupTeamId) {

@@ -69,9 +69,10 @@ const AdminFiles = createVisualComponent({
           label: lsi("admin", "field", "category"),
           sort: true,
           output: (value) => (fileCategoryList ?? []).find((c) => c.code === value)?.name ?? value,
-          input: { Component: Uu5Forms.FormSelect, props: { itemList: categoryItemList } },
+          // Kategorie jsou v nastavení, počet není daný -> výběr s hledáním (Caio 2026-11-10).
+          input: { Component: Uu5Forms.FormTextSelect, props: { itemList: categoryItemList } },
           filterProps: {
-            inputType: "select",
+            inputType: "text-select",
             inputProps: { itemList: categoryItemList },
             filter: (value, filterValue) => value === filterValue,
           },

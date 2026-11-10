@@ -4,7 +4,7 @@ import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { seasonLabel, teamLabel } from "../fields.jsx";
-import { getMatchConfig, MATCH_PAIR_LIST } from "../match-fields.jsx";
+import { getMatchConfig, matchFormConfig, MATCH_PAIR_LIST } from "../match-fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import { MatchModal } from "../match-modals.jsx";
 import { useApp } from "../../core/app-context.jsx";
@@ -94,6 +94,9 @@ const AdminMatches = createVisualComponent({
       [getTeam, teamItemList, seasonItemList],
     );
 
+    // The form of a new match in the order of the Info tab; the columns keep the order of CONFIG.
+    const FORM_CONFIG = useMemo(() => matchFormConfig(CONFIG), [CONFIG]);
+
     const { seriesList, columnList, sorterList, filterList } = useMemo(
       () => UiElements.Crud.generate(CONFIG),
       [CONFIG],
@@ -142,7 +145,7 @@ const AdminMatches = createVisualComponent({
             },
           ]}
         >
-          {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={MATCH_PAIR_LIST} />}
+          {({ type }) => <CrudFormView cfg={FORM_CONFIG} operation={type} pairList={MATCH_PAIR_LIST} />}
         </UiElements.Crud>
 
         {editFor ? (

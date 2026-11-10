@@ -25,7 +25,7 @@ const teamName = (team) => teamLabel(team);
 
 /**
  * Competition participants -- multi-select of teams. Through `EntitySelect`, which mounts the
- * validating `FormSelect` only once the list is loaded (fields.jsx).
+ * validating `FormTextSelect` only once the list is loaded (fields.jsx).
  */
 function TeamListInput(props) {
   return <EntitySelect {...props} useCase="/team/list" getLabel={teamName} multiple />;
@@ -45,8 +45,9 @@ const getConfig = (yearList) => ({
     sort: true,
     columnProps: { maxWidth: 100 },
     input: { Component: Uu5Forms.FormText, props: { required: true, pattern: "\\d{4}", maxLength: 4 } },
+    // Ročníků přibývá každý rok -> výběr s hledáním (Caio 2026-11-10).
     filterProps: {
-      inputType: "select",
+      inputType: "text-select",
       inputProps: { itemList: yearList.map((yearFrom) => ({ value: yearFrom, children: seasonLabel({ yearFrom }) })) },
       filter: (value, filterValue) => value === filterValue,
     },

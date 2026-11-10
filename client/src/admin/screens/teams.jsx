@@ -44,8 +44,9 @@ const getConfig = ({ clubItemList, categoryItemList }) => ({
   },
   category: {
     ...categoryField,
+    // Kategorie spravuje klub, počet není daný -> výběr s hledáním (Caio 2026-11-10).
     filterProps: {
-      inputType: "select",
+      inputType: "text-select",
       inputProps: { itemList: categoryItemList },
       filter: (value, filterValue) => value === filterValue,
     },

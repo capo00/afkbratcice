@@ -59,7 +59,7 @@ function getRosterConfig({ playerItemList }) {
       sort: (_, __, a, b) => playerText(a.data.player).localeCompare(playerText(b.data.player), "cs"),
       input: {
         Component: EntitySelect,
-        props: { required: true, searchable: true, useCase: "/player/list", getLabel: playerText },
+        props: { required: true, useCase: "/player/list", getLabel: playerText },
       },
       filterProps: {
         inputType: "text-select",

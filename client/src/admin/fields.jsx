@@ -37,9 +37,12 @@ const EntitySelect = createVisualComponent({
   uu5Tag: Config.TAG + "EntitySelect",
 
   // `valueKey`: co se ukládá -- `id` (výchozí), nebo jiný klíč entity (kategorie se
-  // odkazují kódem, `afk_category.code`). `searchable`: výběr s hledáním (`FormTextSelect`)
-  // pro dlouhé seznamy -- hráčů jsou stovky; popisek pak musí být řetězec.
-  render({ useCase, dtoIn, getLabel, valueKey = "id", searchable = false, ...props }) {
+  // odkazují kódem, `afk_category.code`).
+  //
+  // Vždy `FormTextSelect` (s hledáním), ne `FormSelect`: seznam entit má dynamický počet
+  // položek a může jich být víc než deset (pravidlo Caio 2026-11-10). Popisek z `getLabel`
+  // proto musí být řetězec.
+  render({ useCase, dtoIn, getLabel, valueKey = "id", ...props }) {
     // `getLabel(item, app)`: popisek může sáhnout do app-contextu (kategorie týmu).
     const app = useApp();
     const { state, data } = useDataObject(
@@ -52,16 +55,24 @@ const EntitySelect = createVisualComponent({
       [data, getLabel, valueKey, app],
     );
 
-    // While the list loads, a plain `Select` (no `name`, no validation, not part of the form value).
-    // `FormSelect` validates its initial value against `itemList` once, on mount: with an empty list it
+    // While the list loads, a plain `TextSelect` (no `name`, no validation, not part of the form value).
+    // A form select validates its initial value against `itemList` once, on mount: with an empty list it
     // reports `mismatch`, does not revalidate when the list arrives, and the error disables Submit --
     // editing any record with an entity select was impossible. `className` carries the grid area that
     // `Form.View` assigns to this component; `pending` says "loading", not "nothing to choose from".
     if (state === "pendingNoData") {
-      return <Uu5Forms.Select label={props.label} className={props.className} required={props.required} pending disabled />;
+      return (
+        <Uu5Forms.TextSelect
+          label={props.label}
+          className={props.className}
+          required={props.required}
+          onChange={() => {}}
+          pending
+          disabled
+        />
+      );
     }
-    const Select = searchable ? Uu5Forms.FormTextSelect : Uu5Forms.FormSelect;
-    return <Select {...props} itemList={itemList} />;
+    return <Uu5Forms.FormTextSelect {...props} itemList={itemList} />;
   },
 });
 

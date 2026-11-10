@@ -14,8 +14,20 @@ const dateRangeDtoIn = ([from, to] = []) => ({
   ...(to ? { dateTo: `${to}T23:59:59.999Z` } : null),
 });
 
+// Formulář zápasu -- nový zápas na obrazovce Zápasy i záložka Info modalu -- má pořadí podle
+// obrazovky, ne podle sloupců tabulky (Caio 2026-11-10): sezóna a kolo, termín a stav, domácí
+// a hosté, hřiště a odjezd, poznámka přes celou šířku. `generateInputs` vykresluje pole
+// v pořadí konfigurace, proto se konfigurace pro formulář přeřadí (`matchFormConfig`) a
+// tabulátor jde stejně jako oko. Pořadí sloupců zůstává z `getMatchConfig`.
+const MATCH_FORM_FIELD_LIST = ["seasonId", "round", "time", "state", "homeTeamId", "guestTeamId", "place", "departureTime", "note"];
+
 /** Dvojice polí vedle sebe od `s` výš (`formGridLayout`). */
-const MATCH_PAIR_LIST = [["homeTeamId", "guestTeamId"], ["seasonId", "round"], ["place", "departureTime"]];
+const MATCH_PAIR_LIST = [["seasonId", "round"], ["time", "state"], ["homeTeamId", "guestTeamId"], ["place", "departureTime"]];
+
+/** Jen pole formuláře, v pořadí `nameList`; chybějící klíče se přeskočí. */
+function matchFormConfig(cfg, nameList = MATCH_FORM_FIELD_LIST) {
+  return Object.fromEntries(nameList.filter((name) => cfg[name]).map((name) => [name, cfg[name]]));
+}
 
 /**
  * @param getTeam         tým podle id z app-contextu (název ve sloupci)
@@ -118,4 +130,4 @@ function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
   };
 }
 
-export { getMatchConfig, MATCH_PAIR_LIST };
+export { getMatchConfig, matchFormConfig, MATCH_FORM_FIELD_LIST, MATCH_PAIR_LIST };

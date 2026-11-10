@@ -25,6 +25,29 @@ const CARD_COLOR = { yellow: "#E9C500", red: "#D01319" };
 const CARD_SIZE = { width: 8, height: 11 };
 const NAME_SHADOW = "0 1px 2px rgba(0, 0, 0, 0.6)";
 
+/**
+ * A yellow or red card as an icon, the same mark as on the pitch -- the lineup player modal
+ * uses it instead of a text label. `label` is what a screen reader says.
+ */
+function CardIcon({ color, label, scale = 1.6 }) {
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      title={label}
+      className={Config.Css.css({
+        display: "inline-block",
+        verticalAlign: "middle",
+        inlineSize: CARD_SIZE.width * scale,
+        blockSize: CARD_SIZE.height * scale,
+        borderRadius: 2,
+        backgroundColor: CARD_COLOR[color],
+        boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.35)",
+      })}
+    />
+  );
+}
+
 // Průměr kruhu (px) podle stupně `RichIcon`. Vybírá se největší, který se při dané šířce
 // hřiště vejde i se jménem do svislého rozestupu postů (PLAYER_BOX.height).
 const ICON_SIZE_LIST = [
@@ -353,5 +376,5 @@ const LineupPitch = createVisualComponent({
   },
 });
 
-export { LineupPitch };
+export { LineupPitch, CardIcon };
 export default LineupPitch;

@@ -738,9 +738,11 @@ otevře záložku **Výsledek**) i v administraci (tužka řádku na obrazovce Z
 akci nemá -- je to záložka modalu, Caio 2026-11-10).
 Nadpis je dvojice týmů. Záložky (nativní `tabList` `Uu5Elements.Modal`):
 
-- **Info** – termín, týmy (jen profil MATCH -- editorovi týmu by je server zahodil), sezóna,
-  kolo, hřiště, odjezd, stav, poznámka; tatáž pole jako formulář administrace
-  (`admin/match-fields.jsx`). Jen pro toho, kdo smí `match/update`.
+- **Info** – tatáž pole i rozložení jako formulář nového zápasu v administraci
+  (`MATCH_FORM_FIELD_LIST` a `MATCH_PAIR_LIST` v `admin/match-fields.jsx`; sloupce tabulky mají
+  své pořadí), od tabletu ve dvojicích: sezóna a kolo, termín a stav, domácí a hosté (jen profil MATCH -- editorovi týmu
+  by je server zahodil), hřiště a odjezd, poznámka přes celou šířku (Caio 2026-11-10). Na
+  mobilu pole pod sebou. Jen pro toho, kdo smí `match/update`.
 - **Výsledek** – skóre, poločas, vítěz rozstřelu (jen u remízy v sezóně s penaltami). Skóre
   je povinné, jen když zápas výsledek už má nebo se začal vyplňovat -- zápas, který se ještě
   nehrál, jde uložit jen s úpravou Info.
@@ -752,8 +754,10 @@ Nadpis je dvojice týmů. Záložky (nativní `tabList` `Uu5Elements.Modal`):
     prázdný post čárkovaný kruh s „+“. Nová sestava začíná výchozím rozestavením brankář,
     pravá a levá obrana, stoper, předstoper, pravá a levá záloha, defenzivní a ofenzivní
     záloha, pravý a levý útok (`admin/lineup/lineup-state.js`).
-  - Klepnutí na post nebo střídajícího otevře modal hráče: hráč ze soupisky, post (u
-    střídajícího nepovinný), góly, žlutá a červená karta (toggle). Hráč, který už v sestavě
+  - Klepnutí na post nebo střídajícího otevře modal hráče: hráč ze soupisky a post (u
+    střídajícího nepovinný), oba `TextSelect` s hledáním a od tabletu vedle sebe; pod nimi
+    v jednom řádku góly (dva sloupce) a žlutá a červená karta jako toggle s kartičkou místo
+    popisku, zarovnané dolů k poli gólů (Caio 2026-11-10). Hráč, který už v sestavě
     je, se s tím na postu prohodí -- nikdo není v sestavě dvakrát a na postu je jeden hráč.
     „Uvolnit post“ / „Odebrat“; „Použít“ mění jen rozpracovanou sestavu.
   - Pod hřištěm střídající a „Přidat střídajícího“. U prázdné sestavy **Převzít z minulého
