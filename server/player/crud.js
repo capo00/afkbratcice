@@ -12,6 +12,13 @@ import { withTeamList } from "../services/roster.js";
 // statistiky i stránka hráče, proto zůstává jeden záznam na osobu. Kdy byl v jakém týmu, je
 // soupiska (`afk_roster`, `roster/*`); `teamList` ve výstupu je z ní odvozený (services/roster.js).
 
+/** `{ from, to }` of one day, or `null` for anything that is not a YYYY-MM-DD date. */
+function dayRange(date) {
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date.slice(0, 10))) return null;
+  const day = date.slice(0, 10);
+  return { from: day, to: day };
+}
+
 class PlayerCrud extends Crud {
   constructor() {
     super("player", dao);
@@ -38,9 +45,15 @@ class PlayerCrud extends Crud {
     });
   }
 
-  /** `teamId` = soupiska týmu (s `active` / `seasonId` v čase), jinak všichni hráči. */
-  async list({ teamId, active, seasonId, idList, pageInfo } = {}, identity) {
-    const range = seasonId ? await seasonRangeOf(seasonId) : undefined;
+  /**
+   * `teamId` = soupiska týmu (s `active` / `seasonId` / `date` v čase), jinak všichni hráči.
+   *
+   * `date` (YYYY-MM-DD) is the roster on a single day: a match lineup offers the players of
+   * the match day, the same check `match/setLineup` makes. It wins over `seasonId`; a malformed
+   * date returns nothing, like an unknown season, rather than the roster of all time.
+   */
+  async list({ teamId, active, seasonId, date, idList, pageInfo } = {}, identity) {
+    const range = date !== undefined ? dayRange(date) : seasonId ? await seasonRangeOf(seasonId) : undefined;
     if (range === null) return [];
 
     let playerList;

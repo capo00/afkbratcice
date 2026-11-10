@@ -8,16 +8,17 @@ import TeamLogo from "./team-logo.jsx";
 import DateText from "./date-text.jsx";
 import { TeamLink, SeasonLink } from "./route-link.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { lineupTeamIdFor } from "../core/lineup-team.js";
 
 const { theme } = Config;
 
-// Formulář výsledku se načítá **lazy**: dlaždice je součást veřejného balíku, ale modal
+// Modal zápasu se načítá **lazy**: dlaždice je součást veřejného balíku, ale modal
 // z administrace by do něj přitáhl svoje závislosti (`admin/fields.jsx`, `uu5codekitg01`)
 // kvůli tlačítku, které naprostá většina čtenářů nikdy neuvidí. Ověřeno na buildu —
-// `match-modals` sedí ve vlastním chunku (~10 kB i s poli rozbalovací úpravy zápasu, build 2026-11-03) a stáhne se až kliknutím na tužku.
+// `match-modals` sedí ve vlastním chunku (build 2026-11-03) a stáhne se až kliknutím na tužku.
 // (`uu5g05-forms` samotné v hlavním balíku stejně je, táhne si ho `home/tables-section.jsx`.)
-const ResultModal = Utils.Component.lazy(() =>
-  import("../admin/match-modals.jsx").then((m) => ({ default: m.ResultModal })),
+const MatchModal = Utils.Component.lazy(() =>
+  import("../admin/match-modals.jsx").then((m) => ({ default: m.MatchModal })),
 );
 
 // Dlaždice zápasu — **jediná** komponenta, která kreslí zápas: rozpis i výsledek v seznamech,
@@ -52,7 +53,8 @@ const ResultModal = Utils.Component.lazy(() =>
 //   size           "medium" (výchozí, seznamy) | "large" (hlavička detailu: větší loga,
 //                  patička s kolem, datem a časem, místem a odjezdem, bez prokliku)
 //   onClick        proklik; výchozí je detail zápasu (u `large` žádný)
-//   onResultSaved  (updatedMatch) => void, po uložení výsledku tužkou
+//   onResultSaved  (updatedMatch, { lineupSaved }) => void, po uložení tužkou; `lineupSaved`
+//                  = změnila se sestava (vrácený zápas ji má bez osob, detail si ji načte znovu)
 
 function outcome(match, ownTeamId) {
   if (!Number.isFinite(match.homeGoals) || !Number.isFinite(match.guestGoals)) return null;
@@ -89,7 +91,7 @@ function canSetResult(identity, match) {
   return myTeamIdList.some((id) => id === match.homeTeamId || id === match.guestTeamId);
 }
 
-// Smí přihlášený i `match/update` (rozbalovací sekce modalu výsledku)? Na serveru má dnes
+// Smí přihlášený i `match/update` (záložka Info modalu zápasu)? Na serveru má dnes
 // stejná práva jako `setResult` (design/roles.md, 5) -- zvlášť pro případ, že se rozejdou.
 const canUpdateMatch = canSetResult;
 
@@ -219,11 +221,11 @@ const MatchTile = createVisualComponent({
     // Velká dlaždice JE detail zápasu, proklik by vedl na tutéž stránku.
     const handleClick = onClick ?? (match.id && !large ? () => setRoute("zapas", { id: match.id }) : undefined);
 
-    function handleResultSaved(updated) {
+    function handleResultSaved(updated, { lineupSaved = false } = {}) {
       // Zápis vrací holý zápas (bez vložených týmů a rozbalené sestavy), proto merge.
       const next = { ...match, ...updated };
       if (!matchData) setSaved({ base: baseMatch, match: next });
-      onResultSaved?.(next);
+      onResultSaved?.(next, { lineupSaved });
     }
 
     // `Tile` (pod `Card`) schová `actionList` na `opacity: 0` a odkryje ho na hoveru karty;
@@ -423,23 +425,27 @@ const MatchTile = createVisualComponent({
             keeps the app's `loose`, as the former detail header did. */}
         {large ? card : <Uu5Elements.SpacingProvider type="normal">{card}</Uu5Elements.SpacingProvider>}
 
-        {/* `ResultModal` čeká celé týmy (vypisuje jejich názvy), ale `match/list` vrací jen
+        {/* `MatchModal` čeká celé týmy (vypisuje jejich názvy), ale `match/list` vrací jen
             id — doplní se z mapy týmů v app-contextu, stejně jako to dělá `admin/matches`.
 
             U `matchData` jde zápis **položkovým handlerem seznamu** (`onSubmit`): seznam pak
-            položku nahradí tím, co server vrátil, a nepřenačítá se celý. U holého `match`
-            volá modal use case sám a dlaždice si výsledek převezme v `handleResultSaved`. */}
+            položku nahradí tím, co vrátil server, a nepřenačítá se celý. U holého `match`
+            volá modal use case sám a dlaždice si výsledek převezme v `handleResultSaved`.
+            Sestavu dlaždice nekreslí, takže jde vždy use casem; modal si ji při otevření
+            stejně načítá čerstvou (`match/get`). Na webu se otevírá záložka Výsledek. */}
         {resultOpen ? (
           <Suspense fallback={null}>
-            <ResultModal
+            <MatchModal
               match={{ ...match, homeTeam, guestTeam }}
+              initialTabCode="result"
               onClose={() => setResultOpen(false)}
               onSubmit={matchData ? setResult : undefined}
               onSaved={handleResultSaved}
               // Seznam bez handleru `update` dostane úpravu zápasu až s výsledkem (`setResult`
-              // vrací celý zápas) -- proto se sekce nabídne jen tam, kde ho seznam má.
+              // vrací celý zápas) -- proto se záložka Info nabídne jen tam, kde ho seznam má.
               canUpdate={(!matchData || Boolean(update)) && canUpdateMatch(session.identity, match)}
               onUpdate={matchData ? update : undefined}
+              lineupTeamId={lineupTeamIdFor(session.identity, match, getTeam)}
             />
           </Suspense>
         ) : null}

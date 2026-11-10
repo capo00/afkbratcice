@@ -1,14 +1,13 @@
-import { createVisualComponent, useDataObject, useState, useMemo, useRef, Lsi } from "uu5g05";
+import { useDataObject, useState, useMemo, useRef, useEffect, useCallback, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements, UiAuth } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
-import { enumItemList, personLabel } from "./fields.jsx";
 import { getMatchConfig, MATCH_PAIR_LIST } from "./match-fields.jsx";
 import { formGridLayout } from "./form-layout.js";
-
-const { theme } = Config;
+import LineupEditor from "./lineup/lineup-editor.jsx";
+import { toEditorState, toPlayerList, fromPreviousMatch, lineupKey, playerCount } from "./lineup/lineup-state.js";
 
 const LSI_PATH = ["admin", "matches"];
 
@@ -36,11 +35,18 @@ function showsPenaltyWinner(hasPenalties, value) {
   );
 }
 
-// Pole zápasu v rozbalovací sekci modalu výsledku, v pořadí formuláře administrace. Bez
-// skóre (to je nahoře) -- a týmy jen pro správce zápasů: editorovi týmu by je server
-// stejně zahodil (`match/crud.js`, `update`), takže by je měnil naprázdno.
+// Pole zápasu na záložce Info, v pořadí formuláře administrace. Bez skóre (to je na záložce
+// Výsledek) -- a týmy jen pro správce zápasů: editorovi týmu by je server stejně zahodil
+// (`match/crud.js`, `update`), takže by je měnil naprázdno.
 const UPDATE_FIELD_LIST = ["time", "homeTeamId", "guestTeamId", "seasonId", "round", "place", "departureTime", "state", "note"];
 const TEAM_FIELD_LIST = ["homeTeamId", "guestTeamId"];
+const RESULT_FIELD_LIST = ["homeGoals", "guestGoals", "homeGoalsHalf", "guestGoalsHalf", "penaltyWinnerTeamId"];
+
+// Which tab a form field lives on -- an invalid field on a hidden tab switches to it.
+const FIELD_TAB = {
+  ...Object.fromEntries(UPDATE_FIELD_LIST.map((name) => [name, "info"])),
+  ...Object.fromEntries(RESULT_FIELD_LIST.map((name) => [name, "result"])),
+};
 
 function pickConfig(cfg, nameList) {
   return Object.fromEntries(nameList.filter((name) => cfg[name]).map((name) => [name, cfg[name]]));
@@ -64,24 +70,35 @@ function useHasPenalties(seasonId) {
 }
 
 /**
- * Je potřeba zapsat výsledek? Bez rozbalené sekce vždycky -- k tomu modal je. S ní jde upravit
- * jen zápas (přesunout termín zápasu, který se ještě nehrál), dokud nemá výsledek uložený
- * a nezačal se vyplňovat: `match/setResult` skóre bez gólů nebere.
+ * Is the score required? Only once the match has a result saved or one is being typed:
+ * `match/setResult` takes no score without goals. Otherwise the modal saves the rest alone --
+ * a new kick-off of a match not played yet, or a lineup without a result.
  */
-function needsResult(expanded, match, value) {
-  return (
-    !expanded ||
-    Number.isFinite(match.homeGoals) ||
-    Number.isFinite(value?.homeGoals) ||
-    Number.isFinite(value?.guestGoals)
-  );
+function needsResult(match, value) {
+  return Number.isFinite(match.homeGoals) || Number.isFinite(value?.homeGoals) || Number.isFinite(value?.guestGoals);
+}
+
+/**
+ * The result fields as they are -- compared with the last saved ones, so an unchanged result is
+ * not sent again. Raw values on purpose, not filtered by `hasPenalties`: the season loads
+ * asynchronously (or fails to), and a lineup-only save must not erase a stored shootout winner
+ * just because the season had not answered yet (review 2026-11-10).
+ */
+function resultKey(value) {
+  return JSON.stringify([
+    value.homeGoals ?? null,
+    value.guestGoals ?? null,
+    value.homeGoalsHalf ?? null,
+    value.guestGoalsHalf ?? null,
+    value.penaltyWinnerTeamId ?? null,
+  ]);
 }
 
 /**
  * Pole formuláře výsledku. Je to vlastní komponenta jen kvůli `useFormApi`: ten musí sedět
  * pod `Form.Provider`, a vítěz rozstřelu se ukazuje živě podle toho, co je zrovna vyplněné --
- * i podle sezóny, kterou může změnit rozbalovací sekce. Co platí, předává `hasPenaltiesRef`
- * zápisu v `ResultModal`, který sedí nad formulářem.
+ * i podle sezóny, kterou může změnit záložka Info. Co platí, předává `hasPenaltiesRef`
+ * zápisu v `MatchModal`, který sedí nad formulářem.
  */
 function ResultFields({ teamItemList, hasPenaltiesRef, scoreRequired }) {
   const { value } = Uu5Forms.useFormApi();
@@ -107,69 +124,209 @@ function ResultFields({ teamItemList, hasPenaltiesRef, scoreRequired }) {
   );
 }
 
-/**
- * Zbytek editace zápasu pod odkazem „Další úpravy zápasu“. Pole se vykreslí až po rozbalení:
- * výběry týmů a sezón se tak nenačítají zbytečně a skryté povinné pole neblokuje uložení.
- */
-function UpdateSection({ cfg }) {
-  const autoFocusRef = UiElements.useAutoFocus();
+/** The Info tab: the rest of the match, the same fields as the admin form. */
+function InfoFields({ cfg }) {
   return (
-    <div ref={autoFocusRef} className={Config.Css.css({ marginBlockStart: 16 })}>
-      <Uu5Forms.Form.View gridLayout={formGridLayout(cfg, MATCH_PAIR_LIST)}>
-        {UiElements.Crud.generateInputs(cfg, { operation: "update" })}
-      </Uu5Forms.Form.View>
-    </div>
+    <Uu5Forms.Form.View gridLayout={formGridLayout(cfg, MATCH_PAIR_LIST)}>
+      {UiElements.Crud.generateInputs(cfg, { operation: "update" })}
+    </Uu5Forms.Form.View>
   );
 }
 
-// Dva modaly nad zápasem: **výsledek** a **sestava**. Obojí je vlastní use case
-// (`match/setResult`, `match/setLineup`), ne `match/update` — a to schválně:
-//
-// - `setResult` hlídá, že rozstřel dává smysl jen u remízy a že vítěz je jeden ze dvou
-//   týmů; kdyby to byl obyčejný update, dala by se tabulka rozbít vyplněním formuláře,
-// - `setLineup` pouští editora jednoho týmu jen k hráčům jeho týmu, i když zápas má dva.
-//
-// Formulář výsledku odpovídá v0 `editZapas.php`, jen bez ručního psaní loginů.
-//
-// Kdo smí i `match/update`, dostane v modalu výsledku rozbalovací sekci se zbytkem zápasu
-// (termín, sezóna, kolo, hřiště, odjezd, stav, poznámka). Uloží se jedním tlačítkem, ale pořád
-// dvěma use casy za sebou: nejdřív `update` se změněnými poli, pak `setResult` -- v tomhle
-// pořadí, protože změna sezóny mění `hasPenalties`, podle kterého server rozstřel kontroluje.
-// Zápas, který ještě nemá výsledek, jde po rozbalení uložit i bez skóre -- pak jen `update`.
+/**
+ * Invalid fields on hidden tabs. uu5 disables Save as soon as a field is invalid, so a user on
+ * another tab would see a dead button and no reason: `onInvalidChange` gets the tabs with an
+ * invalid field (their label gets a warning icon). And Save pressed while validation fails only
+ * on submit (a required field never touched): that tab is shown. `attemptRef` holds when Save
+ * was pressed -- validation answers a moment later, and an error that appears while typing
+ * must not switch tabs.
+ */
+function InvalidTabs({ attemptRef, onTab, onInvalidChange }) {
+  const { itemMap } = Uu5Forms.useFormApi();
+  const invalidKey = [
+    ...new Set(Object.keys(FIELD_TAB).filter((field) => itemMap?.[field] && itemMap[field].valid === false).map((field) => FIELD_TAB[field])),
+  ].join(",");
+  useEffect(() => {
+    onInvalidChange(invalidKey);
+  }, [invalidKey, onInvalidChange]);
+  useEffect(() => {
+    if (!attemptRef.current || Date.now() - attemptRef.current > 3000) return;
+    const name = Object.keys(FIELD_TAB).find((field) => itemMap?.[field] && itemMap[field].valid === false);
+    if (name) {
+      attemptRef.current = 0;
+      onTab(FIELD_TAB[name]);
+    }
+  }, [itemMap, attemptRef, onTab]);
+  return null;
+}
 
 /**
- * @param onSubmit  volitelný zapisovač — dostane hotový dtoIn místo toho, aby se volal
- *                  `match/setResult` napřímo. Je to kvůli `useDataList`: když zápis projde
- *                  **položkovým handlerem** seznamu, seznam si položku aktualizuje sám tím,
- *                  co server vrátil, a nemusí se přenačítat celý (viz `components/match-tile.jsx`).
- *                  Bez něj se volá use case přímo — pro obrazovky, které seznam nedrží.
- * @param onSaved   dostane zápas, jak ho vrátil zápis (`onSubmit` nebo `match/setResult`).
- * @param canUpdate smí přihlášený i `match/update` -- pak modal nabídne rozbalovací sekci
- *                  se zbytkem zápasu.
- * @param onUpdate  volitelný zapisovač `match/update` -- totéž co `onSubmit`, jen pro úpravu
- *                  zápasu (položkový handler `update` seznamu).
+ * Roster of the edited team on the match day and the match's current lineup. `match/get`
+ * rather than `match.playerList`: a list on the home page keeps the match as it was loaded,
+ * and editing an old lineup would overwrite a newer one.
  */
-function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onUpdate }) {
+function useLineupData(match, teamId) {
+  const { state, data } = useDataObject(
+    {
+      handlerMap: {
+        load: async () => {
+          if (!teamId) return null;
+          const day = match.time ? String(match.time).slice(0, 10) : undefined;
+          const [roster, fresh] = await Promise.all([
+            UiElements.Call.cmdGet("/player/list", { teamId, ...(day ? { date: day } : null) }).catch(() => ({ itemList: [] })),
+            UiElements.Call.cmdGet("/match/get", { id: match.id }).catch(() => null),
+          ]);
+          // Without the current lineup the tab is not offered: editing the copy a list holds could
+          // overwrite a newer lineup (review 2026-11-10).
+          if (!fresh) return null;
+          return { players: roster?.itemList ?? [], playerList: fresh.playerList ?? [] };
+        },
+      },
+    },
+    [match.id, teamId],
+  );
+  return { pending: state === "pendingNoData", data };
+}
+
+// Jeden modal nad zápasem, na webu (tužka u dlaždice) i v administraci (Caio 2026-11-10).
+// Záložky:
+//
+// - **Info** -- termín, týmy, sezóna, kolo, hřiště, odjezd, stav, poznámka (`match/update`),
+//   jen pro toho, kdo smí `match/update`,
+// - **Výsledek** -- skóre, poločas, vítěz rozstřelu (`match/setResult`),
+// - **Sestava** -- hřiště s výchozím rozestavením (`match/setLineup`), jen u vlastního týmu,
+//   který přihlášený smí editovat a který má k datu zápasu soupisku (Caio 2026-11-10).
+//
+// Každá část je vlastní use case, ne `match/update` -- a to schválně: `setResult` hlídá
+// rozstřel (tabulka), `setLineup` pouští editora jednoho týmu jen k hráčům jeho týmu.
+//
+// Uloží se jedním tlačítkem, use casy jdou za sebou: `update` (změněná pole) → `setResult`
+// (jen změněný výsledek; po `update`, protože změna sezóny mění `hasPenalties`) → `setLineup`
+// (jen změněná sestava; po výsledku, server porovnává góly se skóre). Když jeden selže, modal
+// zůstane otevřený a další Uložit pošle jen to, co ještě neprošlo.
+//
+// Všechny záložky zůstávají vykreslené, neaktivní jsou jen schované: formulář tak nepřijde
+// o hodnoty polí, která zrovna nejsou vidět. Info se poprvé vykreslí až při první návštěvě
+// (výběry týmů a sezón se jinak načítají zbytečně); hodnoty jeho polí jsou ve formuláři
+// z `initialValue` i bez nich.
+
+/**
+ * @param match           zápas; `homeTeam`/`guestTeam` kvůli názvům
+ * @param initialTabCode  "info" | "result" | "lineup"; bez něj Info (administrace), web posílá "result".
+ *                        Záložka, která není k dispozici, ustoupí první dostupné.
+ * @param canUpdate       smí přihlášený i `match/update` -- pak je tu záložka Info
+ * @param lineupTeamId    vlastní tým, jehož sestavu přihlášený smí zapsat (match-tile.jsx,
+ *                        `lineupTeamIdFor`); záložka Sestava jen s neprázdnou soupiskou
+ * @param onSubmit        volitelný zapisovač `match/setResult` -- položkový handler `useDataList`,
+ *                        seznam si pak položku aktualizuje sám. Bez něj se volá use case.
+ * @param onUpdate        totéž pro `match/update`
+ * @param onLineupSubmit  totéž pro `match/setLineup`
+ * @param onSaved         (match, { lineupSaved }) po uložení; `match` je poslední, co vrátil server,
+ *                        sloučené se vstupem (zápisy vrací holý zápas)
+ */
+function MatchModal({
+  match,
+  onClose,
+  onSaved,
+  onSubmit,
+  onUpdate,
+  onLineupSubmit,
+  canUpdate = false,
+  lineupTeamId,
+  initialTabCode,
+}) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState();
-  const [expanded, setExpanded] = useState(false);
+  const [tabCode, setTabCode] = useState(initialTabCode ?? "info");
+  const [visited, setVisited] = useState(() => new Set([initialTabCode ?? "info"]));
   const hasPenaltiesRef = useRef(false);
+  const submitAttemptRef = useRef(0);
   const autoFocusRef = UiElements.useAutoFocus();
   const session = UiAuth.useSession();
   const matchManager = UiAuth.hasProfile(session.identity, Config.MATCH);
+
   const updateFieldList = useMemo(
     () => (matchManager ? UPDATE_FIELD_LIST : UPDATE_FIELD_LIST.filter((name) => !TEAM_FIELD_LIST.includes(name))),
     [matchManager],
   );
-  // Názvy týmů jen pro sloupce; filtry sekce nepotřebuje.
+  // Názvy týmů jen pro sloupce; filtry záložka nepotřebuje.
   const updateCfg = useMemo(() => pickConfig(getMatchConfig({ getTeam: () => undefined }), updateFieldList), [updateFieldList]);
 
-  // Proti čemu se počítá, co rozbalovací sekce změnila. Po úspěšném `update` se posune:
-  // když pak selže `setResult`, další Uložit už úpravu zápasu neposílá znovu.
+  // Proti čemu se počítá, co se změnilo. Po úspěšném zápisu se posune: když selže další krok,
+  // druhé Uložit už to, co prošlo, neposílá znovu.
   const savedRef = useRef();
   if (!savedRef.current) {
     savedRef.current = Object.fromEntries(UPDATE_FIELD_LIST.map((name) => [name, match[name] ?? undefined]));
   }
+  const savedResultRef = useRef();
+  if (savedResultRef.current === undefined) {
+    savedResultRef.current = resultKey(match);
+  }
+
+  // --- Sestava ---
+  const { pending: lineupPending, data: lineupData } = useLineupData(match, lineupTeamId);
+  const players = useMemo(() => lineupData?.players ?? [], [lineupData]);
+  const rosterIdSet = useMemo(() => new Set(players.map((p) => p.id)), [players]);
+  const isOwn = useCallback((playerId) => rosterIdSet.has(playerId), [rosterIdSet]);
+  const initialLineup = useMemo(
+    () => (lineupData && players.length ? toEditorState(lineupData.playerList, isOwn, Config.LINEUP_POSITION_MAP) : null),
+    [lineupData, players, isOwn],
+  );
+  // Edits and the saved key belong to one team: should `lineupTeamId` change while the modal is
+  // open (the session or the team map arriving late), they start over with the new team.
+  const [edited, setEdited] = useState(null);
+  const lineup = edited?.teamId === lineupTeamId ? edited.lineup : initialLineup;
+  const setEditedLineup = useCallback((next) => setEdited({ teamId: lineupTeamId, lineup: next }), [lineupTeamId]);
+  const savedLineupKeyRef = useRef(null);
+  if (initialLineup && savedLineupKeyRef.current?.teamId !== lineupTeamId) {
+    savedLineupKeyRef.current = { teamId: lineupTeamId, key: lineupKey(initialLineup) };
+  }
+  const ownSide = lineupTeamId === match.homeTeamId ? "home" : "guest";
+
+  async function loadPrevious() {
+    const { itemList = [] } = await UiElements.Call.cmdGet("/match/list", {
+      teamId: lineupTeamId,
+      state: "played",
+      order: "desc",
+      ...(match.time ? { dateTo: match.time } : null),
+      pageInfo: { pageSize: 10 },
+    });
+    const previous = itemList.find((m) => m.id !== match.id && (m.playerList ?? []).some((e) => isOwn(e.playerId)));
+    return previous ? fromPreviousMatch(lineup, previous.playerList, isOwn, Config.LINEUP_POSITION_MAP) : null;
+  }
+
+  // --- Záložky ---
+  const [invalidTabs, setInvalidTabs] = useState("");
+  const tabLabel = (code, lsiKey) => (
+    <span className={Config.Css.css({ display: "inline-flex", alignItems: "center", gap: 4 })}>
+      <Lsi import={importLsi} path={[...LSI_PATH, lsiKey]} />
+      {invalidTabs.split(",").includes(code) ? <Uu5Elements.Icon icon="uugds-alert-circle" colorScheme="negative" /> : null}
+    </span>
+  );
+  const tabList = [
+    canUpdate ? { code: "info", label: tabLabel("info", "tabInfo") } : null,
+    { code: "result", label: tabLabel("result", "tabResult") },
+    lineup
+      ? {
+          code: "lineup",
+          label: playerCount(lineup) ? (
+            <Lsi import={importLsi} path={[...LSI_PATH, "tabLineupCount"]} params={{ count: playerCount(lineup) }} />
+          ) : (
+            <Lsi import={importLsi} path={[...LSI_PATH, "tabLineup"]} />
+          ),
+        }
+      : null,
+  ].filter(Boolean);
+  // The requested tab may not exist (no Info for a team editor, no roster for the lineup) or
+  // not yet (the lineup loads): until then the first available one. Once the lineup arrives,
+  // a requested Lineup tab opens by itself.
+  const activeTab = tabList.some((tab) => tab.code === tabCode) ? tabCode : tabList[0].code;
+  const initialTabRef = useRef(activeTab);
+
+  const showTab = useCallback((code) => {
+    setTabCode(code);
+    setVisited((set) => (set.has(code) ? set : new Set([...set, code])));
+  }, []);
 
   const teamItemList = [
     { value: match.homeTeamId, children: match.homeTeam?.name ?? match.homeTeamId },
@@ -181,9 +338,10 @@ function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onU
     const hasPenalties = hasPenaltiesRef.current;
     setPending(true);
     setError();
+    let saved = null;
+    let lineupSaved = false;
     try {
-      let saved;
-      if (expanded) {
+      if (canUpdate) {
         // Jen změněná pole, prázdné jako `null` -- stejné porovnání jako `Crud` (caio-ui).
         const changed = {};
         for (const name of updateFieldList) {
@@ -191,11 +349,14 @@ function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onU
         }
         if (Object.keys(changed).length) {
           const updateDtoIn = { id: match.id, ...changed };
-          saved = onUpdate ? await onUpdate(updateDtoIn) : await UiElements.Call.cmdPost("/match/update", updateDtoIn);
-          savedRef.current = { ...savedRef.current, ...changed };
+          saved = { ...saved, ...(onUpdate ? await onUpdate(updateDtoIn) : await UiElements.Call.cmdPost("/match/update", updateDtoIn)) };
+          // As the next comparison reads it: empty is `undefined` there, not `null`.
+          savedRef.current = { ...savedRef.current, ...Object.fromEntries(Object.keys(changed).map((name) => [name, v[name] ?? undefined])) };
         }
       }
-      if (needsResult(expanded, match, v)) {
+
+      const nextResultKey = resultKey(v);
+      if (needsResult(match, v) && Number.isFinite(v.homeGoals) && nextResultKey !== savedResultRef.current) {
         const dtoIn = {
           id: match.id,
           homeGoals: v.homeGoals,
@@ -206,17 +367,35 @@ function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onU
           // z dřívějška (remíza se mezitím změnila na výhru, nebo sezóna penalty nehraje).
           penaltyWinnerTeamId: showsPenaltyWinner(hasPenalties, v) ? (v.penaltyWinnerTeamId ?? null) : null,
         };
-        saved = onSubmit ? await onSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setResult", dtoIn);
+        saved = { ...saved, ...(onSubmit ? await onSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setResult", dtoIn)) };
+        savedResultRef.current = nextResultKey;
       }
-      if (saved) onSaved?.(saved);
+
+      if (lineup && lineupKey(lineup) !== savedLineupKeyRef.current?.key) {
+        // One team's lineup (`teamId`): the server replaces that team's players on the match day
+        // and keeps every other entry, so nobody has to send back what he did not edit.
+        const dtoIn = { id: match.id, teamId: lineupTeamId, playerList: toPlayerList(lineup) };
+        saved = { ...saved, ...(onLineupSubmit ? await onLineupSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setLineup", dtoIn)) };
+        savedLineupKeyRef.current = { teamId: lineupTeamId, key: lineupKey(lineup) };
+        lineupSaved = true;
+      }
+
+      if (saved) onSaved?.({ ...match, ...saved }, { lineupSaved });
       onClose();
     } catch (err) {
-      // Server odmítne rozstřel u neremízy — hláška patří k formuláři, ne do konzole.
+      // A step that went through stays saved (the refs above moved); the list or detail learns
+      // about it now, the message stays with the form.
+      if (saved) onSaved?.({ ...match, ...saved }, { lineupSaved });
       setError(err?.message ?? String(err));
     } finally {
       setPending(false);
     }
   }
+
+  // A requested Lineup tab waits for the roster with a skeleton instead of another tab's content.
+  const waitingForLineup = lineupPending && tabCode === "lineup";
+  const hidden = (code) => Config.Css.css({ display: activeTab === code && !waitingForLineup ? "block" : "none" });
+  const pairName = (match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?");
 
   return (
     <Uu5Forms.Form.Provider
@@ -227,46 +406,54 @@ function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onU
         homeGoalsHalf: match.homeGoalsHalf ?? undefined,
         guestGoalsHalf: match.guestGoalsHalf ?? undefined,
         penaltyWinnerTeamId: match.penaltyWinnerTeamId ?? undefined,
-        // Pole rozbalovací sekce; `seasonId` čte i `ResultFields` kvůli penaltám.
+        // Pole záložky Info; `seasonId` čte i `ResultFields` kvůli penaltám.
         ...savedRef.current,
       }}
     >
+      <InvalidTabs attemptRef={submitAttemptRef} onTab={showTab} onInvalidChange={setInvalidTabs} />
       <Uu5Elements.Modal
         open
         onClose={onClose}
-        header={<Lsi import={importLsi} path={[...LSI_PATH, "resultHeader"]} />}
+        header={pairName}
+        tabList={tabList.length > 1 ? tabList : undefined}
+        tabCode={activeTab}
+        onTabCodeChange={(e) => showTab(e.data.tabCode)}
         footer={
-          <div className={Config.Css.css({ display: "flex", gap: 8, justifyContent: "end" })}>
+          <div
+            className={Config.Css.css({ display: "flex", gap: 8, justifyContent: "end" })}
+            // Remember when Save was pressed (InvalidTabs).
+            onClickCapture={() => {
+              submitAttemptRef.current = Date.now();
+            }}
+          >
             <Uu5Forms.CancelButton onClick={onClose} disabled={pending} />
             <Uu5Forms.SubmitButton icon="uugds-check" disabled={pending} />
           </div>
         }
       >
-        {/* The match name and the error sit outside `Form.View`: the grid places only named
-            fields into `gridLayout` areas, anything else would be auto-placed outside it. */}
-        <div ref={autoFocusRef}>
-          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18, marginBlockEnd: 16 })}>
-            {(match.homeTeam?.name ?? "?") + " – " + (match.guestTeam?.name ?? "?")}
-          </div>
-
-          <ResultFields
-            teamItemList={teamItemList}
-            hasPenaltiesRef={hasPenaltiesRef}
-            scoreRequired={(value) => needsResult(expanded, match, value)}
-          />
-
+        <div>
           {canUpdate ? (
-            <Uu5Elements.Link
-              colorScheme="primary"
-              onClick={() => setExpanded((open) => !open)}
-              className={Config.Css.css({ display: "inline-flex", alignItems: "center", gap: 4, marginBlockStart: 16 })}
-            >
-              <Uu5Elements.Icon icon={expanded ? "uugds-chevron-up" : "uugds-chevron-down"} />
-              <Lsi import={importLsi} path={[...LSI_PATH, expanded ? "lessEdit" : "moreEdit"]} />
-            </Uu5Elements.Link>
+            <div ref={initialTabRef.current === "info" ? autoFocusRef : undefined} className={hidden("info")}>
+              {visited.has("info") || activeTab === "info" ? <InfoFields cfg={updateCfg} /> : null}
+            </div>
           ) : null}
 
-          {canUpdate && expanded ? <UpdateSection cfg={updateCfg} /> : null}
+          <div ref={initialTabRef.current === "result" ? autoFocusRef : undefined} className={hidden("result")}>
+            <ResultFields
+              teamItemList={teamItemList}
+              hasPenaltiesRef={hasPenaltiesRef}
+              scoreRequired={(value) => needsResult(match, value)}
+            />
+          </div>
+
+          {lineup ? (
+            <div className={hidden("lineup")}>
+              <LineupEditor lineup={lineup} onChange={setEditedLineup} players={players} ownSide={ownSide} loadPrevious={loadPrevious} />
+            </div>
+          ) : null}
+
+          {/* The lineup tab appears once the roster is in; a requested Lineup tab waits for it. */}
+          {waitingForLineup ? <Uu5Elements.Skeleton height={240} /> : null}
 
           {error ? (
             <Uu5Elements.Text
@@ -285,153 +472,4 @@ function ResultModal({ match, onClose, onSaved, onSubmit, canUpdate = false, onU
   );
 }
 
-// Sloupce sestavy drží hlavička i řádky — jeden zdroj, aby se nemohly rozejít.
-const LINEUP_COLUMNS = "minmax(140px, 2fr) 220px 90px 70px 70px 70px";
-
-/** Řádek sestavy — jeden hráč a co v zápase udělal. */
-function LineupRow({ player, entry, onChange }) {
-  const set = (patch) => onChange({ ...entry, ...patch });
-
-  return (
-    <>
-    <Uu5Elements.Grid
-      templateColumns={LINEUP_COLUMNS}
-      columnGap={8}
-      alignItems="center"
-      className={Config.Css.css({ paddingBlock: 4 })}
-    >
-      <div>
-        {player.person ? personLabel(player.person) : "?"}
-      </div>
-
-      {/* Přesný post (28 postů, Caio 2026-10-26); linii `position` dopočítá server. Starý
-          zápis bez přesného postu ukáže prázdný výběr. */}
-      <Uu5Forms.Select
-        value={entry?.positionDetail ?? undefined}
-        itemList={enumItemList("lineupPosition", Config.LINEUP_POSITION_LIST)}
-        disabled={!entry}
-        onChange={(e) => set({ positionDetail: e.data.value, position: Config.LINEUP_POSITION_MAP[e.data.value] })}
-      />
-
-      <Uu5Forms.Number
-        value={entry?.goals ?? 0}
-        min={0}
-        step={1}
-        disabled={!entry}
-        onChange={(e) => set({ goals: e.data.value })}
-      />
-
-      <Uu5Forms.Checkbox value={!!entry} onChange={(e) => onChange(e.data.value ? { playerId: player.id, position: player.position, goals: 0 } : null)} />
-      <Uu5Forms.Checkbox value={!!entry?.substitute} disabled={!entry} onChange={(e) => set({ substitute: e.data.value })} />
-      <div className={Config.Css.css({ display: "flex", gap: 4 })}>
-        <Uu5Forms.Checkbox value={!!entry?.yellowCard} disabled={!entry} onChange={(e) => set({ yellowCard: e.data.value })} />
-        <Uu5Forms.Checkbox value={!!entry?.redCard} disabled={!entry} onChange={(e) => set({ redCard: e.data.value })} />
-      </div>
-    </Uu5Elements.Grid>
-    {/* Linka za řádkem, ne `borderBlockEnd` na mřížce — barvu i sílu dá GDS. Řádky jsou
-        sourozenci v obyčejném `<div>`, takže `Line` mezi ně jde vložit bez obalu navíc. */}
-    <Uu5Elements.Line significance="subdued" />
-    </>
-  );
-}
-
-/** `onSubmit` má stejný smysl jako u `ResultModal` výš — zápis přes položkový handler. */
-function LineupModal({ match, onClose, onSaved, onSubmit }) {
-  const [pending, setPending] = useState(false);
-  const [playerList, setPlayerList] = useState(() => match.playerList ?? []);
-  // Na seznamu hráčů, ne na modalu: ten se kreslí až po načtení, do té doby je tam skeleton.
-  // Fokus dostane „Hrál“ prvního hráče -- post je bez zaškrtnutí zakázaný.
-  const autoFocusRef = UiElements.useAutoFocus();
-
-  // Nabídnou se hráči **obou** týmů: sestavu zapisuje jeden člověk pro celý zápas
-  // a u přáteláků hrají za oba i lidé z klubu.
-  const { state, data } = useDataObject(
-    {
-      handlerMap: {
-        load: async () => {
-          const lists = await Promise.all(
-            [match.homeTeamId, match.guestTeamId].filter(Boolean).map((teamId) =>
-              UiElements.Call.cmdGet("/player/list", { teamId, active: "true" }).catch(() => ({ itemList: [] })),
-            ),
-          );
-          const byId = new Map();
-          for (const list of lists) for (const player of list.itemList ?? []) byId.set(player.id, player);
-          return { itemList: [...byId.values()] };
-        },
-      },
-    },
-    [match.id],
-  );
-
-  const players = useMemo(() => data?.itemList ?? [], [data]);
-  const entryOf = (playerId) => playerList.find((p) => p.playerId === playerId) ?? null;
-
-  function change(playerId, entry) {
-    setPlayerList((list) => {
-      const rest = list.filter((p) => p.playerId !== playerId);
-      return entry ? [...rest, { ...entry, playerId }] : rest;
-    });
-  }
-
-  async function save() {
-    setPending(true);
-    try {
-      const dtoIn = { id: match.id, playerList };
-      if (onSubmit) await onSubmit(dtoIn);
-      else await UiElements.Call.cmdPost("/match/setLineup", dtoIn);
-      onSaved?.();
-      onClose();
-    } finally {
-      setPending(false);
-    }
-  }
-
-  return (
-    <Uu5Elements.Modal
-      open
-      onClose={onClose}
-      header={<Lsi import={importLsi} path={[...LSI_PATH, "lineupHeader"]} />}
-      footer={
-        <div className={Config.Css.css({ display: "flex", gap: 8, justifyContent: "end" })}>
-          <Uu5Elements.Button onClick={onClose} disabled={pending}>
-            <Lsi import={importLsi} path={[...LSI_PATH, "cancel"]} />
-          </Uu5Elements.Button>
-          <Uu5Elements.Button colorScheme="primary" significance="highlighted" onClick={save} disabled={pending}>
-            <Lsi import={importLsi} path={[...LSI_PATH, "save"]} />
-          </Uu5Elements.Button>
-        </div>
-      }
-    >
-      {state === "pendingNoData" ? (
-        <Uu5Elements.Skeleton height={240} />
-      ) : (
-        <div ref={autoFocusRef}>
-          <Uu5Elements.Grid
-            templateColumns={LINEUP_COLUMNS}
-            columnGap={8}
-            className={Config.Css.css({ color: theme.color.mutedFg, paddingBlockEnd: 4 })}
-          >
-            <span><Lsi import={importLsi} path={[...LSI_PATH, "player"]} /></span>
-            <span><Lsi import={importLsi} path={[...LSI_PATH, "position"]} /></span>
-            <span><Lsi import={importLsi} path={[...LSI_PATH, "goals"]} /></span>
-            <span><Lsi import={importLsi} path={[...LSI_PATH, "played"]} /></span>
-            <span><Lsi import={importLsi} path={[...LSI_PATH, "substitute"]} /></span>
-            <span><Lsi import={importLsi} path={[...LSI_PATH, "cards"]} /></span>
-          </Uu5Elements.Grid>
-
-          {players.map((player) => (
-            <LineupRow key={player.id} player={player} entry={entryOf(player.id)} onChange={(entry) => change(player.id, entry)} />
-          ))}
-
-          {players.length === 0 ? (
-            <Uu5Elements.Text category="interface" segment="content" type="medium">
-              <Lsi import={importLsi} path={[...LSI_PATH, "noPlayers"]} />
-            </Uu5Elements.Text>
-          ) : null}
-        </div>
-      )}
-    </Uu5Elements.Modal>
-  );
-}
-
-export { ResultModal, LineupModal };
+export { MatchModal };

@@ -58,12 +58,16 @@ const LINE_Y = { GK: 89, DF: 75, MF: 42, FW: 18 };
 
 /**
  * @param entryList sestava jednoho týmu (`match.playerList` z `match/get`)
- * @returns `{ placed: [{ entry, x, y }], substitutes: [entry], unplaced: [entry] }`
+ * @param emptyPositionList positions without a player, drawn as empty spots (the lineup
+ *   editor, `lineup-pitch.jsx` with `onSelect`); unknown codes are skipped
+ * @returns `{ placed: [{ entry, x, y } | { empty: true, positionDetail, x, y }], substitutes: [entry], unplaced: [entry] }`
  *   `placed` hráči základní sestavy na hřišti, `substitutes` střídající, `unplaced` hráči
  *   základní sestavy bez postu i linie (vykreslí se pod hřištěm).
  */
-function layoutLineup(entryList = []) {
-  const placed = [];
+function layoutLineup(entryList = [], { emptyPositionList = [] } = {}) {
+  const placed = emptyPositionList
+    .filter((code) => POSITION_POINT[code])
+    .map((code) => ({ empty: true, positionDetail: code, ...POSITION_POINT[code] }));
   const substitutes = [];
   const unplaced = [];
   const byLine = {};

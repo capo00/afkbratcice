@@ -447,7 +447,8 @@ poznámka z předlohy („stará garda hraje svoji soutěž bez tabulky“).
   Převzato ze současného webu, v původním návrhu chybělo.
 - **Články** – `article/list?matchId`.
 - **Fotogalerie** – `gallery/list?matchId`.
-- Pro `members` navíc odjezd; pro `operatives` akce **Zapsat výsledek** a **Zapsat sestavu**.
+- Pro `members` navíc odjezd; kdo smí zapsat výsledek, má u dlaždice tužku -- otevře modal
+  zápasu na záložce **Výsledek** (6.4).
 
 #### 3.7.1 Sestava na hřišti (od 2026-10-27)
 
@@ -726,19 +727,46 @@ se nahrávají obě.
 (`uu5codekitg01-forms`), který volá `match/createMany`. Slouží k naimportování rozlosování
 staženého ze stránek OFS.
 
-### 6.4 Zápis výsledku a sestavy
+### 6.4 Modal zápasu: Info, Výsledek, Sestava (od 2026-11-10)
 
-Samostatný modal nad detailem zápasu:
+Jeden modal (`admin/match-modals.jsx`, `MatchModal`) na webu (tužka u dlaždice zápasu,
+otevře záložku **Výsledek**) i v administraci (tužka řádku na obrazovce Zápasy, otevře
+**Info**; zkratka „Zapsat výsledek“ v menu řádku otevře záložku Výsledek, sestava samostatnou
+akci nemá -- je to záložka modalu, Caio 2026-11-10).
+Nadpis je dvojice týmů. Záložky (nativní `tabList` `Uu5Elements.Modal`):
 
-- **Výsledek** – skóre, poločas, přepínač „rozhodly penalty“ + výběr vítěze rozstřelu.
-  Kdo smí i `match/update` (dnes stejná práva jako `setResult`), má pod výsledkem odkaz
-  **Další úpravy zápasu**: rozbalí termín, sezónu, kolo, hřiště, odjezd, stav a poznámku
-  (týmy jen profil MATCH -- editorovi týmu by je server zahodil). Pole jsou tatáž jako
-  v administraci (`admin/match-fields.jsx`). Uložit pošle nejdřív `match/update` se
-  změněnými poli, pak `setResult`; zápas bez výsledku jde po rozbalení uložit i bez skóre
-  (jen `update`).
-- **Sestava** – tabulka hráčů týmu s inline vstupy: post, střídající, góly, žlutá, červená
-  (odpovídá formuláři v0 `editZapas.php`, ale bez ručního psaní loginů).
+- **Info** – termín, týmy (jen profil MATCH -- editorovi týmu by je server zahodil), sezóna,
+  kolo, hřiště, odjezd, stav, poznámka; tatáž pole jako formulář administrace
+  (`admin/match-fields.jsx`). Jen pro toho, kdo smí `match/update`.
+- **Výsledek** – skóre, poločas, vítěz rozstřelu (jen u remízy v sezóně s penaltami). Skóre
+  je povinné, jen když zápas výsledek už má nebo se začal vyplňovat -- zápas, který se ještě
+  nehrál, jde uložit jen s úpravou Info.
+- **Sestava** – jen u **vlastního týmu**, jehož sestavu přihlášený smí zapsat (MATCH
+  kterýkoli, TE svůj; `core/lineup-team.js`), a jen když má tým **k datu zápasu soupisku**
+  (`player/list?teamId&date`); jinak se záložka nenabízí (Caio 2026-11-10). Soupiska a
+  čerstvá sestava (`match/get`) se načítají při otevření modalu.
+  - Hřiště je `LineupPitch` z detailu zápasu s `onSelect`: posty a střídající jsou tlačítka,
+    prázdný post čárkovaný kruh s „+“. Nová sestava začíná výchozím rozestavením brankář,
+    pravá a levá obrana, stoper, předstoper, pravá a levá záloha, defenzivní a ofenzivní
+    záloha, pravý a levý útok (`admin/lineup/lineup-state.js`).
+  - Klepnutí na post nebo střídajícího otevře modal hráče: hráč ze soupisky, post (u
+    střídajícího nepovinný), góly, žlutá a červená karta (toggle). Hráč, který už v sestavě
+    je, se s tím na postu prohodí -- nikdo není v sestavě dvakrát a na postu je jeden hráč.
+    „Uvolnit post“ / „Odebrat“; „Použít“ mění jen rozpracovanou sestavu.
+  - Pod hřištěm střídající a „Přidat střídajícího“. U prázdné sestavy **Převzít z minulého
+    zápasu** -- poslední odehraný zápas týmu se sestavou se načte až po kliknutí (tlačítko
+    mezitím čeká), převezmou se posty a střídání, góly a karty ne, hráči mimo soupisku vypadnou.
+  - Upozornění (ne chyba), když góly hráčů nesedí se skóre týmu -- vlastní gól soupeře.
+  - Zápas dvou vlastních týmů dostane sestavu jen prvního z nich.
+
+Uloží se jedním tlačítkem; use casy jdou za sebou a jen to, co se změnilo: `match/update`
+(změněná pole Info) → `match/setResult` (změněný výsledek; po `update`, protože sezóna mění
+`hasPenalties`) → `match/setLineup` (změněná sestava, s `teamId`: server nahradí jen hráče
+toho týmu podle soupisky v den zápasu a ostatní záznamy nechá, takže nikdo neposílá zpět, co
+needitoval). Bez čerstvé sestavy (`match/get` selže) se záložka Sestava nenabízí. Když krok selže, modal zůstane otevřený s hláškou a další Uložit
+pošle jen to, co ještě neprošlo. Záložka s neplatným polem má výstražnou ikonu (uu5 Uložit
+zamkne a z jiné záložky by nebylo vidět proč). Všechny záložky zůstávají vykreslené, neaktivní
+jsou schované, aby formulář nepřišel o hodnoty.
 
 Ve všech modalech s formulářem dostane fokus první pole, **ne na mobilu** (`xs`
 a dotykové zařízení) -- caio-ui `UiElements.useAutoFocus`, u `Crud` sám.

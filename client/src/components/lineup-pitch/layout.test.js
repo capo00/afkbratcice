@@ -46,6 +46,14 @@ test("rozestavení: přesný post, linie, náhradník, bez postu", () => {
   assert.deepEqual(unplaced.map((e) => e.playerId), ["e"]);
 });
 
+test("empty positions of the lineup editor are placed on their points", () => {
+  const { placed } = layoutLineup([{ playerId: "a", positionDetail: "GK" }], { emptyPositionList: ["CB", "nope"] });
+  assert.deepEqual(
+    placed.map((p) => [p.empty ? p.positionDetail : p.entry.playerId, p.x, p.y]),
+    [["CB", 50, 77], ["a", 50, 89]],
+  );
+});
+
 test("jméno pod kruhem a iniciály", () => {
   const entry = { person: { name: "Oleksandr", surname: "Shpuryk" } };
   assert.equal(shortName(entry), "Shpuryk O.");

@@ -189,7 +189,7 @@ class MatchCrud extends Crud {
    * dva a `any` v autorizaci pustí editora kteréhokoli z nich, ale sestavu soupeři
    * zapisovat nesmí. Ostatní záznamy proto zůstávají, jak byly.
    */
-  async setLineup({ id, playerList = [] }, identity) {
+  async setLineup({ id, playerList = [], teamId }, identity) {
     const current = await this._get(id);
     const teamIdList = [current.homeTeamId, current.guestTeamId];
 
@@ -202,6 +202,8 @@ class MatchCrud extends Crud {
     // Hráč patří k zápasu, když byl v den zápasu na soupisce domácích nebo hostů; zápas
     // bez termínu bere kterékoli působení.
     const matchDay = current.time ? String(current.time).slice(0, 10) : null;
+
+    if (teamId) return this._setTeamLineup({ id, current, teamId, playerList, players, rosterList, matchDay }, identity);
 
     for (const entry of playerList) {
       const player = players.find((p) => p.id === entry.playerId);
@@ -232,6 +234,42 @@ class MatchCrud extends Crud {
       nextPlayerList = [...foreign, ...playerList];
     }
 
+    return this._saveLineup(id, current, nextPlayerList, identity);
+  }
+
+  /**
+   * Lineup of **one team** of the match (`teamId`, the match modal): the players of that team's
+   * roster on the match day are replaced by `playerList`, every other entry stays as it is --
+   * for a match manager and a team editor alike. Without it the client and the server would
+   * have to agree on which entries are "the other ones", and a team editor's save could
+   * silently delete entries his client never showed him (review 2026-11-10).
+   */
+  async _setTeamLineup({ id, current, teamId, playerList, players, rosterList, matchDay }, identity) {
+    if (teamId !== current.homeTeamId && teamId !== current.guestTeamId) {
+      throw this._error("teamNotInMatch", "The team does not play this match", { teamId });
+    }
+    const scopedOnly =
+      !Authorization.hasProfile(identity, Config.MATCH) && Authorization.hasProfile(identity, [Config.ANY_TEAM_EDITOR]);
+    if (scopedOnly && !Authorization.scopesOf(identity, Config.ROLE.TEAM_EDITOR).includes(teamId)) {
+      throw this._error("foreignLineup", "A team editor may only write their own team's lineup", {});
+    }
+
+    const onTeam = (playerId) =>
+      rosterList.some((r) => r.playerId === playerId && r.teamId === teamId && (!matchDay || isActive(r, matchDay)));
+    for (const entry of playerList) {
+      if (!players.some((p) => p.id === entry.playerId)) {
+        throw this._error("unknownPlayer", "Player does not exist", { playerId: entry.playerId });
+      }
+      if (!onTeam(entry.playerId)) {
+        throw this._error("playerNotInMatch", "Player is not on the team's roster on the match day", { playerId: entry.playerId });
+      }
+    }
+
+    const kept = (current.playerList ?? []).filter((entry) => !onTeam(entry.playerId));
+    return this._saveLineup(id, current, [...kept, ...playerList], identity);
+  }
+
+  async _saveLineup(id, current, nextPlayerList, identity) {
     // Součet gólů vyšší než skóre týmu je varování, ne chyba -- vlastní góly existují.
     const goalSum = nextPlayerList.reduce((sum, entry) => sum + (entry.goals ?? 0), 0);
     const scoreSum = (current.homeGoals ?? 0) + (current.guestGoals ?? 0);

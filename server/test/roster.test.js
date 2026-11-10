@@ -55,3 +55,34 @@ test("neexistující hráč a obrácené období jsou chyba", async () => {
     /invalidPeriod/.test(e.code ?? e.message),
   );
 });
+
+test("`player/list` with `date` asks the roster for that single day", async () => {
+  const seen = [];
+  const original = rosterDao.listByFilter;
+  rosterDao.listByFilter = async (filter) => {
+    seen.push(filter);
+    return [{ id: "a", playerId: PLAYER, teamId: TEAM, dateFrom: "2020-08-01", dateTo: "2022-06-30" }];
+  };
+  try {
+    const out = await playerCrud.list({ teamId: TEAM, date: "2021-10-19" });
+    assert.deepEqual(seen[0].range, { from: "2021-10-19", to: "2021-10-19" });
+    assert.deepEqual(out.map((p) => p.id), [PLAYER]);
+  } finally {
+    rosterDao.listByFilter = original;
+  }
+});
+
+test("`player/list` with a malformed `date` returns nothing, not the roster of all time", async () => {
+  let called = false;
+  const original = rosterDao.listByFilter;
+  rosterDao.listByFilter = async () => {
+    called = true;
+    return [{ id: "a", playerId: PLAYER, teamId: TEAM }];
+  };
+  try {
+    assert.deepEqual(await playerCrud.list({ teamId: TEAM, date: "19. 10. 2021" }), []);
+    assert.equal(called, false);
+  } finally {
+    rosterDao.listByFilter = original;
+  }
+});

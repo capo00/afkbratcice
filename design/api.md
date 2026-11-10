@@ -279,7 +279,7 @@ VP/PP, nebo R. Je to **nastavení sezóny**, ne odvození z dat; proč, viz
 | `match/createMany` | post | MATCH | `{ itemList }` | `{ itemList }` |
 | `match/update` | post | MATCH, **TE** | `{ id, ... }` | `match` |
 | `match/setResult` | post | MATCH, **TE** | `{ id, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId }` | `match` |
-| `match/setLineup` | post | MATCH, **TE** | `{ id, playerList }` | `match` |
+| `match/setLineup` | post | MATCH, **TE** | `{ id, playerList, teamId? }` | `match` |
 | `match/delete` | post | MATCH | `{ id }` | `{}` |
 | `match/deleteMany` | post | MATCH | `{ idList }` | `{}` |
 
@@ -292,6 +292,11 @@ Pravidla:
   (`afkbratcice/match/invalidPenaltyWinner`).
 - `setLineup` ověří, že hráči patří do některého z týmů zápasu, a že součet `goals`
   nepřevyšuje počet gólů týmu (varování, ne chyba – vlastní góly).
+- `setLineup` s `teamId` (modal zápasu, od 2026-11-10) nahradí jen hráče **toho týmu** podle
+  jeho soupisky v den zápasu a všechny ostatní záznamy ponechá -- pro správce i editora týmu.
+  Hráč mimo soupisku týmu v ten den je `match/playerNotInMatch`, tým mimo zápas
+  `match/teamNotInMatch`, cizí tým editora týmu `match/foreignLineup`. Bez `teamId` se
+  chová jako dřív (správce přepisuje celý seznam).
 - `createMany` je určeno pro hromadný import rozlosování (viz [frontend.md](./frontend.md), sekce 6.3).
 
 **Jeden `match/list` místo tří use casů.** Původní návrh měl vedle sebe `listRound`,
@@ -412,7 +417,7 @@ Hráč je karta (osoba, post, poznámka), soupiska je záznam na hráče v týmu
 
 | Use case | Metoda | Auth | dtoIn | dtoOut |
 |---|---|---|---|---|
-| `player/list` | get | – | `{ teamId, active, seasonId, idList, pageInfo }` | `{ itemList }` (s vloženou `person` a odvozeným `teamList`) |
+| `player/list` | get | – | `{ teamId, active, seasonId, date, idList, pageInfo }` | `{ itemList }` (s vloženou `person` a odvozeným `teamList`) |
 | `player/get` | get | – | `{ id }` | `player` + `person` + `teamList` |
 | `player/create` | post | CONTENT, kterýkoli **TE** | `{ personId, position, note }` | `player` |
 | `player/update` | post | CONTENT, **TE** | `{ id, personId?, position?, note? }` | `player` |
@@ -425,7 +430,9 @@ Hráč je karta (osoba, post, poznámka), soupiska je záznam na hráče v týmu
 
 - `player/list?teamId` je soupiska týmu: `active: true` = působení, které trvá dnes;
   `seasonId` = působení, které zasahuje do období sezóny (od 1. 8. `yearFrom` do 31. 7.
-  dalšího roku) — soupiska staré sezóny.
+  dalšího roku) — soupiska staré sezóny; `date` (YYYY-MM-DD) = působení, které trvá ten den —
+  soupiska k datu zápasu pro sestavu (stejně kontroluje `match/setLineup`). `date` má přednost
+  před `seasonId`; nesmyslné datum vrátí prázdný seznam.
 - **TE**: kartu hráče smí založit kterýkoli editor týmu (týmu nepatří, jako osoba), upravit
   jen hráče, jehož všechna působení jsou v jeho týmech. Soupisku smí jen svého týmu (u `create`
   z dtoIn, jinak uložený tým).

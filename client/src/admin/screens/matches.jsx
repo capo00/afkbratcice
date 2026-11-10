@@ -1,23 +1,27 @@
 import { createVisualComponent, useState, useMemo, useRef, useEffect, useDataList, useDataObject, Lsi } from "uu5g05";
-import { UiElements } from "caio-ui";
+import { UiElements, UiAuth } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { seasonLabel, teamLabel } from "../fields.jsx";
 import { getMatchConfig, MATCH_PAIR_LIST } from "../match-fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
-import { ResultModal, LineupModal } from "../match-modals.jsx";
+import { MatchModal } from "../match-modals.jsx";
 import { useApp } from "../../core/app-context.jsx";
+import { lineupTeamIdFor } from "../../core/lineup-team.js";
 import { mergeItemHandler } from "../../core/item-merge.js";
 
 // Zápasy. Nejrušnější obrazovka administrace: rozpis se zakládá hromadně na začátku
 // sezóny, výsledky a sestavy se dopisují každý víkend.
 //
 // Proto tři cesty místo jedné:
-// - **Vytvořit** — jeden zápas ručně,
+// - **Vytvořit** — jeden zápas ručně (formulář `Crud`),
 // - **Hromadně** — JSON s rozlosováním z OFS (`match/createMany`, nabídne ho `Crud` sám,
 //   protože provider má `createMany`),
-// - **Zapsat výsledek / sestavu** — vlastní modaly nad řádkem, viz `admin/match-modals.jsx`.
+// - **Upravit** — modal zápasu se záložkami Info / Výsledek / Sestava, týž jako tužka na webu
+//   (`admin/match-modals.jsx`, Caio 2026-11-10). Tužka řádku ho otevře na Info, zkratka
+//   „Zapsat výsledek“ v menu rovnou na záložce Výsledek. Sestava je jen záložka modalu,
+//   samostatnou akci nemá (Caio 2026-11-10).
 
 // `useDataList` napřímo, ne `CrudContext`: ten umí položkové handlery jen pro `update`
 // a `delete` (caio-ui, `crud-context.jsx`), takže „zapsat výsledek" a „zapsat sestavu" by
@@ -64,8 +68,9 @@ const AdminMatches = createVisualComponent({
   render() {
     const app = useApp();
     const { getTeam, teamList } = app;
-    const [resultFor, setResultFor] = useState();
-    const [lineupFor, setLineupFor] = useState();
+    const session = UiAuth.useSession();
+    // `{ item, tabCode }`: the list item (saves through its handlers) and the tab to open.
+    const [editFor, setEditFor] = useState();
 
     // Nabídky filtrů: týmy jsou v app-contextu, sezóny se načtou.
     const { data: seasonData } = useDataObject(
@@ -125,41 +130,36 @@ const AdminMatches = createVisualComponent({
           // (`{ data, handlerMap }`), ne samotný zápas — proto se rozbaluje na `item`.
           // Do stavu jde celá položka: modal pak ukládá jejím handlerem a seznam si ten
           // jeden řádek aktualizuje sám, bez přenačtení celého rozpisu.
+          //
+          // `key: "update"` replaces what Crud's own pencil does (its form stays for Create):
+          // the match is edited in the same modal as on the web.
           getItemActionList={({ data: item }) => [
+            { key: "update", onClick: () => setEditFor({ item }) },
             {
               icon: "uugds-check",
               children: <Lsi import={importLsi} path={["admin", "matches", "setResult"]} />,
-              onClick: () => setResultFor(item),
-            },
-            {
-              icon: "uugds-account-multi",
-              children: <Lsi import={importLsi} path={["admin", "matches", "setLineup"]} />,
-              onClick: () => setLineupFor(item),
+              onClick: () => setEditFor({ item, tabCode: "result" }),
             },
           ]}
         >
           {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={MATCH_PAIR_LIST} />}
         </UiElements.Crud>
 
-        {resultFor ? (
-          <ResultModal
+        {editFor ? (
+          <MatchModal
             match={{
-              ...resultFor.data,
-              homeTeam: getTeam(resultFor.data.homeTeamId),
-              guestTeam: getTeam(resultFor.data.guestTeamId),
+              ...editFor.item.data,
+              homeTeam: getTeam(editFor.item.data.homeTeamId),
+              guestTeam: getTeam(editFor.item.data.guestTeamId),
             }}
-            onClose={() => setResultFor()}
-            onSubmit={resultFor.handlerMap.setResult}
+            // No tab given = Info (Caio 2026-11-10); the "Zapsat výsledek" shortcut opens Result.
+            initialTabCode={editFor.tabCode}
+            onClose={() => setEditFor()}
+            onSubmit={editFor.item.handlerMap.setResult}
+            onUpdate={editFor.item.handlerMap.update}
+            onLineupSubmit={editFor.item.handlerMap.setLineup}
             canUpdate
-            onUpdate={resultFor.handlerMap.update}
-          />
-        ) : null}
-
-        {lineupFor ? (
-          <LineupModal
-            match={lineupFor.data}
-            onClose={() => setLineupFor()}
-            onSubmit={lineupFor.handlerMap.setLineup}
+            lineupTeamId={lineupTeamIdFor(session.identity, editFor.item.data, getTeam)}
           />
         ) : null}
       </AdminScreen>

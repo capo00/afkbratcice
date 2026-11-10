@@ -122,9 +122,11 @@ function MatchDetail({ matchId }) {
   const hasLineup = homeLineup.length > 0 || guestLineup.length > 0;
 
   // Zápis výsledku vrací holý zápas -- sestava v něm není rozbalená (hráč + osoba), takže
-  // se ponechá ta z `match/get`; jinak by hřiště a střelci zmizeli.
-  function handleResultSaved(updated) {
+  // se ponechá ta z `match/get`; jinak by hřiště a střelci zmizeli. Po změně sestavy se
+  // zápas načte znovu, ať hřiště a střelci ukážou novou sestavu i s osobami.
+  function handleResultSaved(updated, { lineupSaved = false } = {}) {
     dataObject.handlerMap.setData?.({ ...match, ...updated, playerList: match.playerList });
+    if (lineupSaved) dataObject.handlerMap.load?.().catch(() => {});
   }
 
   return (

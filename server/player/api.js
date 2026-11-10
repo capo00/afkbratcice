@@ -8,6 +8,8 @@ const listDtoIn = shape({
   teamId: mongoId(),
   active: any(),
   seasonId: mongoId(),
+  // Roster on one day (YYYY-MM-DD); the match lineup offers the players of the match day.
+  date: string(),
   idList: array(mongoId()),
   pageInfo: pageInfo(),
 });

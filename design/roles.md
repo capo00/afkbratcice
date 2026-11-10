@@ -123,8 +123,9 @@ Tři věci, které je snadné přehlédnout a bolí později:
 1. **`setLineup` musí být zúžený na vlastní tým.** Zápas má dva týmy a `any` pustí editora
    kteréhokoli z nich — ale nesmí zapsat sestavu **soupeři**. `crud.js` proto u `setLineup`
    navíc ověří, že všichni hráči v `playerList` patří do týmu, který volající spravuje,
-   a ostatní záznamy nechá být. Výsledek (`setResult`) naopak může zapsat kterýkoli
-   z obou — byli u toho oba.
+   a ostatní záznamy nechá být. S `teamId` (modal zápasu) musí `teamId` být tým editora
+   a nahradí se jen hráči jeho soupisky v den zápasu (design/api.md). Výsledek (`setResult`)
+   naopak může zapsat kterýkoli z obou — byli u toho oba.
 2. **`teamEditor` nesmí přepsat soupeře.** Editor týmu A by si jinak mohl změnit
    `guestTeamId` a dostat se k cizímu zápasu. Omezení je **jen na `teamEditor`** —
    `matchEditor`, `operatives` i `authorities` smějí u `match/update` měnit

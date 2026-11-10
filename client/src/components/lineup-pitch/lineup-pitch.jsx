@@ -74,8 +74,8 @@ function PitchDrawing({ colors }) {
   );
 }
 
-/** Photo circle with goal and card marks and the name below it. */
-function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, surnameOnly }) {
+/** Photo circle with goal and card marks and the name below it. `interactive`: the parent wraps it in a button, so the circle itself is not focusable. */
+function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, surnameOnly, interactive = false }) {
   const name = shortName(entry, { surnameOnly });
   const fullName = [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || name || "?";
   const tooltip = [
@@ -115,7 +115,7 @@ function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, 
           colorScheme="primary"
           significance="highlighted"
           tooltip={tooltip}
-          elementAttrs={{ "aria-label": tooltip, role: "img", tabIndex: 0 }}
+          elementAttrs={interactive ? { "aria-hidden": "true" } : { "aria-label": tooltip, role: "img", tabIndex: 0 }}
         />
         {entry.yellowCard ? card(CARD_COLOR.yellow, 0) : null}
         {entry.redCard ? card(CARD_COLOR.red, entry.yellowCard ? 5 : 0) : null}
@@ -169,15 +169,81 @@ function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, 
   );
 }
 
+/** A position without a player in the lineup editor: a dashed circle with a plus, the position name below. */
+function EmptySpot({ positionDetail, iconSize, nameWidth, positionLsi, textColor }) {
+  const px = ICON_SIZE_LIST.find(([size]) => size === iconSize)[1];
+  return (
+    <div className={Config.Css.css({ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 })}>
+      <span
+        aria-hidden="true"
+        className={Config.Css.css({
+          boxSizing: "border-box",
+          inlineSize: px,
+          blockSize: px,
+          borderRadius: "50%",
+          border: "2px dashed rgba(255, 255, 255, 0.9)",
+          backgroundColor: "rgba(0, 0, 0, 0.18)",
+          color: textColor,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        })}
+      >
+        <Uu5Elements.Icon icon="uugds-plus" />
+      </span>
+      <div className={Config.Css.css({ inlineSize: nameWidth, textAlign: "center", lineHeight: `${NAME_HEIGHT}px` })}>
+        <Uu5Elements.Text
+          category="interface"
+          segment="content"
+          type="small"
+          autoFit
+          className={Config.Css.css({ display: "block", whiteSpace: "nowrap", color: textColor, textShadow: NAME_SHADOW, opacity: 0.9 })}
+        >
+          {positionLsi[positionDetail] ?? positionDetail}
+        </Uu5Elements.Text>
+      </div>
+    </div>
+  );
+}
+
+// A player or an empty position as a button (lineup editor). Native button without its own
+// look: the circle and the name are the content; the focus ring stays.
+const SPOT_BUTTON_CSS = {
+  display: "block",
+  padding: 2,
+  margin: 0,
+  border: 0,
+  borderRadius: 8,
+  background: "none",
+  color: "inherit",
+  font: "inherit",
+  cursor: "pointer",
+  "&:focus-visible": { outline: "2px solid currentColor", outlineOffset: 2 },
+};
+
+function fullNameOf(entry) {
+  return [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || shortName(entry) || "?";
+}
+
 const LineupPitch = createVisualComponent({
   uu5Tag: Config.TAG + "LineupPitch",
 
-  render({ entryList }) {
+  /**
+   * @param entryList          lineup of one team (`match.playerList` entries with `person`)
+   * @param onSelect           lineup editor: makes players, empty positions and substitutes
+   *                           buttons; gets `{ kind: "slot", positionDetail }` or
+   *                           `{ kind: "sub", playerId }`. Without it the pitch only shows.
+   * @param emptyPositionList  lineup editor: positions without a player (empty spots)
+   * @param benchFooter        lineup editor: content after the substitutes ("Add substitute");
+   *                           with `onSelect` the substitutes section shows even when empty
+   */
+  render({ entryList, onSelect, emptyPositionList, benchFooter }) {
     const { ref, width = 0 } = useElementSize();
     const { background } = useAppBackground();
     const positionLsi = useLsi(importLsi, ["enum", "lineupPosition"]);
     const pitchLsi = useLsi(importLsi, ["match", "pitch"]);
-    const { placed, substitutes, unplaced } = layoutLineup(entryList);
+    const { placed, substitutes, unplaced } = layoutLineup(entryList, { emptyPositionList });
+    const editable = typeof onSelect === "function";
 
     const colors = PITCH_COLOR[background === "dark" ? "dark" : "light"];
     const [iconSize] = iconSizeFor(width);
@@ -185,16 +251,30 @@ const LineupPitch = createVisualComponent({
     const benchIconSize = ICON_SIZE_LIST[Math.min(ICON_SIZE_LIST.findIndex(([size]) => size === iconSize) + 1, ICON_SIZE_LIST.length - 1)][0];
     const playerProps = { positionLsi, pitchLsi };
 
-    const bench = (titlePath, list) =>
-      list.length ? (
+    // `selectable`: the substitutes in the editor; players without a position stay read-only.
+    const bench = (titlePath, list, footer, selectable = false) =>
+      list.length || footer ? (
         <div>
           <div className={Config.Css.css({ ...Config.theme.typography.eyebrow, fontSize: 11, marginBlockEnd: 8 })}>
             <Lsi import={importLsi} path={titlePath} />
           </div>
-          <div className={Config.Css.css({ display: "flex", flexWrap: "wrap", gap: 12 })}>
-            {list.map((entry, index) => (
-              <Player key={entry.playerId ?? index} entry={entry} iconSize={benchIconSize} nameWidth={80} {...playerProps} />
-            ))}
+          <div className={Config.Css.css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 })}>
+            {list.map((entry, index) =>
+              selectable ? (
+                <button
+                  key={entry.playerId ?? index}
+                  type="button"
+                  aria-label={fullNameOf(entry)}
+                  className={Config.Css.css(SPOT_BUTTON_CSS)}
+                  onClick={() => onSelect({ kind: "sub", playerId: entry.playerId })}
+                >
+                  <Player entry={entry} iconSize={benchIconSize} nameWidth={80} interactive {...playerProps} />
+                </button>
+              ) : (
+                <Player key={entry.playerId ?? index} entry={entry} iconSize={benchIconSize} nameWidth={80} {...playerProps} />
+              ),
+            )}
+            {footer}
           </div>
         </div>
       ) : null;
@@ -216,9 +296,30 @@ const LineupPitch = createVisualComponent({
           {/* Odznaky na trávě: GDS volí barvy jako na tmavém podkladu. */}
           <BackgroundProvider background="dark">
             {width
-              ? placed.map(({ entry, x, y }, index) => (
+              ? placed.map(({ entry, empty, positionDetail, x, y }, index) => {
+                  const position = empty ? positionDetail : entry.positionDetail;
+                  const spot = empty ? (
+                    <EmptySpot
+                      positionDetail={positionDetail}
+                      iconSize={iconSize}
+                      nameWidth={nameWidth}
+                      positionLsi={positionLsi}
+                      textColor={colors.text}
+                    />
+                  ) : (
+                    <Player
+                      entry={entry}
+                      iconSize={iconSize}
+                      nameWidth={nameWidth}
+                      textColor={colors.text}
+                      surnameOnly={width < SURNAME_ONLY_BELOW}
+                      interactive={editable}
+                      {...playerProps}
+                    />
+                  );
+                  return (
                   <div
-                    key={entry.playerId ?? index}
+                    key={empty ? `empty-${positionDetail}` : (entry.playerId ?? index)}
                     className={Config.Css.css({
                       position: "absolute",
                       insetInlineStart: `${x}%`,
@@ -227,20 +328,25 @@ const LineupPitch = createVisualComponent({
                       transform: `translate(-50%, -${ICON_SIZE_LIST.find(([size]) => size === iconSize)[1] / 2}px)`,
                     })}
                   >
-                    <Player
-                      entry={entry}
-                      iconSize={iconSize}
-                      nameWidth={nameWidth}
-                      textColor={colors.text}
-                      surnameOnly={width < SURNAME_ONLY_BELOW}
-                      {...playerProps}
-                    />
+                    {editable ? (
+                      <button
+                        type="button"
+                        aria-label={`${positionLsi[position] ?? position ?? ""}: ${empty ? pitchLsi.vacant : fullNameOf(entry)}`}
+                        className={Config.Css.css({ ...SPOT_BUTTON_CSS, color: colors.text })}
+                        onClick={() => onSelect({ kind: "slot", positionDetail: position })}
+                      >
+                        {spot}
+                      </button>
+                    ) : (
+                      spot
+                    )}
                   </div>
-                ))
+                  );
+                })
               : null}
           </BackgroundProvider>
         </div>
-        {bench(["match", "substitutes"], substitutes)}
+        {bench(["match", "substitutes"], substitutes, editable ? benchFooter : null, editable)}
         {bench(["match", "pitch", "noPosition"], unplaced)}
       </div>
     );

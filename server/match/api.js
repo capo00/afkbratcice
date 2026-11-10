@@ -156,7 +156,9 @@ export default {
       resolve: teamsOfMatch,
       mode: "any",
     }),
-    validator: validate(shape({ id: mongoId().isRequired(), playerList: array(lineupEntry) })),
+    // `teamId` (optional): replace only the lineup of this team of the match (its roster on the
+    // match day) and keep every other entry -- the match modal edits one team (crud.js).
+    validator: validate(shape({ id: mongoId().isRequired(), playerList: array(lineupEntry), teamId: mongoId() })),
     fn: ({ dtoIn, identity }) => crud.setLineup(dtoIn, identity),
   },
 
