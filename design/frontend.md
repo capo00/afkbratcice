@@ -372,7 +372,7 @@ Pořadí bloků podle předlohy (`mockups/desktop-01-home.jpg`):
 |---|---|---|
 | 1 | Hero | statické (LSI + `assets`) |
 | 2 | Statistiky | `appConfig` (rok založení, počet mužstev) |
-| 3 | **Program víkendu** | `match/list?teamIdList&dateFrom&dateTo` – jeden dotaz za všechny kategorie, s odpočtem u nejbližšího |
+| 3 | **Program víkendu** | `match/list?teamIdList&dateFrom&dateTo` – jeden dotaz za všechny kategorie, s odpočtem u nejbližšího. Týden dopředu; odehraný zápas bez výsledku (ne odložený ani zrušený) v programu zůstává až 14 dní, dokud se výsledek nezapíše (`components/home/program-window.js`) |
 | 4 | Poslední výsledky | `match/getLast` pro každou kategorii ze `season/listCurrent` |
 | 5 | Aktuality | `article/list` (3 položky: foto, kategorie, datum, titulek, perex) |
 | 6 | Tabulky | `stats/getTable` s přepínačem kategorie, vlastní tým zvýrazněn |

@@ -9,6 +9,7 @@ import MatchTile from "../match-tile.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import { mergeItemHandler } from "../../core/item-merge.js";
+import { programRange, isInProgram } from "./program-window.js";
 
 // Program víkendu napříč kategoriemi.
 //
@@ -22,18 +23,18 @@ import { mergeItemHandler } from "../../core/item-merge.js";
 // **Jeden dotaz za všechny kategorie.** `match/list` bere `teamIdList`, takže se neptáme
 // zvlášť na každé mužstvo; ids se berou ze `season/listCurrent`, takže server nemusí nic
 // tušit o tom, co je „naše".
+//
+// Okno je týden dopředu a **odehraný zápas bez výsledku v něm zůstává**, dokud se výsledek
+// nezapíše (program-window.js): poslední výsledky ukazují jen zápasy se skóre, takže jinak by
+// se k sobotnímu zápasu v neděli nedalo dostat tužkou.
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-// Okno je **týden dopředu**, ne „nejbližší sobota a neděle": v týdnu se hrají dohrávky
-// a mládež mívá zápas ve všední den. Pevný víkend by je zamlčel.
-const WINDOW_DAYS = 7;
-
-function range() {
-  const from = new Date();
-  from.setHours(0, 0, 0, 0);
-  const to = new Date(from.getTime() + WINDOW_DAYS * DAY_MS);
-  return { dateFrom: from.toISOString(), dateTo: to.toISOString() };
+/** `match/list` s oknem programu; starší dny jen se zápasy, které ještě nemají výsledek. */
+async function loadProgram(teamIdList) {
+  const dtoOut = await UiElements.Call.cmdGet("/match/list", { teamIdList, ...programRange(), order: "asc" });
+  // Filtr při načtení, ne při vykreslení: zapsaný výsledek tak dlaždici nechá na místě se
+  // skóre (potvrzení, že se uložil) a zmizí až s dalším načtením home.
+  const now = new Date();
+  return { ...dtoOut, itemList: dtoOut.itemList.filter((match) => isInProgram(match, now)) };
 }
 
 const WeekendProgram = createVisualComponent({
@@ -50,10 +51,7 @@ const WeekendProgram = createVisualComponent({
     const dataList = useDataList(
       {
         handlerMap: {
-          load: () =>
-            teamIdList.length
-              ? UiElements.Call.cmdGet("/match/list", { teamIdList, ...range(), order: "asc" })
-              : Promise.resolve({ itemList: [] }),
+          load: () => (teamIdList.length ? loadProgram(teamIdList) : Promise.resolve({ itemList: [] })),
         },
         itemHandlerMap: {
           // `id` doplní uu5g05 z položky samo, dtoIn se jen doplní o zbytek formuláře.
