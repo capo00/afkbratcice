@@ -2,7 +2,8 @@ import matchDao from "../match/dao.js";
 import playerDao from "../player/dao.js";
 import personDao from "../person/dao.js";
 import { countsTowardsTable } from "./table.js";
-import { personForIdentity } from "./hidden-names.js";
+import { personForIdentity, isPlayerHidden } from "./hidden-names.js";
+import { withTeamList } from "./roster.js";
 
 // Statistiky hráčů se agregují v Mongu ($unwind nad playerList), ne v paměti -- sezóna
 // má stovky zápasů a načítat je všechny kvůli součtu by bylo zbytečné.
@@ -31,13 +32,17 @@ const SUM_STAGE = {
 
 /**
  * Doplní k agregovaným řádkům hráče a osobu (bez kontaktů -- statistiky jsou veřejné).
- * `hidden`: statistiky dětí jdou bez jmen (services/hidden-names.js).
+ * `hidden`: statistiky dětí jdou bez jmen (services/hidden-names.js) -- `true`/`false` for the
+ * whole list (the context of a team or a season decides), or a function `(player) => boolean`
+ * deciding per player (no context; the player gets their `teamList` for it first).
  */
 async function decorate(rowList, { hidden = false, identity } = {}) {
   const playerIdList = rowList.map((r) => r.playerId).filter(Boolean);
   if (!playerIdList.length) return [];
 
-  const players = await playerDao.listByIdList(playerIdList);
+  const perPlayer = typeof hidden === "function";
+  let players = await playerDao.listByIdList(playerIdList);
+  if (perPlayer) players = await withTeamList(players);
   const personIdList = [...new Set(players.map((p) => p.personId).filter(Boolean))];
   const persons = personIdList.length ? await personDao.listByIdList(personIdList) : [];
 
@@ -45,13 +50,27 @@ async function decorate(rowList, { hidden = false, identity } = {}) {
     const player = players.find((p) => p.id === row.playerId) ?? null;
     const found = player ? persons.find((x) => x.id === player.personId) : null;
     // O skrytí rozhoduje celá osoba (i `identity` kvůli výjimce pro ni samu), ořízne se až potom.
-    const person = found ? personForIdentity(found, identity, hidden) : null;
+    const person = found ? personForIdentity(found, identity, perPlayer ? hidden(player) : hidden) : null;
     return {
       ...row,
       player: player ? { id: player.id, position: player.position } : null,
       person: person ? { id: person.id, name: person.name, surname: person.surname } : null,
     };
   });
+}
+
+/**
+ * Whether the names in player statistics are hidden (services/hidden-names.js). With a season or
+ * a team the context decides -- the age of the season, or the team asked about. Without either
+ * the statistics span every category, so it is decided per player, the same rule as
+ * `player/list` (an open membership in a hidden team); without it one anonymous request listed
+ * the names of the whole U15 (review 2026-11-12, V3).
+ *
+ * @returns `true`/`false` for the whole list, or `(player) => boolean` for `decorate`
+ */
+function hiddenNamesRule({ seasonId, teamId, season, hiddenAgeList, hiddenTeamIdSet }) {
+  if (!seasonId && !teamId) return (player) => isPlayerHidden(player, hiddenTeamIdSet);
+  return hiddenAgeList.includes(season?.age) || (teamId ? hiddenTeamIdSet.has(teamId) : false);
 }
 
 async function listPlayerStats({ seasonId, teamId, hidden = false, identity } = {}) {
@@ -105,4 +124,4 @@ async function getPlayerStats({ playerId }) {
 // `buildMatchFilter` je exportované kvůli testům: je to jediný kus statistik, který jde
 // ověřit bez Monga, a zároveň ten, kde se pravidlo „jen odehrané soutěžní zápasy" musí
 // shodovat s tabulkou (`countsTowardsTable`).
-export { listPlayerStats, getPlayerStats, countsTowardsTable, buildMatchFilter };
+export { listPlayerStats, getPlayerStats, hiddenNamesRule, countsTowardsTable, buildMatchFilter };

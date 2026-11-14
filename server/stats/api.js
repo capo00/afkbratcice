@@ -2,7 +2,7 @@ import matchDao from "../match/dao.js";
 import seasonDao from "../season/dao.js";
 import teamDao from "../team/dao.js";
 import { computeTable } from "../services/table.js";
-import { listPlayerStats, getPlayerStats } from "../services/stats.js";
+import { listPlayerStats, getPlayerStats, hiddenNamesRule } from "../services/stats.js";
 import { validate, shape, mongoId } from "../services/validators.js";
 import { getYearFrom } from "../services/season.js";
 import { loadHiddenAgeList, loadHiddenTeamIdSet } from "../services/hidden-teams.js";
@@ -36,10 +36,10 @@ export default {
     validator: validate(shape({ seasonId: mongoId(), teamId: mongoId() })),
     fn: async ({ dtoIn, identity }) => {
       const season = await resolveSeason(dtoIn);
-      // Statistiky dětí bez jmen: rozhoduje věk sezóny, nebo tým, na který se ptá.
+      // Children's statistics go without names (services/stats.js `hiddenNamesRule`).
       const hiddenAgeList = await loadHiddenAgeList();
       const hiddenTeamIdSet = await loadHiddenTeamIdSet(hiddenAgeList);
-      const hidden = hiddenAgeList.includes(season?.age) || (dtoIn.teamId ? hiddenTeamIdSet.has(dtoIn.teamId) : false);
+      const hidden = hiddenNamesRule({ ...dtoIn, season, hiddenAgeList, hiddenTeamIdSet });
       const itemList = await listPlayerStats({ seasonId: season?.id, teamId: dtoIn.teamId, hidden, identity });
       return { itemList };
     },

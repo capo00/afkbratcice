@@ -14,6 +14,10 @@ import Config from "../config.js";
 // původně říkal jen `CONTENT`; editor sestav by pak u žáků viděl samá čísla. A osoba sama.
 //
 // Trenéři se neskrývají: jsou dospělí a rodiče mají vědět, kdo děti vede.
+//
+// The context of the team decides, not the player: a pupil who plays for the men is named in
+// the men's lineup and statistics (Caio 2026-11-14). Without a team context (a player profile,
+// statistics across categories) it is decided per player -- `isPlayerHidden`.
 
 const HIDDEN_FIELD_LIST = ["name", "surname", "photoId", "photoUri"];
 
