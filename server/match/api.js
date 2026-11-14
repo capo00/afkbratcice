@@ -35,7 +35,12 @@ const lineupEntry = shape({
   redCard: boolean(),
 });
 
-const writeDtoIn = shape({
+// Match info -- what the "Info" tab of the match modal edits. The result and the lineup are NOT
+// accepted by `match/create` and `match/update`: they have their own use cases with their own
+// rules (`setResult` checks the penalty shootout, `setLineup` keeps a team editor to their own
+// players). The validator drops unknown keys with a warning, so an older client keeps working,
+// it just cannot bypass those rules (review 2026-11-12, V1).
+const infoFields = {
   id: mongoId(),
   seasonId: mongoId(),
   round: string(),
@@ -44,14 +49,22 @@ const writeDtoIn = shape({
   departureTime: string(),
   homeTeamId: mongoId(),
   guestTeamId: mongoId(),
+  state: oneOf(Config.MATCH_STATE),
+  note: string(),
+};
+
+const infoDtoIn = shape(infoFields);
+
+// One match of the fixture import (`match/createMany`, broad roles only): the info plus the
+// result, so already played rounds can be imported too. The result goes through the same check
+// as `match/setResult` (crud.js `_checkResult`). No lineup -- the import does not carry one.
+const importEntryDtoIn = shape({
+  ...infoFields,
   homeGoals: integer(),
   guestGoals: integer(),
   homeGoalsHalf: integer(),
   guestGoalsHalf: integer(),
   penaltyWinnerTeamId: mongoId(),
-  playerList: array(lineupEntry),
-  state: oneOf(Config.MATCH_STATE),
-  note: string(),
 });
 
 /**
@@ -107,7 +120,7 @@ export default {
       resolve: ({ dtoIn }) => [dtoIn?.homeTeamId, dtoIn?.guestTeamId],
       mode: "any",
     }),
-    validator: validate(writeDtoIn),
+    validator: validate(infoDtoIn),
     fn: ({ dtoIn, identity }) => crud.create(dtoIn, identity),
   },
 
@@ -115,7 +128,7 @@ export default {
   "match/createMany": {
     method: "post",
     auth: Authorization.auth(Config.MATCH),
-    validator: validate(shape({ itemList: array(writeDtoIn).isRequired() })),
+    validator: validate(shape({ itemList: array(importEntryDtoIn).isRequired() })),
     fn: ({ dtoIn }) => crud.createMany(dtoIn.itemList).then((itemList) => ({ itemList })),
   },
 
@@ -126,7 +139,7 @@ export default {
       resolve: teamsOfMatch,
       mode: "any",
     }),
-    validator: validate(writeDtoIn),
+    validator: validate(infoDtoIn),
     fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 

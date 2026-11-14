@@ -113,6 +113,7 @@ class MatchCrud extends Crud {
   async createMany(dataList) {
     for (const item of dataList) this._checkTeams(item);
     await this._checkAgesMany(dataList);
+    for (const [index, item] of dataList.entries()) await this._checkResult(item, { index });
     return super.createMany(
       dataList.map((item) => {
         const normalized = this._normalize(item);
@@ -145,27 +146,39 @@ class MatchCrud extends Crud {
     return this._forIdentity(await super.update(this._normalize(data)), identity);
   }
 
+  /**
+   * Rules of a match result, shared by `setResult` and the fixture import (`createMany`) -- every
+   * way a result enters the database goes through them (review 2026-11-12, V1). The season is
+   * loaded only when there is a shootout winner to check.
+   *
+   * @param match  the teams and the season of the match plus the result being written
+   * @param extra  additional error data (the item index of an import)
+   */
+  async _checkResult({ homeTeamId, guestTeamId, seasonId, homeGoals, guestGoals, penaltyWinnerTeamId }, extra = {}) {
+    if (!penaltyWinnerTeamId) return;
+
+    if (![homeTeamId, guestTeamId].includes(penaltyWinnerTeamId)) {
+      throw this._error("invalidPenaltyWinner", "Penalty winner must be one of the two teams", { penaltyWinnerTeamId, ...extra });
+    }
+    // A shootout only makes sense on a draw -- otherwise the table would count nonsense.
+    if (homeGoals !== guestGoals) {
+      throw this._error("invalidPenaltyWinner", "Penalty shootout is only possible on a draw", { homeGoals, guestGoals, ...extra });
+    }
+    // ... and only in a competition played with shootouts (`season.hasPenalties`). Elsewhere the
+    // table would not count the winner anyway (services/table.js) and the web would show a badge
+    // that means nothing. A match without a season is a friendly without shootouts.
+    const season = seasonId ? await seasonDao.get(seasonId).catch(() => null) : null;
+    if (!season?.hasPenalties) {
+      throw this._error("invalidPenaltyWinner", "Penalty shootout is not played in this season", {
+        seasonId: seasonId ?? null,
+        ...extra,
+      });
+    }
+  }
+
   async setResult({ id, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId }, identity) {
     const current = await this._get(id);
-
-    if (penaltyWinnerTeamId) {
-      if (![current.homeTeamId, current.guestTeamId].includes(penaltyWinnerTeamId)) {
-        throw this._error("invalidPenaltyWinner", "Penalty winner must be one of the two teams", { penaltyWinnerTeamId });
-      }
-      // Rozstřel dává smysl jen u remízy -- jinak by tabulka počítala nesmysl.
-      if (homeGoals !== guestGoals) {
-        throw this._error("invalidPenaltyWinner", "Penalty shootout is only possible on a draw", { homeGoals, guestGoals });
-      }
-      // ... a jen v soutěži, která se na penalty hraje (`season.hasPenalties`). Jinde by
-      // tabulka vítěze rozstřelu stejně nezapočítala (services/table.js) a na webu by
-      // u zápasu visel odznak, který nic neznamená. Zápas bez sezóny je přátelák bez penalt.
-      const season = current.seasonId ? await seasonDao.get(current.seasonId).catch(() => null) : null;
-      if (!season?.hasPenalties) {
-        throw this._error("invalidPenaltyWinner", "Penalty shootout is not played in this season", {
-          seasonId: current.seasonId ?? null,
-        });
-      }
-    }
+    await this._checkResult({ ...current, homeGoals, guestGoals, penaltyWinnerTeamId });
 
     // `_forIdentity` i tady, aby zápis vracel týž tvar jako `list` -- klient položku
     // v seznamu nahradí tímhle objektem (`useDataList`), takže by se jinak lišila
