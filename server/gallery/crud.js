@@ -82,11 +82,34 @@ class GalleryCrud extends Crud {
     return { ...updated, binary, thumbBinary };
   }
 
+  /**
+   * A new album has no photos, so it has no cover either -- the first upload sets it
+   * (`addPhoto`). A `coverBinaryId` sent on create could only point at someone else's binary.
+   */
+  async create({ coverBinaryId, ...data }) {
+    return super.create(data);
+  }
+
+  /**
+   * A cover is a photo of this very album; its thumbnail goes along (`coverThumbUri`), otherwise
+   * the web would keep showing the previous cover. `null` clears the cover.
+   */
+  async update(data) {
+    if (!("coverBinaryId" in data)) return super.update(data);
+    if (data.coverBinaryId == null) return super.update({ ...data, coverBinaryId: null, coverThumbUri: null });
+
+    const photo = await this._photoOf(data.id, data.coverBinaryId);
+    return super.update({ ...data, coverThumbUri: photo.thumbUri ?? photo.uri ?? null });
+  }
+
   async deletePhoto({ id, binaryId }) {
     const gallery = await this._get(id);
-    const binary = await BinaryStore.Binary.get(binaryId).catch(() => null);
+    // Only a photo of this album -- the binary store would delete any file (a club crest,
+    // a portrait, a download), and the per-collection authorization of `binary/*` does not
+    // apply to a library call (design/roles.md, 5.1; review 2026-11-12, V2).
+    const binary = await this._photoOf(id, binaryId);
 
-    if (binary?.thumbBinaryId) await this._deleteBinary(binary.thumbBinaryId);
+    if (binary.thumbBinaryId) await this._deleteBinary(binary.thumbBinaryId);
     await this._deleteBinary(binaryId);
 
     const patch = { id, photoCount: Math.max(0, (gallery.photoCount ?? 1) - 1) };
@@ -104,6 +127,26 @@ class GalleryCrud extends Crud {
     await super.delete(id);
     // Úklid binárek až po smazání alba: kdyby selhal, zůstanou soubory, ne osiřelé album.
     for (const binary of photoList) await this._deleteBinary(binary.id);
+  }
+
+  /**
+   * The photo `binaryId` of the album `galleryId` (a full-size photo, not its thumbnail). 404,
+   * not 403, for anything else: whether some other binary exists is none of the caller's business.
+   */
+  async _photoOf(galleryId, binaryId) {
+    const binary = await BinaryStore.Binary.get(binaryId).catch(() => null);
+    const isPhoto =
+      binary?.collection === Config.BINARY_COLLECTION.GALLERY &&
+      String(binary.refId) === String(galleryId) &&
+      binary.type === Config.BINARY_TYPE.PHOTO;
+    if (!isPhoto) {
+      throw new CoreError("Photo does not exist in this gallery", {
+        status: 404,
+        code: CoreError.code("gallery", "photoNotFound"),
+        paramMap: { id: galleryId, binaryId },
+      });
+    }
+    return binary;
   }
 
   async _deleteBinary(id) {
