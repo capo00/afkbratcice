@@ -373,7 +373,7 @@ Implementace přes aggregation pipeline (`$unwind: "$playerList"`), ne v paměti
 |---|---|---|---|---|
 | `person/list` | get | – | `{ query, idList, pageInfo }` | `{ itemList }` (bez kontaktů, viz 1.2) |
 | `person/get` | get | – | `{ id }` | `person` |
-| `person/create` | post | CONTENT, **TE** | `{ name, surname, birthdate, email, phone, identity, photo: File }` | `person` |
+| `person/create` | post | CONTENT, **TE** | `{ name, surname, birthdate, email, phone, note, photo: File }` (bez `identity`, ta jen přes `linkIdentity`) | `person` |
 | `person/update` | post | CONTENT | `{ id, ... }` | `person` |
 | `person/delete` | post | CONTENT | `{ id }` | `{}` |
 | `person/linkIdentity` | post | ADMIN | `{ id, identity }` | `person` |

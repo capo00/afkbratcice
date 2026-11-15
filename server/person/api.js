@@ -6,6 +6,9 @@ import { validate, shape, string, mongoId, array, any, pageInfo } from "../servi
 const listDtoIn = shape({ query: string(), idList: array(mongoId()), pageInfo: pageInfo() });
 const idDtoIn = shape({ id: mongoId().isRequired() });
 
+// Bez `identity`: přiřadit osobě účet smí jen admin přes `person/linkIdentity`. Tudy by správce
+// obsahu dal cizímu účtu kontakty kterékoli osoby (i dítěte) a správce týmu by účet zabral
+// novou osobou -- `identity` je unikátní (review 2026-11-12, S2). Validátor pole zahodí.
 const writeDtoIn = shape({
   id: mongoId(),
   name: string(),
@@ -13,7 +16,6 @@ const writeDtoIn = shape({
   birthdate: string(),
   email: string(),
   phone: string(),
-  identity: string(),
   note: string(),
   photo: any(),
 });
