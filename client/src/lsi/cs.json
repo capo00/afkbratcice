@@ -3,6 +3,12 @@
     "name": "AFK Bratčice",
     "since": "od roku 1932"
   },
+  "common": {
+    "loadError": "Data se nepodařilo načíst. Zkuste to prosím za chvíli znovu.",
+    "appLoadError": "Web se nepodařilo načíst. Zkuste to prosím za chvíli znovu.",
+    "retry": "Zkusit znovu",
+    "selectLoadError": "Seznam se nepodařilo načíst. Zavřete formulář a otevřete ho znovu."
+  },
   "header": {
     "nav": {
       "home": "Úvod",

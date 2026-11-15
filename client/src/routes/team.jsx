@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 
 const { theme } = Config;
@@ -170,10 +171,10 @@ function Roster({ teamId, seasonId, category }) {
     return result;
   }, [data]);
 
-  if (state === "pendingNoData") {
+  if (state === "pendingNoData" || state === "errorNoData") {
     return (
       <Section>
-        <Uu5Elements.Skeleton height={200} />
+        <DataState dataObject={dataObject} height={200} />
       </Section>
     );
   }

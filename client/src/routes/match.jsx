@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import LineupPitch from "../components/lineup-pitch/lineup-pitch.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
@@ -48,8 +49,9 @@ function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, va
   }
 
   // Prázdný blok se nekreslí vůbec — „ostatní výsledky kola" bez ostatních výsledků je
-  // jen nadpis nad prázdnem.
-  if (dataObject.state === "pendingNoData" || itemList.length === 0) return null;
+  // jen nadpis nad prázdnem. Při chybě taky nic: je to doplněk pod detailem zápasu
+  // a hláška o výpadku by tu jen opakovala tu, kterou by návštěvník viděl nahoře.
+  if (dataObject.state === "errorNoData" || dataObject.state === "pendingNoData" || itemList.length === 0) return null;
 
   return (
     <Section variant={variant}>
@@ -98,10 +100,11 @@ function MatchDetail({ matchId }) {
       : null,
   });
 
-  if (state === "pendingNoData") {
+  // 404 -> „zápas neexistuje“, jiná chyba (výpadek) -> „nepodařilo se načíst“ s novým pokusem.
+  if (state === "pendingNoData" || state === "errorNoData") {
     return (
       <Section>
-        <Uu5Elements.Skeleton height={280} />
+        <DataState dataObject={dataObject} height={280} notFound={lsi("match", "missing")} notFoundIcon="uugds-alert-circle" />
       </Section>
     );
   }

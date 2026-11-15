@@ -1,11 +1,11 @@
 import { createVisualComponent, useDataObject, Lsi } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 import RouteLink from "../components/route-link.jsx";
 
@@ -48,8 +48,8 @@ function Stats({ teamId, seasonId }) {
 
   return (
     <Section>
-      {state === "pendingNoData" ? (
-        <Uu5Elements.Skeleton height={240} />
+      {state === "pendingNoData" || state === "errorNoData" ? (
+        <DataState dataObject={dataObject} height={240} />
       ) : itemList.length === 0 ? (
         <EmptyState lsi={lsi("team", "noStats")} icon="uugds-view-list" />
       ) : (

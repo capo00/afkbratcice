@@ -7,6 +7,7 @@ import Section from "../layout/section.jsx";
 import Heading from "../layout/heading.jsx";
 import MatchTile from "../match-tile.jsx";
 import EmptyState from "../empty-state.jsx";
+import DataState from "../data-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import { mergeItemHandler } from "../../core/item-merge.js";
 import { programRange, isInProgram } from "./program-window.js";
@@ -82,8 +83,8 @@ const WeekendProgram = createVisualComponent({
         <Heading eyebrow={lsi("home", "program", "eyebrow")} lsi={lsi("home", "program", "header")} />
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
-          {state === "pendingNoData" ? (
-            <Uu5Elements.Skeleton height={160} />
+          {state === "pendingNoData" || state === "errorNoData" ? (
+            <DataState dataObject={dataList} height={160} />
           ) : itemList.length === 0 ? (
             <EmptyState lsi={lsi("home", "program", "empty")} icon="uugds-calendar" />
           ) : (

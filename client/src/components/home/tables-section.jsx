@@ -8,6 +8,7 @@ import Heading from "../layout/heading.jsx";
 import { SeasonLink } from "../route-link.jsx";
 import StandingsTable from "../standings-table.jsx";
 import EmptyState from "../empty-state.jsx";
+import DataState from "../data-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
 
 const { theme } = Config;
@@ -94,8 +95,8 @@ const TablesSection = createVisualComponent({
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
           {!active ? (
             <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-view-list" />
-          ) : state === "pendingNoData" ? (
-            <Uu5Elements.Skeleton height={240} />
+          ) : state === "pendingNoData" || state === "errorNoData" ? (
+            <DataState dataObject={dataObject} height={240} />
           ) : (data?.table ?? []).length === 0 ? (
             <EmptyState lsi={lsi("home", "tables", "empty")} icon="uugds-view-list" />
           ) : (

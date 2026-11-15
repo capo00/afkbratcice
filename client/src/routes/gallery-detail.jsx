@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
 
 const { theme } = Config;
@@ -101,7 +102,7 @@ const GalleryDetail = createVisualComponent({
     const { state, data } = dataObject;
     usePageTitle({ title: data?.gallery?.name, description: data?.gallery?.desc });
 
-    if (!galleryId || state === "errorNoData") {
+    if (!galleryId) {
       return (
         <Section>
           <EmptyState lsi={lsi("gallery", "missing")} icon="uugds-image" />
@@ -109,10 +110,11 @@ const GalleryDetail = createVisualComponent({
       );
     }
 
-    if (state === "pendingNoData") {
+    // 404 -> „neexistuje“, jiná chyba (výpadek) -> „nepodařilo se načíst“ s novým pokusem.
+    if (state === "pendingNoData" || state === "errorNoData") {
       return (
         <Section>
-          <Uu5Elements.Skeleton height={320} />
+          <DataState dataObject={dataObject} height={320} notFound={lsi("gallery", "missing")} notFoundIcon="uugds-image" />
         </Section>
       );
     }

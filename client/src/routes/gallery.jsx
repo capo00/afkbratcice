@@ -9,6 +9,7 @@ import Card from "../components/layout/card.jsx";
 import Button from "../components/layout/button.jsx";
 import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import { useApp } from "../core/app-context.jsx";
 
 const { theme } = Config;
@@ -151,8 +152,8 @@ const Gallery = createVisualComponent({
         </div>
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
-          {state === "pendingNoData" ? (
-            <Uu5Elements.Skeleton height={240} />
+          {state === "pendingNoData" || state === "errorNoData" ? (
+            <DataState dataObject={dataObject} height={240} />
           ) : itemList.length === 0 ? (
             <EmptyState lsi={lsi("gallery", "empty")} icon="uugds-image" />
           ) : (

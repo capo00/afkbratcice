@@ -1,11 +1,11 @@
 import { createVisualComponent, useDataObject } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import StandingsTable from "../components/standings-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 import { SeasonLink } from "../components/route-link.jsx";
 
@@ -30,8 +30,8 @@ function Table({ teamId, seasonId }) {
 
   return (
     <Section>
-      {state === "pendingNoData" ? (
-        <Uu5Elements.Skeleton height={280} />
+      {state === "pendingNoData" || state === "errorNoData" ? (
+        <DataState dataObject={dataObject} height={280} />
       ) : table.length === 0 ? (
         // Soutěž bez tabulky (stará garda) i sezóna, ve které se ještě nehrálo, končí tady.
         // Rozlišovat je nemá cenu — pro čtenáře je to v obou případech „zatím nic".

@@ -72,6 +72,22 @@ const EntitySelect = createVisualComponent({
         />
       );
     }
+    // Failed to load: the same placeholder with an error message under it, not an empty list -- an
+    // editor would read that as "no team / season exists" (review 2026-11-12, S1). The field stays
+    // out of the form; reopening the form loads the list again.
+    if (state === "errorNoData") {
+      return (
+        <Uu5Forms.TextSelect
+          label={props.label}
+          className={props.className}
+          required={props.required}
+          onChange={() => {}}
+          feedback="error"
+          message={<Lsi lsi={lsi("common", "selectLoadError")} />}
+          disabled
+        />
+      );
+    }
     return <Uu5Forms.FormTextSelect {...props} itemList={itemList} />;
   },
 });

@@ -8,6 +8,7 @@ import Heading from "../components/layout/heading.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import StandingsTable from "../components/standings-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import DateText from "../components/date-text.jsx";
 import { seasonLabel } from "../components/season-select.jsx";
 import { useApp } from "../core/app-context.jsx";
@@ -127,7 +128,9 @@ const Season = createVisualComponent({
       document.getElementById(roundAnchor(kolo))?.scrollIntoView({ block: "start" });
     }, [kolo, roundList.length]);
 
-    if (!seasonId || state === "error" || (state === "ready" && !season)) {
+    // Bez id, nebo server sezónu nezná (404, `null`) -> „neexistuje“; jiná chyba -> „nepodařilo se
+    // načíst“ s novým pokusem. Dřív se testovalo `"error"`, takže 404 viselo na skeletonu.
+    if (!seasonId || (state === "ready" && !season)) {
       return (
         <Section>
           <EmptyState lsi={lsi("season", "missing")} icon="uugds-calendar" />
@@ -138,7 +141,7 @@ const Season = createVisualComponent({
     if (!season) {
       return (
         <Section>
-          <Uu5Elements.Skeleton height={320} />
+          <DataState dataObject={dataObject} height={320} notFound={lsi("season", "missing")} notFoundIcon="uugds-calendar" />
         </Section>
       );
     }

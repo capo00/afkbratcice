@@ -2,8 +2,8 @@ import { createComponent, useDataObject, useMemo, useRef, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiApp, UiElements } from "caio-ui";
 import Config from "../config/config.js";
-
-const { theme } = Config;
+import { lsi } from "../lsi/import-lsi.js";
+import { ErrorState } from "../components/data-state.jsx";
 
 // Nastavení klubu, kategorie a mapa týmů — jednou při startu SPA, pak z kontextu.
 //
@@ -60,9 +60,6 @@ const AppProvider = createComponent({
         : dataObject.state === "pendingNoData" || !settingsLoaded
           ? "pendingNoData"
           : dataObject.state;
-    // `useSettings` dává chybu samotnou, `useDataObject` ji balí do `{ error }`.
-    const settingsError = !settingsLoaded && settings.errorData ? { error: settings.errorData } : undefined;
-    const errorData = dataObject.errorData ?? settingsError;
     const { data } = dataObject;
 
     function retry() {
@@ -109,18 +106,8 @@ const AppProvider = createComponent({
     // Chybová obrazovka je proto celostránková, ne alert kdesi v rohu.
     if (state === "errorNoData") {
       return (
-        <div className={Config.Css.css({ padding: 64, textAlign: "center", color: theme.color.mutedFg })}>
-          <Uu5Elements.Text category="interface" segment="title" type="minor">
-            Web se nepodařilo načíst.
-          </Uu5Elements.Text>
-          <div className={Config.Css.css({ marginBlockStart: 16 })}>
-            <Uu5Elements.Button onClick={retry}>Zkusit znovu</Uu5Elements.Button>
-          </div>
-          {errorData ? (
-            <pre className={Config.Css.css({ marginBlockStart: 24, fontSize: 12, opacity: 0.6 })}>
-              {String(errorData.error?.message ?? errorData.error ?? "")}
-            </pre>
-          ) : null}
+        <div className={Config.Css.css({ maxWidth: 640, marginInline: "auto", padding: "64px 16px" })}>
+          <ErrorState lsi={lsi("common", "appLoadError")} onRetry={retry} />
         </div>
       );
     }

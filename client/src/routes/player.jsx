@@ -9,6 +9,7 @@ import Card from "../components/layout/card.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import { seasonLabel } from "../components/season-select.jsx";
 import { SeasonLink } from "../components/route-link.jsx";
 import { useApp } from "../core/app-context.jsx";
@@ -164,7 +165,7 @@ const Player = createVisualComponent({
       noindex: Boolean(data?.player) && !playerName,
     });
 
-    if (!playerId || state === "errorNoData") {
+    if (!playerId) {
       return (
         <Section>
           <EmptyState lsi={lsi("player", "missing")} icon="uugds-account" />
@@ -172,10 +173,11 @@ const Player = createVisualComponent({
       );
     }
 
-    if (state === "pendingNoData") {
+    // 404 -> „neexistuje“, jiná chyba (výpadek) -> „nepodařilo se načíst“ s novým pokusem.
+    if (state === "pendingNoData" || state === "errorNoData") {
       return (
         <Section>
-          <Uu5Elements.Skeleton height={280} />
+          <DataState dataObject={dataObject} height={280} notFound={lsi("player", "missing")} notFoundIcon="uugds-account" />
         </Section>
       );
     }

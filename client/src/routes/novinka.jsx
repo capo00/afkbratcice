@@ -8,6 +8,7 @@ import Heading from "../components/layout/heading.jsx";
 import DateText from "../components/date-text.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
 
@@ -58,10 +59,16 @@ const Novinka = createVisualComponent({
     const { state, data } = dataObject;
     usePageTitle({ title: data?.name, description: data?.desc });
 
-    if (state === "pendingNoData") {
+    // 404 -> „novinka neexistuje“, jiná chyba (výpadek) -> „nepodařilo se načíst“ s novým pokusem.
+    if (state === "pendingNoData" || state === "errorNoData") {
       return (
         <Section>
-          <Uu5Elements.Skeleton height={320} />
+          <DataState
+            dataObject={dataObject}
+            height={320}
+            notFound={lsi("news", "missing")}
+            notFoundIcon="uugdsstencil-communication-megaphone"
+          />
         </Section>
       );
     }

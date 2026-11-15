@@ -7,6 +7,7 @@ import Section from "../layout/section.jsx";
 import Heading from "../layout/heading.jsx";
 import MatchTile from "../match-tile.jsx";
 import EmptyState from "../empty-state.jsx";
+import DataState from "../data-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import { mergeItemHandler } from "../../core/item-merge.js";
 
@@ -42,15 +43,15 @@ const LastResults = createVisualComponent({
       {
         handlerMap: {
           load: async () => {
-            const matchList = await Promise.all(
-              categoryList
-                .filter((category) => category.teamId)
-                .map((category) =>
-                  UiElements.Call.cmdGet("/match/getLast", { teamId: category.teamId })
-                    // Jedna kategorie bez výsledku nesmí shodit celou sekci.
-                    .catch(() => null),
-                ),
+            const teamIdList = categoryList.filter((category) => category.teamId).map((c) => c.teamId);
+            const resultList = await Promise.allSettled(
+              teamIdList.map((teamId) => UiElements.Call.cmdGet("/match/getLast", { teamId })),
             );
+            // Jedna kategorie bez výsledku nesmí shodit celou sekci. Když ale selžou všechny,
+            // je to výpadek, ne „žádné výsledky“ -- chyba jde dál do `DataState`.
+            const failedList = resultList.filter((result) => result.status === "rejected");
+            if (failedList.length && failedList.length === resultList.length) throw failedList[0].reason;
+            const matchList = resultList.map((result) => (result.status === "fulfilled" ? result.value : null));
             // Derby A proti B vrátí `getLast` pro oba týmy tentýž zápas -- jen jednou.
             const seen = new Set();
             return { itemList: matchList.filter((match) => match?.id && !seen.has(match.id) && seen.add(match.id)) };
@@ -80,8 +81,8 @@ const LastResults = createVisualComponent({
         <Heading eyebrow={lsi("home", "results", "eyebrow")} lsi={lsi("home", "results", "header")} />
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
-          {state === "pendingNoData" ? (
-            <Uu5Elements.Skeleton height={160} />
+          {state === "pendingNoData" || state === "errorNoData" ? (
+            <DataState dataObject={dataList} height={160} />
           ) : resultList.length === 0 ? (
             <EmptyState lsi={lsi("home", "results", "empty")} icon="uugds-check" />
           ) : (

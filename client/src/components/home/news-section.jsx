@@ -7,6 +7,7 @@ import Section from "../layout/section.jsx";
 import Heading from "../layout/heading.jsx";
 import Button from "../layout/button.jsx";
 import ArticleTile from "../article-tile.jsx";
+import DataState from "../data-state.jsx";
 
 // Aktuality na úvodní stránce — tři nejnovější a odkaz na celý výpis.
 //
@@ -30,10 +31,16 @@ const NewsSection = createVisualComponent({
     const { state, data } = dataObject;
     const itemList = data?.itemList ?? [];
 
-    if (state === "pendingNoData") {
+    // Při chybě se sekce ukáže s hláškou -- tiše zmizet smí jen tehdy, když opravdu nic není.
+    if (state === "pendingNoData" || state === "errorNoData") {
       return (
         <Section id="aktuality">
-          <Uu5Elements.Skeleton height={240} />
+          {state === "errorNoData" ? (
+            <Heading eyebrow={lsi("news", "eyebrow")} lsi={lsi("news", "header")} />
+          ) : null}
+          <div className={Config.Css.css({ marginBlockStart: state === "errorNoData" ? 24 : 0 })}>
+            <DataState dataObject={dataObject} height={240} />
+          </div>
         </Section>
       );
     }

@@ -1,9 +1,9 @@
 import { createVisualComponent, useDataObject, Lsi } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import EmptyState from "./empty-state.jsx";
+import DataState from "./data-state.jsx";
 
 // Výbor AFK ze záznamů vedení (`management/list?board=true&active=true`), ne psaný text --
 // do 2026-11 byl stránkou v `content/page-content.js` a každá změna ve výboru znamenala
@@ -48,12 +48,13 @@ const Board = createVisualComponent({
   uu5Tag: Config.TAG + "Board",
 
   render() {
-    const { state, data } = useDataObject(
+    const dataObject = useDataObject(
       { handlerMap: { load: () => UiElements.Call.cmdGet("/management/list", { board: true, active: true }) } },
       [],
     );
+    const { state, data } = dataObject;
 
-    if (state === "pendingNoData") return <Uu5Elements.Skeleton height={240} />;
+    if (state === "pendingNoData" || state === "errorNoData") return <DataState dataObject={dataObject} height={240} />;
 
     // Záznam je jedna trvající funkce ve výboru (`active: true` filtruje server).
     const groupList = Config.BOARD_ROLE_LIST.map((role) => ({

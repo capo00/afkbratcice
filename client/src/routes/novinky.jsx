@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import ArticleTile from "../components/article-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 
 // Výpis novinek se stránkováním.
 //
@@ -51,8 +52,8 @@ const Novinky = createVisualComponent({
         <Heading eyebrow={lsi("news", "eyebrow")} lsi={lsi("news", "header")} />
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
-          {state === "pendingNoData" ? (
-            <Uu5Elements.Skeleton height={320} />
+          {state === "pendingNoData" || state === "errorNoData" ? (
+            <DataState dataObject={dataObject} height={320} />
           ) : itemList.length === 0 ? (
             <EmptyState lsi={lsi("news", "empty")} icon="uugdsstencil-communication-megaphone" />
           ) : (

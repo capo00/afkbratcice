@@ -7,6 +7,7 @@ import Section from "../components/layout/section.jsx";
 import Button from "../components/layout/button.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 import { useApp } from "../core/app-context.jsx";
 
@@ -103,8 +104,8 @@ function MatchList({ teamId, seasonId, category }) {
         <ButtonRow itemList={FILTER_LIST} active={filter} onChange={setFilter} path={["team", "matches", "filter"]} />
       </div>
 
-      {state === "pendingNoData" ? (
-        <Uu5Elements.Skeleton height={200} />
+      {state === "pendingNoData" || state === "errorNoData" ? (
+        <DataState dataObject={dataObject} height={200} />
       ) : itemList.length === 0 ? (
         <EmptyState
           lsi={lsi("team", "matches", activeMode === "played" ? "noPlayed" : "noUpcoming")}
