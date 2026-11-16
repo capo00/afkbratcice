@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import Config from "../config.js";
 import clubApi from "../club/api.js";
 import categoryApi from "../category/api.js";
@@ -228,6 +229,39 @@ test("access table has a row for every use case of the app api", () => {
   const covered = new Set(Object.keys(expected).map((row) => row.split("#")[0]));
   assert.deepEqual(Object.keys(api).filter((uc) => !covered.has(uc)), []);
   assert.deepEqual(Object.keys(dtoInMap).filter((row) => !(row in expected)), []);
+});
+
+// design/roles.md describes the use cases and their roles with the reasons; this table enforces
+// them. The two drifted apart once (review 2026-11-12, S13: `person/list` public in the document,
+// `page/*` and `person/linkSelf` documented but never built, `category/*` missing), so the
+// document has to name exactly the app's use cases. The roles themselves are compared above,
+// against this table -- parsing the document's notation (`**TE** (any)`, "viz 5.2") would be brittle.
+// Stack use cases (`sys/*`, `identity/*`, `member/*`, `binary/*`, `/auth/*`, `sitemap.xml`) are
+// listed there too, for completeness, and are not compared.
+const STACK_USE_CASE = /^(sys|identity|member|binary|auth)\/|^sitemap\.xml$/;
+
+/** Use case names of the tables in roles.md: `` `team/create` ``, `` `team/update`, `delete` `` … */
+function documentedUseCases() {
+  const doc = fs.readFileSync(new URL("../../design/roles.md", import.meta.url), "utf8");
+  const names = new Set();
+  for (const line of doc.split(/\r?\n/).filter((l) => l.startsWith("| `"))) {
+    let entity = null;
+    for (const [, raw] of line.split("|")[1].matchAll(/`([^`]+)`/g)) {
+      // `GET /rss`, `/calendar/team-<id>.ics` -> rss, calendar/team
+      const name = raw.replace(/^(GET )?\//, "").replace(/-<id>\.ics$/, "").replace(/\/\*$/, "/*");
+      if (name.includes("/") || name === "rss") {
+        entity = name.split("/")[0];
+        names.add(name);
+      } else if (entity && /^[a-zA-Z]+$/.test(name)) {
+        names.add(`${entity}/${name}`); // `season/list`, `get` -> season/get
+      }
+    }
+  }
+  return [...names].filter((name) => !STACK_USE_CASE.test(name)).sort();
+}
+
+test("roles.md lists exactly the app's use cases", () => {
+  assert.deepEqual(documentedUseCases(), Object.keys(api).sort());
 });
 
 // Public only on purpose (the "public" rows above), and every restricted use case has a

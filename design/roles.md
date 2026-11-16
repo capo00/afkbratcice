@@ -3,7 +3,9 @@
 Datum: 2026-09-06
 
 **Tenhle dokument je zdroj pravdy pro autorizaci.** [api.md](./api.md) u každého use casu
-odkazuje na množiny definované tady; když si odporují, vyhrává tenhle dokument.
+odkazuje na množiny definované tady; když si odporují, vyhrává tenhle dokument. Kód ho
+vynucuje přes `server/test/access-table.test.js`: změna oprávnění se dělá v dokumentu
+i v tom testu zároveň (aktualizováno 2026-11-16, review S13).
 
 ---
 
@@ -194,6 +196,12 @@ V tabulce níž se používají tyhle názvy množin, ne jednotlivé role.
 Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastník záznamu ·
 **TE** `teamEditor:<teamId>` (rozsah dle sekce 3) · množiny z sekce 4.
 
+Platná oprávnění drží `server/test/access-table.test.js` (každá role proti každému use
+casu). Tabulka tady je jejich popis s důvody; že v ní je každý use case aplikace a žádný
+navíc, hlídá tamtéž test „roles.md lists exactly the app's use cases“ (review 2026-11-12, S13).
+Stackové use casy (`sys/*`, `identity/*`, `member/*`, `binary/*`, `/auth/*`) jsou tu pro
+úplnost a test je neporovnává.
+
 ### Týmy, sezóny, tabulka
 
 | Use case | Kdo | Poznámka |
@@ -206,6 +214,8 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 | `team/delete` | CONTENT | |
 | `season/list`, `get`, `getCurrent`, `listCurrent`, `listYears` | – | `listCurrent` staví menu |
 | `season/create`, `update`, `delete` | CONTENT | zakládá kategorie pro ročník |
+| `category/list`, `get` | – | kategorie (A, B, dorost…) staví přehled mužstev |
+| `category/create`, `update`, `delete` | ADMIN | číselník klubu, mění se výjimečně (`services/category.js`) |
 | `stats/getTable`, `listPlayerStats`, `getPlayerStats` | – | počítané, nejde editovat |
 
 ### Zápasy
@@ -224,11 +234,13 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 
 | Use case | Kdo | Poznámka |
 |---|---|---|
-| `person/list`, `get` | – | kontakty jen CONTENT nebo self, viz sekce 7 |
+| `person/list`, `get` | CONTENT, kterýkoli **TE** | **neveřejné** (od 2026-10-28): web jména dostává se soupiskou, sestavou a statistikami, kde se dětem skrývají (`services/hidden-names.js`), veřejný `person/list` by to obešel. TE z osob skládá soupisku. Kontakty jen CONTENT nebo self, viz sekce 7 |
 | `person/create` | CONTENT, **TE** | TE zakládá osobu kvůli soupisce |
 | `person/update`, `delete` | CONTENT | osoba je sdílená napříč týmy |
 | `person/linkIdentity` | ADMIN | ruční spojení osoby s přihlášením |
-| `person/linkSelf` | přihlášený | spáruje volajícího s jeho `person` podle **ověřeného** e-mailu; jinak nedělá nic (viz [api.md](./api.md), 2.5.1) |
+
+> `person/linkSelf` (spárování volajícího s jeho `person` podle **ověřeného** e-mailu,
+> [api.md](./api.md), 2.5.1) **zatím není implementované** — čeká v [todo.md](../todo.md), 4.4.
 | `player/list`, `get` | – | |
 | `player/create` | CONTENT, kterýkoli **TE** | karta týmu nepatří, jako osoba |
 | `player/update` | CONTENT, **TE** (`all`) | hráč, jehož všechna působení jsou v jeho týmech |
@@ -244,9 +256,11 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 |---|---|---|
 | `article/list`, `get` | – | nepřihlášený vidí jen `published` |
 | `article/create`, `update`, `setState`, `delete` | NEWS | |
-| `page/get` | – | bere `code`, ne jen `id` |
-| `page/list` | PAGES | správcovský výpis |
-| `page/create`, `update`, `delete` | PAGES | obsahové stránky |
+
+> **Entita `page` není implementovaná** (stav 2026-11-16). Obsahové stránky (historie, hymna,
+> výbor, tréninky, týmové fotky) jsou statický obsah klienta v `client/src/content/` a mění se
+> nasazením. Role PAGES dnes zapisuje jen binárky kolekcí `page` a `file` (5.1). Kdyby `page/*`
+> vznikly, platí pro ně odstavec níž.
 
 > **Obsah článku a obsah stránky jsou dvě různé entity se dvěma různými rolemi**
 > (rozhodnuto 2026-09-06). Dřívější návrh držel obojí v ECC sekcích, a proto potřeboval
@@ -334,9 +348,10 @@ pravidlo, `services/category.js`).
 | Use case | Kdo | Poznámka |
 |---|---|---|
 | `sys/health` | – | |
-| `GET /rss`, `/sitemap.xml`, `/calendar/team-<id>.ics` | – | |
-| `appConfig/get` | – | |
-| `appConfig/update` | ADMIN | pořadí kategorií, upozornění, kontakty |
+| `GET /rss`, `/sitemap.xml`, `/calendar/team-<id>.ics` | – | iCal (use case `calendar/team`) klient zatím nikde nenabízí, viz [todo.md](../todo.md), 2 |
+| `appConfig/get` | – | jen zpětná kompatibilita na jedno vydání; nastavení je `sys/settings/*` |
+| `sys/settings/get` | – | veřejná část nastavení klubu |
+| `sys/settings/adminGet`, `update`, `testMail` | ADMIN | pořadí kategorií, upozornění, kontakty, pošta (dřív `appConfig/update`) |
 | `identity/get` | – | jen zobrazovací data |
 | `identity/search`, `identity/list` | A | výběr uživatele ve formuláři |
 | `identity/adminList`, `identity/update` | ADMIN | **viz sekce 6** |
