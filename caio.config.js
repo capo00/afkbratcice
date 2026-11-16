@@ -51,6 +51,9 @@ export default {
         mutedFg: "#6B5E5B",
         clubRed: "#D01319",
         clubRedBright: "#F92725",
+        // Club red as small text (eyebrow, links in prose): AA 4.5:1 on every surface of the
+        // mode -- clubRed on light, clubRedBright on dark (review 2026-11-12, S9).
+        redText: "#D01319",
         onRed: "#FEF7F2",
       },
       dark: {
@@ -64,6 +67,7 @@ export default {
         mutedFg: "#99908E",
         clubRed: "#D01319",
         clubRedBright: "#F92725",
+        redText: "#F92725",
         onRed: "#FEF7F2",
       },
     },

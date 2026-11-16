@@ -180,7 +180,7 @@ function LargeFooter({ match }) {
       {/* `departureTime` je interní údaj — server ho vrací jen roli `members` a výš,
           takže když tu je, smí se ukázat. */}
       {match.departureTime ? (
-        <span className={Config.Css.css({ color: theme.color.clubRed })}>
+        <span className={Config.Css.css({ color: theme.color.redText })}>
           <Uu5Elements.Icon icon="uugds-clock" />{" "}
           <Lsi import={importLsi} path={["match", "departure"]} />: <DateText value={match.departureTime} type="time" />
         </span>

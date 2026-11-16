@@ -20,6 +20,10 @@ const { theme } = Config;
  * stejný postup jako `components/layout/heading.jsx`. Přebíjí se jen to, co token nemá:
  * rodina písma, prostrkání a verzálky.
  *
+ * Lišta je tmavá v obou režimech, takže podstrom dostane tmavou paletu (`darkScope`, jako
+ * hero): bez ní by druhý řádek ve světlém režimu vzal světlou `redText` a měl na tmavé
+ * liště kontrast 3,7 : 1 (S9).
+ *
  * @param subtitle druhý řádek; bez něj „od roku …“ z LSI (admin tu má „Administrace“).
  */
 function ClubName({ subtitle }) {
@@ -30,7 +34,7 @@ function ClubName({ subtitle }) {
     // Dva řádky nalepené na sebe, vycentrované na výšku lišty: `rowGap={0}` je tu proto,
     // že výchozí mezera `Grid` (24 px z `loose`) je mezera mezi dlaždicemi, ne mezi řádky
     // jednoho popisku.
-    <Uu5Elements.Grid alignContent="center" rowGap={0}>
+    <Uu5Elements.Grid alignContent="center" rowGap={0} className={Config.Css.css(theme.darkScope)}>
       <Uu5Elements.Text category="interface" segment="title" type="minor">
         {({ style }) => (
           <span

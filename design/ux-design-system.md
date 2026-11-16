@@ -54,8 +54,9 @@ hex je bezpečný fallback pro místa, kde `uu5g05` `oklch` nezvládne.
 | `input` | `oklch(31% .012 25)` | `#362E2D` | rámeček vstupu |
 | `foreground` | `oklch(95.5% .005 60)` | `#F3EFED` | základní text |
 | `mutedForeground` | `oklch(66% .012 30)` | `#99908E` | sekundární text, perex, popisky |
-| **`primary` / `clubRed`** | `oklch(54.5% .215 27.56)` | **`#D01319`** | klubová červená: CTA, eyebrow, aktivní nav, skóre |
-| `clubRedBright` | `oklch(63% .24 28)` | `#F92725` | světlejší varianta (hover, CTA pruh) — zatím se nikde nepoužívá |
+| **`primary` / `clubRed`** | `oklch(54.5% .215 27.56)` | **`#D01319`** | klubová červená: plochy, pruh u nadpisu, CTA, ikony, velká čísla |
+| `clubRedBright` | `oklch(63% .24 28)` | `#F92725` | světlejší varianta (hover, CTA pruh); v tmavém režimu hodnota `redText` |
+| `redText` | – | `#F92725` | **červený malý text**: eyebrow, záhlaví tabulek, odkazy v textu, čas odjezdu (od 2026-11-16, S9) |
 | `primaryForeground` | `oklch(98% .01 60)` | `#FEF7F2` | text na červené |
 | ~~`destructive`~~ | — | — | **zrušené 2026-10-25**, viz 1.1: chyby a mazání jsou `colorScheme="negative"` z uuGds, přemapované na oranžovou |
 
@@ -88,9 +89,19 @@ canvas „AFK Bratčice – světlý režim“ (https://claude.ai/artifact/QmFSX
 | `fg` | `#1C1312` | `#F3EFED` |
 | `mutedFg` | `#6B5E5B` | `#99908E` |
 | `clubRed`, `clubRedBright`, `onRed` | beze změny | beze změny |
+| `redText` | `#D01319` (= `clubRed`) | `#F92725` (= `clubRedBright`) |
 
 Kontrasty světlé palety: fg/bg 16,98 : 1, mutedFg/bg 5,79 : 1, clubRed/bg 5,16 : 1,
 clubRed/accent 4,53 : 1, onRed/clubRed 5,23 : 1 — všechno AA.
+
+**Červený text je `redText`, ne `clubRed`** (2026-11-16, review S9). `clubRed` má na tmavém
+podkladu 3,69 : 1, na kartě 3,48 a na `muted` 3,19 : 1. Stačí to na velký text (skóre, čísla
+statistik), ikony a plochy (WCAG 3 : 1), ne na 12px eyebrow (4,5 : 1). `redText` je ve světlém
+režimu `clubRed` (5,16–5,54 : 1) a v tmavém `clubRedBright` (bg 5,20, card 4,91, muted
+4,51 : 1). Tmavé plochy ve světlém režimu (hero, lišta) dostanou tmavou hodnotu přes
+`darkScope`. Tím se mění poznámka z 8. 9. výš: `clubRedBright` už není jen hover a CTA pruh.
+Odkazy uu5 s `colorScheme="primary"` si odstín počítají samy (v tmavém `#DA433B`, na kartě
+4,45 : 1) a `redText` je nebere.
 
 **Horní lišta (web i administrace), hero a červený CTA pruh jsou tmavé v obou režimech**
 (lišta: Caio 2026-10-25, po schválení canvasu; `cssBackground` je hex tmavé palety, aby

@@ -30,7 +30,7 @@ const Prose = createVisualComponent({
                 "& h3": { ...h3Style, ...theme.typography.display, marginBlock: "1.5em 0.5em" },
                 "& ul, & ol": { paddingInlineStart: "1.25em", lineHeight: 1.7 },
                 "& li": { marginBlockEnd: "0.25em" },
-                "& a": { color: theme.color.clubRed },
+                "& a": { color: theme.color.redText },
                 "& code": { backgroundColor: theme.color.muted, padding: "0.1em 0.35em", borderRadius: 4 },
                 "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
               }),

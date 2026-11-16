@@ -47,12 +47,14 @@ const typography = {
   },
   // Malý prostrkaný červený štítek nad nadpisem sekce (PROGRAM, NOVINKY Z KLUBU, …).
   // Nejlevnější a nejvýraznější prvek rytmu celé stránky — nevynechávat.
+  // Barva `redText`, ne `clubRed`: 12 px je malý text a `clubRed` má na tmavém jen
+  // 3,2–3,7 : 1 (S9). `clubRed` zůstává plochám, pruhům, ikonám a velkým číslům.
   eyebrow: {
     fontFamily: font.body,
     fontWeight: 700,
     letterSpacing: "0.25em",
     textTransform: "uppercase",
-    color: color.clubRed,
+    color: color.redText,
   },
 };
 

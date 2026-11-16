@@ -119,6 +119,7 @@ Tmavé schéma, hue 25–30 (teplá). Nikde není čistá černá ani čistá b�
 - `mutedFg: "#99908E"` — sekundární text, perex, popisky, vzdálenosti
 - **`clubRed: "#D01319"`** — klubová červená: CTA, eyebrow, aktivní nav, skóre, pruh u nadpisu
 - `clubRedBright: "#F92725"` — hover a plný CTA pruh
+- `redText` — červený malý text (eyebrow, odkazy v textu): `#D01319` ve světlém, `#F92725` v tmavém režimu (2026-11-16, review S9; platné hodnoty v `caio.config.js`)
 - `onRed: "#FEF7F2"` — text na červené
 - `destructive: "#E7000B"` — chyby
 
