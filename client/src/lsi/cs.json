@@ -506,6 +506,7 @@
     "afkbratcice/management/personRequired": "Vyberte osobu.",
     "afkbratcice/roster/overlap": "Tento hráč už je v tomto týmu v období, které se s tímto překrývá. Upravte nebo ukončete ten záznam.",
     "afkbratcice/roster/unknownPlayer": "Vyberte hráče.",
+    "afkbratcice/roster/unknownPerson": "Vybraná osoba neexistuje, možná ji mezitím někdo smazal.",
     "afkbratcice/roster/invalidPeriod": "Začátek je po konci.",
     "afkbratcice/match/sameTeams": "Tým nemůže hrát sám se sebou. Vyberte jiného soupeře.",
     "afkbratcice/match/invalidPenaltyWinner": "Rozstřel jde zadat jen při remíze, v soutěži, která ho hraje, a vítězem musí být jeden z týmů zápasu.",

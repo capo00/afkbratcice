@@ -2,10 +2,16 @@ import { Crud, Error as CoreError } from "caio-server";
 import dao from "./dao.js";
 import playerDao from "../player/dao.js";
 import playerCrud from "../player/crud.js";
+import personDao from "../person/dao.js";
 import { overlaps, seasonRangeOf } from "../services/membership.js";
 
-// Soupiska: hráč v týmu v období (`dao.js`). Výstup nese vloženého `player` (s `person`),
-// aby tabulka v administraci nemusela hráče dohledávat; jména dětí řeší `playerCrud._withPerson`.
+// Soupiska: hráč v týmu v období (`dao.js`). Výstup nese vloženého `player` (s `person`) a jeho
+// `personId`, aby tabulka v administraci nemusela hráče dohledávat; jména dětí řeší
+// `playerCrud._withPerson`.
+//
+// Zápis přijímá místo `playerId` i **`personId`** (review 2026-11-12, S14): administrace
+// vybírá osobu, protože nová osoba kartu hráče ještě nemá a ze seznamu karet by ji do týmu
+// dát nešlo. Kartu najde, nebo založí `_resolvePlayer`.
 
 class RosterCrud extends Crud {
   constructor() {
@@ -19,7 +25,10 @@ class RosterCrud extends Crud {
           teamId,
         })
       : [];
-    return rowList.map((row) => ({ ...row, player: players.find((p) => p.id === row.playerId) ?? null }));
+    return rowList.map((row) => {
+      const player = players.find((p) => p.id === row.playerId) ?? null;
+      return { ...row, personId: player?.personId ?? null, player };
+    });
   }
 
   async list({ teamId, playerId, active, seasonId } = {}, identity) {
@@ -35,7 +44,7 @@ class RosterCrud extends Crud {
   }
 
   async create(data, identity) {
-    const row = this._normalize(data);
+    const row = await this._resolvePlayer(this._checkPeriod(this._normalize(data)));
     await this._check(row);
     const [out] = await this._withPlayer([await super.create(row)], identity, { teamId: row.teamId });
     return out;
@@ -44,7 +53,7 @@ class RosterCrud extends Crud {
   /** Tým se nemění (`teamId` v dtoIn update není): jiný tým = jiné působení, nový záznam. */
   async update(data, identity) {
     const current = this._getData(await this._get(data.id));
-    const row = this._normalize({ ...current, ...data, teamId: current.teamId });
+    const row = await this._resolvePlayer(this._checkPeriod(this._normalize({ ...current, ...data, teamId: current.teamId })));
     await this._check(row);
     const [out] = await this._withPlayer([await super.update(row)], identity, { teamId: row.teamId });
     return out;
@@ -54,12 +63,42 @@ class RosterCrud extends Crud {
     return { ...rest, dateFrom: dateFrom || null, dateTo: dateTo || null };
   }
 
+  /** Obrácené období odmítne dřív, než `_resolvePlayer` založí kartu, která by pak zbyla. */
+  _checkPeriod(row) {
+    if (row.dateFrom && row.dateTo && row.dateFrom > row.dateTo) {
+      throw this._error("invalidPeriod", "dateFrom is after dateTo");
+    }
+    return row;
+  }
+
+  /**
+   * `personId` -> `playerId`: karta osoby, a když ji osoba ještě nemá, nová (jen s osobou; post
+   * a poznámka se doplní na kartě). `personId` má přednost před `playerId` -- při úpravě přijde
+   * z formuláře změněná osoba a k ní staré `playerId` ze záznamu.
+   */
+  async _resolvePlayer({ personId, ...row }) {
+    if (!personId) return row;
+    const existing = await playerDao.findByPersonId(personId);
+    if (existing) return { ...row, playerId: String(existing.id) };
+
+    if (!(await personDao.get(personId).catch(() => null))) {
+      throw this._error("unknownPerson", "Person does not exist", { personId });
+    }
+    try {
+      return { ...row, playerId: String((await playerDao.create({ personId })).id) };
+    } catch (e) {
+      // Souběh: kartu mezitím založil jiný zápis (unikátní index na `personId`).
+      const raced = await playerDao.findByPersonId(personId);
+      if (raced) return { ...row, playerId: String(raced.id) };
+      throw e;
+    }
+  }
+
   async _check(row) {
-    const { playerId, teamId, dateFrom, dateTo } = row;
+    const { playerId, teamId } = row;
     if (!playerId || !(await playerDao.get(playerId).catch(() => null))) {
       throw this._error("unknownPlayer", "Player does not exist", { playerId: playerId ?? null });
     }
-    if (dateFrom && dateTo && dateFrom > dateTo) throw this._error("invalidPeriod", "dateFrom is after dateTo");
 
     // Týž hráč nesmí být v témž týmu dvakrát ve stejnou dobu (design/data-model.md, sekce 6.1).
     const sameTeam = await dao.listByFilter({ playerId, teamId });

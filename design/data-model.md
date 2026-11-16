@@ -555,7 +555,9 @@ API vrací u hráče i **odvozený `teamList`** `[{ id: teamId, dateFrom, dateTo
 
 **Pravidla** (`server/roster/crud.js`): týž hráč nesmí být v témž týmu ve dvou překrývajících
 se obdobích (`roster/overlap`); `dateFrom` není po `dateTo` (`roster/invalidPeriod`); tým se
-u záznamu nemění. Smazání hráče smaže i jeho soupisku.
+u záznamu nemění. Smazání hráče smaže i jeho soupisku. Zápis smí místo `playerId` poslat
+`personId` -- kartu hráče té osoby najde, nebo založí (review 2026-11-12, S14); ukládá se
+vždy `playerId`.
 
 **Aktuální soupiska týmu** = záznamy s `teamId`, které trvají dnes; **soupiska sezóny** =
 záznamy, které se překrývají s obdobím ročníku (`server/services/membership.js`). Hráč patří

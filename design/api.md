@@ -424,8 +424,8 @@ Hráč je karta (osoba, post, poznámka), soupiska je záznam na hráče v týmu
 | `player/delete` | post | CONTENT | `{ id }` | `{}` (smaže i soupisku hráče) |
 | `roster/list` | get | – | `{ teamId, playerId, active, seasonId }` | `{ itemList }` (s vloženým `player` + `person`) |
 | `roster/get` | get | – | `{ id }` | záznam + `player` |
-| `roster/create` | post | CONTENT, **TE** | `{ playerId, teamId, dateFrom, dateTo }` | záznam + `player` |
-| `roster/update` | post | CONTENT, **TE** | `{ id, playerId?, dateFrom?, dateTo? }` (bez `teamId`) | záznam + `player` |
+| `roster/create` | post | CONTENT, **TE** | `{ personId \| playerId, teamId, dateFrom, dateTo }` | záznam + `personId` + `player` |
+| `roster/update` | post | CONTENT, **TE** | `{ id, personId?, playerId?, dateFrom?, dateTo? }` (bez `teamId`) | záznam + `personId` + `player` |
 | `roster/delete` | post | CONTENT, **TE** | `{ id }` | `{}` |
 
 - `player/list?teamId` je soupiska týmu: `active: true` = působení, které trvá dnes;
@@ -436,8 +436,14 @@ Hráč je karta (osoba, post, poznámka), soupiska je záznam na hráče v týmu
 - **TE**: kartu hráče smí založit kterýkoli editor týmu (týmu nepatří, jako osoba), upravit
   jen hráče, jehož všechna působení jsou v jeho týmech. Soupisku smí jen svého týmu (u `create`
   z dtoIn, jinak uložený tým).
+- **Soupiska se plní osobou** (od 2026-11-16, review S14): `personId` se převede na kartu
+  hráče té osoby, a když ji osoba ještě nemá, karta (jen `personId`) se založí. Nová osoba tak
+  jde do týmu jedním krokem, i pro TE (kartu smí založit kterýkoli TE, viz výš). `personId` má
+  přednost před `playerId`; `playerId` zůstává pro import a nástroje. Obrácené období se odmítne
+  dřív, než karta vznikne.
 - Chyby 400 soupisky: `roster/overlap` (týž hráč v témž týmu v překrývajícím se období),
-  `unknownPlayer`, `invalidPeriod`.
+  `unknownPlayer` (chybí `personId` i `playerId`, nebo karta neexistuje), `unknownPerson`,
+  `invalidPeriod`.
 - Do 2026-11 byly `player/addTeam` a `player/endTeam` a členství v `player.teamList`; číslo
   dresu (`number`) se už neeviduje.
 

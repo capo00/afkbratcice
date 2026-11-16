@@ -188,7 +188,7 @@ a `withRoute` guard nemohly rozejít.
 | `admin/seasons` | CRUD sezón, přiřazení týmů, `hasPenalties` |
 | `admin/matches` | CRUD zápasů, hromadné vytvoření, zápis výsledku a sestavy |
 | `admin/persons` | CRUD osob |
-| `admin/players` | Hráči: záložka za každý náš tým se soupiskou (`roster`: hráč, post, období; aktuální nahoře; filtry hráč / post / období) a *Karty hráčů* (osoba, post, poznámka, týmy dnes) |
+| `admin/players` | Hráči: záložka za každý náš tým se soupiskou (`roster`: hráč, post, období; aktuální nahoře; filtry hráč / post / období) a *Karty hráčů* (osoba, post, poznámka, týmy dnes). Na soupisku se vybírá **osoba** s hledáním (`FormPersonSelect`), ne karta: osobě bez karty ji server založí (S14) |
 | `admin/coaches` | CRUD vedení (`management`): záložka za každý náš tým a Výbor (`?tab=`), tabulka funkcí (osoba, funkce, období), aktuální nahoře, filtry funkce / osoba / období |
 | `admin/articles` | CRUD článků; `sectionList` v `uu5codekitg01-forms` |
 | `admin/galleries` | CRUD alb, hromadný upload fotek |

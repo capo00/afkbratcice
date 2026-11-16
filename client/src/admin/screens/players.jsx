@@ -4,7 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { EntitySelect, EnumText, enumItemList, noteField, personLabel } from "../fields.jsx";
+import { EnumText, enumItemList, noteField, personLabel } from "../fields.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import FormPersonSelect from "../form-person-select.jsx";
@@ -15,7 +15,9 @@ import { periodFields, useTeamTabs } from "../team-tabs.jsx";
 // záznam = hráč v týmu v období (`roster`, design/data-model.md, sekce 6.1).
 //
 // Záložka za každý náš tým ukazuje jeho soupisku (aktuální nahoře), poslední záložka karty
-// hráčů. Hráč na soupisku přidává z existujících karet; karta se zakládá na své záložce.
+// hráčů. Na soupisku se vybírá **osoba**, ne karta: nová osoba kartu ještě nemá a ze seznamu
+// karet by ji do týmu dát nešlo (review 2026-11-12, S14). Kartu najde, nebo založí server
+// (`roster/create` s `personId`); post a poznámka se pak doplní na záložce karet.
 // Číslo dresu se od 2026-11 neeviduje.
 
 const [RosterProvider] = UiElements.CrudContext.create("roster");
@@ -53,14 +55,11 @@ function useItemList(dataList, getKey, getLabel) {
 //@@viewOn:soupiska
 function getRosterConfig({ playerItemList }) {
   return {
-    playerId: {
+    personId: {
       label: lsi("admin", "field", "player"),
       output: (_, item) => playerText(item.data.player),
       sort: (_, __, a, b) => playerText(a.data.player).localeCompare(playerText(b.data.player), "cs"),
-      input: {
-        Component: EntitySelect,
-        props: { required: true, useCase: "/player/list", getLabel: playerText },
-      },
+      input: { Component: FormPersonSelect, props: { required: true } },
       filterProps: {
         inputType: "text-select",
         inputProps: { itemList: playerItemList },
@@ -89,7 +88,7 @@ const ROSTER_PAIR_LIST = [["dateFrom", "dateTo"]];
 function RosterTable({ dataList }) {
   const playerItemList = useItemList(
     dataList,
-    (d) => d.playerId,
+    (d) => d.personId,
     (d) => playerText(d.player),
   );
   const { cfg, seriesList, columnList, sorterList, filterList } = useMemo(() => {

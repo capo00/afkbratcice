@@ -13,14 +13,23 @@ const listDtoIn = shape({
   seasonId: mongoId(),
 });
 const idDtoIn = shape({ id: mongoId().isRequired() });
+// `personId` místo `playerId`: karta hráče se najde, nebo založí (`crud._resolvePlayer`, S14).
+// Jedno z nich je povinné -- chybí-li obě, `crud._check` vrátí `unknownPlayer`.
 const createDtoIn = shape({
-  playerId: mongoId().isRequired(),
+  playerId: mongoId(),
+  personId: mongoId(),
   teamId: mongoId().isRequired(),
   dateFrom: any(),
   dateTo: any(),
 });
 // Bez `teamId`: editor týmu A by jinak působení „převedl“ do svého týmu.
-const updateDtoIn = shape({ id: mongoId().isRequired(), playerId: mongoId(), dateFrom: any(), dateTo: any() });
+const updateDtoIn = shape({
+  id: mongoId().isRequired(),
+  playerId: mongoId(),
+  personId: mongoId(),
+  dateFrom: any(),
+  dateTo: any(),
+});
 
 /** Tým zápisu: u `create` z dtoIn, jinak uložený. */
 async function teamOfRow({ dtoIn }) {
