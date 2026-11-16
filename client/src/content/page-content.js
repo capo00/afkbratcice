@@ -47,110 +47,159 @@ function teamPhotosContent(photoList) {
     .join("\n\n");
 }
 
+/**
+ * Milníky historie klubu. Souvislý text z v0 je rozsekaný na milníky schválně: seznam jmen
+ * průkopníků a čtyři odstavce o kabinách se jako jeden sloupec textu nečtou. Věcně je to
+ * totéž, jen seřazené podle let — a co v0 nedatuje (třeba změnu názvu na SOKOL), zůstává
+ * u desetiletí, ne u vymyšleného roku.
+ *
+ * `text` je **prostý text**: `VerticalTimeline` vykreslí `children` položky tak, jak jsou,
+ * uu5String uvnitř `itemList` už neparsuje (ověřeno 2026-11-16) -- proto bez `<b>`.
+ */
+const HISTORY_MILESTONE_LIST = [
+  {
+    label: "1932 · Založení klubu", icon: "uugds-favorites", colorScheme: "primary", significance: "highlighted",
+    text: `
+      Klub vzniká v rámci tělocvičné organizace Sokol Bratčice. První zápasy se hrají na
+      provizorním hřišti u Tisí skály, později je zřízeno nové hřiště „V Chobotě“ na Radově
+      louce za roční nájemné 500,- Kčs. Průkopníky jsou bratři Hamsové z čp. 13, Havránkové
+      z čp. 130, Josef Ryšavý, Jaroslav Miláček, Rudolf Bečkovský, bratři Miláčkové, Josef
+      a Václav Slavíkovi, František Marousek, Prokeš z čp. 130, Josef Kořínek a Josef Čejka;
+      z přespolních František Spěvák, Bárta a Vančura z Podmok. Z funkcionářů Alois
+      Hofrichter, obchodník Václav Fiala a Václav Prášek jako předseda — a někdy i hráč.
+      Klub přijímá název AFK BRATČICE.
+    `,
+  },
+  {
+    label: "Po druhé světové válce · Hřiště v Zálesí", icon: "uugds-home",
+    text: `
+      Díky pochopení pana Josefa Vrabce je vybudováno nové hřiště v Zálesí, kde klub hraje
+      dodnes. Mění se i generace hráčů: Jiří Žaloudek, Bedřich Novotný, Oldřich Vavřina,
+      Antonín Čapek, Václav Havránek, Jiří Prášek, Jaroslav Miláček, Vladimír Ryšavý,
+      Jaroslav Rak, Josef Ságl, Jaroslav Zajíc, Slávek Knický, Antonín Kohout, Oldřich
+      Zelinger, Čeněk Hnilička, Josef Říha, Miloslav Ronovský, Miroslav Daněk, Václav
+      a Alois Štěpánkovi, Karel Doležal, Josef Papoušek a Miroslav Dvořák (Baxa).
+    `,
+  },
+  {
+    label: "Září 1948 · LTC Praha v Bratčicích", icon: "uugdsstencil-uiaction-favorites-solid", colorScheme: "primary",
+    text: `
+      Nejvýznamnější událost v historii klubu: přátelský zápas s mužstvem LTC Praha,
+      které ho využilo v rámci letní přípravy. LTC bylo tehdy nejlepším týmem republiky
+      v ledním hokeji a kostrou československé reprezentace. Podle doslechu zápas skončil
+      1:7 pro hokejisty, když Troják bombou protrhl síť. Další podrobnosti se nedochovaly,
+      mimo několika fotografií.
+    `,
+  },
+  {
+    label: "Padesátá léta · Klub se jmenuje SOKOL", icon: "uugds-refresh",
+    text: `
+      S reorganizací sportu musí být název změněn na SOKOL. Přichází další generace: Václav
+      Rak, Jiří Navrátil, Zdeněk Marousek, Bedřich Dušek, Jaroslav Procházka, Václav Kadlec,
+      Josef Kafka, Milouš Čech, Josef Volenec a Josef Kotrba, které postupně doplňují Jiří
+      Rak, Jaroslav Pecina, Milan Vaňkát, Václav Čech, František Spěvák, Zdeněk Dalešický,
+      Josef Miláček a Alois Chládek. V přátelských zápasech vypomáhají Jiří Müller a Antonín
+      Kohout ml. — ten hrál v té době za Spartak Praha Sokolovo (dnešní Spartu), se kterým se
+      stal přeborníkem Československa. Klub hraje soutěž tehdejšího čáslavského okresu proti
+      Golčovu Jeníkovu, Klášteru, Okřesanči, Hostovlicím, Žlebům, Ronovu nad Doubravou,
+      Třemošnici, Míčovu a dalším.
+    `,
+  },
+  {
+    label: "Léto 1957 · Přerušení činnosti", icon: "uugds-alert-circle",
+    text: `
+      Na vojnu odcházejí téměř všichni hráči a aktivní činnost se přerušuje — na dvanáct let,
+      až do poloviny roku 1969. Do té doby klub nikdy neměl fotbalové kabiny: domácí i soupeř
+      se převlékali v hospodě U Nováků a na hřiště docházeli oblečení a obutí. Kámen na stavbu
+      byl už navezen za pískovkou, ale vichřice v padesátých letech vyvrátila i duby v místě,
+      kde měly kabiny stát, a s nimi i ochotu je stavět. Dlouholetým pečovatelem o obuv
+      a dresy byl švec pan Josef Novotný, o hřiště se staral pan Jaroslav Zajíc.
+    `,
+  },
+  {
+    label: "24. 8. 1969 · Návrat do mistrovských soutěží", icon: "uugds-sprint", colorScheme: "primary",
+    text: `
+      Ročník 1969/1970 je zahájen mistrovským utkáním na hřišti v Ratajích nad Sázavou. Od
+      tohoto roku hraje mužstvo dospělých mistrovské soutěže nepřetržitě až do současnosti.
+    `,
+  },
+  {
+    label: "1970 · Širší hřiště a družstvo žáků", icon: "uugds-account-multi",
+    text: `
+      Tok potoka sousedícího s hřištěm je převeden do nově zbudovaného koryta, což umožní
+      rozšířit hrací plochu o zhruba sedm metrů. Ve stejném roce vzniká družstvo žáků. Zázemí
+      je provizorní: jako šatna slouží nejprve hostinec „U Nováků“, později kabina vyřazeného
+      autobusu, a přilehlý potok dělá sprchy.
+    `,
+  },
+  {
+    label: "1972–1973 · Kabiny", icon: "uugds-home",
+    text: `
+      Dotace od OV ČSTV v Kutné Hoře pokryje materiál na výstavbu fotbalových kabin, stavební
+      práce se dělají svépomocí. V roce 1973 jsou kabiny uvedeny do užívání; další
+      rekonstrukce proběhla v roce 1998.
+    `,
+  },
+  {
+    label: "2006 · Přístavba šaten", icon: "uugds-plus-circle",
+    text: `
+      Obec Bratčice získává dotaci Ministerstva školství ve výši 1,9 mil. Kč na rekonstrukci
+      a přístavbu šaten a rekonstrukci sociálního zařízení. Ke stávajícím šatnám přibyly dvě
+      kabiny, sociální zařízení, klubovna, úklidová místnost a kotelna; kabiny jsou napojeny
+      na městský vodovod.
+    `,
+  },
+  {
+    label: "2007–2010 · První dorost", icon: "uugds-account-badge",
+    text: `
+      Vzniká mužstvo dorostu. Vydrží tři roky a v roce 2010 je pro nedostatek hráčů zrušeno.
+    `,
+  },
+  {
+    label: "2011 · Postup do III. třídy", icon: "uugdsstencil-education-trophy", colorScheme: "primary",
+    text: `
+      Mužstvo dospělých postupuje z prvního místa do III. třídy okresu Kutná Hora.
+    `,
+  },
+  {
+    label: "Dnes · Tři mužstva", icon: "uugds-shield", colorScheme: "primary", significance: "highlighted",
+    text: `
+      AFK Bratčice staví muže, dorost a žáky — dorost je po šestnácti letech zpátky.
+      Členové klubu se ale nevěnují jen fotbalu: podílejí se na kulturním a společenském
+      životě obce pořádáním tanečních zábav a spolu s dalšími místními spolky a obecním
+      úřadem jsou spolupořadateli akcí pro děti a mládež.
+    `,
+  },
+];
+
+/**
+ * Časová osa → uu5String: `Uu5Extras.VerticalTimeline` (uu5g05, design/frontend.md, 3.11.1)
+ * bere milníky v `itemList`, ne jako vnořené značky, proto se sem skládají z pole výš.
+ *
+ * Dřív tu byla `Uu5Bricks.VerticalTimeline` z `uu5bricksg01`, která táhla `uu_appg01`
+ * a s ním OIDC klienta Plus4U, popisky let se překrývaly s textem a text milníků zůstával
+ * `visibility:hidden` (review 2026-11-12, S5). `animation` je vypnutá ze stejného důvodu:
+ * animace skrývá položky, dokud nedoskrolují do obrazu, a čtečky ani vyhledávač je pak
+ * nevidí. Jeden sloupec, protože text stránky je úzký (720 px); popisek `m`, protože rok je
+ * na ose hlavní údaj a výchozí `xs` pod textem zaniká.
+ */
+function timelineBlock(milestoneList) {
+  const itemList = milestoneList.map(({ text, ...item }) => ({
+    ...item,
+    children: text.replace(/\s+/g, " ").trim(),
+  }));
+  // Hodnota atributu je v apostrofech; texty apostrofy nemají, ale kdyby přibyly, rozbily by ji.
+  const json = JSON.stringify(itemList).replaceAll("'", "\\u0027");
+  return `<Uu5Extras.VerticalTimeline singleColumn='<uu5json/>true' animation='<uu5json/>false' itemLabelSize="m" itemList='<uu5json/>${json}'/>`;
+}
+
 const PAGE_CONTENT = {
-  // Časová osa je `Uu5Bricks.VerticalTimeline` — hotová komponenta, nepíše se vlastní
-  // (design/frontend.md, 3.11.1). Je lazy, takže se její kód stáhne teprve na téhle
-  // stránce; do `client/package.json` kvůli ní přibyl `uu5bricksg01`.
-  //
-  // Souvislý text z v0 je rozsekaný na milníky schválně: seznam jmen průkopníků a čtyři
-  // odstavce o kabinách se jako jeden sloupec textu nečtou. Věcně je to totéž, jen
-  // seřazené podle let — a co v0 nedatuje (třeba změnu názvu na SOKOL), zůstává
-  // u desetiletí, ne u vymyšleného roku.
   historie: `<uu5string/>
 <p>Fotbalový klub v Bratčicích byl založen v roce 1932 v rámci tělocvičné organizace
 Sokol Bratčice. Od té doby se v obci hraje — s jedinou dvanáctiletou přestávkou —
 dodnes.</p>
 
-<Uu5Bricks.VerticalTimeline>
-  <Uu5Bricks.VerticalTimeline.Item label="1932 · Založení klubu" icon="uugds-favorites" colorScheme="primary" significance="highlighted">
-    Klub vzniká v rámci tělocvičné organizace Sokol Bratčice. První zápasy se hrají na
-    provizorním hřišti u Tisí skály, později je zřízeno nové hřiště „V Chobotě" na Radově
-    louce za roční nájemné 500,- Kčs. Průkopníky jsou bratři Hamsové z čp. 13, Havránkové
-    z čp. 130, Josef Ryšavý, Jaroslav Miláček, Rudolf Bečkovský, bratři Miláčkové, Josef
-    a Václav Slavíkovi, František Marousek, Prokeš z čp. 130, Josef Kořínek a Josef Čejka;
-    z přespolních František Spěvák, Bárta a Vančura z Podmok. Z funkcionářů Alois
-    Hofrichter, obchodník Václav Fiala a Václav Prášek jako předseda — a někdy i hráč.
-    Klub přijímá název <b>AFK BRATČICE</b>.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="Po druhé světové válce · Hřiště v Zálesí" icon="uugds-home">
-    Díky pochopení pana Josefa Vrabce je vybudováno nové hřiště v Zálesí, kde klub hraje
-    dodnes. Mění se i generace hráčů: Jiří Žaloudek, Bedřich Novotný, Oldřich Vavřina,
-    Antonín Čapek, Václav Havránek, Jiří Prášek, Jaroslav Miláček, Vladimír Ryšavý,
-    Jaroslav Rak, Josef Ságl, Jaroslav Zajíc, Slávek Knický, Antonín Kohout, Oldřich
-    Zelinger, Čeněk Hnilička, Josef Říha, Miloslav Ronovský, Miroslav Daněk, Václav
-    a Alois Štěpánkovi, Karel Doležal, Josef Papoušek a Miroslav Dvořák (Baxa).
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="Září 1948 · LTC Praha v Bratčicích" icon="uugdsstencil-uiaction-star" colorScheme="primary">
-    Nejvýznamnější událost v historii klubu: přátelský zápas s mužstvem <b>LTC Praha</b>,
-    které ho využilo v rámci letní přípravy. LTC bylo tehdy nejlepším týmem republiky
-    v ledním hokeji a kostrou československé reprezentace. Podle doslechu zápas skončil
-    1:7 pro hokejisty, když Troják bombou protrhl síť. Další podrobnosti se nedochovaly,
-    mimo několika fotografií.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="Padesátá léta · Klub se jmenuje SOKOL" icon="uugds-refresh">
-    S reorganizací sportu musí být název změněn na SOKOL. Přichází další generace: Václav
-    Rak, Jiří Navrátil, Zdeněk Marousek, Bedřich Dušek, Jaroslav Procházka, Václav Kadlec,
-    Josef Kafka, Milouš Čech, Josef Volenec a Josef Kotrba, které postupně doplňují Jiří
-    Rak, Jaroslav Pecina, Milan Vaňkát, Václav Čech, František Spěvák, Zdeněk Dalešický,
-    Josef Miláček a Alois Chládek. V přátelských zápasech vypomáhají Jiří Müller a Antonín
-    Kohout ml. — ten hrál v té době za Spartak Praha Sokolovo (dnešní Spartu), se kterým se
-    stal přeborníkem Československa. Klub hraje soutěž tehdejšího čáslavského okresu proti
-    Golčovu Jeníkovu, Klášteru, Okřesanči, Hostovlicím, Žlebům, Ronovu nad Doubravou,
-    Třemošnici, Míčovu a dalším.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="Léto 1957 · Přerušení činnosti" icon="uugds-alert-circle">
-    Na vojnu odcházejí téměř všichni hráči a aktivní činnost se přerušuje — na dvanáct let,
-    až do poloviny roku 1969. Do té doby klub nikdy neměl fotbalové kabiny: domácí i soupeř
-    se převlékali v hospodě U Nováků a na hřiště docházeli oblečení a obutí. Kámen na stavbu
-    byl už navezen za pískovkou, ale vichřice v padesátých letech vyvrátila i duby v místě,
-    kde měly kabiny stát, a s nimi i ochotu je stavět. Dlouholetým pečovatelem o obuv
-    a dresy byl švec pan Josef Novotný, o hřiště se staral pan Jaroslav Zajíc.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="24. 8. 1969 · Návrat do mistrovských soutěží" icon="uugds-sprint" colorScheme="primary">
-    Ročník 1969/1970 je zahájen mistrovským utkáním na hřišti v Ratajích nad Sázavou. Od
-    tohoto roku hraje mužstvo dospělých mistrovské soutěže nepřetržitě až do současnosti.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="1970 · Širší hřiště a družstvo žáků" icon="uugds-account-multi">
-    Tok potoka sousedícího s hřištěm je převeden do nově zbudovaného koryta, což umožní
-    rozšířit hrací plochu o zhruba sedm metrů. Ve stejném roce vzniká družstvo žáků. Zázemí
-    je provizorní: jako šatna slouží nejprve hostinec „U Nováků", později kabina vyřazeného
-    autobusu, a přilehlý potok dělá sprchy.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="1972–1973 · Kabiny" icon="uugds-home">
-    Dotace od OV ČSTV v Kutné Hoře pokryje materiál na výstavbu fotbalových kabin, stavební
-    práce se dělají svépomocí. V roce 1973 jsou kabiny uvedeny do užívání; další
-    rekonstrukce proběhla v roce 1998.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="2006 · Přístavba šaten" icon="uugds-plus-circle">
-    Obec Bratčice získává dotaci Ministerstva školství ve výši 1,9 mil. Kč na rekonstrukci
-    a přístavbu šaten a rekonstrukci sociálního zařízení. Ke stávajícím šatnám přibyly dvě
-    kabiny, sociální zařízení, klubovna, úklidová místnost a kotelna; kabiny jsou napojeny
-    na městský vodovod.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="2007–2010 · První dorost" icon="uugds-account-badge">
-    Vzniká mužstvo dorostu. Vydrží tři roky a v roce 2010 je pro nedostatek hráčů zrušeno.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="2011 · Postup do III. třídy" icon="uugdsstencil-uiaction-trophy" colorScheme="primary">
-    Mužstvo dospělých postupuje z prvního místa do III. třídy okresu Kutná Hora.
-  </Uu5Bricks.VerticalTimeline.Item>
-
-  <Uu5Bricks.VerticalTimeline.Item label="Dnes · Tři mužstva" icon="uugds-shield" colorScheme="primary" significance="highlighted">
-    AFK Bratčice staví <b>muže, dorost a žáky</b> — dorost je po šestnácti letech zpátky.
-    Členové klubu se ale nevěnují jen fotbalu: podílejí se na kulturním a společenském
-    životě obce pořádáním tanečních zábav a spolu s dalšími místními spolky a obecním
-    úřadem jsou spolupořadateli akcí pro děti a mládež.
-  </Uu5Bricks.VerticalTimeline.Item>
-</Uu5Bricks.VerticalTimeline>
+${timelineBlock(HISTORY_MILESTONE_LIST)}
 
 <p><i>Čerpáno ze záznamů a fotografií z pamětní knihy pana Václava Práška a z pamětí
 bývalých aktivních účastníků pana Josefa Ságla, Jaroslava Miláčka a Josefa Štěpánka.

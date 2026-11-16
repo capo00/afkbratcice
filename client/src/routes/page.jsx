@@ -1,4 +1,5 @@
-import { createVisualComponent, useRoute, Content } from "uu5g05";
+import { createVisualComponent, useRoute, Content, Utils } from "uu5g05";
+import Uu5Extras from "uu5extrasg01";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
@@ -11,6 +12,12 @@ import Board from "../components/board.jsx";
 import PAGE_CONTENT from "../content/page-content.js";
 
 const { theme } = Config;
+
+// Komponenty, které obsah stránek smí použít, se registrují do uu5String tady. Bez registrace
+// si uu5g05 jmenný prostor (`Uu5Extras`) překládá dotazem do uuAppLibraryRegistry na
+// `uuapp.plus4u.net` -- každý návštěvník historie by volal cizí server (review 2026-11-12, S5).
+// Import je v téhle líné obrazovce, takže se knihovna stahuje jen s obsahovými stránkami.
+Utils.LibraryRegistry.registerComponent(Uu5Extras.VerticalTimeline);
 
 // Jedna obrazovka pro všechny obsahové stránky. Kterou vykreslí, říká **routa** —
 // `/historie`, `/hymna`, `/vybor`, … —, ne parametr: adresy jsou převzaté z v0, takže
@@ -62,6 +69,13 @@ const Page = createVisualComponent({
             "& a": { color: theme.color.clubRed },
             "& code": { backgroundColor: theme.color.muted, padding: "0.1em 0.35em", borderRadius: 4 },
             "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
+            // `Uu5Extras.VerticalTimeline` (uu5extrasg01 1.9) dává kolečku ikony napevno inline
+            // `background: white`. Na tmavém podkladu na něm průsvitná ikona položky zmizí, proto
+            // `!important` a barva stránky (průhledné ne: kolečkem by prosvítala čára osy).
+            "& .vertical-timeline-element-icon": { backgroundColor: `${theme.color.bg} !important` },
+            // Popisek (rok) je pod textem jako `float: left` na celou šířku a poslední řádek
+            // textu ho obtéká -- odsune se doprava. Jako blok pod textem obtékat nemá co.
+            "& .vertical-timeline-element-date": { float: "none !important", display: "block !important" },
           })}
         >
           {DataPage ? <DataPage /> : <Content>{PAGE_CONTENT[route.uu5Route]}</Content>}

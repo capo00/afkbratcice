@@ -746,7 +746,7 @@ Poznámky:
   `contentMap.cs` uvnitř sekce), ne jen doplnění kódu — vědomá cena za to, že se stránky
   rozjedou hned. Jazyk UI je zatím stejně jediný (`cs`).
 - Editace je **v kódu, ne WYSIWYG**: `uu5codekitg01-forms` nad `content` každé sekce. Komponenty
-  jako `Uu5Bricks.VerticalTimeline` (časová osa v historii) se do `uu5String` registrují
+  jako `Uu5Extras.VerticalTimeline` (časová osa v historii) se do `uu5String` registrují
   a redakce je píše ručně.
 - Obrázky ve stránkách jdou přes `BinaryStore`, kolekce `page`.
 - Stránky se **seedují** (`tools/seed-pages.js`) s obsahem přepsaným z v0, aby web nešel

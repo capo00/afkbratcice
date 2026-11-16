@@ -518,7 +518,7 @@ Hráč je karta (osoba, post, poznámka), soupiska je záznam na hráče v týmu
   "desc": "Od založení v roce 1932 po dnešek.",
   "sectionList": [
     { "content": "<uu5string/>Skupina nadšenců zakládá…" },
-    { "content": "<uu5string/><Uu5Bricks.VerticalTimeline>…</Uu5Bricks.VerticalTimeline>" }
+    { "content": "<uu5string/><Uu5Extras.VerticalTimeline itemList='<uu5json/>[…]'/>" }
   ]
 }
 ```

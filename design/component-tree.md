@@ -373,7 +373,7 @@ flowchart TD
   page["routes/page.jsx -- obsahová stránka<br/>history, hymn, contact, board, training, team-photos"]:::own
   edit["ContentEditModal<br/>name, desc + uu5codekitg01-forms na každou sekci<br/>ukládá celý sectionList; ZATÍM KÓD, ne WYSIWYG"]:::own
   ck["uu5codekitg01-forms"]:::uu5
-  tl["Uu5Bricks.VerticalTimeline + .Item<br/>registrované do uu5String -> redakce je píše do obsahu<br/>historie klubu 1932-2022"]:::uu5
+  tl["Uu5Extras.VerticalTimeline<br/>registrovaná do uu5String, milníky v itemList<br/>historie klubu 1932-2022"]:::uu5
 
   d1["article/list -- bez content"]:::data
   d2["article/get -- včetně content"]:::data
@@ -518,8 +518,8 @@ Proti revizi 5. 9. přibylo: `EmptyState` (prázdné stavy jsou v návrhu povinn
 pro ně chyběla) a trojice `Content`, `SectionList` a `ContentEditModal`, která nahradila
 `UiEcc`. Rozsahovou roli v guardu řeší `caio-ui`, ne appka.
 
-Časová osa historie je **`Uu5Bricks.VerticalTimeline`** zaregistrovaná do `uu5String`, aby ji
-redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
+Časová osa historie je **`Uu5Extras.VerticalTimeline`** zaregistrovaná do `uu5String`, aby
+zůstala obsahem stránky — vlastní komponenta se nepíše.
 
 `WeekendProgram` je sekce na home, ne routa: program víkendu napříč kategoriemi.
 
@@ -530,7 +530,7 @@ redakce mohla vkládat do sekce stránky — vlastní komponenta se nepíše.
 | `Uu5Elements.Header` | token pro `font-family` | schválené přebití `className`em na vnitřní `Text` |
 | GDS typografie | `fontFamily`, `letterSpacing`, `textTransform` nejsou tokeny | přimíchávají se z `theme.typography[role].style`; **velikost se nikdy nepřepisuje** |
 | GDS váhy vs. Bebas Neue | GDS chce u `hero`/`h5` váhu 700, Bebas má jen 400 | `fontWeight: 400` u rolí sázených Bebasem — jinak by prohlížeč tučnost nasyntetizoval |
-| Časová osa historie | `uu5g05-elements` ji nemá | `Uu5Bricks.VerticalTimeline` registrovaná do `uu5String` — viz [frontend.md](./frontend.md), 3.11.1. **uu5g04 je zakázané**, vlastní komponenta se nepíše. |
+| Časová osa historie | `uu5g05-elements` ji nemá | `Uu5Extras.VerticalTimeline` registrovaná do `uu5String` — viz [frontend.md](./frontend.md), 3.11.1. **uu5g04 je zakázané**, vlastní komponenta se nepíše. |
 | GDS paleta | `building` je bílá, tmavé schéma se nepřenastaví | barvy lišty a ploch z `theme.js` přes `cssBackground`/`cssColor` |
 | Tabulka soutěže | `Uu5Tiles.Table` neumí zvýraznit řádek klubovou barvou ani skrývat sloupce po breakpointech | vlastní `StandingsTable` nad `<table>` |
 | Odpočet do zápasu | uu5 nemá | vlastní `Countdown` (`useInterval` + `useVisibility`) |

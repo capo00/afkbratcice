@@ -500,33 +500,44 @@ součást `uu5String`, ne kód appky.
 ### 3.11.1 Historie jako časová osa
 
 Historie je **svislá časová osa** s roky, jak ji ukazuje předloha (1932, 1948, 1972, 1992,
-2005, 2012, 2022). Používá se **`Uu5Bricks.VerticalTimeline`** — hotová komponenta, nepíše
-se vlastní.
+2005, 2012, 2022). Používá se **`Uu5Extras.VerticalTimeline`** (`uu5extrasg01`) — hotová
+komponenta, nepíše se vlastní.
 
-Musí zůstat editovatelná redakcí, takže se komponenta **registruje do `uu5String`** a osa
-je obsahem jedné sekce stránky `history`, ne natvrdo psaná komponenta:
+Musí zůstat obsahem stránky (`uu5String`), ne natvrdo psaná komponenta, aby se s ECC
+přesunula do databáze beze změny. Komponenta se proto **registruje do `uu5String`**
+(`Utils.LibraryRegistry.registerComponent` v `routes/page.jsx`) — bez registrace by si uu5g05
+jmenný prostor překládal dotazem do uuAppLibraryRegistry na `uuapp.plus4u.net`.
 
-Popisek položky je **`label`**, ne `header` (ověřeno proti `uu5bricksg01@1.25.1`); dál umí
-`icon`, `colorScheme`, `significance` a `position`:
+Milníky jdou v propu `itemList` (`label`, `children`, `icon`, `colorScheme`, `significance`,
+`position`), ne jako vnořené značky. Proto se v `content/page-content.js` skládají z pole
+`HISTORY_MILESTONE_LIST` (`timelineBlock()`), stejně jako týmové fotky:
 
 ```
-<Uu5Bricks.VerticalTimeline>
-  <Uu5Bricks.VerticalTimeline.Item label="1932 · Založení klubu" icon="uugds-favorites" colorScheme="primary" significance="highlighted">
-    Skupina nadšenců zakládá v Bratčicích Athletický fotbalový klub…
-  </Uu5Bricks.VerticalTimeline.Item>
-</Uu5Bricks.VerticalTimeline>
+<Uu5Extras.VerticalTimeline singleColumn='<uu5json/>true' animation='<uu5json/>false' itemLabelSize="m"
+  itemList='<uu5json/>[{"label":"1932 · Založení klubu","icon":"uugds-favorites","colorScheme":"primary",
+  "significance":"highlighted","children":"Klub vzniká v rámci tělocvičné organizace Sokol Bratčice…"}]'/>
 ```
 
-**Hotovo 7. 9. 2026:** balíček je `uu5bricksg01` a je v `client/package.json`; do import mapy
-se dostane sám, protože `createViteConfig()` staví mapu z tranzitivního uzávěru `uu*`
-závislostí klienta. Ověřeno v prohlížeči na `/historie`.
+- **`children` je prostý text.** Komponenta ho vykreslí, jak je; `<uu5string/>` uvnitř
+  `itemList` se už neparsuje (ověřeno 2026-11-16), takže milníky jsou bez `<b>`.
+- **`animation` vypnutá:** animace skrývá položky (`visibility: hidden`), dokud nedoskrolují
+  do obrazu, a čtečky ani vyhledávač je pak nevidí.
+- **Dvě opravy v CSS** (`routes/page.jsx`): kolečko ikony má v knihovně napevno inline
+  `background: white`, takže na tmavém podkladu průsvitná ikona mizela, a popisek je
+  `float: left` přes celou šířku, takže ho poslední řádek textu obtékal.
 
-Cena je ale citelná: `uu5bricksg01` s sebou přitáhne dalších **28 `uu*` balíčků** a výstup
-`public/libs` naroste z ~30 MB na **126 MB** — sama komponenta je líná, ale do nasazení jde
-všechno, co je v mapě. Největší kus je `uu_uubmldraw_iconsg04` (**70 MB**, ikony BML
-diagramů), který tenhle web nikdy nezobrazí.
+**Změněno 16. 11. 2026** (review 2026-11-12, S5). Do té doby tu byla
+`Uu5Bricks.VerticalTimeline` z `uu5bricksg01`, která na stránce historie táhla `uu_appg01`
+a OIDC klienta Plus4U (404 na `/oidc/getClientId`), popisky let se překrývaly s textem
+a text milníků zůstával `visibility: hidden`. Dvě ikony (`uugdsstencil-uiaction-star`,
+`-trophy`) v GDS neexistují a nevykreslovaly se.
 
-**Balíček přesto zůstává** (2026-09-09): kromě časové osy z něj přijdou komponenty do obsahu,
+Cena `uu5bricksg01` (2026-09-07): s sebou přitáhne dalších **28 `uu*` balíčků** a výstup
+`public/libs` naroste z ~30 MB na **126 MB** — do nasazení jde všechno, co je v mapě.
+Největší kus je `uu_uubmldraw_iconsg04` (**70 MB**, ikony BML diagramů), který tenhle web
+nikdy nezobrazí.
+
+**Balíček přesto zůstává** (2026-09-09): z něj přijdou komponenty do obsahu,
 až se bude dělat ECC. Řeší se tedy jen ta jedna závislost — vyřadit `uu_uubmldraw_iconsg04`
 z import mapy přes `client/uu5-imports.json`, až to začne vadit u deploye (`todo.md`, 5.2).
 
