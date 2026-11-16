@@ -1,6 +1,6 @@
 import { createVisualComponent, useDataObject, useMemo, Lsi } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
-import { UiElements } from "caio-ui";
+import { UiElements, UiAuth } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import TeamLogo from "../../components/team-logo.jsx";
@@ -74,11 +74,22 @@ const getConfig = ({ clubItemList, categoryItemList }) => ({
   },
 });
 
+// Pole, která editor týmu na svém týmu nemění -- server mu je zahodí (`team/update`,
+// `TEAM_EDITOR_FIELD_LIST`). Ve formuláři je proto nevidí, jinak by uložení vypadalo
+// úspěšně a změna by se neprojevila (review 2026-11-12, S3).
+const CONTENT_ONLY_FIELD_LIST = ["category", "own", "clubId"];
+
+function withoutInputs(cfg, nameList) {
+  return { ...cfg, ...Object.fromEntries(nameList.map((name) => [name, { ...cfg[name], input: false }])) };
+}
+
 const AdminTeams = createVisualComponent({
   uu5Tag: Config.TAG + "AdminTeams",
 
   render() {
     const { teamCategoryList } = useApp();
+    const session = UiAuth.useSession();
+    const contentManager = UiAuth.hasProfile(session.identity, Config.CONTENT);
     const { data: clubData } = useDataObject({ handlerMap: { load: () => UiElements.Call.cmdGet("/club/list", {}) } }, []);
 
     const CONFIG = useMemo(
@@ -92,6 +103,10 @@ const AdminTeams = createVisualComponent({
       [clubData, teamCategoryList],
     );
     const { seriesList, columnList, sorterList, filterList } = useMemo(() => UiElements.Crud.generate(CONFIG), [CONFIG]);
+    const formCfg = useMemo(
+      () => (contentManager ? CONFIG : withoutInputs(CONFIG, CONTENT_ONLY_FIELD_LIST)),
+      [CONFIG, contentManager],
+    );
 
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "teams", "header")}>
@@ -104,7 +119,7 @@ const AdminTeams = createVisualComponent({
               sorterDefinitionList={sorterList}
               filterDefinitionList={filterList}
             >
-              {({ type }) => <CrudFormView cfg={CONFIG} operation={type} pairList={[["name", "shortName"], ["category", "own"]]} />}
+              {({ type }) => <CrudFormView cfg={formCfg} operation={type} pairList={[["name", "shortName"], ["category", "own"]]} />}
             </UiElements.Crud>
           )}
         </TeamProvider>

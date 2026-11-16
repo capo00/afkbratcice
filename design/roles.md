@@ -202,7 +202,7 @@ Legenda: **–** veřejné · **A** jakýkoli přihlášený · **self** vlastn�
 | `club/create`, `update`, `delete` | CONTENT | **ne TE** — viz 5.2 |
 | `team/list`, `team/get` | – | |
 | `team/create` | CONTENT | |
-| `team/update` | CONTENT, **TE** | TE jen svůj tým (název, zkratka, `clubId`) — logo ne, viz 5.2 |
+| `team/update` | CONTENT, **TE** | TE jen svůj tým a jen název a zkratku — kategorie, `own`, `clubId` ani logo ne, viz 5.2 |
 | `team/delete` | CONTENT | |
 | `season/list`, `get`, `getCurrent`, `listCurrent`, `listYears` | – | `listCurrent` staví menu |
 | `season/create`, `update`, `delete` | CONTENT | zakládá kategorie pro ročník |
@@ -322,9 +322,12 @@ víc různými TE. Dvě možnosti, jak to řešit:
   ale je to výjimka z principu „žádná dědičnost, auth je plochý seznam" (sekce 1) a přidává
   dotaz `team → club` navíc do autorizační vrstvy. Zamítnuto pro jednoduchost.
 
-TE si nadále může sám změnit `clubId` svého týmu (přepnout, na který klub se odkazuje) —
-to zůstává v `team/update` beze změny, protože nesahá na cizí `club` záznam, jen na
-vlastní FK.
+Do 2026-11-16 si TE směl sám změnit `clubId` svého týmu. **Změněno** (review
+2026-11-12, S3): `team/update` bere od TE jen `name` a `shortName`, ostatní pole zahodí.
+`clubId` přepisuje erb týmu (`team/crud.js`), takže TE by svému týmu dal erb soupeře; týmy
+zakládá CONTENT i s klubem. `own` z TE taky ne — `own: false` schová celou kategorii z menu,
+úvodu, přehledu mužstev a sitemapy. `category` měnil už dřív jen CONTENT (věkové
+pravidlo, `services/category.js`).
 
 ### Provoz a identity
 

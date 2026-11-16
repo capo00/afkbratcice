@@ -24,6 +24,20 @@ const writeDtoIn = shape({
   clubId: mongoId(),
 });
 
+// Co smí editor týmu změnit na svém týmu (review 2026-11-12, S3). Výčet, ne seznam zákazů,
+// aby nové pole týmu nebylo automaticky jeho:
+//  - `category`: přepnutím na starou gardu by obešel pravidlo, kdo proti komu smí hrát
+//    (services/category.js);
+//  - `own`: z něj se staví menu, úvod, přehled mužstev i sitemap -- `own: false` celou
+//    kategorii schová z webu a tým se začne chovat jako soupeř;
+//  - `clubId`: přepíše erb týmu za erb jiného klubu (`team/crud.js`); týmy zakládá CONTENT
+//    i s klubem a trenér ho měnit nepotřebuje.
+const TEAM_EDITOR_FIELD_LIST = ["id", "name", "shortName"];
+
+function pick(object, keyList) {
+  return Object.fromEntries(keyList.filter((key) => object[key] !== undefined).map((key) => [key, object[key]]));
+}
+
 export default {
   "team/list": {
     method: "get",
@@ -45,8 +59,8 @@ export default {
     fn: ({ dtoIn }) => crud.create(dtoIn),
   },
 
-  // Editor týmu smí upravit svůj tým (název, zkratku, klub). Logo je od 2026-09-11 věcí
-  // `club/update` (jen CONTENT) -- TE ho spravovat nemá, viz design/roles.md, 5.2.
+  // Editor týmu smí u svého týmu jen název a zkratku (`TEAM_EDITOR_FIELD_LIST`). Logo je od
+  // 2026-09-11 věcí `club/update` (jen CONTENT) -- TE ho spravovat nemá, viz design/roles.md, 5.2.
   "team/update": {
     method: "post",
     auth: Authorization.auth(Config.CONTENT, {
@@ -55,12 +69,9 @@ export default {
       mode: "all",
     }),
     validator: validate(writeDtoIn),
-    // Kategorii mění jen CONTENT: editor týmu by přepnutím na starou gardu obešel pravidlo,
-    // kdo proti komu smí hrát (services/category.js).
     fn: ({ dtoIn, identity }) => {
       if (Authorization.hasProfile(identity, Config.CONTENT)) return crud.update(dtoIn);
-      const { category, ...rest } = dtoIn;
-      return crud.update(rest);
+      return crud.update(pick(dtoIn, TEAM_EDITOR_FIELD_LIST));
     },
   },
 
