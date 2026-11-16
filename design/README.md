@@ -153,7 +153,8 @@ entity z ER diagramu a přechází na aktuální stack `caio-server` + `caio-ui`
 
 **Klient**
 
-- Vite 6 + React **18.3.1** (ne 19 – to je verze, na které jede referenční appka),
+- Vite 6 + React **19.1.9** s uu5g05 1.54 alfa (od 2026-11-16 dočasně, stejně jako referenční
+  appka; návrat na 18.3.1 popsaný v [frontend.md](./frontend.md) nahoře),
   `uu5g05` / `uu5g05-elements` / `uu5g05-forms` / `uu5tilesg02*`
 - uu5 knihovny se **nebundlují** – resolvuje je za běhu `uu5loaderg01`; zařizuje
   `createViteConfig()` z `caio-devkit/vite`

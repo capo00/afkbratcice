@@ -1,6 +1,25 @@
 # Frontend
 
-Vite 6 + React 18.3.1 + `uu5g05`, stavební kameny z `caio-ui`.
+Vite 6 + React 19.1.9 + `uu5g05` 1.54 alfa (dočasně, viz níže), stavební kameny z `caio-ui`.
+
+> **uu5g05 1.54.0-alpha-react19.3 a React 19.1.9** (2026-11-16, majitel). Dočasně, dokud
+> uu5g05 pro React 19 nevyjde a stack (caio-devkit, caio-ui) React 19 neumí sám. Stejné
+> řešení jako v referenční appce (tam `react19.2`):
+> - `uu5g05`, `uu5g05-elements` a `uu5g05-forms` jsou v `client/package.json` jako tarbally
+>   z dev CDN, `react` a `react-dom` 19.1.9 (alfa má React v `dependencies` napevno).
+> - `overrides` drží jednu kopii: elements a forms chtějí `uu5g05 ^1.52.3`, tomu prerelease
+>   nevyhovuje; přebíjí i `react ^18.3.1` z peer dependencies caio-ui. Tranzitivní
+>   `uu5g05-editing` a `uu5g05-bricks-support` (přes `uu5bricksg01`) jsou v `overrides`
+>   rovnou na tarbally stejné alfy, ať je celá rodina na jedné verzi.
+> - React 19 jde do prohlížeče z `client/src/assets/vendor/` (UMD build, oficiální React 19
+>   UMD nemá), převzatý z referenční appky. Ukazuje na něj `client/uu5-imports.json`, React
+>   z `node_modules` je v `exclude`. Tamtéž `react/jsx-dev-runtime` → vlastní shim (dev build
+>   kompiluje JSX na `jsx-dev-runtime`, který devkit neexternalizuje).
+> - Ověřeno 2026-11-16 v dev buildu: web (domů, historie, mužstvo), administrace (osoby,
+>   hráči, formulář soupisky s hledáním osoby), `npm test`. Vadu hledání v menu na mobilu
+>   (`docs/uu5g05-elements-menu-search-vada.md`) alfa neopravuje.
+> - Návrat: v `client/package.json` vrátit verze z registru / `18.3.1` a smazat `overrides`,
+>   smazat `client/uu5-imports.json` a `client/src/assets/vendor/`.
 Struktura a konvence se drží referenční appky [`caio_propertyman`](../../caio_propertyman).
 
 **Základní pravidlo: všechno se staví z `uu5g05` / `uu5g05-elements` / `uu5g05-forms` /
