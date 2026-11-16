@@ -4,6 +4,7 @@ import { UiAuth } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Card from "./layout/card.jsx";
+import DisplayText from "./layout/display-text.jsx";
 import TeamLogo from "./team-logo.jsx";
 import DateText from "./date-text.jsx";
 import { TeamLink, SeasonLink } from "./route-link.jsx";
@@ -284,11 +285,11 @@ const MatchTile = createVisualComponent({
     // výkopu a pod ním den.
     const center = played ? (
       <>
-        <span className={Config.Css.css({ ...theme.typography.display, fontSize: 44, lineHeight: 1, whiteSpace: "nowrap" })}>
+        <DisplayText type="hero" className={Config.Css.css({ lineHeight: 1, whiteSpace: "nowrap" })}>
           {Number.isFinite(match.homeGoals) ? match.homeGoals : "–"}
           {" : "}
           {Number.isFinite(match.guestGoals) ? match.guestGoals : "–"}
-        </span>
+        </DisplayText>
         {Number.isFinite(match.homeGoalsHalf) && Number.isFinite(match.guestGoalsHalf) ? (
           <Uu5Elements.Text
             category="interface"
@@ -302,9 +303,9 @@ const MatchTile = createVisualComponent({
       </>
     ) : match.time ? (
       <>
-        <span className={Config.Css.css({ ...theme.typography.display, fontSize: 34, lineHeight: 1 })}>
+        <DisplayText className={Config.Css.css({ lineHeight: 1 })}>
           <DateText value={match.time} type="time" />
-        </span>
+        </DisplayText>
         <Uu5Elements.Text
           category="interface"
           segment="content"
@@ -315,7 +316,7 @@ const MatchTile = createVisualComponent({
         </Uu5Elements.Text>
       </>
     ) : (
-      <span className={Config.Css.css({ ...theme.typography.display, fontSize: 34, lineHeight: 1 })}>–</span>
+      <DisplayText className={Config.Css.css({ lineHeight: 1 })}>–</DisplayText>
     );
 
     // Spodní řádek je patička dlaždice — `Tile` má na oddělovací linku `footerSeparator`

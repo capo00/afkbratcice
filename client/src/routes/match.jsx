@@ -5,6 +5,7 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
+import Eyebrow from "../components/layout/eyebrow.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
@@ -161,9 +162,9 @@ function MatchDetail({ matchId }) {
             <div>
               {scorers.length ? (
                 <div>
-                  <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 8 })}>
+                  <Eyebrow>
                     <Lsi import={importLsi} path={["match", "scorers"]} />
-                  </div>
+                  </Eyebrow>
                   <div className={Config.Css.css({ display: "flex", gap: 12, flexWrap: "wrap" })}>
                     {scorers.map((entry, index) => (
                       <Uu5Elements.Tag key={entry.playerId ?? index} size="m" colorScheme="building" significance="distinct">

@@ -1,4 +1,5 @@
 import { createVisualComponent, useDataObject, Lsi } from "uu5g05";
+import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
@@ -79,9 +80,14 @@ function Stats({ teamId, seasonId }) {
                       <span>{playerLabel(row) ?? <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />}</span>
                     )}
                     {row.player?.position ? (
-                      <span className={Config.Css.css({ color: theme.color.mutedFg, fontSize: 12 })}>
+                      <Uu5Elements.Text
+                        category="interface"
+                        segment="content"
+                        type="small"
+                        className={Config.Css.css({ color: theme.color.mutedFg })}
+                      >
                         <Lsi import={importLsi} path={["enum", "position", row.player.position]} />
-                      </span>
+                      </Uu5Elements.Text>
                     ) : null}
                   </span>
                 </DataTable.Th>

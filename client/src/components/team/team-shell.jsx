@@ -4,6 +4,7 @@ import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import Section from "../layout/section.jsx";
+import Heading from "../layout/heading.jsx";
 import TeamLogo from "../team-logo.jsx";
 import SeasonSelect from "../season-select.jsx";
 import { SeasonLink } from "../route-link.jsx";
@@ -113,9 +114,10 @@ const TeamShell = createVisualComponent({
                   {category.categoryName ?? <Lsi import={importLsi} path={["enum", "age", category.age]} />}
                 </Uu5Elements.Tag>
               ) : null}
-              <div className={Config.Css.css({ ...theme.typography.display, fontSize: 32, marginBlockStart: 4 })}>
+              {/* The page title: the size of a section heading, but the page's only h1. */}
+              <Heading level={2} as="h1" bar={false} className={Config.Css.css({ marginBlockStart: 4 })}>
                 {team?.name ?? "—"}
-              </div>
+              </Heading>
               {competition ? (
                 <Uu5Elements.Text
                   category="interface"

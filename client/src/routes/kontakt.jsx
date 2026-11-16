@@ -4,6 +4,7 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
+import Eyebrow from "../components/layout/eyebrow.jsx";
 import Card from "../components/layout/card.jsx";
 import Button from "../components/layout/button.jsx";
 import EmptyState from "../components/empty-state.jsx";
@@ -91,9 +92,9 @@ const Kontakt = createVisualComponent({
                         className={Config.Css.css({ color: theme.color.clubRed, flexShrink: 0, marginBlockStart: 2 })}
                       />
                       <div>
-                        <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 11 })}>
+                        <Eyebrow className={Config.Css.css({ marginBlockEnd: 0 })}>
                           <Lsi import={importLsi} path={["contact", row.code]} />
-                        </div>
+                        </Eyebrow>
                         {row.href ? (
                           <Uu5Elements.Link href={row.href(value)} colorScheme="building">
                             {value}

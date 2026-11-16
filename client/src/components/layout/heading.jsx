@@ -21,6 +21,10 @@ const { theme } = Config;
 // Stupně nastavuje `level`, značku `as` — vizuálně velký nadpis tak může být v osnově
 // správně zanořený. Mobilní zmenšení se neřeší: GDS má vlastní `smallScreen` sadu
 // a `Typography.getValue` si mezi nimi vybírá sama.
+//
+// The caller's `className` goes through `Css.join` (emotion `cx`): its rules then come after
+// ours in one class. As a separate class it would depend on the order emotion inserted the two,
+// and a margin from the caller would sometimes lose to our `margin: 0`.
 
 const TYPOGRAPHY = {
   // Hero headline. `expose` je v GDS kategorie pro expresivní text, který má upoutat.
@@ -49,26 +53,29 @@ const Heading = createVisualComponent({
         {({ style }) => {
           const attrs = Utils.VisualComponent.getAttrs(
             props,
-            Config.Css.css({
-              ...style,
-              ...theme.typography.display,
-              margin: 0,
-              textWrap: "balance",
-              // Pruh je pseudoelement, ne další <div>: nadpis tak zůstane jeden element
-              // s jedním textovým obsahem (osnova, čtečky, výběr textu).
-              ...(bar && {
-                position: "relative",
-                paddingInlineStart: BAR_WIDTH + BAR_GAP,
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  insetInlineStart: 0,
-                  insetBlock: 0,
-                  inlineSize: BAR_WIDTH,
-                  backgroundColor: theme.color.clubRed,
-                },
+            Config.Css.join(
+              Config.Css.css({
+                ...style,
+                ...theme.typography.display,
+                margin: 0,
+                textWrap: "balance",
+                // Pruh je pseudoelement, ne další <div>: nadpis tak zůstane jeden element
+                // s jedním textovým obsahem (osnova, čtečky, výběr textu).
+                ...(bar && {
+                  position: "relative",
+                  paddingInlineStart: BAR_WIDTH + BAR_GAP,
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    insetInlineStart: 0,
+                    insetBlock: 0,
+                    inlineSize: BAR_WIDTH,
+                    backgroundColor: theme.color.clubRed,
+                  },
+                }),
               }),
-            }),
+              props.className,
+            ),
           );
 
           const heading = <Tag {...attrs}>{lsi ? <Lsi lsi={lsi} /> : children}</Tag>;

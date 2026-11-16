@@ -605,7 +605,10 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 | Komponenta | Popis |
 |---|---|
 | `layout/section.jsx` | Sekce s `maxWidth 1152`, gutterem a vertikálním paddingem; volitelně šrafovaný podklad |
-| `layout/heading.jsx` | Eyebrow + `h2` s červeným svislým pruhem – tokeny z `theme.text` |
+| `layout/heading.jsx` | Nadpis `level` 1–3 (hero, sekce, titulek karty) se stupněm z uuGds, volitelně eyebrow a červený svislý pruh; `as` mění značku (jméno týmu a hráče je `h1` ve velikosti nadpisu sekce) |
+| `layout/eyebrow.jsx` | Prostrkaný červený štítek nad nadpisem nebo skupinou (`interface/highlight/small`) |
+| `layout/display-text.jsx` | Text v klubovém písmu, který není nadpis: skóre a čas výkopu na dlaždici, název klubu v patičce; velikost jako token uuGds (výchozí `expose/default/lead`) |
+| `layout/prose.jsx` | Rytmus dlouhého textu z uu5Stringu (článek, obsahová stránka); `h3` v textu je `story/heading/h4` |
 | `layout/card.jsx` | Karta na `theme.color.card` s 1px rámečkem, volitelný horní červený proužek |
 | `layout/footer.jsx` | Třísloupcová patička + spodní řádek |
 | `layout/notice-bar.jsx` | `appConfig.notice` v hlavičce mužstva (`Uu5Elements.HighlightedBox`) |

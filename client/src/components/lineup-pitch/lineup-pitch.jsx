@@ -2,6 +2,7 @@ import { createVisualComponent, useElementSize, useAppBackground, useLsi, Backgr
 import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config.js";
 import importLsi from "../../lsi/import-lsi.js";
+import Eyebrow from "../layout/eyebrow.jsx";
 import { layoutLineup, shortName, initials, PLAYER_BOX } from "./layout.js";
 
 // Sestava jednoho týmu na hřišti (varianta C, schválil Caio 2026-10-27; canvas „AFK Bratčice –
@@ -278,9 +279,9 @@ const LineupPitch = createVisualComponent({
     const bench = (titlePath, list, footer, selectable = false) =>
       list.length || footer ? (
         <div>
-          <div className={Config.Css.css({ ...Config.theme.typography.eyebrow, fontSize: 11, marginBlockEnd: 8 })}>
+          <Eyebrow>
             <Lsi import={importLsi} path={titlePath} />
-          </div>
+          </Eyebrow>
           <div className={Config.Css.css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 })}>
             {list.map((entry, index) =>
               selectable ? (

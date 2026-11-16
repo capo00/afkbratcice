@@ -43,9 +43,9 @@ function TeamCard({ category, coach }) {
         <Uu5Elements.Tag colorScheme="primary" significance="highlighted" size="s">
           {category.categoryName ?? <Lsi import={importLsi} path={["enum", "age", category.age]} />}
         </Uu5Elements.Tag>
-        <div className={Config.Css.css({ ...theme.typography.display, fontSize: 22, marginBlockStart: 4 })}>
+        <Heading level={3} className={Config.Css.css({ marginBlockStart: 4 })}>
           {team?.name ?? "—"}
-        </div>
+        </Heading>
       </div>
     </div>
   );

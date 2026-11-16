@@ -66,7 +66,7 @@ function GalleryTile({ gallery, onClick }) {
         </Uu5Elements.Box>
       )}
 
-      <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>{gallery.name}</div>
+      <Heading level={3}>{gallery.name}</Heading>
       <div
         className={Config.Css.css({
           marginBlockStart: 4,

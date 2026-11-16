@@ -39,9 +39,7 @@ const AdminIndex = createVisualComponent({
                   className={Config.Css.css({ fontSize: 24, color: theme.color.clubRed })}
                 />
                 <div>
-                  <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>
-                    {titleLsi[item.code]?.header ?? item.code}
-                  </div>
+                  <Heading level={3}>{titleLsi[item.code]?.header ?? item.code}</Heading>
                   <Uu5Elements.Text
                     category="interface"
                     segment="content"

@@ -5,6 +5,7 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
+import Eyebrow from "../components/layout/eyebrow.jsx";
 import Card from "../components/layout/card.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
@@ -54,7 +55,7 @@ function PersonTile({ person, fallbackText, name, subtitle, onClick }) {
         />
 
         <div className={Config.Css.css({ minInlineSize: 0 })}>
-          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 18 })}>{name}</div>
+          <Heading level={3}>{name}</Heading>
           <Uu5Elements.Text
             category="interface"
             segment="content"
@@ -123,7 +124,7 @@ function staffOf(itemList) {
 function RosterGroup({ title, children }) {
   return (
     <div className={Config.Css.css({ marginBlockEnd: 24 })}>
-      <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>{title}</div>
+      <Eyebrow className={Config.Css.css({ marginBlockEnd: 12 })}>{title}</Eyebrow>
       <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))">{children}</Uu5Elements.Grid>
     </div>
   );

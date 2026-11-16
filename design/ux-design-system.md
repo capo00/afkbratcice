@@ -182,6 +182,11 @@ s tmavým překryvem, erb, červený eyebrow nad nadpisem, prostrkání a dvě C
 Jestli se po implementaci ukáže, že to nestačí, je přebití `scale` nad GDS hodnotou
 změna, která patří do `decisions.md` se zdůvodněním — ne tichý přepis v komponentě.
 
+> **Výjimka: hero headline 96 px** (potvrdil Caio 2026-11-16, review S8). Hero na úvodní
+> stránce (`routes/home.jsx`) má `fontSize: 96` přes GDS stupeň `expose/hero`, na
+> desktopu i na mobilu. Byl tak od 2026-09-08 bez zápisu, teď je výjimka vědomá. Je to **jediná** výjimka z 2.1 a hlídá ji `client/src/font-size.test.js`
+> (seznam povolených `fontSize`, mimo ni jen velikosti ikon a grafických znaků).
+
 Prostrkání zůstává **kladné** (+4 %), na rozdíl od propertymanu, kde je záporné.
 Bebas Neue bez prostrkání „slepí“.
 

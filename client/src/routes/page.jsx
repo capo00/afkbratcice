@@ -4,6 +4,7 @@ import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
+import Prose from "../components/layout/prose.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import PAGES from "../content/pages.js";
 import Board from "../components/board.jsx";
@@ -55,20 +56,10 @@ const Page = createVisualComponent({
       <Section>
         <Heading lsi={undefined}>{page.name}</Heading>
 
-        <div
+        <Prose
           className={Config.Css.css({
             marginBlockStart: 24,
             maxWidth: 720,
-            // Rytmus dlouhého textu: odstavce a nadpisy si nesou vlastní mezery, aby
-            // stránka nebyla slepený blok. Cílí se na potomky, protože značky vyrábí
-            // uu5String, ne my.
-            "& p": { marginBlock: "0 1em", lineHeight: 1.6 },
-            "& h3": { ...theme.typography.display, fontSize: 22, marginBlock: "1.5em 0.5em" },
-            "& ul, & ol": { paddingInlineStart: "1.25em", lineHeight: 1.7 },
-            "& li": { marginBlockEnd: "0.25em" },
-            "& a": { color: theme.color.clubRed },
-            "& code": { backgroundColor: theme.color.muted, padding: "0.1em 0.35em", borderRadius: 4 },
-            "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
             // `Uu5Extras.VerticalTimeline` (uu5extrasg01 1.9) dává kolečku ikony napevno inline
             // `background: white`. Na tmavém podkladu na něm průsvitná ikona položky zmizí, proto
             // `!important` a barva stránky (průhledné ne: kolečkem by prosvítala čára osy).
@@ -79,7 +70,7 @@ const Page = createVisualComponent({
           })}
         >
           {DataPage ? <DataPage /> : <Content>{PAGE_CONTENT[route.uu5Route]}</Content>}
-        </div>
+        </Prose>
       </Section>
     );
   },

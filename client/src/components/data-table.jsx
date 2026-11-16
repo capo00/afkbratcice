@@ -25,7 +25,13 @@ const Css = {
     borderCollapse: "collapse",
     fontVariantNumeric: "tabular-nums",
   }),
-  headerRow: Config.Css.css({ ...theme.typography.eyebrow, fontSize: 11, textAlign: "start" }),
+  // A class on <tr>, so no `Uu5Elements.Text`: the GDS token is read directly (as uu5 does);
+  // `interface` tokens are the same on small screens.
+  headerRow: Config.Css.css({
+    ...Uu5Elements.UuGds.getValue(["Typography", "interface", "highlight", "small"]),
+    ...theme.typography.eyebrow,
+    textAlign: "start",
+  }),
   cell: Config.Css.css({
     paddingBlock: 10,
     paddingInline: 8,

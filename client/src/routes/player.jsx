@@ -48,12 +48,13 @@ function PlayerCard({ player }) {
         />
 
         <div>
-          <div className={Config.Css.css({ ...theme.typography.display, fontSize: 32 })}>
+          {/* The page title: the size of a section heading, but the page's only h1. */}
+          <Heading level={2} as="h1" bar={false}>
             {/* Prázdné jméno = mládež (server jména dětí nevrací) nebo hráč bez osoby. */}
             {name || (
               <Lsi import={importLsi} path={["team", "unnamedPlayer"]} />
             )}
-          </div>
+          </Heading>
           <div className={Config.Css.css({ display: "flex", gap: 12, color: theme.color.mutedFg, flexWrap: "wrap" })}>
             {player?.position ? (
               <span>

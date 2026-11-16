@@ -5,6 +5,7 @@ import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
+import Prose from "../components/layout/prose.jsx";
 import DateText from "../components/date-text.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
@@ -27,17 +28,6 @@ const { theme } = Config;
 // Report ze zápasu ukazuje zápas běžnou dlaždicí `MatchTile` -- proklik vede na detail zápasu.
 
 const MAX_TEXT_WIDTH = 720;
-
-// Rytmus dlouhého textu. Cílí se na potomky, protože značky vyrábí uu5String, ne my —
-// stejná sada jako v `routes/page.jsx`.
-const PROSE = {
-  "& p": { marginBlock: "0 1em", lineHeight: 1.6 },
-  "& h3": { ...theme.typography.display, fontSize: 22, marginBlock: "1.5em 0.5em" },
-  "& ul, & ol": { paddingInlineStart: "1.25em", lineHeight: 1.7 },
-  "& li": { marginBlockEnd: "0.25em" },
-  "& a": { color: theme.color.clubRed },
-  "& img": { maxInlineSize: "100%", blockSize: "auto", borderRadius: theme.radius },
-};
 
 const Novinka = createVisualComponent({
   uu5Tag: Config.TAG + "Novinka",
@@ -151,13 +141,13 @@ const Novinka = createVisualComponent({
             </div>
           ) : null}
 
-          <div className={Config.Css.css({ marginBlockStart: 24, ...PROSE })}>
+          <Prose className={Config.Css.css({ marginBlockStart: 24 })}>
             {(article.sectionList ?? []).map((section, index) => (
               // Index jako klíč je tu v pořádku: sekce nemají id a pořadí v poli JE jejich
               // identita — načtený článek se navíc nepřerovnává.
               <Content key={index}>{section.content}</Content>
             ))}
-          </div>
+          </Prose>
         </div>
       </Section>
     );

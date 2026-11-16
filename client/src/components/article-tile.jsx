@@ -3,6 +3,7 @@ import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import Card from "./layout/card.jsx";
+import Heading from "./layout/heading.jsx";
 import DateText from "./date-text.jsx";
 
 const { theme } = Config;
@@ -61,9 +62,7 @@ const ArticleTile = createVisualComponent({
           ))}
         </div>
 
-        <div className={Config.Css.css({ ...theme.typography.display, fontSize: 20, textWrap: "balance" })}>
-          {article.name}
-        </div>
+        <Heading level={3}>{article.name}</Heading>
 
         {article.desc ? (
           <Uu5Elements.Text

@@ -3,6 +3,8 @@ import Uu5Elements from "uu5g05-elements";
 import Config from "../../config/config.js";
 import importLsi from "../../lsi/import-lsi.js";
 import { useApp } from "../../core/app-context.jsx";
+import DisplayText from "./display-text.jsx";
+import Eyebrow from "./eyebrow.jsx";
 
 const { theme } = Config;
 
@@ -88,9 +90,9 @@ const Footer = createVisualComponent({
           })}
         >
           <div>
-            <div className={Config.Css.css({ ...theme.typography.display, fontSize: 24, marginBlockEnd: 8 })}>
+            <DisplayText as="p" type="broad" className={Config.Css.css({ marginBlockEnd: 8 })}>
               {clubName}
-            </div>
+            </DisplayText>
             <Uu5Elements.Text
               category="interface"
               segment="content"
@@ -102,9 +104,9 @@ const Footer = createVisualComponent({
           </div>
 
           <nav>
-            <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>
+            <Eyebrow className={Config.Css.css({ marginBlockEnd: 12 })}>
               <Lsi import={importLsi} path={["footer", "navigation"]} />
-            </div>
+            </Eyebrow>
             {/* `children` jako funkce je cesta, jak si vzít styl mřížky, ale vykreslit
                 si element sám — `Grid` jinak vždycky renderuje `<div>` a `<li>` mimo
                 `<ul>` je neplatné HTML. Stejný idiom jako u `Uu5Elements.Text`. */}
@@ -132,9 +134,9 @@ const Footer = createVisualComponent({
           </nav>
 
           <div>
-            <div className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12, marginBlockEnd: 12 })}>
+            <Eyebrow className={Config.Css.css({ marginBlockEnd: 12 })}>
               <Lsi import={importLsi} path={["footer", "contact"]} />
-            </div>
+            </Eyebrow>
             <Uu5Elements.Grid rowGap={8} className={Config.Css.css({ color: theme.color.mutedFg })}>
               {contact.address ? <ContactLine icon={CONTACT_ICON.address}>{contact.address}</ContactLine> : null}
               {contact.email ? (
@@ -179,9 +181,9 @@ const Footer = createVisualComponent({
           <Uu5Elements.Text category="interface" segment="content" type="medium">
             <Lsi import={importLsi} path={["footer", "copyright"]} params={{ year: new Date().getFullYear(), clubName }} />
           </Uu5Elements.Text>
-          <span className={Config.Css.css({ ...theme.typography.eyebrow, fontSize: 12 })}>
+          <Eyebrow className={Config.Css.css({ marginBlockEnd: 0 })}>
             <Lsi import={importLsi} path={["footer", "motto"]} />
-          </span>
+          </Eyebrow>
         </div>
       </footer>
     );

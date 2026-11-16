@@ -13,8 +13,11 @@ const { theme } = Config;
 // Atributy pro DOM se skládají přes `Utils.VisualComponent.getAttrs`, ne rozbalením
 // restProps: `createVisualComponent` komponentě dosype vlastní props (nestingLevel, testId,
 // noPrint, elementAttrs…) a ty na <p> nepatří — React na nich hlásí "React does not
-// recognize the ... prop on a DOM element". getAttrs vrátí jen to, co do DOM smí, a rovnou
-// zaplete className volajícího za náš.
+// recognize the ... prop on a DOM element". getAttrs vrátí jen to, co do DOM smí.
+//
+// The caller's `className` goes through `Css.join` (emotion `cx`): its rules then come after
+// ours in one class. As a separate class it would depend on the order emotion inserted the two,
+// and a margin from the caller would sometimes lose to our `margin: 0`.
 
 const Eyebrow = createVisualComponent({
   uu5Tag: Config.TAG + "Eyebrow",
@@ -27,12 +30,15 @@ const Eyebrow = createVisualComponent({
         {({ style }) => {
           const attrs = Utils.VisualComponent.getAttrs(
             props,
-            Config.Css.css({
-              ...style,
-              ...theme.typography.eyebrow,
-              margin: 0,
-              marginBlockEnd: 8,
-            }),
+            Config.Css.join(
+              Config.Css.css({
+                ...style,
+                ...theme.typography.eyebrow,
+                margin: 0,
+                marginBlockEnd: 8,
+              }),
+              props.className,
+            ),
           );
 
           return <p {...attrs}>{lsi ? <Lsi lsi={lsi} /> : children}</p>;
