@@ -506,6 +506,25 @@
     "afkbratcice/management/personRequired": "Vyberte osobu.",
     "afkbratcice/roster/overlap": "Tento hráč už je v tomto týmu v období, které se s tímto překrývá. Upravte nebo ukončete ten záznam.",
     "afkbratcice/roster/unknownPlayer": "Vyberte hráče.",
-    "afkbratcice/roster/invalidPeriod": "Začátek je po konci."
+    "afkbratcice/roster/invalidPeriod": "Začátek je po konci.",
+    "afkbratcice/match/sameTeams": "Tým nemůže hrát sám se sebou. Vyberte jiného soupeře.",
+    "afkbratcice/match/invalidPenaltyWinner": "Rozstřel jde zadat jen při remíze, v soutěži, která ho hraje, a vítězem musí být jeden z týmů zápasu.",
+    "afkbratcice/match/foreignLineup": "Správce týmu smí zapsat jen sestavu svého týmu.",
+    "afkbratcice/match/teamNotInMatch": "Tento tým v zápasu nehraje.",
+    "afkbratcice/match/playerNotInMatch": "Hráč nebyl v den zápasu na soupisce týmu. Doplňte ho na soupisku, nebo ho ze sestavy vyřaďte.",
+    "afkbratcice/match/unknownPlayer": "Hráč ze sestavy už neexistuje, možná ho mezitím někdo smazal. Načtěte zápas znovu.",
+    "afkbratcice/person/inUse": "Osobu nejde smazat, je to hráč nebo člen vedení. Nejdřív smažte jeho kartu hráče, resp. funkce.",
+    "afkbratcice/season/hasMatches": "Sezónu nejde smazat, má zápasy. Nejdřív je smažte nebo přesuňte do jiné sezóny.",
+    "afkbratcice/club/inUse": "Klub nejde smazat, patří k němu tým. Nejdřív tým převeďte k jinému klubu.",
+    "afkbratcice/team/invalidCategory": "Vyberte kategorii.",
+    "afkbratcice/article/notFound": "Článek už neexistuje, možná ho mezitím někdo smazal.",
+    "afkbratcice/gallery/notFound": "Galerie už neexistuje, možná ji mezitím někdo smazal.",
+    "afkbratcice/gallery/photoNotFound": "Fotka už v galerii není, možná ji mezitím někdo smazal.",
+    "unauthorized": "Na tuto akci nemáte oprávnění.",
+    "caio-server-auth/unauthenticated": "Přihlášení vypršelo. Přihlaste se znovu.",
+    "*/outOfScope": "Na tento záznam nemáte oprávnění.",
+    "*/doesNotExist": "Záznam už neexistuje, možná ho mezitím někdo smazal.",
+    "*/invalidDtoIn": "Některé údaje nejsou vyplněné správně.",
+    "caio-server/*Failed": "Uložení se nepodařilo. Zkuste to prosím znovu."
   }
 }

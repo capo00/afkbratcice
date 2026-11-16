@@ -3,13 +3,15 @@ import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements, UiAuth } from "caio-ui";
 import Config from "../config/config.js";
-import importLsi from "../lsi/import-lsi.js";
+import importLsi, { lsi } from "../lsi/import-lsi.js";
 import { getMatchConfig, matchFormConfig, MATCH_FORM_FIELD_LIST, MATCH_PAIR_LIST } from "./match-fields.jsx";
 import { formGridLayout } from "./form-layout.js";
 import LineupEditor from "./lineup/lineup-editor.jsx";
 import { toEditorState, toPlayerList, fromPreviousMatch, lineupKey, playerCount } from "./lineup/lineup-state.js";
 
 const LSI_PATH = ["admin", "matches"];
+// Chyby serveru česky podle kódu, stejná tabulka jako formuláře `Crud` (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
 
 // Home and guest side by side even on a phone -- the score reads as one row. The penalty
 // winner row is added only while the field is shown; a grid area without its field would
@@ -233,6 +235,7 @@ function MatchModal({
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState();
+  const errorMessage = UiElements.useErrorMessage(ERROR_LSI);
   const [tabCode, setTabCode] = useState(initialTabCode ?? "info");
   const [visited, setVisited] = useState(() => new Set([initialTabCode ?? "info"]));
   const hasPenaltiesRef = useRef(false);
@@ -384,7 +387,7 @@ function MatchModal({
       // A step that went through stays saved (the refs above moved); the list or detail learns
       // about it now, the message stays with the form.
       if (saved) onSaved?.({ ...match, ...saved }, { lineupSaved });
-      setError(err?.message ?? String(err));
+      setError(errorMessage(err) ?? String(err));
     } finally {
       setPending(false);
     }

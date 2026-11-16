@@ -8,6 +8,9 @@ import { ageField, boolField, teamLabel, EntitySelect } from "../fields.jsx";
 import { seasonLabel } from "../../components/season-select.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Sezóny — ročník soutěže jedné kategorie a její účastníci.
 //
 // **`hasPenalties` je nastavení sezóny**, ne vlastnost zápasu (rozhodnuto 2026-09-06):
@@ -83,6 +86,7 @@ const AdminSeasons = createVisualComponent({
         <SeasonProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
+              lsiError={ERROR_LSI}
               dataList={dataList}
               seriesList={seriesList}
               columnList={columnList}

@@ -9,6 +9,9 @@ import CrudFormView from "../crud-form-view.jsx";
 import { prepareImage } from "../image.js";
 import { useApp } from "../../core/app-context.jsx";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Klub nese erb a jméno reálného klubu -- víc věkových kategorií (Chotusice muži, dorost,
 // žáci, ...) na něj odkazuje stejným `clubId` (`screens/teams.jsx`), takže se logo nahrává
 // jednou, ne za každou kategorii zvlášť (design/data-model.md, 1.2).
@@ -57,6 +60,7 @@ const AdminClubs = createVisualComponent({
         <ClubProvider calls={calls}>
           {(dataList) => (
             <UiElements.Crud
+              lsiError={ERROR_LSI}
               dataList={dataList}
               seriesList={seriesList}
               columnList={columnList}

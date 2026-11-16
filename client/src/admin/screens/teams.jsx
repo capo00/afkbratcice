@@ -9,6 +9,9 @@ import { nameField, categoryField, boolField, EntitySelect, clubLabel } from "..
 import { useApp } from "../../core/app-context.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Správa týmů — vlastních i soupeřů.
 //
 // `own` rozhoduje o tom, jestli tým patří klubu; podle něj se staví přehled mužstev
@@ -113,6 +116,7 @@ const AdminTeams = createVisualComponent({
         <TeamProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
+              lsiError={ERROR_LSI}
               dataList={dataList}
               seriesList={seriesList}
               columnList={columnList}

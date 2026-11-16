@@ -11,6 +11,9 @@ import { useApp } from "../../core/app-context.jsx";
 import { lineupTeamIdFor } from "../../core/lineup-team.js";
 import { mergeItemHandler } from "../../core/item-merge.js";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Zápasy. Nejrušnější obrazovka administrace: rozpis se zakládá hromadně na začátku
 // sezóny, výsledky a sestavy se dopisují každý víkend.
 //
@@ -123,6 +126,7 @@ const AdminMatches = createVisualComponent({
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "matches", "header")}>
         <UiElements.Crud
+          lsiError={ERROR_LSI}
           {...filter.crudProps}
           // `dtoIn` na seznamu: `Crud` s ním donačítá další stránky (`loadNext`), jinak by šly bez filtrů.
           dataList={{ ...dataList, dtoIn }}

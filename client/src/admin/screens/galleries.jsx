@@ -9,6 +9,9 @@ import { EnumText, enumItemList, dateField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import PhotoUpload from "../photo-upload.jsx";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Fotoalba. Nahrávání fotek je **vlastní akce řádku**, ne pole formuláře: album se zakládá
 // jednou a fotky se do něj sypou opakovaně, často jindy a někým jiným.
 
@@ -91,6 +94,7 @@ const AdminGalleries = createVisualComponent({
       <AdminScreen titleLsi={lsi("admin", "menu", "galleries", "header")}>
         <>
               <UiElements.Crud
+                lsiError={ERROR_LSI}
                 dataList={dataList}
                 seriesList={seriesList}
                 columnList={columnList}

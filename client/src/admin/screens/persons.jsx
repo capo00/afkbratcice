@@ -8,6 +8,9 @@ import { noteField, dateField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import { prepareImage } from "../image.js";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Osoby. Jedna osoba = jeden člověk; hráčství i trenérství jsou samostatné role nad ní
 // (`player`, `coach`), takže trenér, který si občas zahraje, není v databázi dvakrát.
 //
@@ -57,6 +60,7 @@ const AdminPersons = createVisualComponent({
         <PersonProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
+              lsiError={ERROR_LSI}
               dataList={dataList}
               seriesList={seriesList}
               columnList={columnList}

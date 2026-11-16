@@ -9,6 +9,9 @@ import { dateField } from "../fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import { useApp } from "../../core/app-context.jsx";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Soubory ke stažení.
 //
 // **Není to `UiElements.BinaryCrud`.** Ta kolekci umí, ale je záměrně nerozšiřitelná přes
@@ -97,6 +100,7 @@ const AdminFiles = createVisualComponent({
         <UiElements.BinaryProvider dtoIn={{ collection: COLLECTION }}>
           {(dataList) => (
             <UiElements.Crud
+              lsiError={ERROR_LSI}
               dataList={dataList}
               seriesList={seriesList}
               columnList={columnList}

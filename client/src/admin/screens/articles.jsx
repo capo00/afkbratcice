@@ -9,6 +9,9 @@ import CrudFormView from "../crud-form-view.jsx";
 import FormSectionList from "../form-section-list.jsx";
 import { prepareImage } from "../image.js";
 
+// Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
+const ERROR_LSI = lsi("errors");
+
 // Novinky.
 //
 // Publikace stojí na dvou polích: `state` a `publishTime`. Veřejný výpis chce **oboje** —
@@ -90,6 +93,7 @@ const AdminArticles = createVisualComponent({
         <ArticleProvider calls={CALLS}>
           {(dataList) => (
             <UiElements.Crud
+              lsiError={ERROR_LSI}
               dataList={dataList}
               seriesList={seriesList}
               columnList={columnList}
