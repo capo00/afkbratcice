@@ -67,12 +67,26 @@ const importEntryDtoIn = shape({
   penaltyWinnerTeamId: mongoId(),
 });
 
+// Filters that narrow the matches; `match/list` needs at least one (`validateList`).
+// `opponentId` is not one: the dao applies it only together with `teamId`.
+const LIST_FILTER_KEY_LIST = ["seasonId", "teamId", "teamIdList", "homeTeamId", "guestTeamId", "playerId", "dateFrom", "dateTo"];
+
 /**
+ * Bez filtru by výpis byl celá historie (1000 zápasů na volání, 677 kB) -- hromadný export,
+ * který web nepotřebuje a kdokoli ho může opakovat. Aspoň jeden filtr, který zápasy zúží, je
+ * proto povinný (review 2026-11-12, S12; Caio 2026-11-16). `state`, `round`, `order`
+ * a `pageInfo` se nepočítají: řadí, stránkují nebo zpřesňují, ale nechají celou historii.
+ *
  * Kolo je číslo v rámci soutěže: „5. kolo“ bez sezóny by spojilo pátá kola všech soutěží
  * a ročníků, což nikdo nechce. Proto jen se `seasonId`.
  */
 function validateList(input) {
   const dtoIn = validate(listDtoIn)(input);
+  if (!LIST_FILTER_KEY_LIST.some((key) => (Array.isArray(dtoIn[key]) ? dtoIn[key].length : dtoIn[key]))) {
+    const e = new Error("Invalid dtoIn: at least one filter is required");
+    e.errors = [{ path: [], message: `requires one of ${LIST_FILTER_KEY_LIST.join(", ")}` }];
+    throw e;
+  }
   if (dtoIn.round && !dtoIn.seasonId) {
     const e = new Error("Invalid dtoIn: round requires seasonId");
     e.errors = [{ path: ["round"], message: "requires seasonId" }];

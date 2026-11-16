@@ -1,4 +1,5 @@
 import { createVisualComponent, useState, useMemo, useRef, useEffect, useDataList, useDataObject, Lsi } from "uu5g05";
+import Uu5Elements from "uu5g05-elements";
 import { UiElements, UiAuth } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
@@ -60,6 +61,15 @@ function matchHandlers(dataRef) {
 // Filtry jdou **na server** (`match/list`): zápasů jsou tisíce a seznam se načítá po
 // stránkách, klientský filtr by prošel jen tu načtenou. Kolo platí jen spolu se sezónou
 // (server ho bez ní odmítne) -- bez vybrané sezóny se do dtoIn nepošle.
+// `match/list` needs a filter (review S12), so Termín is a required filter (`match-fields.jsx`)
+// and the screen opens on matches from a year ago to a year ahead, which is the work at hand.
+const DEFAULT_RANGE_DAYS = 365;
+
+function defaultFilterList() {
+  const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+  return [{ key: "time", value: [day(-DEFAULT_RANGE_DAYS), day(DEFAULT_RANGE_DAYS)] }];
+}
+
 function listDtoIn(filterDtoIn) {
   const { round, ...rest } = filterDtoIn;
   return { order: "desc", ...rest, ...(round && rest.seasonId ? { round } : null) };
@@ -105,7 +115,8 @@ const AdminMatches = createVisualComponent({
       [CONFIG],
     );
 
-    const filter = UiElements.Crud.useFilter({ filterDefinitionList: filterList });
+    const [initialFilterList] = useState(defaultFilterList);
+    const filter = UiElements.Crud.useFilter({ filterDefinitionList: filterList, initialFilterList });
     const dtoIn = useMemo(() => listDtoIn(filter.dtoIn), [filter.dtoIn]);
 
     // Ref se plní **až za** `useDataList` — dřív `dataList` ještě neexistuje.
@@ -115,16 +126,33 @@ const AdminMatches = createVisualComponent({
 
     // Jiný filtr = nový výpis. `useDataList` dtoIn nesleduje (na rozdíl od `CrudContext`),
     // takže se načte ručně; první načtení udělal `initialDtoIn`.
+    //
+    // A failed reload is shown, not swallowed: the list would otherwise keep the previous
+    // filter's rows under the new filters without a word.
+    const errorMessage = UiElements.useErrorMessage(ERROR_LSI);
+    const [loadError, setLoadError] = useState();
     const dtoInKey = JSON.stringify(dtoIn);
     const loadedKeyRef = useRef(dtoInKey);
     useEffect(() => {
       if (loadedKeyRef.current === dtoInKey || !dataList.handlerMap.load) return;
       loadedKeyRef.current = dtoInKey;
-      dataList.handlerMap.load(dtoIn).catch(() => {});
+      dataList.handlerMap.load(dtoIn).then(
+        () => setLoadError(),
+        (error) => setLoadError(error),
+      );
     }, [dtoInKey, dataList.handlerMap.load]);
 
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "matches", "header")}>
+        {loadError ? (
+          <Uu5Elements.HighlightedBox
+            icon="uugds-alert-circle"
+            colorScheme="negative"
+            className={Config.Css.css({ marginBlockEnd: 16 })}
+          >
+            {errorMessage(loadError) ?? String(loadError)}
+          </Uu5Elements.HighlightedBox>
+        ) : null}
         <UiElements.Crud
           lsiError={ERROR_LSI}
           {...filter.crudProps}

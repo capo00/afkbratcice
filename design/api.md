@@ -286,6 +286,13 @@ VP/PP, nebo R. Je to **nastavení sezóny**, ne odvození z dat; proč, viz
 Pravidla:
 
 - `match/list` s `teamId` hledá `$or: [{ homeTeamId }, { guestTeamId }]` (z v1).
+- **`match/list` bez filtru vrátí 400 `invalidDtoIn`** (validátor, jako „kolo jen se sezónou“;
+  od 2026-11-16, review S12, rozhodl Caio). Povinný je aspoň jeden z `seasonId`, `teamId`, `teamIdList` (neprázdný),
+  `homeTeamId`, `guestTeamId`, `playerId`, `dateFrom`, `dateTo`. `state`, `round`, `order`
+  ani `pageInfo` se nepočítají a `opponentId` taky ne (dao ho bere jen s `teamId`). Dřív
+  dotaz bez filtru vrátil celou historii: 1000 zápasů, 677 kB. Administrace zápasů má proto
+  **povinný filtr Termín** (uu5tiles `required`, nejde odebrat, jen změnit), výchozí ±365 dní
+  od dneška (`admin/match-fields.jsx`, `admin/screens/matches.jsx`).
 - `departureTime` se ve veřejném `dtoOut` vrací jen roli `members` a výš.
 - `setResult` dopočítá `state: "played"` a ověří, že `penaltyWinnerTeamId` je jeden
   ze zúčastněných týmů a že se současně rovná `homeGoals === guestGoals`

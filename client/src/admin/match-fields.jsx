@@ -38,7 +38,10 @@ function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
   return {
     time: {
       ...dateTimeField(lsi("admin", "field", "time"), { required: false }),
-      filterProps: { inputType: "date-range", dtoIn: dateRangeDtoIn },
+      // Required (uu5tiles: cannot be removed, only changed): `match/list` refuses a list
+      // without a filter (review S12) and the date is the one that fits every task -- the
+      // weekend's results across all teams included. Default range in `screens/matches.jsx`.
+      filterProps: { inputType: "date-range", dtoIn: dateRangeDtoIn, required: true },
     },
     homeTeamId: {
       label: lsi("admin", "field", "homeTeam"),
