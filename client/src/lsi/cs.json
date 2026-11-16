@@ -25,6 +25,7 @@
   },
   "admin": {
     "eyebrow": "Správa obsahu",
+    "back": "Zpět na administraci",
     "bool": { "false": "Ne", "true": "Ano" },
     "header": "Administrace",
     "empty": "Na žádnou obrazovku administrace nemáte oprávnění.",
@@ -453,7 +454,8 @@
     "empty": "V téhle kategorii zatím není žádné album.",
     "noPhotos": "Album je zatím prázdné.",
     "missing": "Album se nepodařilo najít.",
-    "social": "Nejnovější fotky dáváme na sociální sítě:"
+    "social": "Nejnovější fotky dáváme na sociální sítě:",
+    "back": "Zpět na alba"
   },
   "player": {
     "stats": "Statistiky po sezónách",

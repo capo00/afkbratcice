@@ -81,6 +81,21 @@ Co u toho zůstalo otevřené:
 - **Profil přihlášeného uživatele** (`profile`) — vlastní údaje, spárovaná osoba, role.
 - **Odběr kalendáře** — `GET /calendar/team-<id>.ics` server umí, klient na něj zatím
   nikde neodkazuje (patří k zápasům mužstva).
+- **Klikací karty jako skutečné odkazy** (review 2026-11-12, S10; odloženo Caiem 2026-11-16).
+  Ověřeno v prohlížeči: `Card` nad `Uu5Elements.Tile` s `onClick` je `div role="button"`
+  s `tabIndex -1`, takže **z klávesnice nejde otevřít** zápas, článek, hráče ani album; na
+  domovské stránce 0 odkazů `<a>` na detail zápasu (prostřední klik, nová karta, crawler).
+  Sitemapa má články a mužstva, zápasy a hráče ne. `Tile` ani `LinkPanel` `href` nemají.
+  - Týká se: `match-tile.jsx` (home, seznamy, hráč, článek), `article-tile.jsx`,
+    `gallery.jsx` (album), `team.jsx` (hráč na soupisce); tlačítko „Detail mužstva“
+    v `teams.jsx` je `Button` jen s `onClick` (umí `href`).
+  - Návrh: `Card` dostane cíl (routa + parametry), titulek karty se vykreslí jako
+    `RouteLink` (`<a href>`) roztažený přes celou kartu (`::after`, `inset: 0`); vnitřní
+    odkazy dlaždice zápasu (tým, soutěž) nad ním (`position: relative; z-index`). Karta
+    přestane být `role="button"`. „Detail mužstva“ dostane `href`.
+  - Mimo rozsah: karty administrace a rámečky fotek v detailu alba (otevírají modal
+    a prohlížeč, ne stránku).
+  - Ověřit: Tab + Enter, prostřední klik, odkazy uvnitř dlaždice zápasu. Odhad M.
 - ~~**SEO za běhu**~~ — **hotovo 2026-10-29** (0.6.1): titulek, popis, canonical a `og:*`
   podle routy (`client/src/config/seo.js`, `tools/page-meta.js`), detailní stránky z dat
   (`usePageTitle`), 404 a dítě bez jména `noindex`; statický popis, `og:locale` a absolutní

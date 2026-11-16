@@ -14,6 +14,7 @@ import { seasonLabel } from "../components/season-select.jsx";
 import { SeasonLink } from "../components/route-link.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
+import { ROUTE_SEO } from "../config/seo.js";
 
 const { theme } = Config;
 
@@ -161,7 +162,8 @@ const Player = createVisualComponent({
     // Jméno hráče do titulku. Dítě (jméno server neposlal) do vyhledávání nepatří vůbec.
     const playerName = [data?.player?.person?.name, data?.player?.person?.surname].filter(Boolean).join(" ");
     usePageTitle({
-      title: data?.player ? playerName || "Hráč" : null,
+      // Without a name (a child) the page title falls back to the route title of seo.js.
+      title: data?.player ? playerName || ROUTE_SEO.hrac.title : null,
       description: playerName ? `${playerName} – profil a statistiky hráče AFK Bratčice.` : null,
       noindex: Boolean(data?.player) && !playerName,
     });

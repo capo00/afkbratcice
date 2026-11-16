@@ -1,7 +1,7 @@
-import { createVisualComponent, useRoute, Lsi } from "uu5g05";
+import { createVisualComponent, useRoute, useLsi, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config.js";
-import { lsi } from "../lsi/import-lsi.js";
+import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 
@@ -21,6 +21,7 @@ const AdminScreen = createVisualComponent({
 
   render({ titleLsi, children }) {
     const [, setRoute] = useRoute();
+    const backLabel = useLsi(importLsi, ["admin", "back"]);
 
     return (
       <Section>
@@ -30,7 +31,7 @@ const AdminScreen = createVisualComponent({
             significance="subdued"
             colorScheme="building"
             onClick={() => setRoute("")}
-            tooltip="Zpět na administraci"
+            tooltip={backLabel}
           />
           <Heading eyebrow={lsi("admin", "eyebrow")} lsi={titleLsi} />
         </div>

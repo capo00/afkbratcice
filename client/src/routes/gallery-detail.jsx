@@ -1,8 +1,8 @@
-import { createVisualComponent, useDataObject, useState, useRoute, useEffect } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useRoute, useEffect, useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
-import { lsi } from "../lsi/import-lsi.js";
+import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import DateText from "../components/date-text.jsx";
@@ -81,6 +81,7 @@ const GalleryDetail = createVisualComponent({
 
   render() {
     const [route, setRoute] = useRoute();
+    const backLabel = useLsi(importLsi, ["gallery", "back"]);
     const galleryId = route?.params?.id;
     const [openIndex, setOpenIndex] = useState(null);
 
@@ -128,7 +129,7 @@ const GalleryDetail = createVisualComponent({
             icon="uugds-chevron-left"
             significance="subdued"
             onClick={() => setRoute("fotogalerie")}
-            tooltip="Zpět na alba"
+            tooltip={backLabel}
           />
           <Heading bar={false}>{gallery?.name ?? "—"}</Heading>
         </div>

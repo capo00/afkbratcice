@@ -19,29 +19,30 @@ import importLsi from "../lsi/import-lsi.js";
 // Písmeno uvnitř je tam schválně — samotná barva by pro barvoslepé nesla nulovou informaci
 // a tabulka je hustá, takže tooltip nikdo neotevře.
 
+// The letter is the table's column head for the result (`table.wins` / `draws` / `losses`).
 const BADGE = {
-  W: { colorScheme: "primary", significance: "highlighted", letter: "V" },
-  D: { colorScheme: "building", significance: "common", letter: "R" },
-  L: { colorScheme: "building", significance: "distinct", letter: "P" },
+  W: { colorScheme: "primary", significance: "highlighted", letterKey: "wins" },
+  D: { colorScheme: "building", significance: "common", letterKey: "draws" },
+  L: { colorScheme: "building", significance: "distinct", letterKey: "losses" },
 };
 
 // Neznámý kód ze serveru se nemá ztratit ani shodit řádek — vypadá jako prohra, ale s "?".
-const UNKNOWN = { colorScheme: "building", significance: "distinct", letter: "?" };
+const UNKNOWN = { colorScheme: "building", significance: "distinct", letterKey: null };
 
 const FormDots = createVisualComponent({
   uu5Tag: Config.TAG + "FormDots",
 
   render({ form }) {
-    const label = useLsi(importLsi, ["table", "form"]);
+    const tableLsi = useLsi(importLsi, ["table"]) ?? {};
     if (!form?.length) return null;
 
     return (
       <span
-        aria-label={label}
+        aria-label={tableLsi.form}
         className={Config.Css.css({ display: "inline-flex", gap: 4, verticalAlign: "middle" })}
       >
         {form.map((result, index) => {
-          const { colorScheme, significance, letter } = BADGE[result] ?? UNKNOWN;
+          const { colorScheme, significance, letterKey } = BADGE[result] ?? UNKNOWN;
           return (
             // `size="l"` je 20 px z GDS (`spot/minor`), nejblíž k 18 px z předlohy.
             <Uu5Elements.Badge
@@ -51,7 +52,7 @@ const FormDots = createVisualComponent({
               colorScheme={colorScheme}
               significance={significance}
             >
-              {letter}
+              {letterKey ? tableLsi[letterKey] : "?"}
             </Uu5Elements.Badge>
           );
         })}
