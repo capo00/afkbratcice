@@ -1,6 +1,6 @@
 {
   "name": "afkbratcice",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "type": "module",
   "main": "server/index.js",
   "scripts": {
