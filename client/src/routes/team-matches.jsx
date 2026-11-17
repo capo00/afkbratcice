@@ -1,15 +1,16 @@
-import { createVisualComponent, useDataObject, useState, useMemo } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useMemo, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
-import Button from "../components/layout/button.jsx";
 import MatchTile from "../components/match-tile.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 import { useApp } from "../core/app-context.jsx";
+
+const { theme } = Config;
 
 // Zápasy mužstva v sezóně — rozpis i výsledky na jedné ose.
 //
@@ -27,22 +28,27 @@ function isPlayed(match) {
   return Number.isFinite(match.homeGoals) && Number.isFinite(match.guestGoals);
 }
 
-// Přepínač je řada tlačítek, ne segmentovaný ovladač — aktivní se od ostatních liší jen
-// `significance`. Sází se přes `components/layout/button.jsx`, aby se klubové písmo
-// nepředepisovalo podruhé.
+// Přepínač je `ButtonGroup` (review 1.3 B, Caio 2026-11-17): vybraná položka `highlighted`,
+// ostatní `subdued`, vše v primary, takže vzhled zůstal jako u dřívější řady tlačítek.
+// `pressed` dává čtečce `aria-pressed`, kterou samostatná tlačítka neměla. Klubové písmo
+// (Bebas s prostrkáním) se přimíchává jako u `components/layout/button.jsx`, token pro něj není.
+const CLUB_FONT_CSS = Config.Css.css({
+  "& button": { fontFamily: theme.font.display, letterSpacing: "0.1em", textTransform: "uppercase" },
+});
+
 function ButtonRow({ itemList, active, onChange, path }) {
   return (
-    <div className={Config.Css.css({ display: "flex", gap: 8, flexWrap: "wrap" })}>
-      {itemList.map((code) => (
-        <Button
-          key={code}
-          size="m"
-          significance={code === active ? "highlighted" : "subdued"}
-          onClick={() => onChange(code)}
-          lsi={lsi(...path, code)}
-        />
-      ))}
-    </div>
+    <Uu5Elements.ButtonGroup
+      size="m"
+      colorScheme="primary"
+      className={CLUB_FONT_CSS}
+      itemList={itemList.map((code) => ({
+        children: <Lsi lsi={lsi(...path, code)} />,
+        pressed: code === active,
+        significance: code === active ? "highlighted" : "subdued",
+        onClick: () => onChange(code),
+      }))}
+    />
   );
 }
 
