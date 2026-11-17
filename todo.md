@@ -96,12 +96,23 @@ Co u toho zůstalo otevřené:
   - Mimo rozsah: karty administrace a rámečky fotek v detailu alba (otevírají modal
     a prohlížeč, ne stránku).
   - Ověřit: Tab + Enter, prostřední klik, odkazy uvnitř dlaždice zápasu. Odhad M.
+- **Nízká priorita: odehrané zápasy bez výsledku v programu na úvodu** (review 2026-11-12,
+  Top 10 #5, kap. 2.2; odloženo Caiem 2026-11-17). `UNPLAYED_LOOKBACK_DAYS = 14` drží v programu
+  zápasy až 14 dní zpět, aby se správce dostal k tužce, ale návštěvník je vidí jako budoucí
+  (čas, bez výsledku). Návrh: štítek „Čeká na výsledek“ (`Badge colorScheme="warning"`)
+  a řadit je za budoucí zápasy, případně je ukazovat jen přihlášeným editorům. Odhad S.
+- **Nízká priorita: dohledatelnost** (review 2026-11-12, Top 10 #6, kap. 2.1; odloženo Caiem
+  2026-11-17). „Ke stažení“ je v administraci, na webu ne (`/ke-stazeni` přesměruje na úvod,
+  viz položka výš). Fotogalerie chybí v hlavním menu (je jen v patičce). Odhad S.
 - ~~**SEO za běhu**~~ — **hotovo 2026-10-29** (0.6.1): titulek, popis, canonical a `og:*`
   podle routy (`client/src/config/seo.js`, `tools/page-meta.js`), detailní stránky z dat
   (`usePageTitle`), 404 a dítě bez jména `noindex`; statický popis, `og:locale` a absolutní
   `og:image` v index.html pro roboty bez JS (`client/vite.config.js`); `robots.txt` a sitemapa
   s `https` za proxy (`server/seo/api.js`). Adresa webu `APP_URL=https://afkbratcice.cz`
   v `.env`; `CANONICAL_HOST` až po přepnutí DNS.
+  **2026-11-17 (review Top 10 #7):** titulek, popis, obrázek a stav píše do dokumentu i server
+  (`server/seo/document.js` přes caio-server 0.7.0 `seo.document`), takže náhled sdíleného odkazu
+  odpovídá stránce i bez JavaScriptu a neexistující stránka vrací 404.
 
 ### 2.1 Fotogalerie — kód zůstává, obsah ne (2026-09-07)
 
