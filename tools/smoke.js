@@ -111,10 +111,21 @@ const emptyYear = await get("season/listCurrent", { yearFrom: "1990" });
 ok("ročník bez sezón vrací prázdno", emptyYear.body?.itemList?.length === 0, emptyYear.body);
 
 console.log("\n== zápasy a tabulka ==");
-const mk = (h, g, hg, gg, round, extra = {}) => post("match/create", {
-  seasonId: season.body.id, homeTeamId: h, guestTeamId: g,
-  homeGoals: hg, guestGoals: gg, round, time: `2026-0${round || 9}-01T15:00:00.000Z`, ...extra,
-}, cookie);
+// The result goes through `match/setResult`: `match/create` drops it since review V1 (the
+// result has its own use case with the shoot-out rules). Answers like the last call, with the
+// created match's id.
+const mk = async (h, g, hg, gg, round, extra = {}) => {
+  const { penaltyWinnerTeamId, ...rest } = extra;
+  const created = await post("match/create", {
+    seasonId: season.body.id, homeTeamId: h, guestTeamId: g,
+    round, time: `2026-0${round || 9}-01T15:00:00.000Z`, ...rest,
+  }, cookie);
+  if (created.status !== 200) return created;
+  const result = await post("match/setResult", {
+    id: created.body.id, homeGoals: hg, guestGoals: gg, ...(penaltyWinnerTeamId ? { penaltyWinnerTeamId } : null),
+  }, cookie);
+  return result.status === 200 ? { status: 200, body: { ...created.body, ...result.body } } : result;
+};
 
 const m1 = await mk(teamIds[0], teamIds[1], 2, 1, "1");
 ok("založení zápasu", m1.status === 200, m1.body);
@@ -294,23 +305,24 @@ await Member.set(adminIdentity.identity, ["teamEditor:" + teamIds[0]], { note: "
 const teLogin = await fetch(`${BASE}/auth/login`, {
   method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ADMIN),
 });
+// A logged-in editor without the right gets 403 (caio-server 0.6.0); 401 is only for nobody logged in.
 const teCookie = (teLogin.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
 
 const teOwn = await post("team/update", { id: teamIds[0], shortName: "AFK2" }, teCookie);
 ok("teamEditor upraví svůj tým", teOwn.status === 200, teOwn.status);
 const teForeign = await post("team/update", { id: teamIds[1], shortName: "X" }, teCookie);
-ok("teamEditor neupraví cizí tým", teForeign.status === 401, teForeign.status);
+ok("teamEditor neupraví cizí tým", teForeign.status === 403, teForeign.status);
 const teDelete = await post("match/delete", { id: m3.body.id }, teCookie);
-ok("teamEditor nesmí mazat zápasy", teDelete.status === 401, teDelete.status);
+ok("teamEditor nesmí mazat zápasy", teDelete.status === 403, teDelete.status);
 const teSwap = await post("match/update", { id: m1.body.id, guestTeamId: teamIds[2], note: "poznamka" }, teCookie);
 const afterSwap = await get("match/get", { id: m1.body.id });
 ok("teamEditor nepřepíše soupeře, ale poznámku ano",
   teSwap.status === 200 && afterSwap.body?.guestTeamId === teamIds[1] && afterSwap.body?.note === "poznamka",
   { guest: afterSwap.body?.guestTeamId, note: afterSwap.body?.note });
 const teIdentity = await get("identity/adminList", {}, teCookie);
-ok("teamEditor nevidí identity", teIdentity.status === 401, teIdentity.status);
+ok("teamEditor nevidí identity", teIdentity.status === 403, teIdentity.status);
 const teArticle = await post("article/create", { name: "SMOKE cizí novinka", desc: "x" }, teCookie);
-ok("teamEditor nepíše novinky", teArticle.status === 401, teArticle.status);
+ok("teamEditor nepíše novinky", teArticle.status === 403, teArticle.status);
 
 console.log("\n== legacy přesměrování ==");
 // Adresy nové appky jsou české a shodné s v0, takže `/historie` se **nepřesměrovává** --
