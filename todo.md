@@ -154,6 +154,15 @@ rozbila každý dao v každé appce kvůli číslu, které potřebují jen list 
 Zbývá `gallery/listPhotos` (album po migraci ~2 600 fotek) a seznamy v administraci.
 Dokud se nepřepnou, jedou na jednu dávku `pageSize: 1000` — což pro dnešní objem stačí.
 
+**`match/list` s jediným širokým filtrem je pořád velký** (změřeno na produkci 2026-11-16,
+po vydání 0.10.0): `match/list?teamId=<A tým>` bez sezóny vrací **726 kB**, celou historii týmu
+z v0. Od review S12 musí mít `match/list` aspoň jeden filtr, ale `teamId` sám je platný filtr,
+takže tohle projde. Web tým volá vždy se `seasonId` (nebo stránkuje), takže se to dnes netýká
+návštěvníků; jde o zátěž, kterou může kdokoli opakovat. Možnosti: `pageInfo` s rozumným
+výchozím `pageSize` (a `pageInfo` v odpovědi) u veřejného `match/list`, nebo u `teamId`
+/ `playerId` bez sezóny a data omezit počet. Ověřit, co z toho rozbije administraci
+(seznam zápasů stránkuje po 50) a modal sestavy (`loadPrevious`, `pageSize: 10`).
+
 ### 4.2 `team.desc`, `photoUri`, `photoDesc`
 
 Karta mužstva v přehledu je bez nich neúplná (dnes se vykreslují podmíněně, takže po
