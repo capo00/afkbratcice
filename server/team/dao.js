@@ -34,10 +34,6 @@ class TeamDao extends Dao {
     return (rows ?? []).map((row) => ({ category: row._id, count: row.count }));
   }
 
-  listByClub(clubId) {
-    return this.find({ clubId });
-  }
-
   /**
    * Erb je od klubu odvozený, ale `team.logoUri` zůstává denormalizace (čtení bez joinu,
    * stejně jako dřív) -- takže při změně loga na klubu se musí přepsat na všech

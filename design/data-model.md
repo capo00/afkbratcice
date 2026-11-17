@@ -7,7 +7,7 @@
 MongoDB, jedna databáze. **Kolekce appky mají od 2026-09-11 prefix `afk_`** (`afk_team`,
 `afk_club`, `afk_config`, …) – výjimka jsou `sys_binary` a `sys_identity`, které patří
 knihovně `caio-server` a sdílí je i jiné appky nad stejným Mongem. Prefix je jen na
-kolekci samotné (druhý argument `Dao` konstruktoru); API cesty (`team/list`, `appConfig/get`)
+kolekci samotné (druhý argument `Dao` konstruktoru); API cesty (`team/list`, `sys/settings/get`)
 se neměnily.
 
 Přístup přes `Dao`, business logika přes `Crud` – obojí z balíčku `caio-server`
@@ -447,7 +447,7 @@ nezměnil bodování celé tabulky.
 | `penaltyWinnerTeamId` | string | | `id` týmu, který vyhrál penaltový rozstřel |
 | `playerList` | object[] | | Sestava a individuální statistiky – viz níže |
 | `state` | enum | | `planned` \| `played` \| `postponed` \| `canceled` |
-| `note` | string | | Poznámka (kontumace, změna hřiště) |
+| `note` | string | | Poznámka (kontumace, změna hřiště). **BACKWARD-COMPAT:** nové pole by bylo `desc`; existující se nepřejmenovává (migrace jen na pokyn), stejně u osoby a karty hráče |
 
 **`playerList[]`**
 

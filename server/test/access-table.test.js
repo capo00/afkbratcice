@@ -15,7 +15,6 @@ import managementApi from "../management/api.js";
 import articleApi from "../article/api.js";
 import galleryApi from "../gallery/api.js";
 import fileApi from "../file/api.js";
-import appConfigApi from "../app-config/api.js";
 import seoApi from "../seo/api.js";
 import matchDao from "../match/dao.js";
 import managementDao from "../management/dao.js";
@@ -65,7 +64,7 @@ function identityOf(name) {
 
 const api = {
   ...clubApi, ...categoryApi, ...teamApi, ...seasonApi, ...matchApi, ...statsApi, ...personApi,
-  ...playerApi, ...rosterApi, ...managementApi, ...articleApi, ...galleryApi, ...fileApi, ...appConfigApi, ...seoApi,
+  ...playerApi, ...rosterApi, ...managementApi, ...articleApi, ...galleryApi, ...fileApi, ...seoApi,
 };
 
 // The records the scoped `auth` functions look up: a match of A at home against B, a coach
@@ -118,8 +117,6 @@ const ANY_TEAM_EDITOR = ["editorA", "editorAB", "editorC"];
 
 // "public" = no `auth` at all; otherwise the identities the use case lets through.
 const expected = {
-  // BACKWARD-COMPAT alias for one release; the settings themselves are the stack's sys/settings/*.
-  "appConfig/get": "public",
   "article/create": NEWS,
   "article/delete": NEWS,
   "article/get": "public",

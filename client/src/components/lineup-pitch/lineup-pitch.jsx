@@ -4,6 +4,7 @@ import Config from "../../config/config.js";
 import importLsi from "../../lsi/import-lsi.js";
 import Eyebrow from "../layout/eyebrow.jsx";
 import { layoutLineup, shortName, initials, PLAYER_BOX } from "./layout.js";
+import { personName } from "../../core/person-name.js";
 
 // Sestava jednoho týmu na hřišti (varianta C, schválil Caio 2026-10-27; canvas „AFK Bratčice –
 // posty v sestavě“). Hřiště je vlastní kresba -- uu5 komponentu hřiště nemá.
@@ -101,7 +102,7 @@ function PitchDrawing({ colors }) {
 /** Photo circle with goal and card marks and the name below it. `interactive`: the parent wraps it in a button, so the circle itself is not focusable. */
 function Player({ entry, iconSize, nameWidth, positionLsi, pitchLsi, textColor, surnameOnly, interactive = false }) {
   const name = shortName(entry, { surnameOnly });
-  const fullName = [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || name || "?";
+  const fullName = personName(entry.person) || name || "?";
   const tooltip = [
     fullName,
     entry.positionDetail ? positionLsi[entry.positionDetail] : null,
@@ -246,7 +247,7 @@ const SPOT_BUTTON_CSS = {
 };
 
 function fullNameOf(entry) {
-  return [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || shortName(entry) || "?";
+  return personName(entry.person) || shortName(entry) || "?";
 }
 
 const LineupPitch = createVisualComponent({

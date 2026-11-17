@@ -35,7 +35,6 @@ function useTop() {
   const { state } = UiAuth.useSession();
   const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
-  const galleryLabel = useLsi(importLsi, ["header", "nav", "gallery"]);
   const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
   const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
   const pageLsi = useLsi(importLsi, ["page", "name"]);
@@ -65,6 +64,8 @@ function useTop() {
           significance: "subdued",
           colorScheme: "building",
         },
+        // Gallery hidden from the menu (todo.md 2.1); to bring it back, read the label with
+        // useLsi(importLsi, ["header", "nav", "gallery"]) like the items around.
         // {
         //   href: "fotogalerie",
         //   children: galleryLabel.toUpperCase(),

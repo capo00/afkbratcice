@@ -5,7 +5,7 @@ import Config from "../../config/config.js";
 import { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { ageField, boolField, teamLabel, EntitySelect } from "../fields.jsx";
-import { seasonLabel } from "../../components/season-select.jsx";
+import { seasonYears } from "../../core/season-label.js";
 import CrudFormView from "../crud-form-view.jsx";
 
 // Chyby serveru česky podle kódu (lsi `errors`), ne anglická zpráva serveru (review 2026-11-12, S6).
@@ -51,7 +51,7 @@ const getConfig = (yearList) => ({
     // Ročníků přibývá každý rok -> výběr s hledáním (Caio 2026-11-10).
     filterProps: {
       inputType: "text-select",
-      inputProps: { itemList: yearList.map((yearFrom) => ({ value: yearFrom, children: seasonLabel({ yearFrom }) })) },
+      inputProps: { itemList: yearList.map((yearFrom) => ({ value: yearFrom, children: seasonYears({ yearFrom }) })) },
       filter: (value, filterValue) => value === filterValue,
     },
   },

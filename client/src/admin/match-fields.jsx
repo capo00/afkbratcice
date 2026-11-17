@@ -1,7 +1,8 @@
 import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
-import { EntitySelect, EnumText, enumItemList, dateTimeField, seasonLabel, teamLabel } from "./fields.jsx";
+import { EntitySelect, EnumText, enumItemList, dateTimeField, teamLabel } from "./fields.jsx";
+import { seasonName } from "../core/season-label.js";
 
 // Pole zápasu pro `UiElements.Crud`: sloupce, formulář i filtry obrazovky `admin/matches`.
 // Zvlášť proto, že stejná pole edituje i rozbalovací sekce modalu „Zapsat výsledek"
@@ -81,7 +82,7 @@ function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
       output: false,
       input: {
         Component: EntitySelect,
-        props: { required: true, useCase: "/season/list", getLabel: seasonLabel },
+        props: { required: true, useCase: "/season/list", getLabel: seasonName },
       },
       filterProps: {
         inputType: "text-select",

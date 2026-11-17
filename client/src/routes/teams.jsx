@@ -10,6 +10,7 @@ import Button from "../components/layout/button.jsx";
 import TeamLogo from "../components/team-logo.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { personName } from "../core/person-name.js";
 
 const { theme } = Config;
 
@@ -93,7 +94,7 @@ function TeamCard({ category, coach }) {
         {category.competition ? <InfoRow icon="uugds-favorites">{category.competition}</InfoRow> : null}
         {coach ? (
           <InfoRow icon="uugds-account">
-            {[coach.person?.name, coach.person?.surname].filter(Boolean).join(" ")}
+            {personName(coach.person)}
           </InfoRow>
         ) : null}
       </Uu5Elements.Grid>

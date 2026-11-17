@@ -10,6 +10,7 @@ import Card from "../components/layout/card.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
+import { personName, personInitials } from "../core/person-name.js";
 
 const { theme } = Config;
 
@@ -22,18 +23,12 @@ const { theme } = Config;
 // tu dřív stálo místo jména, se od 2026-11 neeviduje.)
 
 function playerName(player) {
-  const name = [player.person?.name, player.person?.surname].filter(Boolean).join(" ");
-  return name || null;
+  return personName(player.person) || null;
 }
 
-/** Iniciály do kruhu bez fotky („JN“), bez jména „?“. */
+/** Initials for the circle without a photo ("JN"), "?" without a name. */
 function initialsOf(person) {
-  return (
-    [person?.name, person?.surname]
-      .map((part) => part?.trim()?.[0])
-      .filter(Boolean)
-      .join("") || "?"
-  );
+  return personInitials(person) || "?";
 }
 
 // Dlaždice osoby na soupisce -- hráč i člen realizačního týmu (Caio 2026-10-28: trenér má
@@ -89,7 +84,7 @@ function PlayerTile({ player }) {
 // Záznam vedení je jedna funkce v tomhle týmu (`role`), viz `staffOf`.
 function CoachTile({ coach }) {
   const role = coach.role ?? "assistant";
-  const name = [coach.person?.name, coach.person?.surname].filter(Boolean).join(" ");
+  const name = personName(coach.person);
 
   return (
     <PersonTile

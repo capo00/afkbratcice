@@ -7,6 +7,7 @@
 // Dva hráči na jednom postu v zápase být nemůžou (Caio), takže se nic nerozestupuje.
 // Souřadnice jsou zvolené tak, aby se nepřekrýval ani kruh s fotkou a jméno sousedních postů
 // při nejmenší šířce hřiště (kontroluje layout.test.js).
+import { personInitials } from "../../core/person-name.js";
 
 /** Kód přesného postu (server/services/lineup-position.js) -> bod na hřišti. */
 const POSITION_POINT = {
@@ -99,11 +100,7 @@ function shortName(entry, { surnameOnly = false } = {}) {
 
 /** Iniciály do kruhu bez fotky („OS“). */
 function initials(entry) {
-  const text = [entry.person?.name, entry.person?.surname]
-    .map((part) => part?.trim()?.[0])
-    .filter(Boolean)
-    .join("");
-  return text || "?";
+  return personInitials(entry.person) || "?";
 }
 
 export { POSITION_POINT, LINE_Y, PLAYER_BOX, layoutLineup, shortName, initials };

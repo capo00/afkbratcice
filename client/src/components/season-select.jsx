@@ -2,6 +2,7 @@ import { createVisualComponent, useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config.js";
 import importLsi from "../lsi/import-lsi.js";
+import { seasonYears } from "../core/season-label.js";
 
 const { theme } = Config;
 
@@ -14,12 +15,6 @@ const { theme } = Config;
 //
 // **Ročník se zobrazuje jako `2025/26`, ne `2025`.** Server drží `yearFrom` (sezóna začíná
 // v srpnu), ale fotbalový ročník nikdo neříká jedním číslem.
-
-function seasonLabel(season) {
-  const from = Number(season.yearFrom);
-  if (!Number.isFinite(from)) return season.yearFrom ?? "—";
-  return `${from}/${String((from + 1) % 100).padStart(2, "0")}`;
-}
 
 const SeasonSelect = createVisualComponent({
   uu5Tag: Config.TAG + "SeasonSelect",
@@ -34,11 +29,11 @@ const SeasonSelect = createVisualComponent({
 
     return (
       <Uu5Elements.Dropdown
-        label={`${label}: ${seasonLabel(active)}`}
+        label={`${label}: ${seasonYears(active)}`}
         significance="subdued"
         colorScheme="building"
         itemList={seasonList.map((season) => ({
-          children: seasonLabel(season),
+          children: seasonYears(season),
           onClick: () => onChange?.(season),
           significance: season.id === active.id ? "highlighted" : undefined,
         }))}
@@ -48,5 +43,4 @@ const SeasonSelect = createVisualComponent({
   },
 });
 
-export { seasonLabel };
 export default SeasonSelect;

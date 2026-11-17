@@ -50,6 +50,8 @@ const infoFields = {
   homeTeamId: mongoId(),
   guestTeamId: mongoId(),
   state: oneOf(Config.MATCH_STATE),
+  // BACKWARD-COMPAT: `note`, not `desc` (the rule for new fields). The field holds data migrated
+  // from v0 and the client writes it; renaming it is a migration, done only when asked (review 1.3).
   note: string(),
 };
 

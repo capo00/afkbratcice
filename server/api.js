@@ -14,8 +14,6 @@ import managementApi from "./management/api.js";
 import articleApi from "./article/api.js";
 import galleryApi from "./gallery/api.js";
 import fileApi from "./file/api.js";
-// BACKWARD-COMPAT: `appConfig/get` pro starý bundle klienta, jedno vydání (app-config/api.js).
-import appConfigApi from "./app-config/api.js";
 import seoApi from "./seo/api.js";
 
 // Binárky se dělí do kolekcí a autorizace se nastavuje per kolekce -- fotograf, který
@@ -47,7 +45,6 @@ export default {
   ...articleApi,
   ...galleryApi,
   ...fileApi,
-  ...appConfigApi,
   ...seoApi,
   ...Authentication.createApi(),
   ...(BinaryStore.isConfigured() ? BinaryStore.createApi({ collectionMap: binaryCollectionMap }) : {}),

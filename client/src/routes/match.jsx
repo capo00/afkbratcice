@@ -12,6 +12,7 @@ import DataState from "../components/data-state.jsx";
 import LineupPitch from "../components/lineup-pitch/lineup-pitch.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
+import { personName } from "../core/person-name.js";
 
 const { theme } = Config;
 
@@ -24,9 +25,9 @@ const { theme } = Config;
 // Zápas sám i ostatní zápasy kreslí `MatchTile` (hlavička detailu je `size="large"`). Tužkou
 // zapsaný výsledek se promítá zpátky do dat stránky (`onResultSaved`), aby se změnil i titulek.
 
-// Prázdné jméno znamená mládež (server jména dětí nevrací) nebo hráče bez osoby.
-function personName(entry) {
-  return [entry.person?.name, entry.person?.surname].filter(Boolean).join(" ") || null;
+// No name: a child (the server does not send it) or a player without a person.
+function entryName(entry) {
+  return personName(entry.person) || null;
 }
 
 function RelatedMatches({ dtoIn, headerLsi, eyebrowLsi, excludeId, ownTeamId, variant }) {
@@ -93,6 +94,7 @@ function MatchDetail({ matchId }) {
   // „AFK Bratčice – Chotusice 3:4" do titulku a náhledu sdílení.
   const pairName = match?.id ? `${match.homeTeam?.name ?? "?"} – ${match.guestTeam?.name ?? "?"}` : null;
   const score = Number.isFinite(match?.homeGoals) ? ` ${match.homeGoals}:${match.guestGoals}` : "";
+  // A string for the page description, not rendered text, so not `DateText` (a component).
   const date = match?.time ? new Date(match.time).toLocaleDateString("cs-CZ") : null;
   usePageTitle({
     title: pairName ? pairName + score : null,
@@ -168,7 +170,7 @@ function MatchDetail({ matchId }) {
                   <div className={Config.Css.css({ display: "flex", gap: 12, flexWrap: "wrap" })}>
                     {scorers.map((entry, index) => (
                       <Uu5Elements.Tag key={entry.playerId ?? index} size="m" colorScheme="building" significance="distinct">
-                        {personName(entry) ?? "?"}
+                        {entryName(entry) ?? "?"}
                         {entry.goals > 1 ? ` (${entry.goals})` : null}
                       </Uu5Elements.Tag>
                     ))}

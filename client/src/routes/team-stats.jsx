@@ -9,6 +9,7 @@ import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
 import TeamShell from "../components/team/team-shell.jsx";
 import RouteLink from "../components/route-link.jsx";
+import { personName } from "../core/person-name.js";
 
 const { theme } = Config;
 
@@ -29,9 +30,9 @@ const COLUMN_LIST = [
   { code: "redCards", numeric: true },
 ];
 
-// Bez jména (mládež, hráč bez osoby) volající ukáže „Hráč“.
+// No name (a child, a player without a person): the caller shows "Hráč".
 function playerLabel(row) {
-  return [row.person?.name, row.person?.surname].filter(Boolean).join(" ") || null;
+  return personName(row.person) || null;
 }
 
 function Stats({ teamId, seasonId }) {

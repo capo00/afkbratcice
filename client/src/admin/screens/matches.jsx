@@ -4,7 +4,8 @@ import { UiElements, UiAuth } from "caio-ui";
 import Config from "../../config/config.js";
 import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
-import { seasonLabel, teamLabel } from "../fields.jsx";
+import { teamLabel } from "../fields.jsx";
+import { seasonName } from "../../core/season-label.js";
 import { getMatchConfig, matchFormConfig, MATCH_PAIR_LIST } from "../match-fields.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import { MatchModal } from "../match-modals.jsx";
@@ -98,7 +99,7 @@ const AdminMatches = createVisualComponent({
       [teamList, app],
     );
     const seasonItemList = useMemo(
-      () => (seasonData?.itemList ?? []).map((season) => ({ value: season.id, children: seasonLabel(season) })),
+      () => (seasonData?.itemList ?? []).map((season) => ({ value: season.id, children: seasonName(season) })),
       [seasonData],
     );
 

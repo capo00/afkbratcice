@@ -53,12 +53,12 @@ flowchart TD
   cpage["UiApp.Page<br/>TopProvider + Top + main + footer<br/>sticky=always JE PROP PAGE, ne lišty"]:::caio
   ctop["Top (neexportovaný)<br/>logo, Header, ActionGroup menu"]:::caio
   cmain["main<br/>padding=false -- sekce si ho řeší samy"]:::caio
-  appctx["core/app-context.jsx<br/>appConfig/get + season/listCurrent + team/list<br/>kategorie NEJSOU v konfiguraci -- odvozují se ze sezón"]:::own
+  appctx["core/app-context.jsx<br/>sys/settings/get + season/listCurrent + team/list<br/>kategorie NEJSOU v konfiguraci -- odvozují se ze sezón"]:::own
   router["router.jsx<br/>useRouter(routeMap) + Suspense + ErrorBoundary"]:::own
   routes["routes/** (lazy)"]:::own
   notice["components/layout/notice-bar.jsx"]:::own
   footer["components/layout/footer.jsx"]:::own
-  cfg["appConfig/get + season/listCurrent<br/>-> kategorie, menu, routy"]:::data
+  cfg["sys/settings/get + season/listCurrent<br/>-> kategorie, menu, routy"]:::data
   teams["team/list -> mapa teamId => { name, shortName, logoUri }<br/>match/list vrací JEN id týmů"]:::data
 
   main0 --> spacing --> provider --> spa --> cpage

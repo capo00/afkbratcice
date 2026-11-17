@@ -4,6 +4,7 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import EmptyState from "./empty-state.jsx";
 import DataState from "./data-state.jsx";
+import { personName } from "../core/person-name.js";
 
 // Výbor AFK ze záznamů vedení (`management/list?board=true&active=true`), ne psaný text --
 // do 2026-11 byl stránkou v `content/page-content.js` a každá změna ve výboru znamenala
@@ -16,7 +17,6 @@ import DataState from "./data-state.jsx";
 // Sazbu (nadpisy `h3`, odstavce, barvu odkazů) dává obal obsahové stránky (`routes/page.jsx`),
 // stejně jako dřív psanému textu.
 
-const fullName = (person) => [person?.name, person?.surname].filter(Boolean).join(" ");
 
 function Contact({ contact }) {
   if (!contact?.phone && !contact?.email) return null;
@@ -61,7 +61,7 @@ const Board = createVisualComponent({
       role,
       memberList: (data?.itemList ?? [])
         .filter((item) => item.role === role)
-        .sort((a, b) => fullName(a.person).localeCompare(fullName(b.person), "cs")),
+        .sort((a, b) => personName(a.person).localeCompare(personName(b.person), "cs")),
     })).filter((group) => group.memberList.length);
 
     if (!groupList.length) return <EmptyState lsi={lsi("board", "empty")} icon="uugds-account-multi" />;
@@ -75,7 +75,7 @@ const Board = createVisualComponent({
           {memberList.map((item, i) => (
             <span key={item.id}>
               {i ? <br /> : null}
-              <b>{fullName(item.person)}</b>
+              <b>{personName(item.person)}</b>
               <Contact contact={item.contact} />
             </span>
           ))}

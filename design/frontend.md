@@ -52,7 +52,7 @@ client/
     config/config.js    TAG, Css, AGE_MAP, POSITION_MAP
     config/theme.js     designové tokeny (jediné místo s hexy a velikostmi písma)
     lsi/                import-lsi.js, cs.json          (en.json se nezakládá)
-    core/app-context.jsx  appConfig/get + season/listCurrent + team/list -> konfigurace, menu, mapa týmů
+    core/app-context.jsx  sys/settings/get + season/listCurrent + team/list -> konfigurace, menu, mapa týmů
 ```
 
 ### 1.1 `app.jsx`
@@ -613,7 +613,7 @@ Obsah panelu se nezahazuje, jen se přesouvá tam, kam patří:
 | `layout/footer.jsx` | Třísloupcová patička + spodní řádek |
 | `layout/notice-bar.jsx` | `appConfig.notice` v hlavičce mužstva (`Uu5Elements.HighlightedBox`) |
 | `countdown.jsx` | Odpočet do výkopu v kartě nejbližšího zápasu |
-| `core/app-context.jsx` | `appConfig/get`, `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů**; po přihlášení jednou zavolá `person/linkSelf` |
+| `core/app-context.jsx` | `sys/settings/get` (přes `UiApp.useSettings()`), `season/listCurrent`, `team/list` → konfigurace, kategorie, menu, routy a **mapa týmů** (`person/linkSelf` zatím není, viz todo.md 4.4) |
 | `core/with-team-route.jsx` | Guard s prefixovou shodou nad `teamEditor:<teamId>` (`withRoute` to neumí) |
 | `empty-state.jsx` | Jednotný prázdný stav seznamu – ikona, text z LSI, volitelná akce |
 | `team-logo.jsx` | Logo z `team.logoUri`, bez něj neutrální štít `uugds-shield` (ne erb AFK, 2026-10-28) |
@@ -904,7 +904,7 @@ Devkit z těchto souborů plní i přihlašovací stránku `/login.html`.
 | Stránkování | `pageInfo` u zápasů, článků a fotek |
 | Náhledy | vlastní binárka `w400` – GCS náhledy negeneruje (viz [README.md](./README.md), sekce 3.1) |
 | Denormalizace | `team.logoUri`, `gallery.photoCount`, `gallery.coverThumbUri` – šetří dotazy v seznamech |
-| Cache konfigurace | `appConfig/get`, `season/listCurrent` a `team/list` se volají jednou při startu SPA |
+| Cache konfigurace | `sys/settings/get`, `season/listCurrent` a `team/list` se volají jednou při startu SPA |
 | uu5 mimo bundle | `uu5loaderg01` je stahuje z `public/libs/` – appkový bundle je malý |
 
 ---
@@ -917,7 +917,7 @@ neexistujícímu endpointu.
 
 | Obrazovka / blok | Server | Stav |
 |---|---|---|
-| Home – hero, statistiky, CTA | `appConfig/get` | ✅ |
+| Home – hero, statistiky, CTA | `sys/settings/get` | ✅ |
 | Home – program víkendu | `match/list?teamIdList&dateFrom&dateTo` | ✅ (potřebuje mapu týmů) |
 | Home – poslední výsledky | `match/getLast` per kategorie | ✅ |
 | Home – tabulky | `stats/getTable` | ✅ vč. bodování na penalty a sloupce `form` |

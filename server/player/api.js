@@ -21,6 +21,8 @@ const writeDtoIn = shape({
   id: mongoId(),
   personId: mongoId(),
   position: oneOf(Config.POSITION_LIST),
+  // BACKWARD-COMPAT: `note`, not `desc` (the rule for new fields). The field holds data migrated
+  // from v0 and the client writes it; renaming it is a migration, done only when asked (review 1.3).
   note: string(),
 });
 

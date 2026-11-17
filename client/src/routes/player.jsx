@@ -10,7 +10,8 @@ import MatchTile from "../components/match-tile.jsx";
 import DataTable from "../components/data-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
-import { seasonLabel } from "../components/season-select.jsx";
+import { seasonYears } from "../core/season-label.js";
+import { personName, personInitials } from "../core/person-name.js";
 import { SeasonLink } from "../components/route-link.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
@@ -29,11 +30,8 @@ const { theme } = Config;
 const STAT_COLUMN_LIST = ["appearances", "starts", "goals", "yellowCards", "redCards"];
 
 function PlayerCard({ player }) {
-  const name = [player?.person?.name, player?.person?.surname].filter(Boolean).join(" ");
-  const initials = [player?.person?.name, player?.person?.surname]
-    .map((part) => part?.trim()?.[0])
-    .filter(Boolean)
-    .join("");
+  const name = personName(player?.person);
+  const initials = personInitials(player?.person);
 
   return (
     <Card topStripe>
@@ -91,7 +89,7 @@ function StatsTable({ bySeasonList, total, seasonMap }) {
             <tr key={row.seasonId ?? "?"}>
               <DataTable.Th scope="row" className={Config.Css.css({ fontWeight: 400 })}>
                 {season ? (
-                  <SeasonLink seasonId={season.id}>{`${seasonLabel(season)} · ${season.competition}`}</SeasonLink>
+                  <SeasonLink seasonId={season.id}>{`${seasonYears(season)} · ${season.competition}`}</SeasonLink>
                 ) : (
                   "—"
                 )}
@@ -160,7 +158,7 @@ const Player = createVisualComponent({
     );
 
     // Jméno hráče do titulku. Dítě (jméno server neposlal) do vyhledávání nepatří vůbec.
-    const playerName = [data?.player?.person?.name, data?.player?.person?.surname].filter(Boolean).join(" ");
+    const playerName = personName(data?.player?.person);
     usePageTitle({
       // Without a name (a child) the page title falls back to the route title of seo.js.
       title: data?.player ? playerName || ROUTE_SEO.hrac.title : null,

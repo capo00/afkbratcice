@@ -349,7 +349,6 @@ pravidlo, `services/category.js`).
 |---|---|---|
 | `sys/health` | – | |
 | `GET /rss`, `/sitemap.xml`, `/calendar/team-<id>.ics` | – | iCal (use case `calendar/team`) klient zatím nikde nenabízí, viz [todo.md](../todo.md), 2 |
-| `appConfig/get` | – | jen zpětná kompatibilita na jedno vydání; nastavení je `sys/settings/*` |
 | `sys/settings/get` | – | veřejná část nastavení klubu |
 | `sys/settings/adminGet`, `update`, `testMail` | ADMIN | pořadí kategorií, upozornění, kontakty, pošta (dřív `appConfig/update`) |
 | `identity/get` | – | jen zobrazovací data |

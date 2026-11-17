@@ -70,11 +70,12 @@ ok("přihlášení vrátí cookie", Boolean(cookie), cookie);
 console.log("\n== health a konfigurace ==");
 const health = await get("sys/health");
 ok("sys/health hlásí mongo", health.body?.mongoConfigured === true, health.body);
-const cfg = await get("appConfig/get");
-ok("appConfig má výchozí pořadí kategorií", cfg.body?.categoryOrder?.[0] === "men-a", cfg.body?.categoryOrder);
-ok("appConfig skrývá jména u žáků, ne u dorostu",
-  cfg.body?.hideNamesAgeList?.includes("u15") && !cfg.body?.hideNamesAgeList?.includes("u19"),
-  cfg.body?.hideNamesAgeList);
+// The club settings are the stack's sys/settings (appConfig/get was removed after 0.10.0).
+const cfg = (await get("sys/settings/get")).body?.app?.public;
+ok("nastavení má pořadí kategorií od mužů A", cfg?.categoryOrder?.[0] === "men-a", cfg?.categoryOrder);
+ok("nastavení skrývá jména u žáků, ne u dorostu",
+  cfg?.hideNamesAgeList?.includes("u15") && !cfg?.hideNamesAgeList?.includes("u19"),
+  cfg?.hideNamesAgeList);
 
 console.log("\n== autorizace ==");
 const anon = await post("team/create", { name: "Anonym", category: "men-a" });

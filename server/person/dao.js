@@ -24,10 +24,6 @@ class PersonDao extends Dao {
     }
     return this.find(filter, pageInfo, { surname: 1, name: 1 });
   }
-
-  findByIdentity(identity) {
-    return this.findOne({ identity });
-  }
 }
 
 export default new PersonDao();

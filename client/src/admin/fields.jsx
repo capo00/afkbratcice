@@ -5,6 +5,7 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import DateText from "../components/date-text.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { personNameBySurname } from "../core/person-name.js";
 
 // Stavební kameny konfigurací pro `UiElements.Crud`.
 //
@@ -99,8 +100,7 @@ const teamLabel = (team, app) => {
   return category ? `${team.name} (${category})` : team.name;
 };
 const clubLabel = (club) => club.name;
-const personLabel = (person) => [person.surname, person.name].filter(Boolean).join(" ") || person.id;
-const seasonLabel = (season) => `${season.competition} ${season.yearFrom}/${String(Number(season.yearFrom) + 1).slice(-2)}`;
+const personLabel = (person) => personNameBySurname(person) || person.id;
 
 //@@viewOn:sdílená pole
 const nameField = {
@@ -194,7 +194,6 @@ export {
   teamLabel,
   clubLabel,
   personLabel,
-  seasonLabel,
   nameField,
   noteField,
   ageField,

@@ -14,7 +14,7 @@ const { settingsDefaults } = caioConfig.app;
 // Co vidí jen server a správce (`app.private`; dnes nic), všechno ostatní je veřejné (`app.public`).
 const PRIVATE_KEY_LIST = Object.freeze(Object.keys(settingsDefaults.private));
 
-// Plochý tvar, jak ho čte zbytek serveru (a jak ho vracel `appConfig/get`).
+// Plochý tvar, jak ho čte zbytek serveru.
 const DEFAULT_APP_SETTINGS = Object.freeze({ ...settingsDefaults.public, ...settingsDefaults.private });
 
 /** Plochý tvar -> `{ public, private }`, jak ho ukládá `sys_settings.app`. */

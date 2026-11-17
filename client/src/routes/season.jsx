@@ -10,7 +10,7 @@ import StandingsTable from "../components/standings-table.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
 import DateText from "../components/date-text.jsx";
-import { seasonLabel } from "../components/season-select.jsx";
+import { seasonName } from "../core/season-label.js";
 import { useApp } from "../core/app-context.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
 
@@ -118,8 +118,8 @@ const Season = createVisualComponent({
     const hasTable = ownTeamIdList.every((id) => getCategory(getTeam(id)?.category)?.hasTable !== false);
 
     usePageTitle({
-      title: season ? `${season.competition} ${seasonLabel(season)}` : null,
-      description: season ? `Tabulka a všechna kola soutěže ${season.competition} ${seasonLabel(season)}.` : undefined,
+      title: season ? seasonName(season) : null,
+      description: season ? `Tabulka a všechna kola soutěže ${seasonName(season)}.` : undefined,
     });
 
     // Odrolovat na kolo z adresy, až jsou kola vykreslená.
@@ -150,7 +150,7 @@ const Season = createVisualComponent({
       <>
         <Section>
           <Heading eyebrow={lsi("season", "eyebrow")}>
-            {season.competition} {seasonLabel(season)}
+            {seasonName(season)}
           </Heading>
 
           {hasTable && data.table.length ? (

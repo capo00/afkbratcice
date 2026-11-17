@@ -690,7 +690,6 @@ sekce 3). Use casy dodává caio-server, appka žádné vlastní pro ukládání
 | `sys/settings/get` | get | – | – | `{ registration, app: { public } }` -- `notice`, `founded`, `categoryOrder`, `hideNamesAgeList`, `contact`, `socialList`, `fileCategoryList` |
 | `sys/settings/adminGet` | get | ADMIN | – | navíc `mail` a `app.private` (u klubu prázdné) |
 | `sys/settings/update` | post | ADMIN | `{ mail?, registration?, app?: { public?, private? } }` | jako `adminGet`; `app` validuje `server/app-settings/` |
-| `appConfig/get` | get | – | `{}` | **BACKWARD-COMPAT** na jedno vydání: týž plochý tvar jako dřív, pro kohokoli (bez `id` a `sys` dokumentu `afk_config`) |
 
 Veřejnou část čte klient jednou při startu SPA (`AppProvider` přes `UiApp.useSettings()`). **Menu
 a routy se z ní neodvozují** – ty staví `season/listCurrent` (sekce 2.2); nastavení dodává jen
@@ -819,7 +818,6 @@ import articleApi from "./article/api.js";
 import galleryApi from "./gallery/api.js";
 import fileApi from "./file/api.js";
 import pageApi from "./page/api.js";
-import appConfigApi from "./app-config/api.js";
 import seoApi from "./seo/api.js";
 
 // Verzi čteme z package.json, ne z process.env.npm_package_version -- ta existuje jen
@@ -847,7 +845,7 @@ export default {
   ...teamApi, ...seasonApi, ...matchApi, ...statsApi,
   ...personApi, ...playerApi, ...managementApi,
   ...articleApi, ...galleryApi, ...fileApi, ...pageApi,
-  ...appConfigApi, ...seoApi,
+  ...seoApi,
   ...Authentication.createApi(),
   ...(BinaryStore.isConfigured()
     ? BinaryStore.createApi({ collectionMap: Config.BINARY_COLLECTION_MAP })   // viz 2.11
