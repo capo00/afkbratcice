@@ -1,4 +1,5 @@
 import { Lsi, useMemo, useRoute } from "uu5g05";
+import { UiAuth } from "caio-ui";
 import Uu5Elements from "uu5g05-elements";
 import Uu5Forms from "uu5g05-forms";
 import Config from "../config/config.js";
@@ -74,15 +75,35 @@ function periodFields({ tieBreak = () => 0 } = {}) {
 }
 
 /**
+ * Týmy, které přihlášený smí na obrazovce měnit: `null` = všechny (má plošnou roli
+ * `broadProfileList`), jinak id týmů jeho rozsahových rolí `teamEditor:<id>`.
+ *
+ * Správce týmu dřív v administraci viděl všechny týmy a u každého řádku tužku a koš; server
+ * zápis do cizího týmu odmítl až po vyplnění formuláře (review 2026-11-12, kap. 3.1). Co
+ * nesmí, nemá vidět -- pravidlo `config/admin-menu.js` dotažené na záložky a řádky.
+ */
+function useEditableTeamIdList(broadProfileList) {
+  const { identity } = UiAuth.useSession();
+  return useMemo(
+    () => (UiAuth.hasProfile(identity, broadProfileList) ? null : UiAuth.getScopeList(identity, Config.ROLE.TEAM_EDITOR)),
+    [identity, broadProfileList],
+  );
+}
+
+/**
  * Záložky obrazovky: naše týmy v pořadí kategorií (všechny se jmenují „AFK Bratčice“,
- * rozliší je kategorie) a za nimi `extraTabList` (`[{ code, label }]`). Vybraná je
+ * rozliší je kategorie) a za nimi `extraTabList` (`[{ code, label, broadOnly }]`). Vybraná je
  * v adrese (`?tab=`), aby přežila obnovení stránky.
+ *
+ * Bez plošné role (`broadProfileList`) jen týmy, které uživatel spravuje, a bez záložek
+ * `broadOnly` (výbor): první záložka je pak jeho tým, ne muži.
  *
  * @returns `{ activeTab, tabs }` -- `tabs` je element s přepínačem
  */
-function useTeamTabs(extraTabList = []) {
+function useTeamTabs(extraTabList = [], { broadProfileList = Config.CONTENT } = {}) {
   const { teamList, teamCategoryList, getCategory } = useApp();
   const [route, setRoute] = useRoute();
+  const editableTeamIdList = useEditableTeamIdList(broadProfileList);
 
   const tabList = useMemo(() => {
     const order = (team) => {
@@ -90,11 +111,14 @@ function useTeamTabs(extraTabList = []) {
       return i < 0 ? Infinity : i;
     };
     const teams = teamList
-      .filter((team) => team.own)
+      .filter((team) => team.own && (!editableTeamIdList || editableTeamIdList.includes(team.id)))
       .sort((a, b) => order(a) - order(b))
       .map((team) => ({ code: team.id, label: getCategory(team.category)?.name ?? team.name }));
-    return [...teams, ...extraTabList];
-  }, [teamList, teamCategoryList, getCategory, extraTabList]);
+    const extra = extraTabList
+      .filter((tab) => !editableTeamIdList || !tab.broadOnly)
+      .map(({ broadOnly, ...tab }) => tab);
+    return [...teams, ...extra];
+  }, [teamList, teamCategoryList, getCategory, extraTabList, editableTeamIdList]);
 
   const routeTab = route?.params?.tab;
   const activeTab = tabList.some((t) => t.code === routeTab) ? routeTab : tabList[0]?.code;
@@ -109,7 +133,7 @@ function useTeamTabs(extraTabList = []) {
     />
   );
 
-  return { activeTab, tabs };
+  return { activeTab, tabs, editableTeamIdList };
 }
 
-export { today, overlapsRange, compareRecent, PeriodText, periodFields, useTeamTabs };
+export { today, overlapsRange, compareRecent, PeriodText, periodFields, useTeamTabs, useEditableTeamIdList };

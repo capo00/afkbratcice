@@ -178,7 +178,12 @@ function getCardConfig({ teamItemList }) {
   };
 }
 
-function CardsTab() {
+/**
+ * Karty hráčů pro správce týmu (`editableTeamIdList`, `null` = plošná role): tužka jen u karty,
+ * jejíž týmy ze soupisky jsou všechny jeho (server `player/update`, `teamsOfPlayer`, mode
+ * `all`), koš vůbec (`player/delete` jen plošné role). Výpis začne na jeho týmu.
+ */
+function CardsTab({ editableTeamIdList }) {
   const { teamList, getCategory } = useApp();
   const teamItemList = useMemo(
     () =>
@@ -192,6 +197,25 @@ function CardsTab() {
     return { cfg, ...UiElements.Crud.generate(cfg) };
   }, [teamItemList]);
 
+  const initialFilterList = useMemo(
+    () => (editableTeamIdList?.length ? [{ key: "teamList", value: editableTeamIdList[0] }] : undefined),
+    [editableTeamIdList],
+  );
+  const getItemActionList = useMemo(
+    () =>
+      editableTeamIdList
+        ? ({ data: item }) => {
+            const teamIdList = [...new Set((item?.data?.teamList ?? []).map((m) => m.id))];
+            const mine = teamIdList.length > 0 && teamIdList.every((id) => editableTeamIdList.includes(id));
+            return [
+              { key: "update", hidden: !mine },
+              { key: "delete", hidden: true },
+            ];
+          }
+        : undefined,
+    [editableTeamIdList],
+  );
+
   return (
     <PlayerProvider calls={PLAYER_CALLS}>
       {(dataList) => (
@@ -201,6 +225,8 @@ function CardsTab() {
           columnList={columnList}
           sorterDefinitionList={sorterList}
           filterDefinitionList={filterList}
+          initialFilterList={initialFilterList}
+          getItemActionList={getItemActionList}
           lsiError={ERROR_LSI}
         >
           {({ type }) => <CrudFormView cfg={cfg} operation={type} />}
@@ -217,12 +243,12 @@ const AdminPlayers = createVisualComponent({
   uu5Tag: Config.TAG + "AdminPlayers",
 
   render() {
-    const { activeTab, tabs } = useTeamTabs(EXTRA_TAB_LIST);
+    const { activeTab, tabs, editableTeamIdList } = useTeamTabs(EXTRA_TAB_LIST);
 
     return (
       <AdminScreen titleLsi={lsi("admin", "menu", "players", "header")}>
         {tabs}
-        {activeTab === CARDS ? <CardsTab /> : activeTab ? <RosterTab key={activeTab} teamId={activeTab} /> : null}
+        {activeTab === CARDS ? <CardsTab editableTeamIdList={editableTeamIdList} /> : activeTab ? <RosterTab key={activeTab} teamId={activeTab} /> : null}
       </AdminScreen>
     );
   },

@@ -30,12 +30,27 @@ function matchFormConfig(cfg, nameList = MATCH_FORM_FIELD_LIST) {
   return Object.fromEntries(nameList.filter((name) => cfg[name]).map((name) => [name, cfg[name]]));
 }
 
+// Hodnota filtru Tým „Moje týmy“: všechny týmy správce týmu najednou (`teamIdList`).
+const MY_TEAMS = "mine";
+
 /**
- * @param getTeam         tým podle id z app-contextu (název ve sloupci)
- * @param teamItemList    nabídka filtrů Domácí/Hosté
- * @param seasonItemList  nabídka filtru Sezóna
+ * @param getTeam            tým podle id z app-contextu (název ve sloupci)
+ * @param teamItemList       nabídka filtrů Domácí/Hosté
+ * @param seasonItemList     nabídka filtru Sezóna
+ * @param ownTeamItemList    nabídka filtru Tým: naše týmy (správci týmu jen jeho a „Moje týmy“)
+ * @param myTeamIdList       týmy správce týmu pro „Moje týmy“; plošná role `null`
+ * @param getOwnTeamLabel    náš tým zápasu do sloupce Náš tým (kategorie: „A (Muži)“, „U15“)
+ * @param getSeasonLabel     sezóna do sloupce (soutěž a ročník)
  */
-function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
+function getMatchConfig({
+  getTeam,
+  teamItemList = [],
+  seasonItemList = [],
+  ownTeamItemList = [],
+  myTeamIdList = null,
+  getOwnTeamLabel = () => "",
+  getSeasonLabel = () => "",
+}) {
   return {
     time: {
       ...dateTimeField(lsi("admin", "field", "time"), { required: false }),
@@ -43,6 +58,18 @@ function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
       // without a filter (review S12) and the date is the one that fits every task -- the
       // weekend's results across all teams included. Default range in `screens/matches.jsx`.
       filterProps: { inputType: "date-range", dtoIn: dateRangeDtoIn, required: true },
+    },
+    // Náš tým zápasu a filtr podle něj (doma i venku, `match/list` `teamId`). Bez něj byl seznam
+    // dva tisíce zápasů všech týmů a nebylo poznat, který je čí (review 2026-11-12, kap. 3.1).
+    teamId: {
+      label: lsi("admin", "field", "ownTeam"),
+      columnProps: { maxWidth: 140 },
+      output: (_, item) => getOwnTeamLabel(item.data),
+      filterProps: {
+        inputType: "text-select",
+        inputProps: { itemList: ownTeamItemList },
+        dtoIn: (teamId) => (teamId === MY_TEAMS ? { teamIdList: myTeamIdList ?? [] } : { teamId }),
+      },
     },
     homeTeamId: {
       label: lsi("admin", "field", "homeTeam"),
@@ -77,9 +104,10 @@ function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
       output: (value, item) =>
         Number.isFinite(value) && Number.isFinite(item.data.guestGoals) ? `${value} : ${item.data.guestGoals}` : "",
     },
+    // Sloupec: soutěž a ročník („III. třída 2026/27“), ať je vidět, o jakou soutěž jde.
     seasonId: {
       label: lsi("admin", "field", "season"),
-      output: false,
+      output: (value, item) => getSeasonLabel(item.data) || "",
       input: {
         Component: EntitySelect,
         props: { required: true, useCase: "/season/list", getLabel: seasonName },
@@ -134,4 +162,4 @@ function getMatchConfig({ getTeam, teamItemList = [], seasonItemList = [] }) {
   };
 }
 
-export { getMatchConfig, matchFormConfig, MATCH_FORM_FIELD_LIST, MATCH_PAIR_LIST };
+export { getMatchConfig, matchFormConfig, MATCH_FORM_FIELD_LIST, MATCH_PAIR_LIST, MY_TEAMS };

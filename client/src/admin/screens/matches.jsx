@@ -6,7 +6,8 @@ import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { teamLabel } from "../fields.jsx";
 import { seasonName } from "../../core/season-label.js";
-import { getMatchConfig, matchFormConfig, MATCH_PAIR_LIST } from "../match-fields.jsx";
+import { getMatchConfig, matchFormConfig, MATCH_PAIR_LIST, MY_TEAMS } from "../match-fields.jsx";
+import { useEditableTeamIdList } from "../team-tabs.jsx";
 import CrudFormView from "../crud-form-view.jsx";
 import { MatchModal } from "../match-modals.jsx";
 import { useApp } from "../../core/app-context.jsx";
@@ -40,15 +41,22 @@ const ERROR_LSI = lsi("errors");
 // mění sestavu, ne týmy, takže server vrací holý zápas (`server/match/crud.js`).
 // `mergeItemHandler` proto návratovou hodnotu slučuje se současnými daty položky;
 // `delete` se schválně neslučuje (viz `core/item-merge.js`).
-function matchHandlers(dataRef) {
+//
+// `broad` = plošná role (`Config.MATCH`). Správce týmu hromadný import ani hromadné mazání nemá
+// (server je bez rozsahu nepustí), takže je `Crud` bez handleru ani nenabídne.
+function matchHandlers(dataRef, broad) {
   const merge = (useCase) => mergeItemHandler(dataRef, (dtoIn) => UiElements.Call.cmdPost(useCase, dtoIn));
 
   return {
     handlerMap: {
       load: (dtoIn) => UiElements.Call.cmdGet("match/list", dtoIn),
       create: (dtoIn) => UiElements.Call.cmdPost("match/create", dtoIn),
-      createMany: (dtoIn) => UiElements.Call.cmdPost("match/createMany", dtoIn),
-      deleteMany: (dtoIn) => UiElements.Call.cmdPost("match/deleteMany", dtoIn),
+      ...(broad
+        ? {
+            createMany: (dtoIn) => UiElements.Call.cmdPost("match/createMany", dtoIn),
+            deleteMany: (dtoIn) => UiElements.Call.cmdPost("match/deleteMany", dtoIn),
+          }
+        : null),
     },
     itemHandlerMap: {
       update: merge("match/update"),
@@ -66,9 +74,14 @@ function matchHandlers(dataRef) {
 // and the screen opens on matches from a year ago to a year ahead, which is the work at hand.
 const DEFAULT_RANGE_DAYS = 365;
 
-function defaultFilterList() {
+// Správce týmu začíná na svých týmech (filtr Tým „Moje týmy“, review 2026-11-12, kap. 3.1);
+// filtr jde odebrat, cizí zápasy jen nemají tužku.
+function defaultFilterList(myTeamIdList) {
   const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
-  return [{ key: "time", value: [day(-DEFAULT_RANGE_DAYS), day(DEFAULT_RANGE_DAYS)] }];
+  return [
+    { key: "time", value: [day(-DEFAULT_RANGE_DAYS), day(DEFAULT_RANGE_DAYS)] },
+    ...(myTeamIdList ? [{ key: "teamId", value: MY_TEAMS }] : []),
+  ];
 }
 
 function listDtoIn(filterDtoIn) {
@@ -81,8 +94,10 @@ const AdminMatches = createVisualComponent({
 
   render() {
     const app = useApp();
-    const { getTeam, teamList } = app;
+    const { getTeam, getCategory, teamList } = app;
     const session = UiAuth.useSession();
+    // `null` = plošná role (všechny zápasy); jinak týmy správce týmu.
+    const myTeamIdList = useEditableTeamIdList(Config.MATCH);
     // `{ item, tabCode }`: the list item (saves through its handlers) and the tab to open.
     const [editFor, setEditFor] = useState();
 
@@ -102,11 +117,37 @@ const AdminMatches = createVisualComponent({
       () => (seasonData?.itemList ?? []).map((season) => ({ value: season.id, children: seasonName(season) })),
       [seasonData],
     );
+    // Filtr Tým: naše týmy podle kategorie; správce týmu jen své, první volba „Moje týmy“.
+    const ownTeamItemList = useMemo(() => {
+      const teamItems = teamList
+        .filter((team) => team.own && (!myTeamIdList || myTeamIdList.includes(team.id)))
+        .map((team) => ({ value: team.id, children: getCategory(team.category)?.name ?? team.name }))
+        .sort((a, b) => a.children.localeCompare(b.children, "cs"));
+      return myTeamIdList
+        ? [{ value: MY_TEAMS, children: <Lsi import={importLsi} path={["admin", "matches", "myTeams"]} /> }, ...teamItems]
+        : teamItems;
+    }, [teamList, getCategory, myTeamIdList]);
 
-    const CONFIG = useMemo(
-      () => getMatchConfig({ getTeam, teamItemList, seasonItemList }),
-      [getTeam, teamItemList, seasonItemList],
-    );
+    const CONFIG = useMemo(() => {
+      const seasonById = new Map((seasonData?.itemList ?? []).map((season) => [season.id, season]));
+      return getMatchConfig({
+        getTeam,
+        teamItemList,
+        seasonItemList,
+        ownTeamItemList,
+        myTeamIdList,
+        getOwnTeamLabel: (match) =>
+          [match.homeTeamId, match.guestTeamId]
+            .map(getTeam)
+            .filter((team) => team?.own)
+            .map((team) => getCategory(team.category)?.name ?? team.name)
+            .join(", "),
+        getSeasonLabel: (match) => {
+          const season = seasonById.get(match.seasonId);
+          return season ? seasonName(season) : "";
+        },
+      });
+    }, [getTeam, getCategory, teamItemList, seasonItemList, ownTeamItemList, myTeamIdList, seasonData]);
 
     // The form of a new match in the order of the Info tab; the columns keep the order of CONFIG.
     const FORM_CONFIG = useMemo(() => matchFormConfig(CONFIG), [CONFIG]);
@@ -116,13 +157,13 @@ const AdminMatches = createVisualComponent({
       [CONFIG],
     );
 
-    const [initialFilterList] = useState(defaultFilterList);
+    const [initialFilterList] = useState(() => defaultFilterList(myTeamIdList));
     const filter = UiElements.Crud.useFilter({ filterDefinitionList: filterList, initialFilterList });
     const dtoIn = useMemo(() => listDtoIn(filter.dtoIn), [filter.dtoIn]);
 
     // Ref se plní **až za** `useDataList` — dřív `dataList` ještě neexistuje.
     const dataRef = useRef();
-    const dataList = useDataList({ ...matchHandlers(dataRef), initialDtoIn: dtoIn });
+    const dataList = useDataList({ ...matchHandlers(dataRef, !myTeamIdList), initialDtoIn: dtoIn });
     dataRef.current = dataList.data;
 
     // Jiný filtr = nový výpis. `useDataList` dtoIn nesleduje (na rozdíl od `CrudContext`),
@@ -169,14 +210,23 @@ const AdminMatches = createVisualComponent({
           //
           // `key: "update"` replaces what Crud's own pencil does (its form stays for Create):
           // the match is edited in the same modal as on the web.
-          getItemActionList={({ data: item }) => [
-            { key: "update", onClick: () => setEditFor({ item }) },
-            {
-              icon: "uugds-check",
-              children: <Lsi import={importLsi} path={["admin", "matches", "setResult"]} />,
-              onClick: () => setEditFor({ item, tabCode: "result" }),
-            },
-          ]}
+          //
+          // Správce týmu: tužka a výsledek jen u zápasu svého týmu, koš nikde (server
+          // `match/delete` jen plošné role; review 2026-11-12, kap. 3.1).
+          getItemActionList={({ data: item }) => {
+            const mine =
+              !myTeamIdList || [item?.data?.homeTeamId, item?.data?.guestTeamId].some((id) => id && myTeamIdList.includes(id));
+            return [
+              { key: "update", hidden: !mine, onClick: () => setEditFor({ item }) },
+              { key: "delete", hidden: !!myTeamIdList },
+              {
+                icon: "uugds-check",
+                hidden: !mine,
+                children: <Lsi import={importLsi} path={["admin", "matches", "setResult"]} />,
+                onClick: () => setEditFor({ item, tabCode: "result" }),
+              },
+            ];
+          }}
         >
           {({ type }) => <CrudFormView cfg={FORM_CONFIG} operation={type} pairList={MATCH_PAIR_LIST} />}
         </UiElements.Crud>

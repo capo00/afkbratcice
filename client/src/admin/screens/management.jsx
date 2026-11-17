@@ -148,7 +148,10 @@ function ManagementTab({ tab }) {
   );
 }
 
-const EXTRA_TAB_LIST = [{ code: BOARD, label: <Lsi import={importLsi} path={["admin", "management", "board"]} /> }];
+// Výbor jen pro plošné role: správce týmu výbor nemění (server `management/*`, `teamsOfManagement`).
+const EXTRA_TAB_LIST = [
+  { code: BOARD, label: <Lsi import={importLsi} path={["admin", "management", "board"]} />, broadOnly: true },
+];
 
 const AdminManagement = createVisualComponent({
   uu5Tag: Config.TAG + "AdminManagement",

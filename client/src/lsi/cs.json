@@ -103,6 +103,7 @@
       "position": "Post",
       "role": "Funkce",
       "activeTeamList": "Teď v týmech",
+      "ownTeam": "Náš tým",
       "period": "Období",
       "competition": "Soutěž",
       "yearFrom": "Ročník",
@@ -167,6 +168,7 @@
     },
     "matches": {
       "roundFilter": "Kolo (jen se sezónou)",
+      "myTeams": "Moje týmy",
       "setResult": "Zapsat výsledek",
       "tabInfo": "Info",
       "tabResult": "Výsledek",
