@@ -1,9 +1,9 @@
 import { createComponent, useDataObject, useMemo, useRef, Utils } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
 import { UiApp, UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import { ErrorState } from "../components/data-state.jsx";
+import PageLoading from "../components/layout/page-loading.jsx";
 
 // Nastavení klubu, kategorie a mapa týmů — jednou při startu SPA, pak z kontextu.
 //
@@ -95,11 +95,7 @@ const AppProvider = createComponent({
     }, [data, dataObject, appSettings]);
 
     if (state === "pendingNoData") {
-      return (
-        <div className={Config.Css.css({ display: "flex", justifyContent: "center", padding: 64 })}>
-          <Uu5Elements.Pending size="xl" />
-        </div>
-      );
+      return <PageLoading />;
     }
 
     // Bez nastavení a sezón nejde postavit menu ani routy, takže tady se opravdu nedá pokračovat.

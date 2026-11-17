@@ -1,5 +1,6 @@
-import { Lsi, useRoute } from "uu5g05";
+import { Lsi, useRoute, useLsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
+import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
@@ -23,6 +24,9 @@ const { theme } = Config;
 
 function Hero() {
   const [, setRoute] = useRoute();
+  // „AFK Bratčice erb“: `alt` je text, ne LSI objekt -- holý `<img>` z objektu udělal
+  // „[object Object]“ (review 1.3 B).
+  const clubLsi = useLsi(importLsi, ["club"]);
 
   return (
     // Hero je tmavé v obou režimech (canvas světlé verze, 2026-10-25): později pod ním bude
@@ -38,9 +42,9 @@ function Hero() {
         textAlign: "center",
       })}
     >
-      <img
+      <UiElements.Image
         src={Config.asset.logoTransparent}
-        alt={lsi("club", "name")}
+        alt={[clubLsi?.name, clubLsi?.crest].filter(Boolean).join(" ")}
         className={Config.Css.css({ inlineSize: 180, blockSize: 180, marginBlockEnd: 24 })}
       />
       <Heading level={1} bar={false} lsi={lsi("club", "name")} style={{ fontSize: 96, lineHeight: "normal" }} />

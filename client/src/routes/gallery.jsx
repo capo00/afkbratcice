@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useState, useRoute, Lsi } from "uu5g05";
+import { createVisualComponent, useDataObject, useState, useRoute, useLsi, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiApp, UiElements } from "caio-ui";
 import Config from "../config/config.js";
@@ -6,7 +6,6 @@ import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
-import Button from "../components/layout/button.jsx";
 import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
@@ -16,8 +15,9 @@ const { theme } = Config;
 
 // Seznam fotoalb s filtrem kategorií.
 //
-// Filtr je řada chipů z předlohy; „Vše" je jeho součást, ne zvláštní stav — jinak by
-// první načtení vypadalo, že není vybráno nic.
+// Filtr kategorií jsou záložky jako u mužstva (components/team/team-shell.jsx): kategorie
+// přepínají obsah stránky, což je role `Tabs` (`role="tab"`, šipky). „Vše" je jedna z nich,
+// ne zvláštní stav — jinak by první načtení vypadalo, že není vybráno nic (review 1.3 B).
 //
 // Dlaždice stojí na `coverThumbUri` a `photoCount`, což jsou **denormalizovaná** pole,
 // která album udržuje samo (`gallery/crud.js`). Bez nich by seznam devatenácti alb
@@ -94,6 +94,10 @@ const Gallery = createVisualComponent({
   render() {
     const [, setRoute] = useRoute();
     const [category, setCategory] = useState(ALL);
+    // Texty, ne `<Lsi>`: popisky záložek jsou velkými písmeny jako u mužstva a `Tabs` prop
+    // na `textTransform` nemá.
+    const categoryLsi = useLsi(importLsi, ["enum", "galleryCategory"]);
+    const allLabel = useLsi(importLsi, ["gallery", "all"]);
     const { appSettings } = useApp();
     const socialList = appSettings?.socialList ?? [];
 
@@ -136,20 +140,18 @@ const Gallery = createVisualComponent({
           </div>
         ) : null}
 
-        {/* Filtrovací chipy jsou tatáž tlačítka jako všude jinde, aktivní se liší jen
-            `significance` — proto `components/layout/button.jsx`, ne vlastní kopie
-            klubového písma nad `Uu5Elements.Button`. */}
-        <div className={Config.Css.css({ display: "flex", gap: 8, flexWrap: "wrap", marginBlockStart: 16 })}>
-          {[ALL, ...Config.GALLERY_CATEGORY_LIST].map((code) => (
-            <Button
-              key={code}
-              size="s"
-              significance={code === category ? "highlighted" : "subdued"}
-              onClick={() => setCategory(code)}
-              lsi={code === ALL ? lsi("gallery", "all") : lsi("enum", "galleryCategory", code)}
-            />
-          ))}
-        </div>
+        <Uu5Elements.Tabs
+          type="line"
+          displayBottomLine={false}
+          colorScheme="primary"
+          activeCode={category}
+          onChange={(e) => setCategory(e.data.activeCode)}
+          itemList={[ALL, ...Config.GALLERY_CATEGORY_LIST].map((code) => ({
+            code,
+            label: String((code === ALL ? allLabel : categoryLsi?.[code]) ?? code).toUpperCase(),
+          }))}
+          className={Config.Css.css({ marginBlockStart: 16 })}
+        />
 
         <div className={Config.Css.css({ marginBlockStart: 24 })}>
           {state === "pendingNoData" || state === "errorNoData" ? (

@@ -5,6 +5,7 @@ import importLsi from "../../lsi/import-lsi.js";
 import { useApp } from "../../core/app-context.jsx";
 import DisplayText from "./display-text.jsx";
 import Eyebrow from "./eyebrow.jsx";
+import { CONTACT_FIELD_LIST } from "../../core/contact-links.js";
 
 const { theme } = Config;
 
@@ -28,31 +29,10 @@ const NAV = [
   { code: "contact", href: "kontakt" },
 ];
 
-const CONTACT_ICON = {
-  address: "uugds-mapmarker",
-  email: "uugds-email",
-  phone: "uugds-phone",
-};
-
 // Sítě drží `appSettings.socialList` jako `{ code, uri }`, takže přidat Instagram je změna
 // v Nastavení, ne v kódu. Popisky jsou v `Config.SOCIAL_LABEL` (client.config.js) — a je tam
 // i vysvětlené, proč jsou to texty a ne ikony (GDS logo ikony neexistují). Neznámý `code` se
 // vypíše tak, jak přišel, aby se nová síť neztratila jen proto, že pro ni není popisek.
-
-function ContactLine({ icon, children, href }) {
-  return (
-    <div className={Config.Css.css({ display: "flex", gap: 8, alignItems: "baseline" })}>
-      <Uu5Elements.Icon icon={icon} className={Config.Css.css({ color: theme.color.clubRed, flexShrink: 0 })} />
-      {href ? (
-        <Uu5Elements.Link href={href} colorScheme="building" significance="subdued">
-          {children}
-        </Uu5Elements.Link>
-      ) : (
-        <span>{children}</span>
-      )}
-    </div>
-  );
-}
 
 const Footer = createVisualComponent({
   uu5Tag: Config.TAG + "Footer",
@@ -138,17 +118,19 @@ const Footer = createVisualComponent({
               <Lsi import={importLsi} path={["footer", "contact"]} />
             </Eyebrow>
             <Uu5Elements.Grid rowGap={8} className={Config.Css.css({ color: theme.color.mutedFg })}>
-              {contact.address ? <ContactLine icon={CONTACT_ICON.address}>{contact.address}</ContactLine> : null}
-              {contact.email ? (
-                <ContactLine icon={CONTACT_ICON.email} href={`mailto:${contact.email}`}>
-                  {contact.email}
-                </ContactLine>
-              ) : null}
-              {contact.phone ? (
-                <ContactLine icon={CONTACT_ICON.phone} href={`tel:${contact.phone.replace(/\s/g, "")}`}>
-                  {contact.phone}
-                </ContactLine>
-              ) : null}
+              {/* Stejné řádky jako na stránce Kontakt (InfoGroup, odkazy z core/contact-links.js),
+                  jen menší a bez popisků -- nadpis sloupce „Kontakt“ stačí. */}
+              <Uu5Elements.InfoGroup
+                direction="vertical"
+                size="s"
+                itemList={CONTACT_FIELD_LIST.filter((row) => contact[row.code]).map((row) => ({
+                  icon: row.icon,
+                  colorScheme: "primary",
+                  title: contact[row.code],
+                  href: row.href(contact[row.code]),
+                  target: row.target,
+                }))}
+              />
 
               {socialList.length ? (
                 <div className={Config.Css.css({ display: "flex", gap: 16, marginBlockStart: 8 })}>

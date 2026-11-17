@@ -422,12 +422,12 @@ jen ji redakce píše do sekce stránky.
 ```mermaid
 flowchart TD
   gl["routes/gallery.jsx -- seznam alb"]:::own
-  chips["Uu5Forms.SwitchSelect -- filtr kategorií"]:::uu5
+  chips["Uu5Elements.Tabs -- filtr kategorií (jako záložky mužstva)"]:::uu5
   gtile["GalleryTile coverThumbUri, název, datum, počet"]:::own
 
   gd["routes/gallery-detail.jsx"]:::own
-  pgrid["PhotoGrid<br/>Grid + Photo(thumbUri) + IntersectionObserver"]:::own
-  lb["Lightbox -> Uu5Elements.Modal + UiElements.Image(uri)"]:::own
+  pgrid["Grid + Uu5Imaging.Image(thumbUri, src=uri)<br/>líně načtená knihovna"]:::uu5
+  lb["lightbox Uu5Imaging.Image (lightbox=album)"]:::uu5
 
   files["routes/files.jsx -- ke stažení"]:::own
   frow["FileRow ikona typu, název, datum, velikost -> binary.uri"]:::own
@@ -508,9 +508,9 @@ konfigurace nad `BinaryProvider`, přesně tou cestou, kterou README `caio-ui` p
 | Vrstva | Počet | Odkud |
 |---|---|---|
 | Rám, routing guard, session, CRUD UI, upload | 0 vlastních | `caio-ui` |
-| Primitivy designu (Section, Heading, Eyebrow, Card, Button, Badge, Photo, DateText, TeamLogo, EmptyState) | **10** | vlastní, tenké obálky nad uu5 |
+| Primitivy designu (Section, Heading, Eyebrow, Card, Button, Badge, Photo, DateText, TeamLogo, EmptyState, PageLoading) | **11** | vlastní, tenké obálky nad uu5 |
 | Globální drobnosti (NoticeBar, Countdown) | **2** | vlastní |
-| Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, PhotoGrid, Lightbox, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect, Content, SectionList, ContentEditModal) | **24** | vlastní |
+| Doménové komponenty (MatchTile, ResultTile, ArticleTile, PlayerTile, TeamCard, GalleryTile, FileRow, StandingsTable, FormDots, LineupTable, ScorersList, RoundResults, HeadToHead, WeekendProgram, MatchHeader, TeamShell, SeasonSelect, PersonSelect, TeamSelect, Content, SectionList, ContentEditModal) | **22** | vlastní |
 | Veřejné obrazovky | **16** | vlastní, ale skládají se z výše uvedeného |
 | Správcovské obrazovky | **12** | 7 z nich je jen `CONFIG` objekt |
 
@@ -535,7 +535,6 @@ zůstala obsahem stránky — vlastní komponenta se nepíše.
 | Tabulka soutěže | `Uu5Tiles.Table` neumí zvýraznit řádek klubovou barvou ani skrývat sloupce po breakpointech | vlastní `StandingsTable` nad `<table>` |
 | Odpočet do zápasu | uu5 nemá | vlastní `Countdown` (`useInterval` + `useVisibility`) |
 | Mapa v kontaktu | uu5 nemá mapovou komponentu | `<iframe>` OpenStreetMap — je obsahem sekce stránky `contact`, ne kódu appky |
-| Lightbox | `Uu5Elements.Modal` ano, ale bez šipek a swipe | vlastní `Lightbox` nad `Modal` |
 | Editace obsahu | ECC modul v `caio-server` není a ladí se zvlášť | článek `content`, stránka `sectionList: [{ content }]`; `Content` + `SectionList` + `ContentEditModal` nad `uu5codekitg01-forms`, **zatím kód místo WYSIWYG** |
 | ~~Rozsahová role v guardu~~ | ~~`withRoute` porovnává profily na přesnou shodu~~ | **doplněno do `caio-ui` 2026-09-06**: `"teamEditor:*"` + `UiAuth.getScopeList()` |
 | Soubory ke stažení | `UiElements.BinaryCrud` je záměrně nerozšiřitelná přes props | vlastní `Crud` konfigurace nad `BinaryProvider` s `category` a `date` |

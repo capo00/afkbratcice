@@ -23,15 +23,6 @@ const { theme } = Config;
 // nemá. Karta je proto vykresluje **podmíněně** — až pole přibudou, rozsvítí se samy;
 // do té doby karta stojí na logu, soutěži a trenérovi a nemá prázdná místa.
 
-function InfoRow({ icon, children }) {
-  return (
-    <div className={Config.Css.css({ display: "flex", gap: 8, alignItems: "baseline", color: theme.color.mutedFg })}>
-      <Uu5Elements.Icon icon={icon} className={Config.Css.css({ color: theme.color.clubRed, flexShrink: 0 })} />
-      <span>{children}</span>
-    </div>
-  );
-}
-
 function TeamCard({ category, coach }) {
   const { getTeam } = useApp();
   const [, setRoute] = useRoute();
@@ -90,14 +81,15 @@ function TeamCard({ category, coach }) {
         </Uu5Elements.Text>
       ) : null}
 
-      <Uu5Elements.Grid rowGap={8}>
-        {category.competition ? <InfoRow icon="uugds-favorites">{category.competition}</InfoRow> : null}
-        {coach ? (
-          <InfoRow icon="uugds-account">
-            {personName(coach.person)}
-          </InfoRow>
-        ) : null}
-      </Uu5Elements.Grid>
+      {/* Soutěž a trenér: `InfoGroup`, ne vlastní řádky s ikonou (review 1.3 B). */}
+      <Uu5Elements.InfoGroup
+        direction="vertical"
+        size="m"
+        itemList={[
+          category.competition ? { icon: "uugds-favorites", colorScheme: "primary", title: category.competition } : null,
+          coach ? { icon: "uugds-account", colorScheme: "primary", title: personName(coach.person) } : null,
+        ].filter(Boolean)}
+      />
     </Card>
   );
 }

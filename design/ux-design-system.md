@@ -307,10 +307,10 @@ i s důvodem (stejná konvence jako v `caio_propertyman`, `docs/component-tree.m
 | Datum a čas | `components/date-text.jsx` nad `Uu5Elements.DateTime` s explicitním `format`; nikdy `dateFormat="short\|medium\|long"` (bere vzor z locale prohlížeče, ne z `cs`) |
 | Datová tabulka (soutěž, statistiky) | `components/data-table.jsx` — obal, sazba buněk a vodorovný scroll přes `Uu5Elements.ScrollableBox`; řádky si píše každá obrazovka sama |
 | Tlačítka | `components/layout/button.jsx` nad `Uu5Elements.Button`; váhu určuje **`significance`** (`highlighted` = plné, `distinct` = rámeček, `subdued` = jen text), žádná vlastní osa typu `variant` |
-| Přepínač `MUŽI`/`ŽÁCI`, filtr galerie | `Uu5Elements.Tabs` nebo `Uu5Forms.SwitchSelect` |
+| Přepínač `MUŽI`/`ŽÁCI`, filtr galerie | `Uu5Elements.Tabs` (`type="line"`, primary, jako záložky mužstva) |
 | Tabulka soutěže | `uu5tilesg02` `Table` přes `UiElements.Crud` v `readOnly` režimu, nebo přímo `Uu5Tiles.Table` |
 | Časová osa historie | obsahová stránka `page?code=history` — osa je `Uu5Bricks.VerticalTimeline` uvnitř `content` jedné sekce (`uu5String`), ne natvrdo psaná komponenta |
-| Lightbox fotogalerie | `Uu5Elements.Modal` + `UiElements.Image` |
+| Lightbox fotogalerie | `Uu5Imaging.Image` s `lightbox="album"` (zoom, celá obrazovka, prezentace) |
 | Mapa | `<iframe>` OpenStreetMap uvnitř `Uu5Elements.Block` (uu5 vlastní mapovou komponentu nemá) |
 | Ikony | `Uu5Elements.Icon` s `uugds-*` / `uugdsstencil-*` sadou |
 | Rozestupy | `Uu5Elements.SpacingProvider type="loose"` kolem celé appky (web, ne aplikace) |

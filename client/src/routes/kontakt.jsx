@@ -4,11 +4,11 @@ import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
 import Heading from "../components/layout/heading.jsx";
-import Eyebrow from "../components/layout/eyebrow.jsx";
 import Card from "../components/layout/card.jsx";
 import Button from "../components/layout/button.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import { useApp } from "../core/app-context.jsx";
+import { CONTACT_FIELD_LIST, mapsUrl } from "../core/contact-links.js";
 
 const { theme } = Config;
 
@@ -20,14 +20,8 @@ const { theme } = Config;
 // znamenalo klíč v URL a další službu k hlídání. OSM embed nechce klíč ani cookie.
 //
 // **Embed umí jen souřadnice, ne adresu** — nemá geokodér, takže bez `gps` by z něj byl
-// prázdný šedý obdélník. Když souřadnice nejsou, ukáže se místo mapy odkaz do OSM
+// prázdný šedý obdélník. Když souřadnice nejsou, ukáže se místo mapy odkaz do Google Map
 // s vyhledanou adresou; prázdná mapa je horší než žádná.
-
-const ROW = [
-  { code: "address", icon: "uugds-mapmarker" },
-  { code: "email", icon: "uugds-email", href: (v) => `mailto:${v}` },
-  { code: "phone", icon: "uugds-phone", href: (v) => `tel:${v.replace(/\s/g, "")}` },
-];
 
 // Výřez kolem bodu. ~0.01° je zhruba kilometr — dost na to, aby byla vidět obec i cesta
 // k hřišti, a ne tak málo, aby z mapy zbyla jedna ulice.
@@ -51,21 +45,16 @@ function mapEmbedUrl(contact) {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
 }
 
-/** Náhrada za mapu, když nejsou souřadnice: odkaz do OSM s vyhledanou adresou. */
-function mapSearchUrl(contact) {
-  if (!contact.address) return null;
-  return `https://www.openstreetmap.org/search?query=${encodeURIComponent(contact.address)}`;
-}
-
 const Kontakt = createVisualComponent({
   uu5Tag: Config.TAG + "Kontakt",
 
   render() {
     const { appSettings } = useApp();
     const contact = appSettings?.contact ?? {};
-    const rows = ROW.filter((row) => contact[row.code]);
+    const rows = CONTACT_FIELD_LIST.filter((row) => contact[row.code]);
     const embed = mapEmbedUrl(contact);
-    const search = embed ? null : mapSearchUrl(contact);
+    // Bez souřadnic místo mapy odkaz s vyhledanou adresou, do Google Map jako všude (contact-links.js).
+    const search = embed ? null : mapsUrl(contact.address);
 
     return (
       <Section>
@@ -82,31 +71,19 @@ const Kontakt = createVisualComponent({
               // Prázdná konfigurace je stav, ne chyba — web může jet dřív, než ji někdo vyplní.
               <EmptyState lsi={lsi("contact", "empty")} icon="uugds-mapmarker" />
             ) : (
-              <Uu5Elements.Grid rowGap={16}>
-                {rows.map((row) => {
-                  const value = contact[row.code];
-                  return (
-                    <div key={row.code} className={Config.Css.css({ display: "flex", gap: 12 })}>
-                      <Uu5Elements.Icon
-                        icon={row.icon}
-                        className={Config.Css.css({ color: theme.color.clubRed, flexShrink: 0, marginBlockStart: 2 })}
-                      />
-                      <div>
-                        <Eyebrow className={Config.Css.css({ marginBlockEnd: 0 })}>
-                          <Lsi import={importLsi} path={["contact", row.code]} />
-                        </Eyebrow>
-                        {row.href ? (
-                          <Uu5Elements.Link href={row.href(value)} colorScheme="building">
-                            {value}
-                          </Uu5Elements.Link>
-                        ) : (
-                          <span>{value}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </Uu5Elements.Grid>
+              // Popisek nad hodnotou (výchozí `itemDirection="vertical-reverse"`), celý řádek je
+              // odkaz: adresa do Google Map, e-mail a telefon na mailto/tel (core/contact-links.js).
+              <Uu5Elements.InfoGroup
+                direction="vertical"
+                itemList={rows.map((row) => ({
+                  icon: row.icon,
+                  colorScheme: "primary",
+                  subtitle: <Lsi import={importLsi} path={["contact", row.code]} />,
+                  title: contact[row.code],
+                  href: row.href(contact[row.code]),
+                  target: row.target,
+                }))}
+              />
             )}
           </Card>
 

@@ -488,9 +488,10 @@ Osobní karta (jméno, foto, post, číslo, roky v klubu) + statistiky po sezón
 ### 3.9 Fotogalerie
 
 - Seznam alb: dlaždice s titulní fotkou, názvem, datem a počtem fotek; nad tím filtr kategorií
-  (chipy z předlohy) přes `Uu5Forms.SwitchSelect`.
+  jako `Uu5Elements.Tabs` ve stylu záložek mužstva (review 1.3 B).
 - Detail alba: mřížka náhledů (`thumbUri`, tj. binárka `w400`) s lightboxem
-  (`Uu5Elements.Modal` + `UiElements.Image`, plná velikost `uri` binárky `w1600`),
+  z `Uu5Imaging.Image` (`lightbox="album"`, plná velikost `uri` binárky `w1600`; knihovna se
+  načítá líně, `lazy-libs.test.js`),
   lazy loading přes `loading="lazy"` a `IntersectionObserver` pro dotahování stránek.
 
 ### 3.10 Ke stažení

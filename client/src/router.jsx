@@ -1,7 +1,6 @@
 import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
-import Uu5Elements from "uu5g05-elements";
-import Config from "./config/config.js";
 import { PAGE_CODE_LIST } from "./content/pages.js";
+import PageLoading from "./components/layout/page-loading.jsx";
 
 // Routy se načítají **lazy**: kdo přijde na home, nemá stahovat kód fotogalerie.
 // Administrace tu není vůbec — je to vlastní UVE (admin/app.jsx, /admin/).
@@ -67,11 +66,7 @@ const ROUTE_MAP = {
   "*": <NotFound />,
 };
 
-const FALLBACK = (
-  <div className={Config.Css.css({ display: "flex", justifyContent: "center", padding: 96 })}>
-    <Uu5Elements.Pending size="xl" />
-  </div>
-);
+const FALLBACK = <PageLoading />;
 
 function Router() {
   const element = useRouter(ROUTE_MAP);

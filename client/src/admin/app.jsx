@@ -1,11 +1,11 @@
 import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiApp } from "caio-ui";
-import Config from "../config/config.js";
 import { AppProvider } from "../core/app-context.jsx";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "../config/admin-menu.js";
 import { useAdminTop } from "./top.jsx";
 import { APP_SETTINGS } from "./settings.js";
+import PageLoading from "../components/layout/page-loading.jsx";
 import clientConfig from "../../client.config.js";
 
 // Kořen UVE administrace (admin/index.html, /admin/…). Do 2026-10-24 byla administrace lazy
@@ -65,11 +65,7 @@ function buildRouteMap() {
 
 const ROUTE_MAP = buildRouteMap();
 
-const FALLBACK = (
-  <div className={Config.Css.css({ display: "flex", justifyContent: "center", padding: 96 })}>
-    <Uu5Elements.Pending size="xl" />
-  </div>
-);
+const FALLBACK = <PageLoading />;
 
 function AdminFrame() {
   const top = useAdminTop();

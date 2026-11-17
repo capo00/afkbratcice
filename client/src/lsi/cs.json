@@ -1,7 +1,8 @@
 {
   "club": {
     "name": "AFK Bratčice",
-    "since": "od roku 1932"
+    "since": "od roku 1932",
+    "crest": "erb"
   },
   "common": {
     "loadError": "Data se nepodařilo načíst. Zkuste to prosím za chvíli znovu.",
@@ -469,8 +470,6 @@
   },
   "board": {
     "members": "Ostatní členové",
-    "phone": "Telefon",
-    "email": "E-mail",
     "empty": "Složení výboru zatím není vyplněné."
   },
   "page": {
