@@ -139,6 +139,7 @@
       "round": "Kolo",
       "place": "Hřiště",
       "departureTime": "Odjezd",
+      "departureTimeNoDate": "Nejdřív vyplňte termín zápasu, odjezd je v jeho den.",
       "code": "Kód",
       "teamCount": "Týmů"
     },
@@ -511,7 +512,8 @@
     "afkbratcice/roster/invalidPeriod": "Začátek je po konci.",
     "afkbratcice/match/sameTeams": "Tým nemůže hrát sám se sebou. Vyberte jiného soupeře.",
     "afkbratcice/match/invalidPenaltyWinner": "Rozstřel jde zadat jen při remíze, v soutěži, která ho hraje, a vítězem musí být jeden z týmů zápasu.",
-    "afkbratcice/match/invalidHalfTime": "Poločas nemůže být vyšší než konečné skóre.",
+    "afkbratcice/match/invalidDepartureTime": "Odjezd musí být v den zápasu a nejpozději ve chvíli výkopu. Bez termínu zápasu odjezd zadat nejde.",
+    "afkbratcice/match/invalidHalfTime":"Poločas nemůže být vyšší než konečné skóre.",
     "afkbratcice/match/tooManyStarters": "V základní sestavě může být nejvýš 11 hráčů jednoho týmu. Ostatní označte jako náhradníky.",
     "afkbratcice/match/foreignLineup":"Správce týmu smí zapsat jen sestavu svého týmu.",
     "afkbratcice/match/teamNotInMatch": "Tento tým v zápasu nehraje.",

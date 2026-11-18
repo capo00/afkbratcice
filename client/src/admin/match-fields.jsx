@@ -3,6 +3,7 @@ import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import { EntitySelect, EnumText, enumItemList, dateTimeField, teamLabel } from "./fields.jsx";
 import { seasonName } from "../core/season-label.js";
+import DepartureTimeInput from "./departure-time-input.jsx";
 
 // Pole zápasu pro `UiElements.Crud`: sloupce, formulář i filtry obrazovky `admin/matches`.
 // Zvlášť proto, že stejná pole edituje i rozbalovací sekce modalu „Zapsat výsledek"
@@ -137,7 +138,8 @@ function getMatchConfig({
     departureTime: {
       label: lsi("admin", "field", "departureTime"),
       output: false,
-      input: { Component: Uu5Forms.FormDateTime, props: {} },
+      // Jen čas, datum je den zápasu (Caio 2026-11-18).
+      input: { Component: DepartureTimeInput, props: {} },
     },
     state: {
       label: lsi("admin", "field", "state"),

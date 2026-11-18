@@ -22,6 +22,7 @@
     "migrate:management-flat": "node tools/migrate-management-flat.js",
     "migrate:player-roster": "node tools/migrate-player-roster.js",
     "migrate:penalties": "node tools/migrate-penalties.js",
+    "migrate:departure-time": "node tools/migrate-departure-time.js",
     "qa-accounts": "caio-devkit qa-accounts",
     "settings-import": "caio-devkit settings-import"
   },

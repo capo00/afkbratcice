@@ -775,7 +775,9 @@ Nadpis je dvojice týmů. Záložky (nativní `tabList` `Uu5Elements.Modal`):
 - **Info** – tatáž pole i rozložení jako formulář nového zápasu v administraci
   (`MATCH_FORM_FIELD_LIST` a `MATCH_PAIR_LIST` v `admin/match-fields.jsx`; sloupce tabulky mají
   své pořadí), od tabletu ve dvojicích: sezóna a kolo, termín a stav, domácí a hosté (jen profil MATCH -- editorovi týmu
-  by je server zahodil), hřiště a odjezd, poznámka přes celou šířku (Caio 2026-11-10). Na
+  by je server zahodil), hřiště a odjezd, poznámka přes celou šířku (Caio 2026-11-10). Odjezd je
+  `Uu5Forms.FormTime` s `date` = den výkopu (`admin/departure-time-input.jsx`): vybírá se jen čas,
+  ukládá se ISO; bez termínu je pole neaktivní (Caio 2026-11-18). Na
   mobilu pole pod sebou. Jen pro toho, kdo smí `match/update`.
 - **Výsledek** – skóre, poločas, vítěz rozstřelu (jen u remízy v sezóně s penaltami). Skóre
   je povinné, jen když zápas výsledek už má nebo se začal vyplňovat -- zápas, který se ještě

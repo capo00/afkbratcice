@@ -437,7 +437,7 @@ nezměnil bodování celé tabulky.
 | `round` | string | | Kolo (i nečíselné, např. `předkolo`) |
 | `time` | string (ISO) | | Výkop; prázdné = termín neurčen |
 | `place` | string | | Hřiště |
-| `departureTime` | string (ISO) | | Odjezd – interní údaj (role `members`) |
+| `departureTime` | string (ISO) | | Odjezd – interní údaj (role `members`). Vždy **v den výkopu** (český den): formulář vybírá jen čas, server ho při zápisu termínu nebo odjezdu posadí na den zápasu a odjezd po výkopu odmítne (`invalidDepartureTime`, `match/crud.js` `_withDeparture`) |
 | `homeTeamId` | string | ✓ | FK `team` |
 | `guestTeamId` | string | ✓ | FK `team` |
 | `homeGoals` | number | | Konečný stav domácí; `null` = neodehráno |

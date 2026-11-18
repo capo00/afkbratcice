@@ -156,7 +156,7 @@ jiná cesta ke stejné stránce), nebo mít vlastní obrazovku „Archiv".
 | `kolo` | `round` | prázdné = přátelský zápas |
 | `datum` | `time` | **Už je v UTC**, jen se doplní `Z` — viz sekce 6.1 |
 | `hriste` | `place` | |
-| `odjezd` | `departureTime` | |
+| `odjezd` | `departureTime` | v0 má jen místní čas `HH:MM:SS`; na ISO v den zápasu ho převádí `tools/migrate-departure-time.js` (2026-11) |
 | `idD` / `idH` | `homeTeamId` / `guestTeamId` | přes mapu týmů |
 | `golyD` / `golyH` | `homeGoals` / `guestGoals` | u rozstřelu (`penalty`) má v0 ve skóre i rozhodující gól rozstřelu (2:2 + PK = 3:2): vítězi rozstřelu o gól méně |
 | `golyDP` / `golyHP` | `homeGoalsHalf` / `guestGoalsHalf` | |

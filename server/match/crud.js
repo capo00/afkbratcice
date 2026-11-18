@@ -13,6 +13,7 @@ import { personForIdentity } from "../services/hidden-names.js";
 import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
 import { isActive } from "../services/membership.js";
 import { withTeamList } from "../services/roster.js";
+import { departureOnMatchDay } from "../services/prague-time.js";
 
 // Hráčů jednoho týmu v základu (`substitute: false`) je nejvýš tolik.
 const MAX_STARTERS = 11;
@@ -109,7 +110,7 @@ class MatchCrud extends Crud {
   async create(data, identity) {
     this._checkTeams(data);
     await this._checkAges(data);
-    const item = this._normalize(data);
+    const item = this._normalize(this._withDeparture(data));
     return this._forIdentity(await super.create({ ...item, state: item.state ?? this._deriveState(item) }), identity);
   }
 
@@ -117,8 +118,9 @@ class MatchCrud extends Crud {
     for (const item of dataList) this._checkTeams(item);
     await this._checkAgesMany(dataList);
     for (const [index, item] of dataList.entries()) await this._checkResult(item, { index });
+    const withDeparture = dataList.map((item, index) => this._withDeparture(item, null, { index }));
     return super.createMany(
-      dataList.map((item) => {
+      withDeparture.map((item) => {
         const normalized = this._normalize(item);
         return { ...normalized, state: normalized.state ?? this._deriveState(normalized) };
       }),
@@ -129,7 +131,9 @@ class MatchCrud extends Crud {
    * @param identity  když volající prošel jen rozsahovou rolí (teamEditor), nesmí
    *                  přepsat soupeře -- jinak by si zápas přetáhl k sobě.
    */
-  async update(data, identity) {
+  async update(input, identity) {
+    const data =
+      "time" in input || "departureTime" in input ? this._withDeparture(input, this._getData(await this._get(input.id))) : input;
     const scopedOnly =
       !Authorization.hasProfile(identity, Config.MATCH) && Authorization.hasProfile(identity, [Config.ANY_TEAM_EDITOR]);
 
@@ -147,6 +151,31 @@ class MatchCrud extends Crud {
       await this._checkAges({ ...current, ...data });
     }
     return this._forIdentity(await super.update(this._normalize(data)), identity);
+  }
+
+  /**
+   * Odjezd je čas **v den zápasu** (Caio 2026-11-18): ve formuláři se vybírá jen čas, datum je
+   * výkopu. Server proto odjezd při každém zápisu termínu nebo odjezdu posadí na den zápasu
+   * (stejný český čas) -- přesunutý zápas tak nenechá odjezd na starém dni, a projde i starý
+   * tvar „HH:MM:SS“ z v0, dokud ho nepřevede migrace. Odjezd po výkopu nebo bez výkopu je chyba.
+   *
+   * @param current  uložený zápas (u `update`), z něj se doplní, co v `data` chybí
+   * @param extra    data navíc do chyby (pořadí položky importu)
+   */
+  _withDeparture(data, current = null, extra = {}) {
+    const time = "time" in data ? data.time : current?.time;
+    const departureTime = "departureTime" in data ? data.departureTime : current?.departureTime;
+    if (!departureTime) return data;
+
+    const aligned = departureOnMatchDay(departureTime, time);
+    if (!aligned || new Date(aligned) > new Date(time)) {
+      throw this._error("invalidDepartureTime", "Departure must be on the match day, not after the kick-off", {
+        time: time ?? null,
+        departureTime,
+        ...extra,
+      });
+    }
+    return { ...data, departureTime: aligned };
   }
 
   /**

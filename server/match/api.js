@@ -3,7 +3,7 @@ import Config from "../config.js";
 import { LINEUP_POSITION_LIST } from "../services/lineup-position.js";
 import crud from "./crud.js";
 import dao from "./dao.js";
-import { validate, shape, string, mongoId, oneOf, array, integer, boolean, any, pageInfo }
+import { validate, shape, string, mongoId, oneOf, array, integer, boolean, datetime, any, pageInfo }
   from "../services/validators.js";
 
 const listDtoIn = shape({
@@ -46,7 +46,8 @@ const infoFields = {
   round: string(),
   time: string(),
   place: string(),
-  departureTime: string(),
+  // ISO; server ho posadí na den zápasu (`match/crud.js`, `_withDeparture`).
+  departureTime: datetime(),
   homeTeamId: mongoId(),
   guestTeamId: mongoId(),
   state: oneOf(Config.MATCH_STATE),
