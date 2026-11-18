@@ -36,6 +36,7 @@ function useTop() {
   const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
   const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
+  const highlightsLabel = useLsi(importLsi, ["header", "nav", "highlights"]);
   const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
   const pageLsi = useLsi(importLsi, ["page", "name"]);
 
@@ -78,7 +79,11 @@ function useTop() {
           children: clubLabel.toUpperCase(),
           significance: "subdued",
           colorScheme: "building",
-          itemList: PAGE_CODE_LIST.map((code) => ({ href: code, children: pageLsi[code] })),
+          // Za obsahovými stránkami Zajímavosti (statistiky klubu za celou historii).
+          itemList: [
+            ...PAGE_CODE_LIST.map((code) => ({ href: code, children: pageLsi[code] })),
+            { href: "zajimavosti", children: highlightsLabel },
+          ],
         },
         {
           href: "kontakt",

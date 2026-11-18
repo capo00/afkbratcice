@@ -347,6 +347,18 @@ je to důvod přidat agregaci, ne teď dopředu.
 | `stats/getTable` | get | – | `{ seasonId }` nebo `{ teamId }` | `{ table: [...] }` |
 | `stats/listPlayerStats` | get | – | `{ seasonId, teamId }` | `{ itemList }` |
 | `stats/getPlayerStats` | get | – | `{ playerId, seasonId }` | `{ total, bySeasonList }` |
+| `stats/getHighlights` | get | – | `{ category }` (bez ní `men-a`) | `{ category, team, highlights, playerMap, seasonMap, teamMap }` |
+
+**`stats/getHighlights`** (stránka Klub → Zajímavosti, 2026-11-18) – bilance, rekordy, série a žebříčky hráčů našeho
+týmu kategorie za celou historii. Jen odehrané soutěžní zápasy, rozstřel je remíza. Hráči, sezóny a týmy jsou
+v `highlights` jen jako id, jména jsou v `playerMap` / `seasonMap` / `teamMap` (osoba bez kontaktů, jména dětí
+skrytá podle věku kategorie). Neznámá kategorie vrací `category: null`, kategorie bez týmu nebo bez zápasů
+`highlights: null`.
+
+Výpočet je v paměti (`services/highlights.js`), protože série a Iron man potřebují zápasy popořadě. Dotazy jdou
+přes existující indexy (zápasy týmu přes `homeTeamId_1_time_-1` + `guestTeamId_1_time_-1`). Výsledek drží
+paměťová cache po kategoriích (`services/highlights-cache.js`): zneplatní ji každý zápis zápasu (`match/dao.js`)
+a kvůli dvěma instancím App Engine má navíc limit 10 minut.
 
 **Řádek tabulky**
 

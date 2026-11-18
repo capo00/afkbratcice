@@ -20,6 +20,7 @@
       "contact": "Kontakt",
       "history": "Historie",
       "club": "Klub",
+      "highlights": "Zajímavosti",
       "admin": "Administrace",
       "web": "Web"
     }
@@ -443,6 +444,124 @@
     "yellowCards": "ŽK",
     "redCards": "ČK",
     "total": "Celkem"
+  },
+  "highlights": {
+    "eyebrow": "Klub",
+    "header": "Zajímavosti",
+    "subtitle": "Od sezóny ${season} · jen soutěžní zápasy",
+    "missing": "Taková kategorie neexistuje.",
+    "noTeam": "V téhle kategorii klub nemá mužstvo.",
+    "empty": "Mužstvo zatím neodehrálo žádný soutěžní zápas.",
+    "count": {
+      "matches": { "one": "${count} zápas", "few": "${count} zápasy", "other": "${count} zápasů" },
+      "fromMatches": { "one": "z ${count} zápasu", "few": "z ${count} zápasů", "other": "z ${count} zápasů" },
+      "wins": { "one": "${count} výhra", "few": "${count} výhry", "other": "${count} výher" },
+      "draws": { "one": "${count} remíza", "few": "${count} remízy", "other": "${count} remíz" },
+      "losses": { "one": "${count} prohra", "few": "${count} prohry", "other": "${count} proher" },
+      "points": { "one": "${count} bod", "few": "${count} body", "other": "${count} bodů" },
+      "matchesUnit": { "one": "zápas", "few": "zápasy", "other": "zápasů" },
+      "inRowUnit": { "one": "zápas v řadě", "few": "zápasy v řadě", "other": "zápasů v řadě" },
+      "winsUnit": { "one": "výhra", "few": "výhry", "other": "výher" }
+    },
+    "result": {
+      "W": { "letter": "V", "word": "Výhra" },
+      "D": { "letter": "R", "word": "Remíza" },
+      "L": { "letter": "P", "word": "Prohra" }
+    },
+    "wdl": "${wins} V · ${draws} R · ${losses} P",
+    "balance": {
+      "eyebrow": "Za celou historii",
+      "header": "Bilance",
+      "played": "Soutěžních zápasů",
+      "winPct": "Výher",
+      "score": "Skóre",
+      "scoreDetail": "rozdíl ${diff}",
+      "pointsPerMatch": "Bodů na zápas",
+      "home": "Doma",
+      "away": "Venku"
+    },
+    "form": {
+      "eyebrow": "Kde jsme teď",
+      "header": "Forma a série",
+      "current": "Aktuální forma",
+      "lastHint": "Vlevo nejstarší, vpravo poslední zápas.",
+      "runWins": "Vyhráváme v řadě · rekord ${record}",
+      "runUnbeaten": "Bez porážky · rekord ${record}",
+      "runScoring": "Dáváme gól v řadě · rekord ${record}",
+      "runWinless": "Bez výhry",
+      "noRun": "Teď neběží žádná série.",
+      "longest": "Nejdelší série",
+      "unbeaten": "Bez porážky",
+      "wins": "Výhry v řadě",
+      "scoring": "Gól v každém zápase",
+      "ironMan": "Iron man",
+      "ironManHint": "Nejvíc zápasů v řadě v sestavě, i jako náhradník."
+    },
+    "records": {
+      "eyebrow": "Zápisy do historie",
+      "header": "Rekordy",
+      "biggestWin": "Nejvyšší výhra",
+      "biggestLoss": "Nejvyšší prohra",
+      "halfScore": "poločas ${score}",
+      "bestSeason": "Nejlepší sezóna",
+      "worstSeason": "Nejhorší sezóna",
+      "mostGoalsSeason": "Nejvíc gólů v sezóně",
+      "pointsPerMatchUnit": "bodu na zápas",
+      "goalsUnit": "gólů",
+      "seasonNote": "${wdl} · skóre ${score}",
+      "mostGoalsNote": "nejvíc gólů v historii",
+      "seasonsHint": "Sezóny s aspoň ${min} zápasy, bez té rozehrané.",
+      "halfTime": "Poločasy a obraty",
+      "comebacks": "Otočené zápasy",
+      "comebacksNote": "Prohrávali jsme o poločase ${behind}×, z toho ${draws}× skončil zápas remízou.",
+      "ahead": "Vedení v poločase",
+      "aheadNote": "Vyhráli jsme ${wins} z ${ahead} zápasů.",
+      "bestComeback": "Největší obrat",
+      "bestComebackNote": "v poločase ${score} · ${date}"
+    },
+    "fame": {
+      "eyebrow": "Jména, která zůstanou",
+      "header": "Síň slávy",
+      "club100": "Klub 100",
+      "club100Hint": "Hráči se ${count} a více soutěžními zápasy.",
+      "topScorers": "Nejlepší střelci",
+      "topScorersHint": "Za celou historii.",
+      "kings": "Králové střelců",
+      "kingsHint": "Nejlepší střelec každé sezóny.",
+      "ongoing": "Průběžně",
+      "season": "Sezóna"
+    },
+    "players": {
+      "eyebrow": "Hráči",
+      "header": "Žebříčky hráčů",
+      "winWith": "S ním vyhráváme",
+      "winWithHint": "Podíl výher v zápasech, kdy hráč nastoupil. Nejméně ${min} zápasů. Průměr týmu je ${pct} %.",
+      "winsCol": "Výhry",
+      "goalkeepers": "Brankáři",
+      "goalkeepersHint": "Čistá konta v soutěžních zápasech, nejméně ${min} zápasů v bráně.",
+      "goalkeeper": "Brankář",
+      "cleanSheets": "Čistá konta",
+      "goalkeeperStarts": "Zápasy",
+      "goalkeeperStartsTitle": "Zápasy v bráně",
+      "cleanSheetStreak": "Nejdelší série čistých kont:",
+      "cleanSheetStreakNote": "${matches} v řadě (${from} – ${to}).",
+      "yellowCards": "Nejvíc žlutých karet",
+      "redCards": "Nejvíc vyloučení",
+      "yellowCol": "Žluté",
+      "redCol": "Červené"
+    },
+    "col": {
+      "rank": "#",
+      "player": "Hráč",
+      "appearances": "Zápasy",
+      "goals": "Góly"
+    },
+    "perMatch": {
+      "label": "%",
+      "goals": "Góly na zápas: góly ÷ zápasy",
+      "yellowCards": "Žluté karty na zápas: žluté ÷ zápasy",
+      "redCards": "Vyloučení na zápas: červené ÷ zápasy"
+    }
   },
   "gallery": {
     "eyebrow": "Klub v obrazech",

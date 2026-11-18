@@ -196,6 +196,7 @@ const expected = {
   "season/listCurrent": "public",
   "season/listYears": "public",
   "season/update": CONTENT,
+  "stats/getHighlights": "public",
   "stats/getPlayerStats": "public",
   "stats/getTable": "public",
   "stats/listPlayerStats": "public",

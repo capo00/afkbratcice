@@ -216,7 +216,7 @@ Stackové use casy (`sys/*`, `identity/*`, `member/*`, `binary/*`, `/auth/*`) js
 | `season/create`, `update`, `delete` | CONTENT | zakládá kategorie pro ročník |
 | `category/list`, `get` | – | kategorie (A, B, dorost…) staví přehled mužstev |
 | `category/create`, `update`, `delete` | ADMIN | číselník klubu, mění se výjimečně (`services/category.js`) |
-| `stats/getTable`, `listPlayerStats`, `getPlayerStats` | – | počítané, nejde editovat |
+| `stats/getTable`, `listPlayerStats`, `getPlayerStats`, `getHighlights` | – | počítané, nejde editovat |
 
 ### Zápasy
 

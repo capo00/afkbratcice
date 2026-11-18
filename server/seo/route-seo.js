@@ -24,6 +24,7 @@ const ROUTE_SEO = {
   fotogalerie: { title: "Fotogalerie", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   "fotogalerie/album": { title: "Album", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   kontakt: { title: "Kontakt", description: "Kde najdete hřiště AFK Bratčice a jak nás kontaktovat." },
+  zajimavosti: { title: "Zajímavosti", description: "Rekordy, série a nejlepší hráči AFK Bratčice za celou historii." },
   historie: { title: "Historie klubu", description: "Fotbal v Bratčicích od roku 1932 po dnešek." },
   hymna: { title: "Hymna", description: "Klubová hymna Traverza." },
   vybor: { title: "Výbor AFK", description: "Lidé, kteří klub vedou." },

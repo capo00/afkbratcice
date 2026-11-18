@@ -21,6 +21,7 @@ const GalleryDetail = Utils.Component.lazy(() => import("./routes/gallery-detail
 const Page = Utils.Component.lazy(() => import("./routes/page.jsx"));
 const Kontakt = Utils.Component.lazy(() => import("./routes/kontakt.jsx"));
 const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
+const Zajimavosti = Utils.Component.lazy(() => import("./routes/zajimavosti.jsx"));
 
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
 //
@@ -59,6 +60,8 @@ const ROUTE_MAP = {
   "fotogalerie/album": <GalleryDetail />,
 
   kontakt: <Kontakt />,
+  // Klub → Zajímavosti, po kategoriích (`?kategorie=men-a`).
+  zajimavosti: <Zajimavosti />,
   // Obsahové stránky sdílí jednu obrazovku a rozlišuje je routa; seznam je zdroj pravdy
   // v `content/pages.js`, aby se nová stránka přidávala na jednom místě.
   ...Object.fromEntries(PAGE_CODE_LIST.map((code) => [code, <Page />])),

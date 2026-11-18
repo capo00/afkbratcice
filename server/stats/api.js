@@ -3,9 +3,13 @@ import seasonDao from "../season/dao.js";
 import teamDao from "../team/dao.js";
 import { computeTable } from "../services/table.js";
 import { listPlayerStats, getPlayerStats, hiddenNamesRule } from "../services/stats.js";
-import { validate, shape, mongoId } from "../services/validators.js";
+import { validate, shape, string, mongoId } from "../services/validators.js";
+import { getHighlights } from "./highlights.js";
 import { getYearFrom } from "../services/season.js";
 import { loadHiddenAgeList, loadHiddenTeamIdSet } from "../services/hidden-teams.js";
+
+// Kategorie Zajímavostí, když adresa žádnou neříká.
+const DEFAULT_HIGHLIGHTS_CATEGORY = "men-a";
 
 /** Sezónu lze zadat přímo, nebo ji dohledáme podle týmu v aktuálním ročníku. */
 async function resolveSeason({ seasonId, teamId }) {
@@ -49,5 +53,19 @@ export default {
     method: "get",
     validator: validate(shape({ playerId: mongoId().isRequired() })),
     fn: ({ dtoIn }) => getPlayerStats(dtoIn),
+  },
+
+  // Zajímavosti jedné kategorie za celou historii (stránka Klub → Zajímavosti). Výsledek se drží
+  // v paměti a zneplatní ho zápis zápasu (stats/highlights.js, services/highlights-cache.js).
+  // Bez kategorie muži A: zatím je stránka jen pro ně (Caio 2026-11-18).
+  "stats/getHighlights": {
+    method: "get",
+    validator: validate(shape({ category: string(1, 32) })),
+    fn: async ({ dtoIn, identity }) =>
+      (await getHighlights({ category: dtoIn.category || DEFAULT_HIGHLIGHTS_CATEGORY }, identity)) ?? {
+        category: null,
+        team: null,
+        highlights: null,
+      },
   },
 };

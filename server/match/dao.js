@@ -1,4 +1,5 @@
 import { Dao } from "caio-server";
+import { invalidateHighlights } from "../services/highlights-cache.js";
 
 class MatchDao extends Dao {
   constructor() {
@@ -95,6 +96,51 @@ class MatchDao extends Dao {
 
   listBySeason(seasonId) {
     return this.find({ seasonId }, { pageSize: 1000 }, { time: 1 });
+  }
+
+  /**
+   * Zápasy týmu pro Zajímavosti: jen odehrané soutěžní (stejný filtr jako `services/stats.js`),
+   * bez `sys` a interního odjezdu. Mongo `$or` rozloží na indexy `homeTeamId_1_time_-1`
+   * a `guestTeamId_1_time_-1`.
+   */
+  listPlayedByTeam(teamId) {
+    return this.find(
+      { $or: [{ homeTeamId: teamId }, { guestTeamId: teamId }], round: { $type: "string" }, homeGoals: { $ne: null } },
+      { pageSize: 10000 },
+      { time: 1 },
+      { sys: 0, departureTime: 0 },
+    );
+  }
+
+  // Každý zápis zápasu zneplatní cache Zajímavostí (services/highlights-cache.js). Tady, ne
+  // v crud.js: crud zapisuje přes `super.update` z několika míst (výsledek, sestava, úprava)
+  // a všechna vedou sem.
+  async create(data) {
+    const result = await super.create(data);
+    invalidateHighlights();
+    return result;
+  }
+
+  async createMany(dataList) {
+    const result = await super.createMany(dataList);
+    invalidateHighlights();
+    return result;
+  }
+
+  async update(data) {
+    const result = await super.update(data);
+    invalidateHighlights();
+    return result;
+  }
+
+  async delete(id) {
+    await super.delete(id);
+    invalidateHighlights();
+  }
+
+  async deleteMany(idList) {
+    await super.deleteMany(idList);
+    invalidateHighlights();
   }
 }
 

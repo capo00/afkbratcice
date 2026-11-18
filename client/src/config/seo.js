@@ -32,6 +32,7 @@ const ROUTE_SEO = {
   fotogalerie: { title: "Fotogalerie", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   "fotogalerie/album": { title: "Album", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   kontakt: { title: "Kontakt", description: "Kde najdete hřiště AFK Bratčice a jak nás kontaktovat." },
+  zajimavosti: { title: "Zajímavosti", description: "Rekordy, série a nejlepší hráči AFK Bratčice za celou historii." },
   ...Object.fromEntries(Object.entries(PAGES).map(([code, page]) => [code, { title: page.name, description: page.desc }])),
 };
 
