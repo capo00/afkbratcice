@@ -14,6 +14,9 @@ import { loadHiddenTeamIdSet } from "../services/hidden-teams.js";
 import { isActive } from "../services/membership.js";
 import { withTeamList } from "../services/roster.js";
 
+// Hráčů jednoho týmu v základu (`substitute: false`) je nejvýš tolik.
+const MAX_STARTERS = 11;
+
 class MatchCrud extends Crud {
   constructor() {
     super("match", dao);
@@ -154,7 +157,24 @@ class MatchCrud extends Crud {
    * @param match  the teams and the season of the match plus the result being written
    * @param extra  additional error data (the item index of an import)
    */
-  async _checkResult({ homeTeamId, guestTeamId, seasonId, homeGoals, guestGoals, penaltyWinnerTeamId }, extra = {}) {
+  async _checkResult(
+    { homeTeamId, guestTeamId, seasonId, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId },
+    extra = {},
+  ) {
+    // Gól daný v prvním poločase se už nevezme, takže poločas nemůže být vyšší než konečné skóre
+    // (review 2026-11-12, 5.4: 3 takové zápasy z importu v0).
+    for (const [half, full] of [[homeGoalsHalf, homeGoals], [guestGoalsHalf, guestGoals]]) {
+      if (Number.isFinite(half) && Number.isFinite(full) && half > full) {
+        throw this._error("invalidHalfTime", "Half-time score cannot exceed the final score", {
+          homeGoals,
+          guestGoals,
+          homeGoalsHalf,
+          guestGoalsHalf,
+          ...extra,
+        });
+      }
+    }
+
     if (!penaltyWinnerTeamId) return;
 
     if (![homeTeamId, guestTeamId].includes(penaltyWinnerTeamId)) {
@@ -178,7 +198,7 @@ class MatchCrud extends Crud {
 
   async setResult({ id, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId }, identity) {
     const current = await this._get(id);
-    await this._checkResult({ ...current, homeGoals, guestGoals, penaltyWinnerTeamId });
+    await this._checkResult({ ...current, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId });
 
     // `_forIdentity` i tady, aby zápis vracel týž tvar jako `list` -- klient položku
     // v seznamu nahradí tímhle objektem (`useDataList`), takže by se jinak lišila
@@ -232,6 +252,13 @@ class MatchCrud extends Crud {
       }
     }
 
+    for (const matchTeamId of teamIdList) {
+      const ofTeam = playerList.filter((entry) =>
+        rosterList.some((r) => r.playerId === entry.playerId && r.teamId === matchTeamId && (!matchDay || isActive(r, matchDay))),
+      );
+      this._checkStarters(ofTeam, matchTeamId);
+    }
+
     const scopedOnly =
       !Authorization.hasProfile(identity, Config.MATCH) && Authorization.hasProfile(identity, [Config.ANY_TEAM_EDITOR]);
     let nextPlayerList = playerList;
@@ -278,8 +305,26 @@ class MatchCrud extends Crud {
       }
     }
 
+    this._checkStarters(playerList, teamId);
+
     const kept = (current.playerList ?? []).filter((entry) => !onTeam(entry.playerId));
     return this._saveLineup(id, current, [...kept, ...playerList], identity);
+  }
+
+  /**
+   * Nejvýš 11 hráčů jednoho týmu v základu (review 2026-11-12, 5.4: dvě sestavy z importu v0
+   * jich mají 12). Méně projde -- v nižších soutěžích se nastupuje i v devíti. Kontroluje se jen
+   * to, co se právě zapisuje, ne ponechaná sestava soupeře.
+   */
+  _checkStarters(teamPlayerList, teamId) {
+    const starterCount = teamPlayerList.filter((entry) => !entry.substitute).length;
+    if (starterCount > MAX_STARTERS) {
+      throw this._error("tooManyStarters", `A team can have at most ${MAX_STARTERS} starters`, {
+        teamId,
+        starterCount,
+        maxStarterCount: MAX_STARTERS,
+      });
+    }
   }
 
   async _saveLineup(id, current, nextPlayerList, identity) {

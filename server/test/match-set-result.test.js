@@ -84,3 +84,22 @@ test("vítěz rozstřelu mimo dvojici týmů a neremíza zůstávají chybou", a
   await assertRejected(setResult({ penaltyWinnerTeamId: "000000000000000000000030" }));
   await assertRejected(setResult({ homeGoals: 2, guestGoals: 1, penaltyWinnerTeamId: HOME }));
 });
+
+test("poločas vyšší než konečné skóre odmítne, nejvýš rovný projde", async () => {
+  for (const patch of [
+    { homeGoals: 1, guestGoals: 0, homeGoalsHalf: 2, guestGoalsHalf: 0 },
+    { homeGoals: 0, guestGoals: 2, homeGoalsHalf: 1, guestGoalsHalf: 3 },
+  ]) {
+    await assert.rejects(setResult(patch), (e) => {
+      assert.match(e.code, /match\/invalidHalfTime$/);
+      return true;
+    }, JSON.stringify(patch));
+    assert.equal(updated, null, "odmítnutý zápis se nesmí uložit");
+  }
+
+  await setResult({ homeGoals: 2, guestGoals: 1, homeGoalsHalf: 2, guestGoalsHalf: 0 });
+  assert.equal(updated.homeGoalsHalf, 2);
+  // Bez poločasu se nekontroluje nic.
+  await setResult({ homeGoals: 0, guestGoals: 0, homeGoalsHalf: null, guestGoalsHalf: undefined });
+  assert.equal(updated.homeGoalsHalf, null);
+});

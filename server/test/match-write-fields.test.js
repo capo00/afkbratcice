@@ -107,3 +107,12 @@ test("match/createMany without a shootout winner does not load the season", asyn
   await crud.createMany([importItem({ homeGoals: 3 }), importItem({ homeGoals: undefined, guestGoals: undefined })]);
   assert.equal(created.length, 2);
 });
+
+test("match/createMany rejects a half-time score above the final one, with the item index", async () => {
+  await assert.rejects(crud.createMany([importItem(), importItem({ homeGoals: 0, guestGoals: 2, homeGoalsHalf: 1, guestGoalsHalf: 3 })]), (e) => {
+    assert.match(e.code, /match\/invalidHalfTime$/);
+    assert.equal(e.paramMap.index, 1);
+    return true;
+  });
+  assert.equal(created, null, "a rejected import must not save anything");
+});

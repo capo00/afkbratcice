@@ -92,8 +92,11 @@ function resultKey(value) {
   ]);
 }
 
+/** Horní mez poločasu: konečné skóre, dokud není vyplněné, žádná. */
+const halfMax = (goals) => (Number.isFinite(goals) ? goals : undefined);
+
 /**
- * Pole formuláře výsledku. Je to vlastní komponenta jen kvůli `useFormApi`: ten musí sedět
+ * Pole formuláře výsledku.Je to vlastní komponenta jen kvůli `useFormApi`: ten musí sedět
  * pod `Form.Provider`, a vítěz rozstřelu se ukazuje živě podle toho, co je zrovna vyplněné --
  * i podle sezóny, kterou může změnit záložka Info. Co platí, předává `hasPenaltiesRef`
  * zápisu v `MatchModal`, který sedí nad formulářem.
@@ -109,8 +112,9 @@ function ResultFields({ teamItemList, hasPenaltiesRef, scoreRequired }) {
     <Uu5Forms.Form.View gridLayout={withPenalty ? RESULT_GRID_LAYOUT_WITH_PENALTY : RESULT_GRID_LAYOUT}>
       <Uu5Forms.FormNumber name="homeGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoals"]} />} min={0} step={1} required={required} />
       <Uu5Forms.FormNumber name="guestGoals" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoals"]} />} min={0} step={1} required={required} />
-      <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} step={1} />
-      <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} step={1} />
+      {/* Poločas nejvýš konečné skóre -- server to hlídá taky (`match/crud.js`, `invalidHalfTime`). */}
+      <Uu5Forms.FormNumber name="homeGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "homeGoalsHalf"]} />} min={0} max={halfMax(value?.homeGoals)} step={1} />
+      <Uu5Forms.FormNumber name="guestGoalsHalf" label={<Lsi import={importLsi} path={[...LSI_PATH, "guestGoalsHalf"]} />} min={0} max={halfMax(value?.guestGoals)} step={1} />
       {withPenalty ? (
         <Uu5Forms.FormSelect
           name="penaltyWinnerTeamId"

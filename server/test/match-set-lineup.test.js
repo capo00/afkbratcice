@@ -101,3 +101,36 @@ test("a team editor may not send another team, and the team must play the match"
   );
   assert.equal(updated, null);
 });
+
+// Nejvýš 11 hráčů jednoho týmu v základu (review 2026-11-12, 5.4). Hráči `s1`..`s12` jsou
+// v týmu A v den zápasu.
+const starters = (count, substitute = false) =>
+  Array.from({ length: count }, (_, i) => ({ playerId: `s${i + 1}`, positionDetail: "CM", substitute }));
+
+test("more than 11 starters of one team are rejected, 11 with substitutes pass", async () => {
+  rosterDao.listByPlayerIdList = async (idList) => [
+    ...ROSTER.filter((r) => idList.includes(r.playerId)),
+    ...idList.filter((id) => id.startsWith("s")).map((playerId) => ({ playerId, teamId: TEAM_A, dateFrom: "2020-01-01", dateTo: null })),
+  ];
+
+  for (const dtoIn of [
+    { id: MATCH_ID, teamId: TEAM_A, playerList: starters(12) },
+    // Bez `teamId` (starší klient) se počítá po týmech podle soupisky.
+    { id: MATCH_ID, playerList: [...starters(12), { playerId: "b1" }] },
+  ]) {
+    await assert.rejects(crud.setLineup(dtoIn, MANAGER), (e) => {
+      assert.match(e.code, /match\/tooManyStarters$/);
+      assert.equal(e.paramMap.starterCount, 12);
+      return true;
+    });
+  }
+  assert.equal(updated, null);
+
+  await crud.setLineup({ id: MATCH_ID, teamId: TEAM_A, playerList: [...starters(11), { playerId: "a1", substitute: true }] }, MANAGER);
+  assert.equal(updated.playerList.filter((e) => !e.substitute && e.playerId.startsWith("s")).length, 11);
+
+  // Bez `teamId`: 11 domácích + 1 host v základu je v pořádku.
+  updated = null;
+  await crud.setLineup({ id: MATCH_ID, playerList: [...starters(11), { playerId: "b1" }] }, MANAGER);
+  assert.equal(updated.playerList.length, 12);
+});
