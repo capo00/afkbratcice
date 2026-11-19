@@ -23,6 +23,7 @@
     "migrate:player-roster": "node tools/migrate-player-roster.js",
     "migrate:penalties": "node tools/migrate-penalties.js",
     "migrate:departure-time": "node tools/migrate-departure-time.js",
+    "cleanup:dead-data": "node tools/cleanup-dead-data.js",
     "qa-accounts": "caio-devkit qa-accounts",
     "settings-import": "caio-devkit settings-import"
   },

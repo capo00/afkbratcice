@@ -11,3 +11,4 @@ dist/
 
 # Reporty migračních skriptů (caio-server/script `reportFile`)
 migrate-*-report.json
+cleanup-*-report.json
