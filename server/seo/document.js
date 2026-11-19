@@ -2,8 +2,6 @@ import matchCrud from "../match/crud.js";
 import playerCrud from "../player/crud.js";
 import teamCrud from "../team/crud.js";
 import seasonCrud from "../season/crud.js";
-import articleCrud from "../article/crud.js";
-import galleryCrud from "../gallery/crud.js";
 import { ROUTE_SEO, pageTitle, seasonName } from "./route-seo.js";
 
 // Hlavička dokumentu podle stránky (caio-server `App.init({ seo: { document } })`, review
@@ -13,8 +11,9 @@ import { ROUTE_SEO, pageTitle, seasonName } from "./route-seo.js";
 // svoje „nenalezeno“).
 //
 // Data se berou **přes crud s anonymní identitou**, tedy se stejnými pravidly jako veřejné
-// API: dítě se skrytým jménem nemá jméno ani fotku (services/hidden-names.js), nepublikovaný
-// článek a album jsou 404.
+// API: dítě se skrytým jménem nemá jméno ani fotku (services/hidden-names.js).
+// Novinky a fotogalerie na webu nejsou (Caio 2026-11-19), jejich routy tedy dostanou 404 jako
+// každá neznámá cesta.
 
 // Obrázek, když stránka žádný nemá. Cesta, ne adresa: caio-server ji doplní adresou, na kterou
 // přišel požadavek (build ji má z `APP_URL`, a ten do přepnutí DNS vede na starý web -- 404).
@@ -40,8 +39,6 @@ const defaultLoaders = {
   team: (id) => teamCrud.get(id),
   currentCategoryList: () => seasonCrud.listCurrent(),
   season: (id) => seasonCrud.get(id),
-  article: (id) => articleCrud.get(id, null),
-  gallery: (id) => galleryCrud.get(id, null),
 };
 
 /** Záznam, nebo `null` pro neplatné id a 404. Jiná chyba (výpadek DB) letí dál -- caio-server
@@ -112,18 +109,6 @@ async function resolvePage(route, query, loaders) {
     const season = await load(loaders.season, id);
     if (!season) return NOT_FOUND;
     return page(seasonName(season), `Tabulka a všechna kola soutěže ${seasonName(season)}.`);
-  }
-
-  if (route === "novinka") {
-    const article = await load(loaders.article, id);
-    if (!article) return NOT_FOUND;
-    return page(article.name, article.desc || fallback.description, article.photographUri);
-  }
-
-  if (route === "fotogalerie/album") {
-    const gallery = await load(loaders.gallery, id);
-    if (!gallery) return NOT_FOUND;
-    return page(gallery.name, gallery.desc || fallback.description, gallery.coverThumbUri);
   }
 
   return page(fallback.title, fallback.description);

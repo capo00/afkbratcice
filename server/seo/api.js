@@ -1,8 +1,6 @@
 import matchDao from "../match/dao.js";
 import teamDao from "../team/dao.js";
 import seasonDao from "../season/dao.js";
-import galleryDao from "../gallery/dao.js";
-import articleDao from "../article/dao.js";
 import { Seo, Error as CoreError } from "caio-server";
 import { buildCalendar } from "../services/ical.js";
 
@@ -16,15 +14,7 @@ import { buildCalendar } from "../services/ical.js";
 // seznam je tady schválně: chybějící kód stojí jeden řádek v sitemapě, nic víc.
 const CONTENT_PAGE_LIST = ["historie", "hymna", "vybor", "tymove-fotky", "kontakt"];
 
-const RSS_ITEM_COUNT = 20;
-
-const { getBaseUrl, escapeXml: xml } = Seo;
-
-/** RSS 2.0 chce RFC 822, ne ISO. `toUTCString()` je přesně ten tvar. */
-function rfc822(isoTime) {
-  const date = isoTime ? new Date(isoTime) : null;
-  return date && !Number.isNaN(date.getTime()) ? date.toUTCString() : new Date().toUTCString();
-}
+const { getBaseUrl } = Seo;
 
 /**
  * Obsah `sitemap.xml` (caio-server ho obalí do XML, adresy doplní o základ webu). Adresy jsou
@@ -32,13 +22,8 @@ function rfc822(isoTime) {
  * nabízela samá 404.
  */
 export async function sitemap() {
-  const [ownTeams, galleries, articles] = await Promise.all([
-    teamDao.listOwn(),
-    galleryDao.listByFilter({ state: "published" }, { pageSize: 200 }),
-    articleDao
-      .listPageByFilter({ state: "published", publishedBefore: new Date().toISOString() }, { pageSize: 500 })
-      .then(({ itemList }) => itemList),
-  ]);
+  // Novinky a fotogalerie na webu nejsou (Caio 2026-11-19), v sitemapě tedy taky ne.
+  const ownTeams = await teamDao.listOwn();
 
   // Sezóny, ve kterých hrál některý z našich týmů (detail sezóny: tabulka a všechna kola).
   const seasons = ownTeams.length
@@ -47,9 +32,8 @@ export async function sitemap() {
 
   return [
     { path: "/", priority: "1.0" },
-    { path: "/novinky", priority: "0.9" },
     { path: "/muzstva", priority: "0.8" },
-    { path: "/fotogalerie", priority: "0.6" },
+    { path: "/zajimavosti", priority: "0.6" },
     ...CONTENT_PAGE_LIST.map((code) => ({ path: `/${code}`, priority: "0.5" })),
     ...ownTeams.flatMap((team) => [
       { path: `/muzstvo?id=${team.id}`, priority: "0.7" },
@@ -57,8 +41,6 @@ export async function sitemap() {
       { path: `/muzstvo/tabulka?id=${team.id}`, priority: "0.6" },
     ]),
     ...seasons.map((s) => ({ path: `/sezona?id=${s.id}`, priority: "0.5" })),
-    ...articles.map((a) => ({ path: `/novinka?id=${a.id}`, priority: "0.5" })),
-    ...galleries.map((g) => ({ path: `/fotogalerie/album?id=${g.id}`, priority: "0.4" })),
   ];
 }
 
@@ -97,56 +79,6 @@ export default {
 
       res.set("Content-Type", "text/calendar; charset=utf-8");
       res.set("Content-Disposition", `inline; filename="team-${teamId}.ics"`);
-      res.send(body);
-      return false;
-    },
-  },
-
-  /**
-   * Odběr novinek. Formát je RSS 2.0, ne Atom -- v0 publikoval RSS a čtečky, které si ho
-   * kdo přidal, mají v odkazu tuhle adresu.
-   */
-  rss: {
-    method: "get",
-    fn: async ({ req, res }) => {
-      const base = getBaseUrl(req);
-      // Ne `crud.list`: tady není identita ani stránkování, jen posledních pár
-      // publikovaných. Naplánované články filtrujeme stejně jako veřejný výpis.
-      const { itemList } = await articleDao.listPageByFilter(
-        { state: "published", publishedBefore: new Date().toISOString() },
-        { pageSize: RSS_ITEM_COUNT },
-        // Čistě chronologicky: připnutí je vlastnost webu, ne kanálu.
-        { sort: { publishTime: -1 } },
-      );
-
-      const body =
-        '<?xml version="1.0" encoding="UTF-8"?>\n' +
-        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n' +
-        "<channel>\n" +
-        "  <title>AFK Bratčice – novinky</title>\n" +
-        `  <link>${xml(base)}/novinky</link>\n` +
-        "  <description>Novinky z fotbalového klubu AFK Bratčice</description>\n" +
-        "  <language>cs</language>\n" +
-        `  <atom:link href="${xml(base)}/rss" rel="self" type="application/rss+xml" />\n` +
-        `  <lastBuildDate>${rfc822(itemList[0]?.publishTime)}</lastBuildDate>\n` +
-        itemList
-          .map((article) => {
-            const link = `${base}/novinka?id=${article.id}`;
-            return (
-              "  <item>\n" +
-              `    <title>${xml(article.name)}</title>\n` +
-              `    <link>${xml(link)}</link>\n` +
-              // guid je identifikátor, ne adresa; id je stálé i kdyby se adresa změnila.
-              `    <guid isPermaLink="false">${xml(article.id)}</guid>\n` +
-              `    <pubDate>${rfc822(article.publishTime)}</pubDate>\n` +
-              `    <description>${xml(article.desc)}</description>\n` +
-              "  </item>"
-            );
-          })
-          .join("\n") +
-        "\n</channel>\n</rss>\n";
-
-      res.set("Content-Type", "application/rss+xml; charset=utf-8");
       res.send(body);
       return false;
     },

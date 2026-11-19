@@ -271,7 +271,7 @@ fallbackem; číselná ID se překládají přes `migration_map`.
 
 | Staré URL | Nové URL | Typ |
 |---|---|---|
-| `/home`, `/home-<n>` | `/home` | 301 |
+| `/home`, `/home-<n>` | `/` | 301 |
 | `/historie` | `/page?code=history` | 301 |
 | `/hymna` | `/page?code=hymn` | 301 |
 | `/kontakt` | `/page?code=contact` | 301 |
@@ -286,11 +286,11 @@ fallbackem; číselná ID se překládají přes `migration_map`.
 | `/vsechny-zapasy-muzi\|zaci\|dorost` | `/team/matches?age=...` | 301 |
 | `/tabulka-muzi\|zaci\|dorost` | `/team/table?age=...` | 301 |
 | `/informace-o-zapase-<n>` | `/match?id=<mapované>` | 301 |
-| `/novinka-<n>` | `/novinky` (bez mapy — články se nemigrují, 2026-09-09) | 301 |
-| `/fotogalerie` | `/gallery` | 301 |
-| `/fotogalerie-<n>` | `/fotogalerie` (bez mapy — alba se nemigrují, 2026-09-09) | 301 |
+| `/novinka-<n>` | `/` (novinky na webu nejsou, 2026-11-19) | 301 |
+| `/fotogalerie` | `/` (fotogalerie na webu zatím není, 2026-11-19) | 302 |
+| `/fotogalerie-<n>` | `/` (alba se nemigrovala) | 301 |
 | `/ke-stazeni` | `/files` | 301 |
-| `/rss`, `/rss/` | `/rss` | 301 |
+| `/rss`, `/rss/` | – | 410 Gone (novinky na webu nejsou, 2026-11-19) |
 | `/prihlaseni` | `/login.html` (přihlašovací stránka z devkitu) | 302 |
 | `/editace-*`, `/upravit-*`, `/novy-*`, `/smazat-*` | `/admin/...` | 302 |
 | `/diskuze*` | `/home` | 301 |

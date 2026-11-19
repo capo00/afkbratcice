@@ -293,13 +293,9 @@ ok("detail vrací sekce i navázaný zápas",
 const setState = await post("article/setState", { id: draftArticle.body.id, state: "published" }, cookie);
 ok("setState publikuje", setState.status === 200 && setState.body?.state === "published", setState.body?.state);
 
-const rss = await fetch(`${BASE}/rss`);
-const rssBody = await rss.text();
-ok("RSS je kanál s publikovanou novinkou",
-  rss.headers.get("content-type")?.includes("application/rss+xml")
-  && rssBody.includes("<rss") && rssBody.includes("SMOKE publikovaná novinka"),
-  rss.headers.get("content-type"));
-ok("RSS nepouští naplánovanou novinku ven", !rssBody.includes("SMOKE naplánovaná novinka"));
+// RSS zrušeno spolu s novinkami na webu (Caio 2026-11-19): `/rss` je 410.
+const rss = await fetch(`${BASE}/rss`, { redirect: "manual" });
+ok("/rss je 410 Gone", rss.status === 410, rss.status);
 
 console.log("\n== teamEditor (role s rozsahem) ==");
 await Member.set(adminIdentity.identity, ["teamEditor:" + teamIds[0]], { note: "smoke" });
@@ -333,8 +329,14 @@ ok("/tymove_fotky -> /tymove-fotky", redir.status === 301 && redir.headers.get("
   { status: redir.status, loc: redir.headers.get("location") });
 const gone = await fetch(`${BASE}/pokladna`, { redirect: "manual" });
 ok("/pokladna je 410 Gone", gone.status === 410, gone.status);
-const news = await fetch(`${BASE}/home-3`, { redirect: "manual" });
-ok("/home-3 -> stránkování novinek", news.headers.get("location") === "/novinky?pageIndex=2", news.headers.get("location"));
+// Novinky ani fotogalerie na webu nejsou (Caio 2026-11-19).
+for (const old of ["/home-3", "/novinka-12", "/fotogalerie-7"]) {
+  const res = await fetch(`${BASE}${old}`, { redirect: "manual" });
+  ok(`${old} -> úvod`, res.status === 301 && res.headers.get("location") === "/", { status: res.status, loc: res.headers.get("location") });
+}
+const gallery = await fetch(`${BASE}/fotogalerie`, { redirect: "manual" });
+ok("/fotogalerie -> dočasně úvod", gallery.status === 302 && gallery.headers.get("location") === "/",
+  { status: gallery.status, loc: gallery.headers.get("location") });
 const oldMatch = await fetch(`${BASE}/informace-o-zapase-999999999`, { redirect: "manual" });
 ok("neznámý zápas z v0 -> seznam mužstev", oldMatch.status === 301 && oldMatch.headers.get("location") === "/muzstva",
   { status: oldMatch.status, loc: oldMatch.headers.get("location") });

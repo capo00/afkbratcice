@@ -22,9 +22,7 @@ const { theme } = Config;
 // to je horší než kratší patička. „Ke stažení" sem přibude s ní.
 const NAV = [
   { code: "home", href: "" },
-  { code: "news", href: "novinky" },
   { code: "teams", href: "muzstva" },
-  { code: "gallery", href: "fotogalerie" },
   { code: "history", href: "historie" },
   { code: "contact", href: "kontakt" },
 ];

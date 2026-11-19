@@ -67,8 +67,11 @@ test("neexistující, neplatné nebo chybějící id a neznámá cesta jsou 404 
     ["/zapas", {}],
     ["/hrac", { id: ID(99) }],
     ["/muzstvo/tabulka", { id: ID(99) }],
-    ["/novinka", { id: ID(99) }],
-    ["/fotogalerie/album", { id: ID(99) }],
+    // Novinky a fotogalerie na webu nejsou (Caio 2026-11-19).
+    ["/novinka", { id: ID(7) }],
+    ["/novinky", {}],
+    ["/fotogalerie", {}],
+    ["/fotogalerie/album", { id: ID(8) }],
     ["/sezona", { id: ID(99) }],
     ["/neexistuje", {}],
     ["/muzstvo/neexistuje", { id: ID(5) }],
@@ -110,17 +113,8 @@ test("mužstvo: kategorie a záložka, soutěž v popisu; soupeř podle názvu",
   assert.equal(rival.description, "Tabulka soutěže, ve které hraje mužstvo AFK Bratčice.");
 });
 
-test("sezóna, novinka a album", async () => {
+test("sezóna", async () => {
   assert.equal((await at("/sezona", { id: ID(9) })).title, "III. třída 2026/27 · AFK Bratčice");
-  // Escapování dělá caio-server (applyPageMeta); tady jde text tak, jak je.
-  assert.deepEqual(await at("/novinka", { id: ID(7) }), {
-    title: 'Výhra <3:1> & "derby" · AFK Bratčice',
-    description: "Perex.",
-    image: "/binary/a.jpg",
-  });
-  const album = await at("/fotogalerie/album", { id: ID(8) });
-  assert.equal(album.description, "Fotografie ze zápasů a života klubu AFK Bratčice.");
-  assert.equal(album.image, "/binary/cover.webp");
 });
 
 test("stránky bez dat: titulek routy, úvod jen název klubu, výchozí obrázek", async () => {
@@ -131,5 +125,5 @@ test("stránky bez dat: titulek routy, úvod jen název klubu, výchozí obráze
     ...DEFAULT_IMAGE_SIZE,
   });
   assert.equal((await at("/kontakt")).title, "Kontakt · AFK Bratčice");
-  assert.equal((await at("/vybor")).title, "Výbor AFK · AFK Bratčice");
+  assert.equal((await at("/vybor")).title, "Výbor · AFK Bratčice");
 });

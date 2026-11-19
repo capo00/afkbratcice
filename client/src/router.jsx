@@ -2,12 +2,10 @@ import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import PageLoading from "./components/layout/page-loading.jsx";
 
-// Routy se načítají **lazy**: kdo přijde na home, nemá stahovat kód fotogalerie.
+// Routy se načítají **lazy**: kdo přijde na home, nemá stahovat kód statistik.
 // Administrace tu není vůbec — je to vlastní UVE (admin/app.jsx, /admin/).
 // `Utils.Component.lazy` je uu5 obálka nad `React.lazy`.
 const Home = Utils.Component.lazy(() => import("./routes/home.jsx"));
-const Novinky = Utils.Component.lazy(() => import("./routes/novinky.jsx"));
-const Novinka = Utils.Component.lazy(() => import("./routes/novinka.jsx"));
 const Teams = Utils.Component.lazy(() => import("./routes/teams.jsx"));
 const Team = Utils.Component.lazy(() => import("./routes/team.jsx"));
 const TeamMatches = Utils.Component.lazy(() => import("./routes/team-matches.jsx"));
@@ -16,8 +14,6 @@ const TeamStats = Utils.Component.lazy(() => import("./routes/team-stats.jsx"));
 const Match = Utils.Component.lazy(() => import("./routes/match.jsx"));
 const Season = Utils.Component.lazy(() => import("./routes/season.jsx"));
 const Player = Utils.Component.lazy(() => import("./routes/player.jsx"));
-const Gallery = Utils.Component.lazy(() => import("./routes/gallery.jsx"));
-const GalleryDetail = Utils.Component.lazy(() => import("./routes/gallery-detail.jsx"));
 const Page = Utils.Component.lazy(() => import("./routes/page.jsx"));
 const Kontakt = Utils.Component.lazy(() => import("./routes/kontakt.jsx"));
 const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
@@ -26,8 +22,8 @@ const Zajimavosti = Utils.Component.lazy(() => import("./routes/zajimavosti.jsx"
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
 //
 // **Adresy jsou české** (rozhodnuto 2026-09-06). Je to web českého klubu — a hlavně jsou
-// tím shodné s v0, takže `/muzstva`, `/fotogalerie`, `/historie`, `/hymna`, `/vybor`
-// i `/ke-stazeni` sedí bez jediného přesměrování a co je naindexované ve
+// tím shodné s v0, takže `/muzstva`, `/historie`, `/hymna` a `/vybor`
+// sedí bez jediného přesměrování a co je naindexované ve
 // vyhledávači, zůstane platné.
 //
 // Kanonická adresa úvodní stránky je **`/`, ne `/home`**: `server/legacy-redirect.js` posílá
@@ -40,10 +36,8 @@ const ROUTE_MAP = {
   "": <Home />,
   home: { redirect: "" },
 
-  // `/home-<n>` ze starého webu přesměrovává server sem s `pageIndex`, takže stránkování
-  // novinek musí být v adrese, ne ve stavu obrazovky.
-  novinky: <Novinky />,
-  novinka: <Novinka />,
+  // Novinky (`novinky`, `novinka`) na webu nebudou (Caio 2026-11-19); články zůstávají jen
+  // v administraci. Staré adresy `/novinka-<n>` a `/home-<n>` vede server na úvod.
 
   muzstva: <Teams />,
   muzstvo: <Team />,
@@ -56,8 +50,10 @@ const ROUTE_MAP = {
   sezona: <Season />,
   hrac: <Player />,
 
-  fotogalerie: <Gallery />,
-  "fotogalerie/album": <GalleryDetail />,
+  // Fotogalerie na webu zatím není (Caio 2026-11-19), `/fotogalerie` server dočasně (302)
+  // posílá na úvod. Obrazovky `routes/gallery.jsx` a `routes/gallery-detail.jsx` zůstávají:
+  // návrat jsou dva lazy importy, dva řádky tady, záznamy v `config/seo.js`
+  // a `server/seo/route-seo.js` a pravidlo v `server/legacy-redirect.js`.
 
   kontakt: <Kontakt />,
   // Klub → Zajímavosti, po kategoriích (`?kategorie=men-a`).

@@ -7,24 +7,12 @@
 // týmových fotek od roku 1943 (30 kB, které si otevře málokdo).
 //
 // `code` je zároveň routa — `/historie`, `/hymna`, … Adresy jsou převzaté z v0, takže
-// staré odkazy sedí bez přesměrování.
+// staré odkazy sedí bez přesměrování. Pořadí je pořadí v menu Klub (za Zajímavostmi).
 
 const PAGES = {
   historie: {
     name: "Historie klubu",
     desc: "Fotbal v Bratčicích od roku 1932 po dnešek.",
-  },
-
-  hymna: {
-    name: "Hymna",
-    desc: "Klubová hymna Traverza.",
-  },
-
-  vybor: {
-    name: "Výbor AFK",
-    desc: "Lidé, kteří klub vedou.",
-    // Obsah není text, ale členové výboru ze záznamů vedení (`management/list?board=true`,
-    // `components/board.jsx`); do 2026-11 to byl text v `page-content.js`.
   },
 
   // Stránka `treninky` (z v0) zrušena 2026-11-04: rozpis tréninků nikdo neudržuje,
@@ -34,6 +22,18 @@ const PAGES = {
   "tymove-fotky": {
     name: "Týmové fotky",
     desc: "Mužstva AFK Bratčice od roku 1943.",
+  },
+
+  hymna: {
+    name: "Hymna",
+    desc: "Klubová hymna Traverza.",
+  },
+
+  vybor: {
+    name: "Výbor",
+    desc: "Lidé, kteří klub vedou.",
+    // Obsah není text, ale členové výboru ze záznamů vedení (`management/list?board=true`,
+    // `components/board.jsx`); do 2026-11 to byl text v `page-content.js`.
   },
 };
 

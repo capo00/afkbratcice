@@ -13,7 +13,6 @@
   "header": {
     "nav": {
       "home": "Úvod",
-      "news": "Aktuality",
       "teams": "Mužstva",
       "gallery": "Fotogalerie",
       "files": "Ke stažení",
@@ -244,13 +243,6 @@
       "empty": "Tabulka zatím není — v soutěži se ještě nehrálo.",
       "note": "${categoryList} hraje soutěž bez tabulky."
     }
-  },
-  "news": {
-    "eyebrow": "Co je nového",
-    "header": "Aktuality",
-    "all": "Všechny novinky",
-    "empty": "Zatím tu není žádná novinka.",
-    "missing": "Novinku se nepodařilo najít."
   },
   "teams": {
     "eyebrow": "Jeden klub, jedny barvy",
@@ -599,7 +591,7 @@
     "name": {
       "historie": "Historie",
       "hymna": "Hymna",
-      "vybor": "Výbor AFK",
+      "vybor": "Výbor",
       "tymove-fotky": "Týmové fotky"
     }
   },

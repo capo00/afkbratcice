@@ -31,8 +31,8 @@ uživatele, resetu hesla e-mailem (SMTP), hero fotky a chybějících log klubů
 
 | Vrstva | Hotovo | Chybí |
 |---|---|---|
-| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **kategorie**, `article`, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, `/rss`, přihlášení z knihovny, **skrytí jmen dětí**, jednotkové testy | uzavírání sezón (`season/close`) — po vydání |
-| Klient — veřejná část | rám, české adresy, home vč. aktualit, novinky, mužstva, soupiska vč. realizačního týmu, zápasy, tabulka, statistiky, detail zápasu se sestavou na hřišti, kolo, profil hráče, fotogalerie, obsahové stránky s textem z v0, kontakt, 404, světlý a tmavý režim | ke stažení, profil uživatele, SEO za běhu — po vydání |
+| Server | sportovní jádro (`team`, `season`, `match`, `person`, `player`, `coach`), **kategorie**, `article`, statistiky a tabulka, galerie, `file/list`, konfigurace, iCal, sitemap, přihlášení z knihovny, **skrytí jmen dětí**, jednotkové testy | uzavírání sezón (`season/close`) — po vydání |
+| Klient — veřejná část | rám, české adresy, home, mužstva, soupiska vč. realizačního týmu, zápasy, tabulka, statistiky, detail zápasu se sestavou na hřišti, kolo, profil hráče, Zajímavosti, obsahové stránky s textem z v0, kontakt, 404, světlý a tmavý režim | ke stažení, profil uživatele, SEO za běhu — po vydání |
 | Klient — administrace | vlastní UVE, rozcestník a 13 obrazovek (vč. **kategorií**), upload ověřený proti GCS | filtrování dat podle `teamEditor:*`, filtr týmů podle kategorie |
 | Data | celá historie z v0 v lokální DB (2 519 zápasů, 132 hráčů, 78 týmů, 19 sezón), erby 35 klubů v dev bucketu | prod DB, prod bucket |
 | Provoz | dev proti lokálnímu Mongu, dev GCS bucket, produkční `.env` (Atlas, bucket `afkbratcice-binary`, Google, Facebook) | viz 0 |

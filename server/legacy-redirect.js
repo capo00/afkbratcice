@@ -9,8 +9,7 @@ import teamDao from "./team/dao.js";
 // Co se v mapě nenajde, skončí na nejbližším seznamu, ne na 404.
 
 // Routy nové appky jsou **české a shodné s v0** (`/historie`, `/hymna`, `/vybor`,
-// `/muzstva`, `/fotogalerie`, `/ke-stazeni`), takže se pro ně žádné pravidlo
-// nepíše — adresa zůstává platná a SPA fallback ji obslouží sám. Zbývá jen to, kde se
+// `/muzstva`), takže se pro ně žádné pravidlo nepíše — adresa zůstává platná a SPA fallback ji obslouží sám. Zbývá jen to, kde se
 // adresa opravdu liší.
 const STATIC_REDIRECT = {
   "/home": "/",
@@ -25,14 +24,15 @@ const STATIC_REDIRECT = {
   "/treninky": "/",
 };
 
-// Stránkování novinek: /home-2, /home-69, ...
-const HOME_PAGE = /^\/home-(\d+)\/?$/;
+// Novinky ani fotogalerie na webu nejsou (Caio 2026-11-19): stránkování novinek v0
+// (`/home-2`, `/home-69`, ...), článek (`/novinka-<n>`) i album (`/fotogalerie-<n>`) vedou
+// natrvalo na úvod. Výpis fotogalerie dočasně (`NOT_YET`), ten se vrátí.
+const HOME_PAGE = /^\/home-\d+$/;
+const ARTICLE_PAGE = /^\/novinka-\d+$/;
+const GALLERY_PAGE = /^\/fotogalerie-\d+$/;
 
-// Adresy s id z v0. Články a alba se nemigrovaly (migration.md, 6), takže vedou na seznam;
-// jediný zmigrovaný článek (sezóna 2026) mapa zná.
+// Zápas s id z v0 -> detail přes `afk_migration_map`.
 const MATCH_PAGE = /^\/informace-o-zapase-(\d+)$/;
-const ARTICLE_PAGE = /^\/novinka-(\d+)$/;
-const GALLERY_PAGE = /^\/fotogalerie-(\d+)$/;
 // Zápasy mužstva: `/zapasy` jsou muži, `/zapasy-<id týmu v0>` ostatní mužstva.
 const TEAM_MATCHES_PAGE = /^\/zapasy(?:-(\d+))?$/;
 
@@ -47,17 +47,17 @@ const TEAM_PAGE = {
   "/tabulka-dorost": ["u19", "muzstvo/tabulka"],
 };
 
-// Stránka, která v0 měla a 0.6.0 ještě ne (todo.md, 2): dočasně na úvod, ne natrvalo.
-const NOT_YET = { "/ke-stazeni": "/" };
+// Stránky, které v0 měla a web zatím ne (todo.md, 2): dočasně na úvod, ne natrvalo.
+const NOT_YET = { "/ke-stazeni": "/", "/fotogalerie": "/" };
 
 async function ownTeamId(category) {
   const [team] = await teamDao.listByFilter({ categoryList: [category], own: true });
   return team?.id ?? null;
 }
 
-// Klubová kasa a staré JSON API jsou mimo rozsah -- 410 říká vyhledávačům, že se
-// nevrátí, na rozdíl od 404.
-const GONE = [/^\/pokladna/, /^\/pokuty/, /^\/moje-pokuty/, /^\/prijem/, /^\/vydaj/, /^\/api\//];
+// Klubová kasa, staré JSON API a RSS novinek (novinky na webu nejsou) jsou mimo rozsah --
+// 410 říká vyhledávačům i čtečkám, že se nevrátí, na rozdíl od 404.
+const GONE = [/^\/pokladna/, /^\/pokuty/, /^\/moje-pokuty/, /^\/prijem/, /^\/vydaj/, /^\/api\//, /^\/rss$/];
 
 // Diskuze se ruší (poslední příspěvek 2017, zaspamovaná).
 const DISCUSSION = /^\/diskuze/;
@@ -68,14 +68,6 @@ async function idRedirect(path) {
     const id = await migrationMapDao.findTargetId("match", match[1]);
     return id ? `/zapas?id=${id}` : "/muzstva";
   }
-
-  const article = path.match(ARTICLE_PAGE);
-  if (article) {
-    const id = await migrationMapDao.findTargetId("article", article[1]);
-    return id ? `/novinka?id=${id}` : "/novinky";
-  }
-
-  if (GALLERY_PAGE.test(path)) return "/fotogalerie";
 
   const teamMatches = path.match(TEAM_MATCHES_PAGE);
   if (teamMatches) {
@@ -100,8 +92,7 @@ async function legacyRedirect(req, res, next) {
   const target = STATIC_REDIRECT[path];
   if (target) return res.redirect(301, target);
 
-  const homePage = path.match(HOME_PAGE);
-  if (homePage) return res.redirect(301, `/novinky?pageIndex=${Math.max(0, Number(homePage[1]) - 1)}`);
+  if (HOME_PAGE.test(path) || ARTICLE_PAGE.test(path) || GALLERY_PAGE.test(path)) return res.redirect(301, "/");
 
   if (DISCUSSION.test(path)) return res.redirect(301, "/");
   if (GONE.some((re) => re.test(path))) return res.status(410).send("410 Gone");

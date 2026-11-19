@@ -5,7 +5,7 @@
 // `tools/page-meta.js`; statický popis pro roboty bez JS je v `assets/meta/manifest.json`
 // (description) -- při změně HOME_DESCRIPTION ho přepiš i tam.
 //
-// Stránky s daty (mužstvo, zápas, hráč, novinka, album, sezóna) mají tady jen výchozí
+// Stránky s daty (mužstvo, zápas, hráč, sezóna) mají tady jen výchozí
 // titulek; konkrétní („A (Muži) – Soupiska", „AFK Bratčice – Chotusice") si doplní samy
 // přes `usePageTitle`, až data dorazí.
 import { PAGES } from "../content/pages.js";
@@ -19,8 +19,6 @@ const HOME_DESCRIPTION =
 // Klíč = routa z `router.jsx` (shodu hlídá seo.test.js). `title: null` = jen název klubu.
 const ROUTE_SEO = {
   "": { title: null, description: HOME_DESCRIPTION },
-  novinky: { title: "Novinky", description: "Novinky a reportáže ze zápasů AFK Bratčice." },
-  novinka: { title: "Novinka", description: "Novinky a reportáže ze zápasů AFK Bratčice." },
   muzstva: { title: "Mužstva", description: "Mužstva AFK Bratčice – muži, dorost, žáci a stará garda." },
   muzstvo: { title: "Soupiska", description: "Soupiska a realizační tým mužstva AFK Bratčice." },
   "muzstvo/zapasy": { title: "Zápasy", description: "Program a výsledky zápasů mužstva AFK Bratčice." },
@@ -29,8 +27,6 @@ const ROUTE_SEO = {
   zapas: { title: "Zápas", description: "Výsledek, sestava a střelci zápasu AFK Bratčice." },
   sezona: { title: "Sezóna", description: "Tabulka a všechna kola soutěže, ve které hraje AFK Bratčice." },
   hrac: { title: "Hráč", description: "Profil a statistiky hráče AFK Bratčice." },
-  fotogalerie: { title: "Fotogalerie", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
-  "fotogalerie/album": { title: "Album", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   kontakt: { title: "Kontakt", description: "Kde najdete hřiště AFK Bratčice a jak nás kontaktovat." },
   zajimavosti: { title: "Zajímavosti", description: "Rekordy, série a nejlepší hráči AFK Bratčice za celou historii." },
   ...Object.fromEntries(Object.entries(PAGES).map(([code, page]) => [code, { title: page.name, description: page.desc }])),

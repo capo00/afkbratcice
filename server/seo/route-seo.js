@@ -11,8 +11,6 @@ const HOME_DESCRIPTION =
 
 const ROUTE_SEO = {
   "": { title: null, description: HOME_DESCRIPTION },
-  novinky: { title: "Novinky", description: "Novinky a reportáže ze zápasů AFK Bratčice." },
-  novinka: { title: "Novinka", description: "Novinky a reportáže ze zápasů AFK Bratčice." },
   muzstva: { title: "Mužstva", description: "Mužstva AFK Bratčice – muži, dorost, žáci a stará garda." },
   muzstvo: { title: "Soupiska", description: "Soupiska a realizační tým mužstva AFK Bratčice." },
   "muzstvo/zapasy": { title: "Zápasy", description: "Program a výsledky zápasů mužstva AFK Bratčice." },
@@ -21,14 +19,12 @@ const ROUTE_SEO = {
   zapas: { title: "Zápas", description: "Výsledek, sestava a střelci zápasu AFK Bratčice." },
   sezona: { title: "Sezóna", description: "Tabulka a všechna kola soutěže, ve které hraje AFK Bratčice." },
   hrac: { title: "Hráč", description: "Profil a statistiky hráče AFK Bratčice." },
-  fotogalerie: { title: "Fotogalerie", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
-  "fotogalerie/album": { title: "Album", description: "Fotografie ze zápasů a života klubu AFK Bratčice." },
   kontakt: { title: "Kontakt", description: "Kde najdete hřiště AFK Bratčice a jak nás kontaktovat." },
   zajimavosti: { title: "Zajímavosti", description: "Rekordy, série a nejlepší hráči AFK Bratčice za celou historii." },
   historie: { title: "Historie klubu", description: "Fotbal v Bratčicích od roku 1932 po dnešek." },
-  hymna: { title: "Hymna", description: "Klubová hymna Traverza." },
-  vybor: { title: "Výbor AFK", description: "Lidé, kteří klub vedou." },
   "tymove-fotky": { title: "Týmové fotky", description: "Mužstva AFK Bratčice od roku 1943." },
+  hymna: { title: "Hymna", description: "Klubová hymna Traverza." },
+  vybor: { title: "Výbor", description: "Lidé, kteří klub vedou." },
 };
 
 /** „Soupiska · AFK Bratčice“, bez jména stránky jen název klubu (jako klient, caio-ui `usePageMeta`). */

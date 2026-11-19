@@ -886,7 +886,6 @@ v pořadí sama nic zaregistrovat nemůže — pořadí drží `init()`.
 
 | Trasa | Popis | Kdo registruje |
 |---|---|---|
-| `GET /rss` | RSS 2.0 kanál publikovaných článků (náhrada v0 `rss.php`) | aplikace |
 | `GET /sitemap.xml` | Mapa stránek pro vyhledávače | aplikace |
 | `GET /calendar/team-<id>.ics` | Rozpis zápasů týmu k odběru v telefonu (iCal) | aplikace |
 | `GET /login.html` | Přihlašovací stránka (statická, kopíruje ji `caio-devkit`) | devkit |
@@ -898,6 +897,12 @@ Netypové trasy se registrují jako use case s `method: "get"`, který si odpov�
 Legacy přesměrování (`server/legacy-redirect.js`) musí být namountované **před** SPA
 fallbackem – zařizuje to `middlewareList` v `App.init`, viz [migration.md](./migration.md),
 sekce 5.
+
+**2026-11-19 (Caio):** novinky na webu nebudou a fotogalerie zatím taky ne. Routy `novinky`,
+`novinka`, `fotogalerie` a `fotogalerie/album` jsou z klienta pryč, sitemapa je nevypisuje
+a `GET /rss` je zrušené (stará adresa vrací 410). Use casy `article/*` a `gallery/*` zůstávají
+pro administraci. `/novinka-<n>`, `/home-<n>` a `/fotogalerie-<n>` z v0 vedou natrvalo na úvod,
+`/fotogalerie` dočasně (302).
 
 **Stav po dávce ze 6. 9.:** `sitemap.xml`, `calendar/team` i `/rss` běží. Sitemapa vypisuje
 i české adresy obsahových stránek a publikované články. Přesměrování s číselným `id`

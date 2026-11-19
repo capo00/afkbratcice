@@ -10,7 +10,6 @@ import Button from "../components/layout/button.jsx";
 import Card from "../components/layout/card.jsx";
 import WeekendProgram from "../components/home/weekend-program.jsx";
 import LastResults from "../components/home/last-results.jsx";
-import NewsSection from "../components/home/news-section.jsx";
 import TablesSection from "../components/home/tables-section.jsx";
 import { useApp } from "../core/app-context.jsx";
 
@@ -145,7 +144,6 @@ function Home() {
       <Stats />
       <WeekendProgram />
       <LastResults />
-      <NewsSection />
       <TablesSection />
       <CtaBand />
     </>

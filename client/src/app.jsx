@@ -33,7 +33,6 @@ const SAME_PAGE_PARAM_LIST = ["seasonId"];
 // Přepínač světlého a tmavého režimu přidává `Top` sám.
 function useTop() {
   const { state } = UiAuth.useSession();
-  const newsLabel = useLsi(importLsi, ["header", "nav", "news"]);
   const teamsLabel = useLsi(importLsi, ["header", "nav", "teams"]);
   const clubLabel = useLsi(importLsi, ["header", "nav", "club"]);
   const highlightsLabel = useLsi(importLsi, ["header", "nav", "highlights"]);
@@ -54,12 +53,6 @@ function useTop() {
     menu: {
       itemList: [
         {
-          href: "novinky",
-          children: newsLabel.toUpperCase(),
-          significance: "subdued",
-          colorScheme: "building",
-        },
-        {
           href: "muzstva",
           children: teamsLabel.toUpperCase(),
           significance: "subdued",
@@ -79,10 +72,11 @@ function useTop() {
           children: clubLabel.toUpperCase(),
           significance: "subdued",
           colorScheme: "building",
-          // Za obsahovými stránkami Zajímavosti (statistiky klubu za celou historii).
+          // Zajímavosti (statistiky klubu za celou historii) první, za nimi obsahové stránky
+          // v pořadí z `content/pages.js` (Caio 2026-11-19).
           itemList: [
-            ...PAGE_CODE_LIST.map((code) => ({ href: code, children: pageLsi[code] })),
             { href: "zajimavosti", children: highlightsLabel },
+            ...PAGE_CODE_LIST.map((code) => ({ href: code, children: pageLsi[code] })),
           ],
         },
         {

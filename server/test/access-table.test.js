@@ -187,7 +187,6 @@ const expected = {
   "roster/list": "public",
   "roster/update": [...EDITORS_OF_A, ...CONTENT],
   "roster/update#missing": CONTENT,
-  "rss": "public",
   "season/create": CONTENT,
   "season/delete": CONTENT,
   "season/get": "public",
