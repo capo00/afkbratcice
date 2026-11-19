@@ -586,6 +586,9 @@
     "members": "Ostatní členové",
     "empty": "Složení výboru zatím není vyplněné."
   },
+  "history": {
+    "more": "Podrobnosti"
+  },
   "page": {
     "missing": "Stránka neexistuje.",
     "name": {

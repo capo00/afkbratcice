@@ -1,5 +1,4 @@
-import { createVisualComponent, useRoute, Content, Utils } from "uu5g05";
-import Uu5Extras from "uu5extrasg01";
+import { createVisualComponent, useRoute, Content } from "uu5g05";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import Section from "../components/layout/section.jsx";
@@ -8,17 +7,10 @@ import Prose from "../components/layout/prose.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import PAGES from "../content/pages.js";
 import Board from "../components/board.jsx";
+import History from "../components/history/history.jsx";
 // Text stránek se veze až s touhle obrazovkou (lazy chunk), ne v hlavním bundlu --
 // důvod je v komentáři nahoře v `content/pages.js`.
 import PAGE_CONTENT from "../content/page-content.js";
-
-const { theme } = Config;
-
-// Komponenty, které obsah stránek smí použít, se registrují do uu5String tady. Bez registrace
-// si uu5g05 jmenný prostor (`Uu5Extras`) překládá dotazem do uuAppLibraryRegistry na
-// `uuapp.plus4u.net` -- každý návštěvník historie by volal cizí server (review 2026-11-12, S5).
-// Import je v téhle líné obrazovce, takže se knihovna stahuje jen s obsahovými stránkami.
-Utils.LibraryRegistry.registerComponent(Uu5Extras.VerticalTimeline);
 
 // Jedna obrazovka pro všechny obsahové stránky. Kterou vykreslí, říká **routa** —
 // `/historie`, `/hymna`, `/vybor`, … —, ne parametr: adresy jsou převzaté z v0, takže
@@ -31,10 +23,14 @@ Utils.LibraryRegistry.registerComponent(Uu5Extras.VerticalTimeline);
 // Až vznikne ECC, obsah se přesune do databáze beze změny tvaru a tahle komponenta si
 // jen vymění zdroj.
 //
-// Výjimka jsou stránky, jejichž obsah už v databázi **je** (`DATA_PAGES`): `/vybor`
-// kreslí členy výboru ze záznamů vedení, ve stejné sazbě jako text.
+// Výjimky:
+// - stránky, jejichž obsah už v databázi **je** (`DATA_PAGES`): `/vybor` kreslí členy výboru
+//   ze záznamů vedení, ve stejné sazbě jako text (uvnitř `Prose`);
+// - stránky s vlastním tělem (`OWN_PAGES`): `/historie` má časovou osu s rozklikávacími detaily,
+//   kterou uu5String neumí a která nesmí být v `Prose` (jeho `& p`/`& h3` by přebily její sazbu).
 
 const DATA_PAGES = { vybor: Board };
+const OWN_PAGES = { historie: History };
 
 const Page = createVisualComponent({
   uu5Tag: Config.TAG + "Page",
@@ -43,6 +39,7 @@ const Page = createVisualComponent({
     const [route] = useRoute();
     const page = PAGES[route?.uu5Route];
     const DataPage = DATA_PAGES[route?.uu5Route];
+    const OwnPage = OWN_PAGES[route?.uu5Route];
 
     if (!page) {
       return (
@@ -56,21 +53,13 @@ const Page = createVisualComponent({
       <Section>
         <Heading lsi={undefined}>{page.name}</Heading>
 
-        <Prose
-          className={Config.Css.css({
-            marginBlockStart: 24,
-            maxWidth: 720,
-            // `Uu5Extras.VerticalTimeline` (uu5extrasg01 1.9) dává kolečku ikony napevno inline
-            // `background: white`. Na tmavém podkladu na něm průsvitná ikona položky zmizí, proto
-            // `!important` a barva stránky (průhledné ne: kolečkem by prosvítala čára osy).
-            "& .vertical-timeline-element-icon": { backgroundColor: `${theme.color.bg} !important` },
-            // Popisek (rok) je pod textem jako `float: left` na celou šířku a poslední řádek
-            // textu ho obtéká -- odsune se doprava. Jako blok pod textem obtékat nemá co.
-            "& .vertical-timeline-element-date": { float: "none !important", display: "block !important" },
-          })}
-        >
-          {DataPage ? <DataPage /> : <Content>{PAGE_CONTENT[route.uu5Route]}</Content>}
-        </Prose>
+        {OwnPage ? (
+          <OwnPage />
+        ) : (
+          <Prose className={Config.Css.css({ marginBlockStart: 24, maxWidth: 720 })}>
+            {DataPage ? <DataPage /> : <Content>{PAGE_CONTENT[route.uu5Route]}</Content>}
+          </Prose>
+        )}
       </Section>
     );
   },
