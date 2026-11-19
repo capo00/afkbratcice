@@ -6,7 +6,8 @@ import { buildCalendar } from "../services/ical.js";
 
 // Netypové trasy. Registrují se jako běžný use case, který si odpověď pošle sám přes
 // `res` a vrátí `false` -- App.init pak nic dalšího neodesílá. `robots.txt` a `sitemap.xml`
-// odpovídá caio-server (Disallow počítá z use casů); obsah sitemapy je `sitemap` níž,
+// odpovídá caio-server (use casy a administrace se smí stáhnout a nesou `X-Robots-Tag: noindex`,
+// caio-server 0.8.0); obsah sitemapy je `sitemap` níž,
 // předaný do `App.init({ seo })` v server/index.js.
 
 // Obsahové stránky jsou natvrdo v klientu (`client/src/content/pages.js`) a serveru se

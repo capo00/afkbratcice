@@ -85,7 +85,7 @@ export default {
   pwa: { themeColor: "clubRed" },
 
   // Administrace je vlastní UVE (client/src/admin/), titulek „Administrace · AFK Bratčice“;
-  // neveřejná je sama od sebe (noindex, robots.txt).
+  // neveřejná je sama od sebe (meta i hlavička `X-Robots-Tag: noindex`, caio-server 0.8.0).
   uves: { admin: { title: "Administrace" } },
 
   deploy: { project: "afkbratcice", keepVersions: 3 },

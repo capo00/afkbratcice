@@ -4,7 +4,7 @@
 - Menu Klub v pořadí Zajímavosti, Historie, Týmové fotky, Hymna, Výbor (dříve „Výbor AFK“). Zajímavosti jsou v sitemapě.
 
 ## Opraveno
--
+- caio-server 0.8.0: `robots.txt` už nezakazuje API (`/match/`, `/stats/`, ...), takže Google vykreslí stránky i s výsledky a tabulkami. API, administrace a `/login.html` nesou hlavičku `X-Robots-Tag: noindex`, administrace tak nemůže skončit v indexu ani jako holá adresa.
 
 ## Breaking
 - Novinky na webu nejsou: z menu, úvodu a patičky zmizely Aktuality, routy `/novinky` a `/novinka` vrací 404, sitemapa články nevypisuje a `/rss` vrací 410. Články zůstávají v administraci.
