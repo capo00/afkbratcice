@@ -15,6 +15,9 @@ import { buildCalendar } from "../services/ical.js";
 // seznam je tady schválně: chybějící kód stojí jeden řádek v sitemapě, nic víc.
 const CONTENT_PAGE_LIST = ["historie", "hymna", "vybor", "tymove-fotky", "kontakt"];
 
+// Sitemapa smí mít nejvýš 50 000 adres; zápasů našich týmů je kolem 460 (2026-11).
+const SITEMAP_MATCH_LIMIT = 40000;
+
 const { getBaseUrl } = Seo;
 
 /**
@@ -26,10 +29,23 @@ export async function sitemap() {
   // Novinky a fotogalerie na webu nejsou (Caio 2026-11-19), v sitemapě tedy taky ne.
   const ownTeams = await teamDao.listOwn();
 
-  // Sezóny, ve kterých hrál některý z našich týmů (detail sezóny: tabulka a všechna kola).
-  const seasons = ownTeams.length
-    ? await seasonDao.find({ teamList: { $in: ownTeams.map((team) => team.id) } }, { pageSize: 500 })
-    : [];
+  const ownIdList = ownTeams.map((team) => team.id);
+
+  // Sezóny, ve kterých hrál některý z našich týmů (detail sezóny: tabulka a všechna kola), a zápasy
+  // našich týmů, odehrané i naplánované. Zápasy jsou na webu jen za kartou bez `<a href>` (review
+  // S10), takže vyhledávač je bez sitemapy nenajde. Cizí zápasy soutěže sem nepatří. Hráči sem
+  // nepatří taky (Caio 2026-11-20).
+  const [seasons, matches] = ownIdList.length
+    ? await Promise.all([
+        seasonDao.find({ teamList: { $in: ownIdList } }, { pageSize: 500 }),
+        matchDao.find(
+          { $or: [{ homeTeamId: { $in: ownIdList } }, { guestTeamId: { $in: ownIdList } }] },
+          { pageSize: SITEMAP_MATCH_LIMIT },
+          { time: -1 },
+          { _id: 1 },
+        ),
+      ])
+    : [[], []];
 
   return [
     { path: "/", priority: "1.0" },
@@ -40,8 +56,10 @@ export async function sitemap() {
       { path: `/muzstvo?id=${team.id}`, priority: "0.7" },
       { path: `/muzstvo/zapasy?id=${team.id}`, priority: "0.7" },
       { path: `/muzstvo/tabulka?id=${team.id}`, priority: "0.6" },
+      { path: `/muzstvo/statistiky?id=${team.id}`, priority: "0.6" },
     ]),
     ...seasons.map((s) => ({ path: `/sezona?id=${s.id}`, priority: "0.5" })),
+    ...matches.map((m) => ({ path: `/zapas?id=${m.id}`, priority: "0.4" })),
   ];
 }
 

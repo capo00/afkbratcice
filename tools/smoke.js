@@ -334,6 +334,22 @@ for (const old of ["/home-3", "/novinka-12", "/fotogalerie-7"]) {
   const res = await fetch(`${BASE}${old}`, { redirect: "manual" });
   ok(`${old} -> úvod`, res.status === 301 && res.headers.get("location") === "/", { status: res.status, loc: res.headers.get("location") });
 }
+// Přímé adresy v0 (*.php) a výpisy všech zápasů; administrace v0 nikam nevede (Caio 2026-11-20).
+for (const [old, status, location] of [
+  ["/index.php", 301, "/"],
+  ["/historie.php", 301, "/historie"],
+  ["/prihlaseni", 301, "/"],
+  ["/editace-zapasu", 410],
+  ["/upravit-hrace-abc", 410],
+  ["/prihlaseni.php", 410],
+]) {
+  const res = await fetch(`${BASE}${old}`, { redirect: "manual" });
+  ok(`${old} -> ${status} ${location ?? ""}`.trim(), res.status === status && (location === undefined || res.headers.get("location") === location),
+    { status: res.status, loc: res.headers.get("location") });
+}
+const allMatches = await fetch(`${BASE}/vsechny-zapasy-muzi`, { redirect: "manual" });
+ok("/vsechny-zapasy-muzi -> zápasy mužstva", allMatches.status === 301 && /^\/muzstvo\/zapasy\?id=/.test(allMatches.headers.get("location") ?? "") || allMatches.headers.get("location") === "/muzstva",
+  { status: allMatches.status, loc: allMatches.headers.get("location") });
 const gallery = await fetch(`${BASE}/fotogalerie`, { redirect: "manual" });
 ok("/fotogalerie -> dočasně úvod", gallery.status === 302 && gallery.headers.get("location") === "/",
   { status: gallery.status, loc: gallery.headers.get("location") });

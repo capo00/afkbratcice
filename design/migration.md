@@ -283,7 +283,7 @@ fallbackem; číselná ID se překládají přes `migration_map`.
 | `/dorost` | `/team?age=u18` | 301 |
 | `/stara-garda` | `/team?age=old` | 301 |
 | `/zapasy`, `/zapasy-<n>` | `/team/matches` | 301 |
-| `/vsechny-zapasy-muzi\|zaci\|dorost` | `/team/matches?age=...` | 301 |
+| `/vsechny-zapasy-muzi\|zaci\|dorost` | `/muzstvo/zapasy?id=<mužstvo kategorie>` | 301 |
 | `/tabulka-muzi\|zaci\|dorost` | `/team/table?age=...` | 301 |
 | `/informace-o-zapase-<n>` | `/match?id=<mapované>` | 301 |
 | `/novinka-<n>` | `/` (novinky na webu nejsou, 2026-11-19) | 301 |
@@ -291,11 +291,13 @@ fallbackem; číselná ID se překládají přes `migration_map`.
 | `/fotogalerie-<n>` | `/` (alba se nemigrovala) | 301 |
 | `/ke-stazeni` | `/files` | 301 |
 | `/rss`, `/rss/` | – | 410 Gone (novinky na webu nejsou, 2026-11-19) |
-| `/prihlaseni` | `/login.html` (přihlašovací stránka z devkitu) | 302 |
-| `/editace-*`, `/upravit-*`, `/novy-*`, `/smazat-*` | `/admin/...` | 302 |
+| `/prihlaseni` | `/` (administrace robotům skrytá, 2026-11-20) | 301 |
+| `/profil`, `/editace-*`, `/upravit-*`, `/uprava-zapasu*`, `/novy-*`, `/nova-*`, `/smazat-*`, `/pridat-pokutu*`, `/zaplatit-*`, `/obnovit-pokutu-*`, `/zablokovani-*` | – | 410 Gone (na administraci nic nevede, 2026-11-20) |
 | `/diskuze*` | `/home` | 301 |
 | `/pokladna`, `/pokuty`, `/moje-pokuty`, `/prijem`, `/vydaj` | – | 410 Gone |
 | `/api/<uc>` | – | 410 Gone (nové API má jiný kontrakt) |
+| `/obrazky/*`, `/galerie/*` (soubory v0) | – | 410 Gone |
+| `/<soubor>.php` (přímé adresy v0, např. `infoZapasu.php?zapas=N`, `tym.php?vek=d`) | jako odpovídající hezká adresa v0; editace, přihlášení a pomocné soubory 410 | 301 / 410 (2026-11-20) |
 
 Nepřeložitelné ID (záznam neexistuje v `migration_map`) končí na 404 stránce
 s odkazem na odpovídající seznam.
