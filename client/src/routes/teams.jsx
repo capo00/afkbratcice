@@ -21,9 +21,11 @@ const { theme } = Config;
 //
 // Týmová fotka (`team.photoUri`) a perex (`team.desc`) jsou v návrhu, ale server je zatím
 // nemá. Karta je proto vykresluje **podmíněně** — až pole přibudou, rozsvítí se samy;
-// do té doby karta stojí na logu, soutěži a trenérovi a nemá prázdná místa.
+// do té doby karta stojí na logu, soutěži a trenérech a nemá prázdná místa.
+//
+// Celá karta je proklik na detail mužstva (Caio 2026-11-21), stejně jako karta zápasu.
 
-function TeamCard({ category, coach }) {
+function TeamCard({ category, coachList = [] }) {
   const { getTeam } = useApp();
   const [, setRoute] = useRoute();
   const team = getTeam(category.teamId);
@@ -43,18 +45,23 @@ function TeamCard({ category, coach }) {
   );
 
   // Cesta na soupisku. Do lišty se **nedává** — položka Mužstva vede sem a výběr mužstva
-  // patří na tuhle stránku, kde je vedle sebe logo, soutěž i trenér (app.jsx, `useTop`).
-  // Bez tlačítka by se sem člověk proklikal a dál by neměl kudy.
-  const detail = category.teamId ? (
+  // patří na tuhle stránku, kde je vedle sebe logo, soutěž i trenéři (app.jsx, `useTop`).
+  // Klikací je celá karta; tlačítko zůstává jako viditelná výzva (a pro klávesnici).
+  const openDetail = category.teamId ? () => setRoute("muzstvo", { id: category.teamId }) : undefined;
+  const detail = openDetail ? (
     <Button
       size="m"
-      onClick={() => setRoute("muzstvo", { id: category.teamId })}
+      onClick={(e) => {
+        // Klik na tlačítko by jinak probublal do karty a routa by se nastavila dvakrát.
+        e.stopPropagation();
+        openDetail();
+      }}
       lsi={lsi("teams", "detail")}
     />
   ) : null;
 
   return (
-    <Card header={header} footer={detail} footerSeparator>
+    <Card header={header} footer={detail} footerSeparator onClick={openDetail}>
       {team?.photoUri ? (
         <UiElements.Image
           src={team.photoUri}
@@ -81,13 +88,14 @@ function TeamCard({ category, coach }) {
         </Uu5Elements.Text>
       ) : null}
 
-      {/* Soutěž a trenér: `InfoGroup`, ne vlastní řádky s ikonou (review 1.3 B). */}
+      {/* Soutěž a trenéři: `InfoGroup`, ne vlastní řádky s ikonou (review 1.3 B). Trenérů může
+          být víc, každý má svůj řádek. */}
       <Uu5Elements.InfoGroup
         direction="vertical"
         size="m"
         itemList={[
           category.competition ? { icon: "uugds-favorites", colorScheme: "primary", title: category.competition } : null,
-          coach ? { icon: "uugds-account", colorScheme: "primary", title: personName(coach.person) } : null,
+          ...coachList.map((coach) => ({ icon: "uugds-account", colorScheme: "primary", title: personName(coach.person) })),
         ].filter(Boolean)}
       />
     </Card>
@@ -100,8 +108,8 @@ const Teams = createVisualComponent({
   render() {
     const { categoryList } = useApp();
 
-    // Trenér ke každé kategorii. Jeden dotaz na tým — `management/list` filtruje podle
-    // `teamId`, ne podle seznamu, a mužstev jsou jednotky.
+    // Trenéři ke každé kategorii, všichni aktivní. Jeden dotaz na tým — `management/list`
+    // filtruje podle `teamId`, ne podle seznamu, a mužstev jsou jednotky.
     const dataObject = useDataObject(
       {
         handlerMap: {
@@ -111,19 +119,19 @@ const Teams = createVisualComponent({
                 .filter((category) => category.teamId)
                 .map((category) =>
                   UiElements.Call.cmdGet("/management/list", { teamId: category.teamId, role: "coach", active: true })
-                    .then((res) => [category.teamId, res?.itemList?.[0] ?? null])
+                    .then((res) => [category.teamId, res?.itemList ?? []])
                     // Chybějící trenér nesmí shodit celý přehled.
-                    .catch(() => [category.teamId, null]),
+                    .catch(() => [category.teamId, []]),
                 ),
             );
-            return { coachByTeamId: Object.fromEntries(entries) };
+            return { coachListByTeamId: Object.fromEntries(entries) };
           },
         },
       },
       [categoryList],
     );
 
-    const coachByTeamId = useMemo(() => dataObject.data?.coachByTeamId ?? {}, [dataObject.data]);
+    const coachListByTeamId = useMemo(() => dataObject.data?.coachListByTeamId ?? {}, [dataObject.data]);
 
     return (
       <Section>
@@ -135,7 +143,7 @@ const Teams = createVisualComponent({
           ) : (
             <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))">
               {categoryList.map((category) => (
-                <TeamCard key={`${category.seasonId}:${category.teamId}`} category={category} coach={coachByTeamId[category.teamId]} />
+                <TeamCard key={`${category.seasonId}:${category.teamId}`} category={category} coachList={coachListByTeamId[category.teamId]} />
               ))}
             </Uu5Elements.Grid>
           )}
