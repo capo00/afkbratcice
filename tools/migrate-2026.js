@@ -517,13 +517,13 @@ for (const a of v0Articles) {
 // v administraci a přepsat ji zpátky dumpem by bylo nemilé překvapení.
 //
 // S `--reset` se přepisuje: seed měl adresu a GPS **jiných** Bratčic (664 67 u Brna místo
-// 285 06 u Čáslavi), takže tam nechat ho by znamenalo mapu na špatném konci republiky.
+// 286 01 u Čáslavi), takže tam nechat ho by znamenalo mapu na špatném konci republiky.
 
 const config = (await appConfigDao.findOne({})) ?? null;
 const fromV0 = {
   notice: "Trénink: pátek 17:00",
   contact: {
-    address: "Bratčice 100, 285 06",
+    address: "Bratčice 179, 286 01 Čáslav",
     gps: "49.853660, 15.423600",
     email: "admin@afkbratcice.cz",
   },

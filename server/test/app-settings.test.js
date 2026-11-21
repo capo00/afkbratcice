@@ -9,7 +9,7 @@ import { validatePublic, validatePrivate } from "../app-settings/index.js";
 // Tvar, jaký měl dokument v afk_config (migrate-2026.js, migrate-categories.js).
 const LEGACY = {
   ...DEFAULT_APP_SETTINGS,
-  contact: { address: "Bratčice 100, 285 06", gps: "49.853660, 15.423600", email: "info@afk.test" },
+  contact: { address: "Bratčice 179, 286 01 Čáslav", gps: "49.853660, 15.423600", email: "info@afk.test" },
   socialList: [{ code: "facebook", uri: "https://www.facebook.com/afk.test" }],
   fileCategoryList: [{ code: "rules", name: "Řády a stanovy" }],
 };
