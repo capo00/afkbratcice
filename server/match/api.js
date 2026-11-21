@@ -160,7 +160,8 @@ export default {
     fn: ({ dtoIn, identity }) => crud.update(dtoIn, identity),
   },
 
-  // Výsledek smí zapsat editor kteréhokoli z obou týmů -- byli u toho oba.
+  // Výsledek smí zapsat editor kteréhokoli z obou týmů -- byli u toho oba. Prázdné skóre
+  // (oba góly `null`) výsledek smaže -- odložený ani zrušený zápas ho mít nemusí (Caio 2026-11-21).
   "match/setResult": {
     method: "post",
     auth: Authorization.auth(Config.MATCH, {
@@ -170,8 +171,8 @@ export default {
     }),
     validator: validate(shape({
       id: mongoId().isRequired(),
-      homeGoals: integer().isRequired(),
-      guestGoals: integer().isRequired(),
+      homeGoals: integer(),
+      guestGoals: integer(),
       homeGoalsHalf: integer(),
       guestGoalsHalf: integer(),
       penaltyWinnerTeamId: any(),

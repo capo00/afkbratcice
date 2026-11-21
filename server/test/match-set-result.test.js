@@ -103,3 +103,38 @@ test("poločas vyšší než konečné skóre odmítne, nejvýš rovný projde",
   await setResult({ homeGoals: 0, guestGoals: 0, homeGoalsHalf: null, guestGoalsHalf: undefined });
   assert.equal(updated.homeGoalsHalf, null);
 });
+
+// Odložený zápas výsledek mít nemusí (Caio 2026-11-21): prázdné skóre výsledek smaže.
+
+test("prázdné skóre smaže celý výsledek a stav odloženého zápasu nechá", async () => {
+  stored = { ...stored, state: "postponed", homeGoals: 2, guestGoals: 2, homeGoalsHalf: 1, guestGoalsHalf: 0, penaltyWinnerTeamId: HOME };
+
+  const result = await crud.setResult({ id: MATCH_ID, homeGoals: null, guestGoals: null }, IDENTITY);
+
+  assert.deepEqual(
+    [updated.homeGoals, updated.guestGoals, updated.homeGoalsHalf, updated.guestGoalsHalf, updated.penaltyWinnerTeamId],
+    [null, null, null, null, null],
+  );
+  assert.equal(updated.state, "postponed");
+  assert.equal(result.homeGoals, null);
+});
+
+test("odehraný zápas se smazaným výsledkem se vrátí na plán", async () => {
+  stored = { ...stored, state: "played", homeGoals: 1, guestGoals: 0 };
+
+  await crud.setResult({ id: MATCH_ID }, IDENTITY);
+
+  assert.equal(updated.homeGoals, null);
+  assert.equal(updated.state, "planned");
+});
+
+test("skóre jen jednoho týmu se odmítne", async () => {
+  await assert.rejects(
+    crud.setResult({ id: MATCH_ID, homeGoals: 3, guestGoals: null }, IDENTITY),
+    (e) => {
+      assert.match(e.code, /match\/incompleteScore$/);
+      return true;
+    },
+  );
+  assert.equal(updated, null, "odmítnutý zápis se nesmí uložit");
+});

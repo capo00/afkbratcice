@@ -227,6 +227,33 @@ class MatchCrud extends Crud {
 
   async setResult({ id, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId }, identity) {
     const current = await this._get(id);
+
+    // Bez obou gólů se výsledek maže celý, i s poločasem a rozstřelem -- odložený ani zrušený
+    // zápas výsledek mít nemusí (Caio 2026-11-21). Stav zůstane, jaký je (typicky `postponed`
+    // nebo `canceled`, který klient zapíše `match/update` těsně předtím); jen „odehraný“ bez
+    // výsledku se vrací na plán.
+    const hasHome = Number.isFinite(homeGoals);
+    if (hasHome !== Number.isFinite(guestGoals)) {
+      throw this._error("incompleteScore", "Both final scores are required, or neither to delete the result", {
+        homeGoals: homeGoals ?? null,
+        guestGoals: guestGoals ?? null,
+      });
+    }
+    if (!hasHome) {
+      return this._forIdentity(
+        await super.update({
+          id,
+          homeGoals: null,
+          guestGoals: null,
+          homeGoalsHalf: null,
+          guestGoalsHalf: null,
+          penaltyWinnerTeamId: null,
+          state: current.state === "played" ? "planned" : current.state,
+        }),
+        identity,
+      );
+    }
+
     await this._checkResult({ ...current, homeGoals, guestGoals, homeGoalsHalf, guestGoalsHalf, penaltyWinnerTeamId });
 
     // `_forIdentity` i tady, aby zápis vracel týž tvar jako `list` -- klient položku

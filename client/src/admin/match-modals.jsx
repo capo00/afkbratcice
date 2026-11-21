@@ -72,8 +72,21 @@ function useHasPenalties(seasonId) {
  * `match/setResult` takes no score without goals. Otherwise the modal saves the rest alone --
  * a new kick-off of a match not played yet, or a lineup without a result.
  */
+const RESULT_OPTIONAL_STATE_LIST = ["postponed", "canceled"];
+
 function needsResult(match, value) {
-  return Number.isFinite(match.homeGoals) || Number.isFinite(value?.homeGoals) || Number.isFinite(value?.guestGoals);
+  const typed = Number.isFinite(value?.homeGoals) || Number.isFinite(value?.guestGoals);
+  // A postponed or canceled match need not have a result (Caio 2026-11-21): emptying both scores
+  // in the same edit deletes the saved one (`match/setResult` with empty goals). Half a score
+  // still is not one.
+  if (RESULT_OPTIONAL_STATE_LIST.includes(value?.state)) return typed;
+  return Number.isFinite(match.homeGoals) || typed;
+}
+
+/** Both final scores emptied on a match that has a result saved: `match/setResult` deletes it. */
+function clearsResult(savedResultKey, value) {
+  const [savedHome] = JSON.parse(savedResultKey);
+  return Number.isFinite(savedHome) && !Number.isFinite(value?.homeGoals) && !Number.isFinite(value?.guestGoals);
 }
 
 /**
@@ -361,7 +374,12 @@ function MatchModal({
       }
 
       const nextResultKey = resultKey(v);
-      if (needsResult(match, v) && Number.isFinite(v.homeGoals) && nextResultKey !== savedResultRef.current) {
+      if (clearsResult(savedResultRef.current, v)) {
+        // Po `update`: stav `postponed`/`canceled` už je uložený, takže ho server při mazání nechá.
+        const dtoIn = { id: match.id, homeGoals: null, guestGoals: null };
+        saved = { ...saved, ...(onSubmit ? await onSubmit(dtoIn) : await UiElements.Call.cmdPost("/match/setResult", dtoIn)) };
+        savedResultRef.current = resultKey({});
+      } else if (needsResult(match, v) && Number.isFinite(v.homeGoals) && nextResultKey !== savedResultRef.current) {
         const dtoIn = {
           id: match.id,
           homeGoals: v.homeGoals,
