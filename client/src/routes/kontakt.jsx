@@ -1,4 +1,4 @@
-import { createVisualComponent, Lsi } from "uu5g05";
+import { createVisualComponent, Lsi, Utils } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config.js";
 import importLsi, { lsi } from "../lsi/import-lsi.js";
@@ -95,12 +95,16 @@ const Kontakt = createVisualComponent({
               borderRadius="moderate"
               className={Config.Css.css({ overflow: "hidden", display: "flex" })}
             >
-              <iframe
-                title="Mapa"
-                src={embed}
-                loading="lazy"
-                className={Config.Css.css({ inlineSize: "100%", minBlockSize: 320, border: "none" })}
-              />
+              {/* uu5g05 obaluje `<iframe>` sanitizací a mimo `createUnsafe` ho nevykreslí.
+                  `src` je náš OSM embed nebo `mapUrl` od správce, ne obsah od návštěvníka. */}
+              {Utils.Element.createUnsafe(() => (
+                <iframe
+                  title="Mapa"
+                  src={embed}
+                  loading="lazy"
+                  className={Config.Css.css({ inlineSize: "100%", minBlockSize: 320, border: "none" })}
+                />
+              ))}
             </Uu5Elements.Box>
           ) : search ? (
             <Card>
