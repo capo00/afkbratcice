@@ -140,6 +140,7 @@
       "place": "Hřiště",
       "departureTime": "Odjezd",
       "departureTimeNoDate": "Nejdřív vyplňte termín zápasu, odjezd je v jeho den.",
+      "participantsNoAge": "Nejdřív vyberte věkovou skupinu, pak se nabídnou její týmy.",
       "code": "Kód",
       "teamCount": "Týmů"
     },

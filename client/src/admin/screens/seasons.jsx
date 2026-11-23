@@ -1,8 +1,8 @@
-import { createVisualComponent, useDataObject, useMemo } from "uu5g05";
+import { createVisualComponent, useDataObject, useEffect, useMemo, useRef, Lsi } from "uu5g05";
 import Uu5Forms from "uu5g05-forms";
 import { UiElements } from "caio-ui";
 import Config from "../../config/config.js";
-import { lsi } from "../../lsi/import-lsi.js";
+import importLsi, { lsi } from "../../lsi/import-lsi.js";
 import AdminScreen from "../screen.jsx";
 import { ageField, boolField, teamLabel, EntitySelect } from "../fields.jsx";
 import { seasonYears } from "../../core/season-label.js";
@@ -27,11 +27,36 @@ const CALLS = UiElements.CrudContext.entityCalls("season");
 const teamName = (team) => teamLabel(team);
 
 /**
- * Competition participants -- multi-select of teams. Through `EntitySelect`, which mounts the
- * validating `FormTextSelect` only once the list is loaded (fields.jsx).
+ * Účastníci soutěže -- výběr týmů **jen z věkové skupiny sezóny**. Dokud není věková skupina
+ * vybraná, je výběr zakázaný; po výběru se načtou jen týmy její skupiny (`team/list` s `age`).
+ * Změna věkové skupiny vyprázdní už vybrané účastníky, protože by patřili jiné skupině.
+ * Přes `EntitySelect`, který validující `FormTextSelect` připojí až po načtení seznamu (fields.jsx).
  */
 function TeamListInput(props) {
-  return <EntitySelect {...props} useCase="/team/list" getLabel={teamName} multiple />;
+  const { value, setItemValue } = Uu5Forms.useFormApi();
+  const age = value?.age;
+
+  const previousAgeRef = useRef(age);
+  useEffect(() => {
+    if (previousAgeRef.current === age) return;
+    const hadAge = Boolean(previousAgeRef.current);
+    previousAgeRef.current = age;
+    // Při otevření úpravy se věková skupina jen doplní z uložených dat -> nic nemazat.
+    if (hadAge) setItemValue("teamList", []);
+  }, [age, setItemValue]);
+
+  if (!age) {
+    return (
+      <Uu5Forms.TextSelect
+        label={props.label}
+        className={props.className}
+        onChange={() => {}}
+        disabled
+        infoMessage={<Lsi import={importLsi} path={["admin", "field", "participantsNoAge"]} />}
+      />
+    );
+  }
+  return <EntitySelect {...props} key={age} useCase="/team/list" dtoIn={{ age }} getLabel={teamName} multiple />;
 }
 
 // Filtr ročníku nabízí jen ročníky, ve kterých nějaká sezóna je (`season/listYears`),

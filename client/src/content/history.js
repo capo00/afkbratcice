@@ -315,8 +315,8 @@ const HISTORY_MILESTONE_LIST = [
     id: "dnes",
     date: { text: "Dnes" },
     type: "club",
-    title: "Tři mužstva",
-    summary: "AFK Bratčice staví muže, dorost a žáky — dorost je po šestnácti letech zpátky.",
+    title: "Čtyři mužstva",
+    summary: "AFK Bratčice staví muže, dorost, žáky a mladší přípravku — dorost je po šestnácti letech zpátky.",
     detail: [
       "Členové klubu se nevěnují jen fotbalu: podílejí se na kulturním a společenském životě obce pořádáním tanečních zábav a spolu s dalšími místními spolky a obecním úřadem jsou spolupořadateli akcí pro děti a mládež.",
     ],
