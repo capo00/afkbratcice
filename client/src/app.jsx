@@ -1,4 +1,4 @@
-import { useLsi } from "uu5g05";
+import { useLsi, ErrorBoundary } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiApp, UiAuth } from "caio-ui";
 import Config from "./config/config.js";
@@ -7,6 +7,7 @@ import Router from "./router.jsx";
 import Footer from "./components/layout/footer.jsx";
 import ClubName from "./components/layout/club-name.jsx";
 import { AppProvider } from "./core/app-context.jsx";
+import AppError from "./components/layout/app-error.jsx";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import { usePageMeta } from "./tools/page-meta.js";
 import { ANY_ADMIN_PROFILE } from "./config/admin-menu.js";
@@ -98,9 +99,8 @@ function useTop() {
 }
 
 // TOP se staví z app-contextu, takže `AppProvider` musí být **nad** `Spa` — lišta je prop,
-// ne potomek, a z potomka do ní data nedosáhnou. Cena za to je, že se během načítání
-// konfigurace ukáže samotný spinner bez rámu stránky; je to jen boot SPA a menu bez dat
-// stejně nemá co zobrazit.
+// ne potomek, a z potomka do ní data nedosáhnou. Během načítání konfigurace je na webu vidět
+// boot screen z HTML (core/boot-screen.jsx); menu bez dat stejně nemá co zobrazit.
 function Shell() {
   const top = useTop();
   // Nová stránka začíná nahoře; uu5g05 to samo nedělá (caio-ui `useScrollTopOnRouteChange`).
@@ -119,6 +119,7 @@ function Shell() {
       // výchozí "onScrollUp" by lištu při scrollování dolů schovávalo, předloha ji chce
       // vidět pořád.
       main={{ padding: false, sticky: "always" }}
+      errorFallback={AppError}
     >
       {/* Upozornění redakce tu **není schválně** — vykresluje se u mužstva, kam obsahem
           patří, ne nad každou obrazovkou webu (components/layout/notice-bar.jsx). */}
@@ -135,9 +136,13 @@ function App() {
     <Uu5Elements.SpacingProvider type="loose">
       {/* `config`: client.config.js -- výchozí hodnoty lišty a seznamů z caio-ui. */}
       <UiApp.SpaProvider config={clientConfig}>
-        <AppProvider>
-          <Shell />
-        </AppProvider>
+        {/* `AppProvider` a lišta (`useTop` v `Shell`) jsou nad ErrorBoundary `UiApp.Spa`; chyba v nich
+            by bez téhle hranice odmontovala celou appku a nechala bílou stránku. */}
+        <ErrorBoundary fallback={AppError}>
+          <AppProvider>
+            <Shell />
+          </AppProvider>
+        </ErrorBoundary>
       </UiApp.SpaProvider>
     </Uu5Elements.SpacingProvider>
   );

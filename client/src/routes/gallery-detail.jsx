@@ -9,6 +9,7 @@ import DateText from "../components/date-text.jsx";
 import EmptyState from "../components/empty-state.jsx";
 import DataState from "../components/data-state.jsx";
 import { usePageTitle } from "../tools/page-meta.js";
+import Skeleton from "../components/layout/skeleton.jsx";
 
 const { theme } = Config;
 
@@ -101,7 +102,7 @@ const GalleryDetail = createVisualComponent({
           {photoList.length === 0 ? (
             <EmptyState lsi={lsi("gallery", "noPhotos")} icon="uugds-image" />
           ) : (
-            <Suspense fallback={<Uu5Elements.Skeleton height={240} />}>
+            <Suspense fallback={<Skeleton height={240} />}>
               <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(180px, 1fr))" rowGap={8} columnGap={8}>
                 {photoList.map((photo) => (
                   // Mřížka stahuje náhled (`thumbnailSrc`), plnou verzi (`src`) až lightbox

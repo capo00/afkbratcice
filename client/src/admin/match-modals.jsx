@@ -8,6 +8,7 @@ import { getMatchConfig, matchFormConfig, MATCH_FORM_FIELD_LIST, MATCH_PAIR_LIST
 import { formGridLayout } from "./form-layout.js";
 import LineupEditor from "./lineup/lineup-editor.jsx";
 import { toEditorState, toPlayerList, fromPreviousMatch, lineupKey, playerCount } from "./lineup/lineup-state.js";
+import Skeleton from "../components/layout/skeleton.jsx";
 
 const LSI_PATH = ["admin", "matches"];
 // Chyby serveru česky podle kódu, stejná tabulka jako formuláře `Crud` (review 2026-11-12, S6).
@@ -476,7 +477,7 @@ function MatchModal({
           ) : null}
 
           {/* The lineup tab appears once the roster is in; a requested Lineup tab waits for it. */}
-          {waitingForLineup ? <Uu5Elements.Skeleton height={240} /> : null}
+          {waitingForLineup ? <Skeleton height={240} /> : null}
 
           {error ? (
             <Uu5Elements.Text

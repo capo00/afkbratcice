@@ -19,6 +19,11 @@ export function setupTheme() {
   Config.Css.injectGlobal({
     html: {
       fontFamily: theme.font.body,
+      // Místo pro posuvník je vyhrazené vždy: boot screen zamyká scroll (`overflow: hidden`,
+      // core/boot-screen.jsx) a obsah pod ním přetéká, takže by se šířka stránky (a erb na boot
+      // screenu) při zamčení a odemčení posunula o šířku posuvníku. Stránka posuvník stejně má
+      // pořád (routa drží aspoň výšku okna + patička).
+      scrollbarGutter: "stable",
       WebkitFontSmoothing: "antialiased",
       MozOsxFontSmoothing: "grayscale",
     },

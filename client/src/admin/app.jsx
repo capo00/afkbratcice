@@ -1,11 +1,13 @@
-import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
+import { useRouter, useRoute, Suspense, Utils, ErrorBoundary } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
-import { UiApp } from "caio-ui";
+import { UiApp, UiAuth } from "caio-ui";
 import { AppProvider } from "../core/app-context.jsx";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "../config/admin-menu.js";
 import { useAdminTop } from "./top.jsx";
 import { APP_SETTINGS } from "./settings.js";
 import PageLoading from "../components/layout/page-loading.jsx";
+import AppError from "../components/layout/app-error.jsx";
+import { BootReady } from "../core/boot-screen.jsx";
 import clientConfig from "../../client.config.js";
 
 // Kořen UVE administrace (admin/index.html, /admin/…). Do 2026-10-24 byla administrace lazy
@@ -74,15 +76,19 @@ function AdminFrame() {
   UiApp.useAdminMarkerSync(ANY_ADMIN_PROFILE);
   const element = useRouter(ROUTE_MAP);
   const [route] = useRoute();
+  const sessionPending = UiAuth.useSession().state === "pending";
 
   return (
     // Sekce si gutter i rytmus řeší samy (components/layout/section.jsx) jako na webu, main
     // nepřidává odsazení. Patička webu sem nepatří -- kontakt na klub správce nepotřebuje.
-    <UiApp.Spa top={top} main={{ padding: false, sticky: "always" }}>
+    <UiApp.Spa top={top} main={{ padding: false, sticky: "always" }} errorFallback={AppError}>
       {/* `key` z routy resetuje hranici po přechodu jinam, jinak by chyba jedné obrazovky
           zůstala viset i po odkliknutí pryč. */}
       <Suspense fallback={FALLBACK} key={route?.uu5Route}>
         {element}
+        {/* Mountne se až s obsahem obrazovky a pak pustí boot screen (core/boot-screen.jsx). Dokud se
+            ověřuje session, obrazovky z `UiApp.withRoute` nevykreslí nic, takže se čeká i na ni. */}
+        {sessionPending ? null : <BootReady />}
       </Suspense>
     </UiApp.Spa>
   );
@@ -98,9 +104,12 @@ function AdminApp() {
       <UiApp.SpaProvider config={clientConfig} settings={{ appSection: APP_SETTINGS }}>
         {/* Nastavení klubu a mapa týmů jako na webu: obrazovky z ní berou názvy a loga týmů
             a po zápisu ji obnovují (`useApp().reload`). */}
-        <AppProvider>
-          <AdminFrame />
-        </AppProvider>
+        {/* Chyba v `AppProvider` nebo v liště je nad ErrorBoundary `UiApp.Spa` (jako na webu, app.jsx). */}
+        <ErrorBoundary fallback={AppError}>
+          <AppProvider>
+            <AdminFrame />
+          </AppProvider>
+        </ErrorBoundary>
       </UiApp.SpaProvider>
     </Uu5Elements.SpacingProvider>
   );

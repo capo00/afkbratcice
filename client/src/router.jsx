@@ -2,6 +2,7 @@ import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
 import Config from "./config/config.js";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import PageLoading from "./components/layout/page-loading.jsx";
+import { BootReady } from "./core/boot-screen.jsx";
 import Home from "./routes/home.jsx";
 import Teams from "./routes/teams.jsx";
 import Team from "./routes/team.jsx";
@@ -97,6 +98,9 @@ function Router() {
     <div className={ROUTE_CLASS}>
       <Suspense fallback={FALLBACK} key={route?.uu5Route}>
         {element}
+        {/* Uvnitř `Suspense`: mountne se až s obsahem routy (u `page.jsx` po dotažení chunku),
+            a teprve pak pustí boot screen (core/boot-screen.jsx). */}
+        <BootReady />
       </Suspense>
     </div>
   );
