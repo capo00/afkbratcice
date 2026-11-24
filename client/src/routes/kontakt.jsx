@@ -7,6 +7,7 @@ import Heading from "../components/layout/heading.jsx";
 import Card from "../components/layout/card.jsx";
 import Button from "../components/layout/button.jsx";
 import EmptyState from "../components/empty-state.jsx";
+import SocialLinks from "../components/social-links.jsx";
 import { useApp } from "../core/app-context.jsx";
 import { CONTACT_FIELD_LIST, mapsUrl } from "../core/contact-links.js";
 
@@ -85,6 +86,7 @@ const Kontakt = createVisualComponent({
                 }))}
               />
             )}
+            <SocialLinks socialList={appSettings?.socialList} className={Config.Css.css({ marginBlockStart: 16 })} />
           </Card>
 
           {embed ? (

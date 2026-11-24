@@ -46,9 +46,8 @@ export default {
     // Popisky sítí z nastavení klubu (`socialList`). Nejsou v LSI schválně -- jsou to obchodní
     // názvy, které se nepřekládají. Pořadí je i pořadí polí v Nastavení.
     //
-    // **Nejsou to ikony.** GDS stencil sada nemá skupinu `logo`, takže `uugdsstencil-logo-facebook`
-    // se vykreslí jako prázdné místo se správnou šířkou (component-tree.md, F.2; ověřeno
-    // v prohlížeči 7. 9. 2026). Odkazy jsou proto textové.
+    // Loga sítí jsou v `client/src/assets/social/` (components/social-links.jsx); GDS stencil sada
+    // skupinu `logo` nemá, takže se ikony z ní použít nedají. Síť bez loga se vypíše textem.
     socialLabel: {
       facebook: "Facebook",
       instagram: "Instagram",

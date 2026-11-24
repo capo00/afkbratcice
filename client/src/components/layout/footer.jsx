@@ -5,6 +5,7 @@ import importLsi from "../../lsi/import-lsi.js";
 import { useApp } from "../../core/app-context.jsx";
 import DisplayText from "./display-text.jsx";
 import Eyebrow from "./eyebrow.jsx";
+import SocialLinks from "../social-links.jsx";
 import { CONTACT_FIELD_LIST } from "../../core/contact-links.js";
 
 const { theme } = Config;
@@ -28,9 +29,7 @@ const NAV = [
 ];
 
 // Sítě drží `appSettings.socialList` jako `{ code, uri }`, takže přidat Instagram je změna
-// v Nastavení, ne v kódu. Popisky jsou v `Config.SOCIAL_LABEL` (client.config.js) — a je tam
-// i vysvětlené, proč jsou to texty a ne ikony (GDS logo ikony neexistují). Neznámý `code` se
-// vypíše tak, jak přišel, aby se nová síť neztratila jen proto, že pro ni není popisek.
+// v Nastavení, ne v kódu. Vykreslují se jako loga (components/social-links.jsx).
 
 const Footer = createVisualComponent({
   uu5Tag: Config.TAG + "Footer",
@@ -130,15 +129,7 @@ const Footer = createVisualComponent({
                 }))}
               />
 
-              {socialList.length ? (
-                <div className={Config.Css.css({ display: "flex", gap: 16, marginBlockStart: 8 })}>
-                  {socialList.map(({ code, uri }) => (
-                    <Uu5Elements.Link key={code} href={uri} target="_blank" colorScheme="primary">
-                      {Config.SOCIAL_LABEL[code] ?? code}
-                    </Uu5Elements.Link>
-                  ))}
-                </div>
-              ) : null}
+              <SocialLinks socialList={socialList} className={Config.Css.css({ marginBlockStart: 8 })} />
             </Uu5Elements.Grid>
           </div>
         </Uu5Elements.Grid>
