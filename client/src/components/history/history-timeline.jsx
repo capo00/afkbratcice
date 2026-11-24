@@ -23,6 +23,11 @@ const { theme } = Config;
 // žádný skeleton: obal drží výšku okna, dokud v DOM nejsou všechny položky (styly knihovny
 // vkládá chunk sám před vykreslením), pak rezervu pustí. Osa je v tu chvíli vyšší než okno,
 // takže uvolnění nic viditelného neposune.
+//
+// Do té doby je osa navíc `visibility: hidden`: položky se neodkrývají najednou (každá má
+// vlastní `Suspense`; v měření 2026-11-24 se nejdřív ukázalo 16 z 25), a když se pozdní položka
+// objevila nad už viditelnými, odsunula je -- jeden ze tří běhů měl CLS 0,28 (desktop) až 0,46
+// (mobil). Neviditelný prvek se do CLS nepočítá a hotová osa se pak ukáže celá naráz.
 const TIMELINE_ITEM_SELECTOR = ".vertical-timeline-element";
 
 function useTimelineReady(ref, count) {
@@ -66,7 +71,7 @@ const HistoryTimeline = createVisualComponent({
         ref={ref}
         className={Config.Css.join(
           Config.Css.css({
-            minBlockSize: ready ? undefined : "100vh",
+            ...(!ready && { minBlockSize: "100vh", visibility: "hidden" }),
             // Přepisy CSS knihovny `react-vertical-timeline-component`, které GDS propy neumí:
             // šířka 100 % místo 95 %, kolečko s podkladem stránky (knihovna dává inline bílou,
             // na tmavém by ikona zmizela), bez šipky karty (bez výplně spadne na bílou z CSS
