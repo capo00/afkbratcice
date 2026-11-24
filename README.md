@@ -227,12 +227,12 @@ nahoru se zdrojáky — nepatří do `.gcloudignore`.
 Vydání nové verze (verze z release notes, tag, `main`, GitHub Release, deploy, kontrola):
 
 ```bash
-npm run release -- --url https://afkbratcice.oa.r.appspot.com
+npm run release -- --patch
 ```
 
-> **`--url` je povinné, dokud doména nevede na GAE.** Bez něj poslední krok čeká na
-> `/sys/health` na `APP_URL` (`afkbratcice.cz`), kde je pořád starý web v0. Ten odpovídá
-> 401, krok po 300 s spadne, i když nasazení proběhlo.
+> Doména `afkbratcice.cz` vede na GAE od 2026-11-24 (docs/prechod-domeny.md), takže poslední
+> krok kontroluje `/sys/health` přímo na `APP_URL`. Dřív bylo nutné
+> `--url https://afkbratcice.oa.r.appspot.com`, protože na doméně byl starý web v0.
 
 ### 8. Po prvním deployi
 
