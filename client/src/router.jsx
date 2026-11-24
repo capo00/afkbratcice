@@ -1,23 +1,29 @@
 import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
+import Config from "./config/config.js";
 import { PAGE_CODE_LIST } from "./content/pages.js";
 import PageLoading from "./components/layout/page-loading.jsx";
+import Home from "./routes/home.jsx";
+import Teams from "./routes/teams.jsx";
+import Team from "./routes/team.jsx";
+import TeamMatches from "./routes/team-matches.jsx";
+import TeamTable from "./routes/team-table.jsx";
+import TeamStats from "./routes/team-stats.jsx";
+import Match from "./routes/match.jsx";
+import Season from "./routes/season.jsx";
+import Player from "./routes/player.jsx";
+import Kontakt from "./routes/kontakt.jsx";
+import NotFound from "./routes/not-found.jsx";
+import Zajimavosti from "./routes/zajimavosti.jsx";
 
-// Routy se načítají **lazy**: kdo přijde na home, nemá stahovat kód statistik.
-// Administrace tu není vůbec — je to vlastní UVE (admin/app.jsx, /admin/).
+// Routy se importují **staticky**, lazy je jen `page.jsx` (návrh docs/proposal-section-loading.md,
+// A3, 2026-11-24). Route chunky měly po 1–6 kB a za každým šla druhá vlna drobných sdílených
+// chunků -- na pomalé síti to byla celá fáze `Suspense` s patičkou ve viewportu navíc, kvůli
+// pár kilobajtům proti stovkám kB knihoven uu5. `page.jsx` zůstává lazy, protože přes časovou
+// osu historie táhne `uu5extrasg01` a text všech obsahových stránek (`content/page-content.js`).
+// Administrace tu není vůbec — je to vlastní UVE (admin/app.jsx, /admin/). Co web smí mít
+// staticky, hlídá `lazy-libs.test.js`.
 // `Utils.Component.lazy` je uu5 obálka nad `React.lazy`.
-const Home = Utils.Component.lazy(() => import("./routes/home.jsx"));
-const Teams = Utils.Component.lazy(() => import("./routes/teams.jsx"));
-const Team = Utils.Component.lazy(() => import("./routes/team.jsx"));
-const TeamMatches = Utils.Component.lazy(() => import("./routes/team-matches.jsx"));
-const TeamTable = Utils.Component.lazy(() => import("./routes/team-table.jsx"));
-const TeamStats = Utils.Component.lazy(() => import("./routes/team-stats.jsx"));
-const Match = Utils.Component.lazy(() => import("./routes/match.jsx"));
-const Season = Utils.Component.lazy(() => import("./routes/season.jsx"));
-const Player = Utils.Component.lazy(() => import("./routes/player.jsx"));
 const Page = Utils.Component.lazy(() => import("./routes/page.jsx"));
-const Kontakt = Utils.Component.lazy(() => import("./routes/kontakt.jsx"));
-const NotFound = Utils.Component.lazy(() => import("./routes/not-found.jsx"));
-const Zajimavosti = Utils.Component.lazy(() => import("./routes/zajimavosti.jsx"));
 
 // uu5g05 routeMap: klíč = cesta, hodnota = element / { redirect } / { rewrite }.
 //
@@ -52,7 +58,7 @@ const ROUTE_MAP = {
 
   // Fotogalerie na webu zatím není (Caio 2026-11-19), `/fotogalerie` server dočasně (302)
   // posílá na úvod. Obrazovky `routes/gallery.jsx` a `routes/gallery-detail.jsx` zůstávají:
-  // návrat jsou dva lazy importy, dva řádky tady, záznamy v `config/seo.js`
+  // návrat jsou dva importy, dva řádky tady, záznamy v `config/seo.js`
   // a `server/seo/route-seo.js` a pravidlo v `server/legacy-redirect.js`.
 
   kontakt: <Kontakt />,
@@ -65,7 +71,20 @@ const ROUTE_MAP = {
   "*": <NotFound />,
 };
 
-const FALLBACK = <PageLoading />;
+// Obal routy drží trvale aspoň výšku okna bez lišty, takže patička při prvním vykreslení každé
+// routy začíná pod ohybem a neposkočí ani při mountu, ani když dorazí data (návrh
+// docs/proposal-section-loading.md, A1). Dřív byla ve viewportu po celou dobu fallbacku
+// i skeletonů (`Page` z caio-ui má `min-height: 100vh` a `main` roste) a každý další kus obsahu
+// ji posunul -- většina CLS webu. Obal je **kolem** `Suspense`, takže platí pro fallback i obsah.
+//
+// `100vh`, ne `100svh`: na mobilu je `vh` velký viewport, patička je pod hranou i se zobrazenou
+// lištou prohlížeče. Cena: krátké stránky (`/kontakt` na mobilu) mají nad patičkou volné místo
+// a patička se ukáže až po scrollu (schváleno 2026-11-24, varianta A2 se skrytou patičkou
+// zůstává jako záloha).
+const ROUTE_HEIGHT = `calc(100vh - ${Config.theme.topHeight}px)`;
+const ROUTE_CLASS = Config.Css.css({ minBlockSize: ROUTE_HEIGHT });
+// Fallback (`page.jsx`) vyplní celý obal, ne jen 320 px.
+const FALLBACK = <PageLoading height={ROUTE_HEIGHT} />;
 
 function Router() {
   const element = useRouter(ROUTE_MAP);
@@ -75,9 +94,11 @@ function Router() {
   // z routy hranici po přechodu jinam resetuje — jinak by chyba na jedné obrazovce zůstala
   // viset i po odkliknutí pryč.
   return (
-    <Suspense fallback={FALLBACK} key={route?.uu5Route}>
-      {element}
-    </Suspense>
+    <div className={ROUTE_CLASS}>
+      <Suspense fallback={FALLBACK} key={route?.uu5Route}>
+        {element}
+      </Suspense>
+    </div>
   );
 }
 
