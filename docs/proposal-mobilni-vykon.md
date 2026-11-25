@@ -178,3 +178,21 @@ lokálním produkčním buildu (8082), medián ze 3 běhů:
   do prvního vykreslení), proto `fetchpriority="low"`.
 - M3 zkrátil první render, ale TBT zůstává vysoké: commit odložených sekcí je jeden blok a hlavní
   dlouhé úlohy jsou inicializace uu5 (`uu_gdsg01-unicorn` ~1,6 s při CPU 4×) a render — viz M4.
+
+## 7. Produkce 0.12.4 a vypnutí M1 (2026-11-25)
+
+Lighthouse proti afkbratcice.cz, 0.12.3 → 0.12.4 (M1 + M3 + M6):
+
+| Profil | 0.12.3 | 0.12.4 |
+|---|---|---|
+| Simulovaný mobil: výkon (3 běhy) | 54 / 59 / 58 | 52 / 60 / 62 |
+| Simulovaný mobil: LCP | 6,0–6,6 s | 5,8–6,0 s |
+| Mobil, skutečné zpomalení: LCP | 13,0 s | 11,3 s |
+| Přístupnost | 92 | 95 (desktop 100) |
+| Desktop: výkon | 88 | 73 / 74 / 76 |
+| Desktop: TBT | 110 ms | 330–400 ms |
+
+Pokles desktopu dělá M1: lokálně stejný build s preloady TBT 160–190 ms (výkon 78–81), bez nich
+90 ms (83). Skripty dorazí najednou a uu5loader je spustí v jednom dlouhém bloku, dřív je
+rozdělovaly mezery mezi stahováním. Mobilu M1 dal jen ~−0,5 s LCP. **M1 je proto od caio-devkit
+0.5.3 vypnuté** (volba pluginu `preloadScripts`, výchozí `false`); M3 a M6 zůstávají.

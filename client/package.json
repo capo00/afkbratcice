@@ -19,7 +19,7 @@
     "uu5tilesg02-elements": "*"
   },
   "devDependencies": {
-    "caio-devkit": "npm:@capo00/caio-devkit@^0.5.2",
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.5.3",
     "vite": "^6.3.5"
   },
   "overrides": {
