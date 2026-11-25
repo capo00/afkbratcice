@@ -137,15 +137,23 @@ function CtaBand() {
   );
 }
 
+// Nejdřív hero a statistiky (první obrazovka, data mají z `AppProvider`), zbytek až po prvním
+// vykreslení jako transition (`UiElements.Deferred`). Celá home v jednom renderu byla na mobilu
+// (CPU 4×) blok 2,4 s, během kterého se neukázalo nic -- LCP je h1 v hero (Lighthouse,
+// 2026-11-25, docs/proposal-mobilni-vykon.md M3). Boot screen se tak pustí už po hero.
+// Patičku pod ohybem drží min. výška obalu routy, takže odložené sekce nic neposunou.
+// Kotva `#program` (tlačítko v hero) existuje až po transition -- zlomek sekundy.
 function Home() {
   return (
     <>
       <Hero />
       <Stats />
-      <WeekendProgram />
-      <LastResults />
-      <TablesSection />
-      <CtaBand />
+      <UiElements.Deferred>
+        <WeekendProgram />
+        <LastResults />
+        <TablesSection />
+        <CtaBand />
+      </UiElements.Deferred>
     </>
   );
 }

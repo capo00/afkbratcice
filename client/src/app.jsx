@@ -39,9 +39,11 @@ function useTop() {
   const highlightsLabel = useLsi(importLsi, ["header", "nav", "highlights"]);
   const contactLabel = useLsi(importLsi, ["header", "nav", "contact"]);
   const pageLsi = useLsi(importLsi, ["page", "name"]);
+  const clubName = useLsi(importLsi, ["club", "name"]);
 
   return {
-    logo: { imageSrc: Config.asset.logoTransparent, href: "/", significance: "subdued" },
+    // `label`: erb je jen obrázek, odkaz potřebuje přístupný název (Lighthouse `link-name`).
+    logo: { imageSrc: Config.asset.logoTransparent, href: "/", significance: "subdued", label: clubName },
     // Dvouřádkový název vedle erbu (components/layout/club-name.jsx, sdílený s administrací).
     // `children` Topu je jeho volný obsah.
     children: <ClubName />,

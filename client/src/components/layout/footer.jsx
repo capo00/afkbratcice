@@ -29,7 +29,7 @@ const NAV = [
 ];
 
 // Sítě drží `appSettings.socialList` jako `{ code, uri }`, takže přidat Instagram je změna
-// v Nastavení, ne v kódu. Vykreslují se jako loga (components/social-links.jsx).
+// v Nastavení, ne v kódu. Vykreslují se jako loga (components/social-links.jsx, caio-ui `SocialLink`).
 
 const Footer = createVisualComponent({
   uu5Tag: Config.TAG + "Footer",

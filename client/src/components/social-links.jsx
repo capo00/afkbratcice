@@ -1,47 +1,24 @@
 import { createVisualComponent } from "uu5g05";
+import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
 
-// Odkazy na sítě jen jako logo, bez textu (Caio 2026-11-23, stejně jako v caio_propertyman).
-// Oficiální loga z brand center Mety, PNG 128 px; nesmí se přebarvovat ani upravovat, proto
-// obyčejné `<img>`. Název sítě nese `alt` (zároveň přístupný název odkazu) a `title` (bublina).
-// Soubory jsou v `client/src/assets/social/` a jedou ze statiky pod `/assets/social/`.
-//
-// Neznámý `code` (např. youtube) logo nemá, vypíše se jako text, ať odkaz nezmizí.
-const LOGO = {
-  facebook: "/assets/social/facebook.png",
-  instagram: "/assets/social/instagram.png",
-};
-
-const SIZE = 32;
-
+// Řádek odkazů na sociální sítě jako loga (patička, Kontakt). Logo, odkaz a nové okno kreslí
+// `UiElements.SocialLink` z caio-ui (oficiální loga sítí, Caio 2026-11-23); tady je jen řádek
+// a popisek z `Config.SOCIAL_LABEL` (alt a bublina). Síť, kterou caio-ui nezná, se vypíše textem.
 const SocialLinks = createVisualComponent({
   uu5Tag: Config.TAG + "SocialLinks",
 
   render({ socialList = [], className }) {
     if (!socialList.length) return null;
     return (
-      <div className={[Config.Css.css({ display: "flex", gap: 16, alignItems: "center" }), className].filter(Boolean).join(" ")}>
-        {socialList.map(({ code, uri }) => {
-          const label = Config.SOCIAL_LABEL[code] ?? code;
-          return (
-            <a key={code} href={uri} target="_blank" rel="noopener noreferrer" title={label}>
-              {LOGO[code] ? (
-                <img
-                  src={LOGO[code]}
-                  alt={label}
-                  width={SIZE}
-                  height={SIZE}
-                  className={Config.Css.css({ display: "block" })}
-                />
-              ) : (
-                label
-              )}
-            </a>
-          );
-        })}
+      <div className={Config.Css.join(Config.Css.css({ display: "flex", gap: 16, alignItems: "center" }), className)}>
+        {socialList.map(({ code, uri }) => (
+          <UiElements.SocialLink key={code} type={code} value={uri} label={Config.SOCIAL_LABEL[code] ?? code} />
+        ))}
       </div>
     );
   },
 });
 
+export { SocialLinks };
 export default SocialLinks;

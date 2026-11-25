@@ -46,8 +46,8 @@ export default {
     // Popisky sítí z nastavení klubu (`socialList`). Nejsou v LSI schválně -- jsou to obchodní
     // názvy, které se nepřekládají. Pořadí je i pořadí polí v Nastavení.
     //
-    // Loga sítí jsou v `client/src/assets/social/` (components/social-links.jsx); GDS stencil sada
-    // skupinu `logo` nemá, takže se ikony z ní použít nedají. Síť bez loga se vypíše textem.
+    // Loga sítí kreslí `UiElements.SocialLink` z caio-ui (components/social-links.jsx); popisek
+    // odsud je jejich `alt` a bublina.
     socialLabel: {
       facebook: "Facebook",
       instagram: "Instagram",
