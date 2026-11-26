@@ -394,6 +394,20 @@ Caio 2026-11-26: Q4 do caio-ui (`Skeleton`, `Pending`, `PageLoading`), implement
 - Neměřeno: Lighthouse/TBT `/sezona` před a po (build před změnami už v `public/` není; chce to
   stejný stav stroje). Lokální CLS před změnami taky ne, srovnání je proti produkci 0.12.5.
 
+**Doplněk (2026-11-26, po commitu):**
+
+- `PageLoading` v AFK pixelově ověřen proti starému buildu (předchozí commit v dočasném worktree,
+  animace zmrazené): boot screen, `PageLoading` i skeleton 0 px rozdílu. První srovnání to
+  nepokrylo, baseline vyfotila `PageLoading` dřív, než se objevil.
+- **Propertyman** (`caio_propertyman` a31af53): `UiElements.Pending` místo uu5 `Pending` +
+  vlastního `DELAYED_APPEAR`, detail rezervace v adminu přes `UiApp.PageLoading`, písma
+  v `assets/vendor/fraunces/1.0.0/` a `assets/vendor/karla/2.4.0/`. Web pixelově beze změny
+  (12 rout × 3 pohledy), testy 351/351. `PageLoading` tam nejdřív ukázal uu5 „Blokovaný obsah“:
+  uu5g05 blokuje `dangerouslySetInnerHTML` s logem jako maskou (`style` s `url()`). Opraveno
+  v caio-ui (bb60739): `getBootMark()` vrací kopii DOM uzlu, `PageLoading` ji vloží
+  v `useLayoutEffect`. Ve světlém i tmavém režimu (zelený kruh, podložka pod logem) sedí s boot
+  screenem adminu.
+
 **Zbývá k vydání** (na pokyn): vydat caio-devkit 0.5.4, caio-server 0.8.3 a caio-ui 0.4.14; v AFK
 zvednout `caio-devkit`, `caio-server` a `caio-ui` na nové verze, `npm install`, `npm test`, vydání
 AFK a kontrola hlaviček na produkci. Propertyman zvlášť: přechod na `UiElements.Skeleton`/`Pending`,
