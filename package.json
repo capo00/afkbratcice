@@ -28,11 +28,11 @@
     "settings-import": "caio-devkit settings-import"
   },
   "dependencies": {
-    "caio-server": "npm:@capo00/caio-server@^0.8.1",
+    "caio-server": "npm:@capo00/caio-server@^0.8.3",
     "uu_appdatatypesg02": "~0.2.1"
   },
   "devDependencies": {
-    "caio-devkit": "npm:@capo00/caio-devkit@^0.5.3",
+    "caio-devkit": "npm:@capo00/caio-devkit@^0.5.4",
     "nodemon": "^3.1.14"
   }
 }
