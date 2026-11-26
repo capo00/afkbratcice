@@ -5,9 +5,7 @@ import { AppProvider } from "../core/app-context.jsx";
 import { ADMIN_MENU, ANY_ADMIN_PROFILE } from "../config/admin-menu.js";
 import { useAdminTop } from "./top.jsx";
 import { APP_SETTINGS } from "./settings.js";
-import PageLoading from "../components/layout/page-loading.jsx";
 import AppError from "../components/layout/app-error.jsx";
-import { BootReady } from "../core/boot-screen.jsx";
 import clientConfig from "../../client.config.js";
 
 // Kořen UVE administrace (admin/index.html, /admin/…). Do 2026-10-24 byla administrace lazy
@@ -67,7 +65,7 @@ function buildRouteMap() {
 
 const ROUTE_MAP = buildRouteMap();
 
-const FALLBACK = <PageLoading />;
+const FALLBACK = <UiApp.PageLoading />;
 
 function AdminFrame() {
   const top = useAdminTop();
@@ -86,9 +84,9 @@ function AdminFrame() {
           zůstala viset i po odkliknutí pryč. */}
       <Suspense fallback={FALLBACK} key={route?.uu5Route}>
         {element}
-        {/* Mountne se až s obsahem obrazovky a pak pustí boot screen (core/boot-screen.jsx). Dokud se
+        {/* Mountne se až s obsahem obrazovky a pak pustí boot screen (caio-ui). Dokud se
             ověřuje session, obrazovky z `UiApp.withRoute` nevykreslí nic, takže se čeká i na ni. */}
-        {sessionPending ? null : <BootReady />}
+        {sessionPending ? null : <UiApp.BootReady />}
       </Suspense>
     </UiApp.Spa>
   );

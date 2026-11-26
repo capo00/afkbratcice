@@ -20,7 +20,7 @@ export function setupTheme() {
     html: {
       fontFamily: theme.font.body,
       // Místo pro posuvník je vyhrazené vždy: boot screen zamyká scroll (`overflow: hidden`,
-      // core/boot-screen.jsx) a obsah pod ním přetéká, takže by se šířka stránky (a erb na boot
+      // caio-ui `UiApp.renderApp`) a obsah pod ním přetéká, takže by se šířka stránky (a erb na boot
       // screenu) při zamčení a odemčení posunula o šířku posuvníku. Stránka posuvník stejně má
       // pořád (routa drží aspoň výšku okna + patička).
       scrollbarGutter: "stable",

@@ -1,4 +1,4 @@
-import { createVisualComponent, useDataObject, useRoute, Lsi } from "uu5g05";
+import { createVisualComponent, useRoute, Lsi } from "uu5g05";
 import Uu5Elements from "uu5g05-elements";
 import { UiElements } from "caio-ui";
 import Config from "../config/config.js";
@@ -25,32 +25,12 @@ const { theme } = Config;
 //
 // Celá karta je proklik na detail mužstva (Caio 2026-11-21), stejně jako karta zápasu.
 
-// Místo pro řádek trenéra, dokud trenéři nedorazí (návrh docs/proposal-section-loading.md, A4).
-// Dřív se řádek do hotové karty doplnil až s `management/list` a karta naskočila o řádek
-// (na mobilu CLS 0,165). Teď ho drží stejný řádek `InfoGroup` s ikonou a čárou místo jména;
-// počet trenérů seznam mužstev nenese, takže je to jeden řádek. Čára je jen výplň
-// (`aria-hidden`), barvou `border` jako budoucí skeletony webu (návrh, kap. 5 C).
-const COACH_PLACEHOLDER = {
-  icon: "uugds-account",
-  colorScheme: "primary",
-  title: (
-    <span
-      aria-hidden="true"
-      className={Config.Css.css({
-        display: "inline-block",
-        // Pevná šířka, ne procenta: titulek `InfoGroup` se smrskne na obsah a 50 % z ničeho je nic.
-        inlineSize: "8em",
-        blockSize: "0.7em",
-        borderRadius: 4,
-        verticalAlign: "middle",
-        backgroundColor: theme.color.border,
-      })}
-    />
-  ),
-};
-
-// `coachList` je `undefined`, dokud se trenéři načítají.
-function TeamCard({ category, coachList }) {
+// Trenéři přicházejí se seznamem mužstev (`season/listCurrent` → `category.coachList`), takže
+// karta má řádky trenérů od prvního vykreslení. Dřív se dotahovaly `management/list` po týmech:
+// do jejich příchodu karta držela místo jen pro jeden řádek (počet trenérů seznam mužstev nenesl)
+// a mužstvo s více trenéry pak naskočilo (CLS 0,031, 2026-11-26).
+function TeamCard({ category }) {
+  const coachList = category.coachList ?? [];
   const { getTeam } = useApp();
   const [, setRoute] = useRoute();
   const team = getTeam(category.teamId);
@@ -120,9 +100,7 @@ function TeamCard({ category, coachList }) {
         size="m"
         itemList={[
           category.competition ? { icon: "uugds-favorites", colorScheme: "primary", title: category.competition } : null,
-          ...(coachList
-            ? coachList.map((coach) => ({ icon: "uugds-account", colorScheme: "primary", title: personName(coach.person) }))
-            : [COACH_PLACEHOLDER]),
+          ...coachList.map((coach) => ({ icon: "uugds-account", colorScheme: "primary", title: personName(coach.person) })),
         ].filter(Boolean)}
       />
     </Card>
@@ -135,33 +113,6 @@ const Teams = createVisualComponent({
   render() {
     const { categoryList } = useApp();
 
-    // Trenéři ke každé kategorii, všichni aktivní. Jeden dotaz na tým — `management/list`
-    // filtruje podle `teamId`, ne podle seznamu, a mužstev jsou jednotky.
-    const dataObject = useDataObject(
-      {
-        handlerMap: {
-          load: async () => {
-            const entries = await Promise.all(
-              categoryList
-                .filter((category) => category.teamId)
-                .map((category) =>
-                  UiElements.Call.cmdGet("/management/list", { teamId: category.teamId, role: "coach", active: true })
-                    .then((res) => [category.teamId, res?.itemList ?? []])
-                    // Chybějící trenér nesmí shodit celý přehled.
-                    .catch(() => [category.teamId, []]),
-                ),
-            );
-            return { coachListByTeamId: Object.fromEntries(entries) };
-          },
-        },
-      },
-      [categoryList],
-    );
-
-    // `undefined` = ještě se načítá (karta drží místo pro řádek trenéra).
-    const coachListByTeamId =
-      dataObject.state === "pendingNoData" ? undefined : (dataObject.data?.coachListByTeamId ?? {});
-
     return (
       <Section>
         <Heading eyebrow={lsi("teams", "eyebrow")} lsi={lsi("teams", "header")} />
@@ -172,14 +123,7 @@ const Teams = createVisualComponent({
           ) : (
             <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))">
               {categoryList.map((category) => (
-                <TeamCard
-                  key={`${category.seasonId}:${category.teamId}`}
-                  category={category}
-                  coachList={
-                    // Kategorie bez týmu trenéry nemá, místo pro ně nedrží.
-                    coachListByTeamId || !category.teamId ? (coachListByTeamId?.[category.teamId] ?? []) : undefined
-                  }
-                />
+                <TeamCard key={`${category.seasonId}:${category.teamId}`} category={category} />
               ))}
             </Uu5Elements.Grid>
           )}

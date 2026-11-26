@@ -41,7 +41,7 @@ client/
   public/
     favicon.ico
     assets/meta/        manifest.json, icon-192/512, icon-maskable, apple-touch-icon, og-image
-    assets/fonts/       bebas-neue-400-{latin,latin-ext}.woff2, barlow-{400,600,700}-{latin,latin-ext}.woff2
+    assets/vendor/      bebas-neue/2.0.0/, barlow/1.408.0/ (.woff2, složka s verzí kvůli dlouhé cache); react, react-dom
   src/
     main.jsx            setupTheme() + createRoot(...).render(<App />)
     admin/              vlastní UVE administrace (index.html, index.jsx, app.jsx, top.jsx, screens/)

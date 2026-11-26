@@ -133,7 +133,7 @@ barev: `Uu5Elements.UuGds.setMeaningColor("primary", "#D01319")`.
   nasyntetizoval.
 - `font.body: '"Barlow", system-ui, sans-serif'` — text a UI.
 
-Oba fonty se **self-hostují** (`client/public/assets/fonts/*.woff2` + `@font-face`
+Oba fonty se **self-hostují** (`client/src/assets/vendor/<písmo>/<verze>/*.woff2` + `@font-face`
 v `client/src/fonts.css`), ne přes `<link>` na Google Fonts — kvůli GAE a offline.
 
 ### 4.3 Typografie — velikosti **vždy** z uuGds

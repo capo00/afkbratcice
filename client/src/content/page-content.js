@@ -21,11 +21,12 @@
 import TEAM_PHOTOS from "./team-photos.js";
 
 /** Jedna týmová fotka → uu5String. Sestavy drží `content/team-photos.js`. */
-function teamPhotoBlock({ season, team, file, note, rowList }, index) {
+function teamPhotoBlock({ season, team, file, height, note, rowList }, index) {
   return [
     // `loading="lazy"` schválně: fotek je 53, takže bez odloženého načítání by stránka
-    // stahovala celou historii klubu najednou.
-    `<img src="/assets/teams/${file}" alt="${team} ${season}${index ? `, fotka ${index + 1}` : ""}" loading="lazy"/>`,
+    // stahovala celou historii klubu najednou. `width`/`height` drží místo do stažení (poměr
+    // stran; skutečnou šířku dá `Prose`: `max-inline-size: 100%`, `block-size: auto`).
+    `<img src="/assets/teams/${file}" width="600" height="${height}" alt="${team} ${season}${index ? `, fotka ${index + 1}` : ""}" loading="lazy"/>`,
     ...(note ? [`<p><i>${note}</i></p>`] : []),
     ...rowList.map(({ label, names }) => `<p><b>${label}:</b> ${names}</p>`),
   ].join("\n");

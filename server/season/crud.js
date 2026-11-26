@@ -3,8 +3,33 @@ import dao from "./dao.js";
 import matchDao from "../match/dao.js";
 import teamDao from "../team/dao.js";
 import categoryDao from "../category/dao.js";
+import managementDao from "../management/dao.js";
+import personDao from "../person/dao.js";
 import { getAppSettings } from "../app-settings/index.js";
 import { getYearFrom, sortByCategoryOrder } from "../services/season.js";
+
+/** Aktivní trenéři (`role: "coach"`) těchto týmů, jeden dotaz na funkce a jeden na osoby. */
+async function coachListByTeamId(teamIdList) {
+  const result = new Map();
+  if (!teamIdList.length) return result;
+
+  const coachList = await managementDao.listByFilter({ teamIdList, role: "coach", active: true }, { pageSize: 1000 });
+  const personIdList = [...new Set(coachList.map((coach) => coach.personId).filter(Boolean))];
+  const personList = personIdList.length ? await personDao.listByIdList(personIdList) : [];
+  const personMap = new Map(personList.map((person) => [person.id, person]));
+
+  for (const coach of coachList) {
+    const person = personMap.get(coach.personId);
+    const entry = {
+      id: coach.id,
+      personId: coach.personId,
+      person: person ? { id: person.id, name: person.name ?? null, surname: person.surname ?? null } : null,
+    };
+    if (!result.has(coach.teamId)) result.set(coach.teamId, []);
+    result.get(coach.teamId).push(entry);
+  }
+  return result;
+}
 
 class SeasonCrud extends Crud {
   constructor() {
@@ -67,6 +92,14 @@ class SeasonCrud extends Crud {
         hasPenalties: Boolean(season.hasPenalties),
       }));
     });
+
+    // Trenéři mužstev (stránka /muzstva): v úvodních datech, aby karta měla řádky trenérů od
+    // prvního vykreslení. Dřív si je stránka dotahovala `management/list` po týmech a karta
+    // s více trenéry pak naskočila (CLS 0,031, 2026-11-26). Počítá se při dotazu, v DB se nic
+    // neukládá. Tvar položky jako `management/list`, jen z osoby jméno a příjmení -- odpověď
+    // jde do každé stránky webu.
+    const coachListByTeam = await coachListByTeamId([...new Set(itemList.map((item) => item.teamId))]);
+    for (const item of itemList) item.coachList = coachListByTeam.get(item.teamId) ?? [];
 
     const { categoryOrder } = await getAppSettings();
     return sortByCategoryOrder(itemList, categoryOrder);

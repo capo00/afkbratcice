@@ -223,7 +223,7 @@ afkbratcice/
     public/
       favicon.ico
       assets/meta/               # PWA: manifest.json, icon-192/512, maskable, apple-touch, og-image
-      assets/fonts/              # Bebas Neue + Barlow (.woff2)
+      assets/vendor/             # Bebas Neue + Barlow (.woff2) ve složkách s verzí, React
     src/
       main.jsx, app.jsx          # UiApp.SpaProvider + UiApp.Spa (top/footer/main) + Router
       router.jsx

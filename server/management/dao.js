@@ -18,18 +18,20 @@ class ManagementDao extends Dao {
 
   /**
    * @param teamId    funkce v tomto týmu
+   * @param teamIdList funkce v kterémkoli z těchto týmů (`season/listCurrent`: trenéři všech
+   *                   mužstev jedním dotazem); `teamId` má přednost
    * @param board     true = funkce ve výboru (`teamId: null`); má přednost před `teamId`
    * @param role      funkce
    * @param personId  funkce této osoby
    * @param active    jen funkce, které trvají dnes
    * @param range     `{ from, to }` = funkce zasahuje do období (sezóny)
    */
-  listByFilter({ teamId, board, role, personId, active, range, idList } = {}, pageInfo) {
+  listByFilter({ teamId, teamIdList, board, role, personId, active, range, idList } = {}, pageInfo) {
     if (idList) return this.listByIdList(idList);
 
     const match = {
       // `{ teamId: null }` v Mongu sedí i na chybějící pole -- výbor tak najde i záznam bez něj.
-      ...(board ? { teamId: null } : teamId ? { teamId } : null),
+      ...(board ? { teamId: null } : teamId ? { teamId } : teamIdList ? { teamId: { $in: teamIdList } } : null),
       ...(role ? { role } : null),
       ...(personId ? { personId } : null),
     };

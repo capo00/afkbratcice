@@ -1,8 +1,7 @@
 import { useRouter, useRoute, Suspense, Utils } from "uu5g05";
+import { UiApp } from "caio-ui";
 import Config from "./config/config.js";
 import { PAGE_CODE_LIST } from "./content/pages.js";
-import PageLoading from "./components/layout/page-loading.jsx";
-import { BootReady } from "./core/boot-screen.jsx";
 import Home from "./routes/home.jsx";
 import Teams from "./routes/teams.jsx";
 import Team from "./routes/team.jsx";
@@ -85,7 +84,7 @@ const ROUTE_MAP = {
 const ROUTE_HEIGHT = `calc(100vh - ${Config.theme.topHeight}px)`;
 const ROUTE_CLASS = Config.Css.css({ minBlockSize: ROUTE_HEIGHT });
 // Fallback (`page.jsx`) vyplní celý obal, ne jen 320 px.
-const FALLBACK = <PageLoading height={ROUTE_HEIGHT} />;
+const FALLBACK = <UiApp.PageLoading height={ROUTE_HEIGHT} />;
 
 function Router() {
   const element = useRouter(ROUTE_MAP);
@@ -99,8 +98,8 @@ function Router() {
       <Suspense fallback={FALLBACK} key={route?.uu5Route}>
         {element}
         {/* Uvnitř `Suspense`: mountne se až s obsahem routy (u `page.jsx` po dotažení chunku),
-            a teprve pak pustí boot screen (core/boot-screen.jsx). */}
-        <BootReady />
+            a teprve pak pustí boot screen (caio-ui). */}
+        <UiApp.BootReady />
       </Suspense>
     </div>
   );

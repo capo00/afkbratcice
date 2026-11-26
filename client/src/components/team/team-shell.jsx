@@ -12,7 +12,6 @@ import NoticeBar from "../layout/notice-bar.jsx";
 import EmptyState from "../empty-state.jsx";
 import { useApp } from "../../core/app-context.jsx";
 import { usePageTitle } from "../../tools/page-meta.js";
-import Skeleton from "../layout/skeleton.jsx";
 
 const { theme } = Config;
 
@@ -168,7 +167,7 @@ const TeamShell = createVisualComponent({
 
         {seasonPending ? (
           <Section>
-            <Skeleton height={200} />
+            <UiElements.Skeleton height={200} />
           </Section>
         ) : (
           children({ teamId, seasonId, team, category, isOpponent })

@@ -3,8 +3,6 @@ import { UiApp, UiElements } from "caio-ui";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import { ErrorState } from "../components/data-state.jsx";
-import PageLoading from "../components/layout/page-loading.jsx";
-import { BootReady, useBootScreenActive } from "./boot-screen.jsx";
 
 // Nastavení klubu, kategorie a mapa týmů — jednou při startu SPA, pak z kontextu.
 //
@@ -54,10 +52,10 @@ const AppProvider = createComponent({
     const settingsLoadedRef = useRef(false);
     if (settings.state === "ready") settingsLoadedRef.current = true;
     const settingsLoaded = settingsLoadedRef.current;
-    // Při startu (web i admin) drží boot screen z HTML (core/boot-screen.jsx), takže tady se nic
+    // Při startu (web i admin) drží boot screen z HTML (caio-ui `UiApp.renderApp`), takže tady se nic
     // nekreslí -- dřív tu byl šedý `PageLoading` bez lišty. Po puštění boot screenu („Zkusit
     // znovu“ po chybě startu) se ukáže `PageLoading`.
-    const bootScreenActive = useBootScreenActive();
+    const bootScreenActive = UiApp.useBootScreenActive();
 
     const state =
       dataObject.state === "errorNoData" || (!settingsLoaded && settings.state === "error")
@@ -102,7 +100,7 @@ const AppProvider = createComponent({
     if (state === "pendingNoData") {
       // Bez lišty (je pod `AppProvider`), takže přes celé okno. Erb je zhruba tam, kde byl na boot
       // screenu (ten má pod kruhem název, takže erb tam sedí asi o 30 px výš).
-      return bootScreenActive ? null : <PageLoading height="100vh" />;
+      return bootScreenActive ? null : <UiApp.PageLoading height="100vh" />;
     }
 
     // Bez nastavení a sezón nejde postavit menu ani routy, takže tady se opravdu nedá pokračovat.
@@ -111,7 +109,7 @@ const AppProvider = createComponent({
       return (
         <div className={Config.Css.css({ maxWidth: 640, marginInline: "auto", padding: "64px 16px" })}>
           <ErrorState lsi={lsi("common", "appLoadError")} onRetry={retry} />
-          <BootReady />
+          <UiApp.BootReady />
         </div>
       );
     }

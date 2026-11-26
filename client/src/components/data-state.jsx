@@ -3,7 +3,7 @@ import Uu5Elements from "uu5g05-elements";
 import Config from "../config/config.js";
 import { lsi } from "../lsi/import-lsi.js";
 import EmptyState from "./empty-state.jsx";
-import Skeleton from "./layout/skeleton.jsx";
+import { UiElements } from "caio-ui";
 
 // Stavy načítání kolem dat z `useDataObject` / `useDataList` -- jedno místo pro skeleton,
 // „neexistuje“ a „nepodařilo se načíst“ (review 2026-11-12, S1).
@@ -76,7 +76,7 @@ const DataState = createVisualComponent({
     const { dataObject, height = 160, notFound, notFoundIcon, children } = props;
     const { state, errorData, handlerMap } = dataObject;
 
-    if (state === "pendingNoData") return <Skeleton height={height} />;
+    if (state === "pendingNoData") return <UiElements.Skeleton height={height} />;
 
     if (state === "errorNoData") {
       if (notFound && isNotFound(errorData)) return <EmptyState lsi={notFound} icon={notFoundIcon} />;

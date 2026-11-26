@@ -78,6 +78,47 @@ function RoundDates({ list }) {
   );
 }
 
+/** Kola sezóny, nejnovější nahoře. Odroluje na kolo z adresy (`kolo`), až jsou vykreslená. */
+function RoundList({ roundList, ownTeamOf, kolo }) {
+  // Uvnitř `Deferred`: kotvy kol existují až s ním, takže se roluje odsud, ne z routy.
+  useEffect(() => {
+    if (!kolo || !roundList.length) return;
+    document.getElementById(roundAnchor(kolo))?.scrollIntoView({ block: "start" });
+  }, [kolo, roundList.length]);
+
+  return (
+    <>
+      {roundList.map(({ round, list }) => (
+        <section
+          key={round}
+          id={roundAnchor(round)}
+          className={Config.Css.css({ marginBlockStart: 32, scrollMarginBlockStart: 96 })}
+        >
+          <div
+            className={Config.Css.css({
+              display: "flex",
+              alignItems: "baseline",
+              flexWrap: "wrap",
+              gap: "4px 16px",
+              marginBlockEnd: 12,
+            })}
+          >
+            <Heading level={3}>
+              <Lsi import={importLsi} path={["match", "round"]} params={{ round }} />
+            </Heading>
+            <RoundDates list={list} />
+          </div>
+          <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
+            {list.map((match) => (
+              <MatchTile key={match.id} match={match} ownTeamId={ownTeamOf(match)} />
+            ))}
+          </Uu5Elements.Grid>
+        </section>
+      ))}
+    </>
+  );
+}
+
 const Season = createVisualComponent({
   uu5Tag: Config.TAG + "Season",
 
@@ -121,12 +162,6 @@ const Season = createVisualComponent({
       title: season ? seasonName(season) : null,
       description: season ? `Tabulka a všechna kola soutěže ${seasonName(season)}.` : undefined,
     });
-
-    // Odrolovat na kolo z adresy, až jsou kola vykreslená.
-    useEffect(() => {
-      if (!kolo || !roundList.length) return;
-      document.getElementById(roundAnchor(kolo))?.scrollIntoView({ block: "start" });
-    }, [kolo, roundList.length]);
 
     // Bez id, nebo server sezónu nezná (404, `null`) -> „neexistuje“; jiná chyba -> „nepodařilo se
     // načíst“ s novým pokusem. Dřív se testovalo `"error"`, takže 404 viselo na skeletonu.
@@ -172,33 +207,12 @@ const Season = createVisualComponent({
               <EmptyState lsi={lsi("season", "noMatches")} icon="uugds-calendar" />
             </div>
           ) : (
-            roundList.map(({ round, list }) => (
-              <section
-                key={round}
-                id={roundAnchor(round)}
-                className={Config.Css.css({ marginBlockStart: 32, scrollMarginBlockStart: 96 })}
-              >
-                <div
-                  className={Config.Css.css({
-                    display: "flex",
-                    alignItems: "baseline",
-                    flexWrap: "wrap",
-                    gap: "4px 16px",
-                    marginBlockEnd: 12,
-                  })}
-                >
-                  <Heading level={3}>
-                    <Lsi import={importLsi} path={["match", "round"]} params={{ round }} />
-                  </Heading>
-                  <RoundDates list={list} />
-                </div>
-                <Uu5Elements.Grid templateColumns="repeat(auto-fill, minmax(280px, 1fr))">
-                  {list.map((match) => (
-                    <MatchTile key={match.id} match={match} ownTeamId={ownTeamOf(match)} />
-                  ))}
-                </Uu5Elements.Grid>
-              </section>
-            ))
+            // Kola až po prvním vykreslení (tabulka a nadpis hned): ~26 kol × ~7 dlaždic byl
+            // na mobilu (CPU 4×) jeden blok hlavního vlákna, TBT 4,8 s (Lighthouse 2026-11-26).
+            // Jako transition se počítají po kouscích. Patičku drží min. výška obalu routy.
+            <UiElements.Deferred>
+              <RoundList roundList={roundList} ownTeamOf={ownTeamOf} kolo={kolo} />
+            </UiElements.Deferred>
           )}
         </Section>
       </>

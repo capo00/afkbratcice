@@ -427,7 +427,7 @@ Uu5Elements.UuGds.setMeaningColor("primary", "#D01319");
   začít hexy, `oklch` až po ověření.
 - **Fonty se musí načíst.** Bebas Neue ani Barlow nejsou systémové. Buď `<link>` na Google Fonts
   v `client/index.html`, nebo (lepší pro GAE a offline) `.woff2` do
-  `client/public/assets/fonts/` a `@font-face` (propertyman má na to `client/src/fonts.css`).
+  `client/src/assets/vendor/<písmo>/<verze>/` a `@font-face` (propertyman má na to `client/src/fonts.css`).
   Bez toho spadne sazba na Impact/system-ui a vzhled se rozpadne.
 - **Bebas Neue má jen jednu váhu (400), ale GDS předepisuje 700.** `expose/default/hero`
   i `story/heading/h5` mají `fontWeight: 700`. Prohlížeč by ji u Bebas nasyntetizoval

@@ -102,7 +102,7 @@ function useTop() {
 
 // TOP se staví z app-contextu, takže `AppProvider` musí být **nad** `Spa` — lišta je prop,
 // ne potomek, a z potomka do ní data nedosáhnou. Během načítání konfigurace je na webu vidět
-// boot screen z HTML (core/boot-screen.jsx); menu bez dat stejně nemá co zobrazit.
+// boot screen z HTML (caio-ui `UiApp.renderApp`); menu bez dat stejně nemá co zobrazit.
 function Shell() {
   const top = useTop();
   // Nová stránka začíná nahoře; uu5g05 to samo nedělá (caio-ui `useScrollTopOnRouteChange`).
