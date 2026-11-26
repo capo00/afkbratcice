@@ -404,8 +404,8 @@ Caio 2026-11-26: Q4 do caio-ui (`Skeleton`, `Pending`, `PageLoading`), implement
   v `assets/vendor/fraunces/1.0.0/` a `assets/vendor/karla/2.4.0/`. Web pixelově beze změny
   (12 rout × 3 pohledy), testy 351/351. `PageLoading` tam nejdřív ukázal uu5 „Blokovaný obsah“:
   uu5g05 blokuje `dangerouslySetInnerHTML` s logem jako maskou (`style` s `url()`). Opraveno
-  v caio-ui (bb60739): `getBootMark()` vrací kopii DOM uzlu, `PageLoading` ji vloží
-  v `useLayoutEffect`. Ve světlém i tmavém režimu (zelený kruh, podložka pod logem) sedí s boot
+  v caio-ui: HTML kruhu z `getBootMarkHtml()` se vykresluje uvnitř `Utils.Element.createUnsafe`
+  (HTML je z buildu, ne vstup uživatele). AFK po opravě znovu pixelově ověřen proti starému buildu. Ve světlém i tmavém režimu (zelený kruh, podložka pod logem) sedí s boot
   screenem adminu.
 
 **Zbývá k vydání** (na pokyn): vydat caio-devkit 0.5.4, caio-server 0.8.3 a caio-ui 0.4.14; v AFK
